@@ -108,13 +108,13 @@ void weight::Initialization() {
 
 double weight::GetNewWeight(group &Group) {
   Group.NewWeight = Evaluate(Group.Order, Var.CurrChannel);
-  return Group.NewWeight;
+  return Group.NewWeight.Sum();
 }
 
 void weight::AcceptChange(group &Group) {
   Var.CurrVersion++;
   Var.CurrGroup = &Group;
-  Group.Weight = Group.NewWeight; // accept group  newweight
+  Group.Weight = Group.NewWeight.Sum(); // accept group  newweight
 }
 
 void weight::RejectChange(group &Group) { return; }
@@ -125,7 +125,7 @@ void weight::Measure(double WeightFactor) {
     VerQTheta.Measure(Var.LoopMom[1], Var.LoopMom[2], Var.CurrExtMomBin,
                       Var.CurrGroup->Order,
                       Var.Tau[Var.CurrGroup->TauNum - 1] - Var.Tau[0],
-                      Var.CurrChannel, WeightFactor);
+                      Var.CurrChannel, Var.CurrGroup->Weight, WeightFactor);
   }
 }
 

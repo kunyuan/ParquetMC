@@ -14,51 +14,51 @@ using namespace dse;
 
 #define TIND(Shift, LTau, RTau) ((LTau - Shift) * MaxTauNum + RTau - Shift)
 
-double weight::Evaluate(int LoopNum, int Channel) {
+weightMatrix weight::Evaluate(int LoopNum, int Channel) {
+  static weightMatrix Weight;
   if (LoopNum == 0) {
     // normalization
-    // return VerQTheta.Interaction(Var.LoopMom[1], Var.LoopMom[2],
-    // Var.LoopMom[0],
-    //                              0.0, -2);
-    return 1.0;
+    Weight(DIR) = 1.0;
+    Weight(EX) = 0.0;
   } else {
     // if (Channel != dse::T)
     //   return 0.0;
 
+    Weight.SetZero();
     ver4 &Root = Ver4Root[LoopNum][Channel];
-    if (Root.Weight.size() == 0)
-      // empty vertex
-      return 0.0;
+    if (Root.Weight.size() != 0) {
 
-    // if (Para.Counter == 12898) {
-    //   cout << Root.ID << endl;
-    // }
+      // if (Para.Counter == 12898) {
+      //   cout << Root.ID << endl;
+      // }
 
-    *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
-    *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
+      *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
+      *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
 
-    // if (Channel == dse::S) {
-    //   *Root.LegK[INR] = Var.LoopMom[0] - Var.LoopMom[1];
-    //   *Root.LegK[OUTR] = Var.LoopMom[0] - Var.LoopMom[2];
-    // } else {
-    //   *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
-    //   *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
-    // }
+      // if (Channel == dse::S) {
+      //   *Root.LegK[INR] = Var.LoopMom[0] - Var.LoopMom[1];
+      //   *Root.LegK[OUTR] = Var.LoopMom[0] - Var.LoopMom[2];
+      // } else {
+      //   *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
+      //   *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
+      // }
 
-    Vertex4(Root);
+      Vertex4(Root);
 
-    double Weight = 0.0;
-    for (auto &w : Root.Weight)
-      Weight += w.Sum();
-    // if (LoopNum == 3 && Channel == dse::I) {
-    //   cout << "loopnum: " << Root.LoopNum << endl;
-    //   cout << "channel: " << Root.Channel[0] << endl;
-    //   cout << Weight << endl;
-    // }
-    // cout << count << endl;
-    return Weight / pow(2.0 * PI, D * LoopNum);
-    // return Weight;
+      double Factor = 1.0 / pow(2.0 * PI, D * LoopNum);
+      for (auto &w : Root.Weight) {
+        Weight(DIR) += w(DIR) * Factor;
+        Weight(EX) += w(EX) * Factor;
+      }
+      // if (LoopNum == 3 && Channel == dse::I) {
+      //   cout << "loopnum: " << Root.LoopNum << endl;
+      //   cout << "channel: " << Root.Channel[0] << endl;
+      //   cout << Weight << endl;
+      // }
+      // cout << count << endl;
+    }
   }
+  return Weight;
 }
 
 void weight::Ver0(ver4 &Ver4) {

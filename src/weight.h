@@ -26,6 +26,7 @@ struct variable {
   double CurrWeight[MaxTauNum];
   array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
   array<double, MaxTauNum> Tau;       // all tau variables
+  dse::weightMatrix CurrWeight;
   // array<int, MaxMomNum> LoopSpin;     // all spin variables
 };
 
@@ -76,7 +77,7 @@ private:
   // diagram for different order and channel
   dse::ver4 Ver4Root[MaxOrder][4];
 
-  double Evaluate(int LoopNum, int Channel);
+  dse::weightMatrix Evaluate(int LoopNum, int Channel);
 
   void Vertex4(dse::ver4 &Ver4);
 

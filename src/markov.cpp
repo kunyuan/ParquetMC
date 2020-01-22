@@ -105,13 +105,13 @@ void markov::AdjustGroupReWeight() {
 
 void markov::Measure() {
   double MCWeight = fabs(Var.CurrGroup->Weight) * Var.CurrGroup->ReWeight;
-  double WeightFactor = Var.CurrGroup->Weight / MCWeight;
+  // double WeightFactor = 1.0 / MCWeight;
 
-  Polar[Var.CurrGroup->ID][Var.CurrExtMomBin] += WeightFactor;
-  PolarStatic[Var.CurrGroup->ID] += WeightFactor;
+  // Polar[Var.CurrGroup->ID][Var.CurrExtMomBin] += WeightFactor;
+  // PolarStatic[Var.CurrGroup->ID] += WeightFactor;
 
-  // Weight.Measure(1.0 / MCWeight);
-  Weight.Measure(WeightFactor);
+  Weight.Measure(1.0 / MCWeight);
+  // Weight.Measure(WeightFactor);
 };
 
 void markov::SaveToFile(bool Simple) { Weight.Save(Simple); };

@@ -1,6 +1,7 @@
 #ifndef diagram_H
 #define diagram_H
 
+#include "dse.h"
 #include "global.h"
 #include "utility/utility.h"
 #include <array>
@@ -42,7 +43,7 @@ struct group {
   int InternalTauNum;     // dimension of internal tau basis
   double ReWeight;
   double Weight;
-  double NewWeight;
+  dse::weightMatrix NewWeight; // direct and exchange
   array<bool, MaxLoopNum> IsExtLoop;
   array<bool, MaxLoopNum> IsExtTransferLoop;
   array<bool, MaxLoopNum> IsExtLegLoop;
