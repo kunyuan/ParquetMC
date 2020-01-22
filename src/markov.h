@@ -26,7 +26,7 @@ public:
   // MC updates
   void ChangeTau();
   void ChangeMomentum();
-  void ChangeGroup();
+  void ChangeOrder();
   void ChangeScale();
   void ChangeChannel();
 
@@ -42,11 +42,8 @@ public:
   vector<diag::group> &Groups;
 
 private:
-  // polarizatoin for each group
-  unordered_map<int, polar> Polar;
-
-  // polarizatoin for each group at the zero momentumr;
-  unordered_map<int, double> PolarStatic;
+  dse::weightMatrix NewWeight;
+  double NewAbsWeight;
 
   // MC updates
 

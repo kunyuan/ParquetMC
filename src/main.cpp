@@ -163,7 +163,7 @@ void MonteCarlo() {
 
       double x = Random.urn();
       if (x < 1.0 / 5.0) {
-        Markov.ChangeGroup();
+        Markov.ChangeOrder();
         // ;
       } else if (x < 2.0 / 5.0) {
         Markov.ChangeMomentum();

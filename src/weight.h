@@ -16,17 +16,20 @@ using namespace std;
 #define MAXMOMNUM get_power<2, MaxOrder + 1>::value * 4
 
 struct variable {
-  group *CurrGroup;
+  int CurrOrder;
+  int CurrChannel; // 0: I, 1: T, 2: U, 3: S
   long int CurrVersion;
+
   int CurrExtMomBin; // current bin of the external momentum
   double CurrTau;    // current external tau
   double CurrScale;  // Current (Reference) Scale: Index=1, ..., ScaleBinSize
-  int CurrChannel;   // 0: I, 1: T, 2: U, 3: S
   int CurrIRScaleBin;
-  double CurrWeight[MaxTauNum];
+
   array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
   array<double, MaxTauNum> Tau;       // all tau variables
+
   dse::weightMatrix CurrWeight;
+  double CurrAbsWeight;
   // array<int, MaxMomNum> LoopSpin;     // all spin variables
 };
 
@@ -34,6 +37,8 @@ class weight {
 public:
   vector<group> Groups;
   variable Var; // The variable of the integral
+
+  dse::weightMatrix Evaluate(int LoopNum, int Channel);
 
   // initialization, read diagrams, then initialize variables
   void ReadDiagrams();
@@ -76,8 +81,6 @@ private:
   dse::verDiag VerDiag;
   // diagram for different order and channel
   dse::ver4 Ver4Root[MaxOrder][4];
-
-  dse::weightMatrix Evaluate(int LoopNum, int Channel);
 
   void Vertex4(dse::ver4 &Ver4);
 

@@ -87,7 +87,8 @@ void weight::Initialization() {
 
   Var.CurrVersion = 0;
 
-  Var.CurrGroup = &Groups[0];
+  // Var.CurrGroup = &Groups[0];
+  Var.CurrOrder = 0;
 
   Var.CurrIRScaleBin = ScaleBinSize / 1.5;
 
@@ -99,9 +100,8 @@ void weight::Initialization() {
 
   LOG_INFO("Calculating the weights of all objects...")
 
-  // ChangeGroup(*Var.CurrGroup, true);
-  GetNewWeight(*Var.CurrGroup);
-  AcceptChange(*Var.CurrGroup);
+  Var.CurrWeight = Evaluate(Var.CurrOrder, Var.CurrChannel);
+  Var.CurrAbsWeight = abs(Var.CurrWeight.Sum());
 
   LOG_INFO("Initializating variables done.")
 }
