@@ -7,7 +7,7 @@
 #include <cmath>
 #include <iostream>
 
-using namespace diag;
+using namespace ver;
 using namespace std;
 
 extern parameter Para;
@@ -18,6 +18,38 @@ extern parameter Para;
 //     Sum2 += Mom[i] * Mom[i];
 //   return Sum2;
 // }
+
+verTensor::verTensor() {
+
+  AngleIndex = ExtMomBinSize;
+  OrderIndex = ExtMomBinSize * AngBinSize;
+
+  _Interaction = new double[AngBinSize * ExtMomBinSize];
+  _Estimator = new double[MaxOrder * AngBinSize * ExtMomBinSize];
+
+  for (int inin = 0; inin < AngBinSize; ++inin)
+    for (int qIndex = 0; qIndex < ExtMomBinSize; ++qIndex) {
+      for (int tIndex = 0; tIndex < TauBinSize; ++tIndex) {
+        Interaction(inin, qIndex) = 0.0;
+        for (int order = 0; order < MaxOrder; ++order) {
+          Estimator(order, inin, qIndex) = 0.0;
+        }
+      }
+    }
+}
+
+verTensor::~verTensor() {
+  delete[] _Interaction;
+  delete[] _Estimator;
+}
+
+double &verTensor::Interaction(int Angle, int ExtQ) {
+  return _Interaction[Angle * AngleIndex + ExtQ];
+}
+
+double &verTensor::Estimator(int Order, int Angle, int ExtQ) {
+  return _Estimator[Order * OrderIndex + Angle * AngleIndex + ExtQ];
+}
 
 // double norm2(const momentum &Mom) { return sqrt(sum2(Mom)); }
 verQTheta::verQTheta() {
@@ -38,83 +70,6 @@ verQTheta::verQTheta() {
   PhyWeightI = ExtMomBinSize * AngBinSize;
   // PhyWeight = 2.0 * PI / TauBinSize * 64;
   // PhyWeight = 1.0;
-
-  AngleIndex = ExtMomBinSize;
-  OrderIndex = ExtMomBinSize * AngBinSize;
-
-  AngleIndexI = ExtMomBinSize;
-  OrderIndexI = ExtMomBinSize * AngBinSize;
-
-  ChanT = new double[AngBinSize * ExtMomBinSize];
-  dChanT = new double[MaxOrder * AngBinSize * ExtMomBinSize];
-
-  ChanU = new double[AngBinSize * ExtMomBinSize];
-  dChanU = new double[MaxOrder * AngBinSize * ExtMomBinSize];
-
-  ChanS = new double[AngBinSize * ExtMomBinSize];
-  dChanS = new double[MaxOrder * AngBinSize * ExtMomBinSize];
-
-  ChanI = new double[AngBinSize * ExtMomBinSize];
-  dChanI = new double[MaxOrder * AngBinSize * ExtMomBinSize];
-
-  // double DiffInteraction[MaxOrder][ScaleBinSize +
-  // 1][AngBinSize][ExtMomBinSize]; double IntInteraction[MaxOrder][ScaleBinSize
-  // + 1][AngBinSize][ExtMomBinSize];
-
-  // initialize interaction table
-  for (int inin = 0; inin < AngBinSize; ++inin)
-    for (int qIndex = 0; qIndex < ExtMomBinSize; ++qIndex) {
-      for (int tIndex = 0; tIndex < TauBinSize; ++tIndex) {
-        double k = Index2Mom(qIndex);
-        // double t = Index2Tau(tIndex);
-        // EffInter(inin, qIndex, tIndex) = 8.0 * PI / (k * k + Para.Mass2) /
-        //                                  (1 + pow(t * 10.0, 2) * 10.0 / PI);
-        EffInterT(inin, qIndex) = 0.0;
-        EffInterU(inin, qIndex) = 0.0;
-        EffInterS(inin, qIndex) = 0.0;
-        EffInterI(inin, qIndex) = 0.0;
-        for (int order = 0; order < MaxOrder; ++order) {
-          DiffInterT(order, inin, qIndex) = 0.0;
-          DiffInterU(order, inin, qIndex) = 0.0;
-          DiffInterS(order, inin, qIndex) = 0.0;
-          DiffInterI(order, inin, qIndex) = 0.0;
-        }
-      }
-    }
-}
-
-double &verQTheta::EffInterT(int Angle, int ExtQ) {
-  // ASSERT_ALLWAYS(ExtQ < ExtMomBinSize, "Q too large " << ExtQ);
-  // ASSERT_ALLWAYS(Tau < TauBinSize, "Tau too large " << Tau);
-  return ChanT[Angle * AngleIndex + ExtQ];
-}
-
-double &verQTheta::DiffInterT(int Order, int Angle, int ExtQ) {
-  return dChanT[Order * OrderIndex + Angle * AngleIndex + ExtQ];
-}
-
-double &verQTheta::EffInterU(int Angle, int ExtQ) {
-  return ChanU[Angle * AngleIndex + ExtQ];
-}
-
-double &verQTheta::DiffInterU(int Order, int Angle, int ExtQ) {
-  return dChanU[Order * OrderIndex + Angle * AngleIndex + ExtQ];
-}
-
-double &verQTheta::EffInterI(int Angle, int ExtQ) {
-  return ChanI[Angle * AngleIndexI + ExtQ];
-}
-
-double &verQTheta::DiffInterI(int Order, int Angle, int ExtQ) {
-  return dChanI[Order * OrderIndexI + Angle * AngleIndexI + ExtQ];
-}
-
-double &verQTheta::EffInterS(int Angle, int ExtQ) {
-  return ChanS[Angle * AngleIndexI + ExtQ];
-}
-
-double &verQTheta::DiffInterS(int Order, int Angle, int ExtQ) {
-  return dChanS[Order * OrderIndexI + Angle * AngleIndexI + ExtQ];
 }
 
 void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
@@ -197,10 +152,10 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
 
 void verQTheta::Measure(const momentum &InL, const momentum &InR,
                         const int QIndex, int Order, double dTau, int Channel,
-                        double WeightFactor) {
+                        ver::weightMatrix &Weight, double Factor) {
   // cout << Order << ", " << DiagNum << endl;
   if (Order == 0) {
-    Normalization += WeightFactor;
+    Normalization += Weight(DIR) * Factor;
     // Normalization += WeightFactor;
   } else {
     // double Factor = 1.0 / pow(2.0 * PI, 2 * Order);
@@ -468,27 +423,27 @@ double fermi::Green(double Tau, const momentum &Mom, spin Spin, int GType,
   return green;
 }
 
-double diag::Index2Mom(const int &Index) {
+double ver::Index2Mom(const int &Index) {
   return (Index + 0.5) / ExtMomBinSize * Para.MaxExtMom;
 };
 
-int diag::Mom2Index(const double &K) {
+int ver::Mom2Index(const double &K) {
   return int(K / Para.MaxExtMom * ExtMomBinSize);
 };
 
-double diag::Angle3D(const momentum &K1, const momentum &K2) {
+double ver::Angle3D(const momentum &K1, const momentum &K2) {
   // Returns the angle in radians between vectors 'K1' and 'K2'
   double dotp = K1.dot(K2);
   double Angle2D = dotp / K1.norm() / K2.norm();
   return Angle2D;
 }
 
-double diag::Index2Angle(const int &Index, const int &AngleNum) {
+double ver::Index2Angle(const int &Index, const int &AngleNum) {
   // Map index [0...AngleNum-1] to the theta range [0.0, 2*pi)
   return (Index + 0.5) * 2.0 / AngleNum - 1.0;
 }
 
-int diag::Angle2Index(const double &Angle, const int &AngleNum) {
+int ver::Angle2Index(const double &Angle, const int &AngleNum) {
   // Map theta range  [0.0, 2*pi) to index [0...AngleNum-1]
   // double dAngle = 2.0 * PI / AngleNum;
   // if (Angle >= 2.0 * PI - dAngle / 2.0 || Angle < dAngle / 2.0)
@@ -503,22 +458,22 @@ int diag::Angle2Index(const double &Angle, const int &AngleNum) {
   // }
 }
 
-double diag::Index2Scale(const int &Index) {
+double ver::Index2Scale(const int &Index) {
   return Index * Para.UVScale / ScaleBinSize;
 }
-int diag::Scale2Index(const double &Scale) {
+int ver::Scale2Index(const double &Scale) {
   return int((Scale / Para.UVScale) * ScaleBinSize);
 }
 
-int diag::Tau2Index(const double &Tau) {
+int ver::Tau2Index(const double &Tau) {
   return int((Tau / Para.Beta) * TauBinSize);
 }
 
-double diag::Index2Tau(const int &Index) {
+double ver::Index2Tau(const int &Index) {
   return (Index + 0.5) * Para.Beta / TauBinSize;
 }
 
-void diag::_TestAngle2D() {
+void ver::_TestAngle2D() {
   // Test Angle functions
   momentum K1 = {1.0, 0.0};
   momentum K2 = {1.0, 0.0};
@@ -543,7 +498,7 @@ void diag::_TestAngle2D() {
                   Angle3D(K1, K2)));
 }
 
-void diag::_TestAngleIndex() {
+void ver::_TestAngleIndex() {
   // Test Angle functions
   int AngleNum = 8;
   cout << Index2Angle(0, AngleNum) << endl;

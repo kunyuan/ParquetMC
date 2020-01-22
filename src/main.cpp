@@ -44,24 +44,6 @@ void InitPara() {
   Para.Type = RG;
   Para.ObsType = FREQ;
 
-  Para.UseVer4 = false;
-  // Para.UseVer4 = true;
-
-  // diagram file path: groups/DiagPolar1.dat
-  // Para.DiagFileFormat = "groups/DiagPolar{}.txt";
-  Para.DiagFileFormat = "groups/DiagLoop{}.txt";
-  Para.GroupName = {
-      "0", // 0 loop
-      "1", // 1 loop
-      "2", // 2 loop
-      "3", // 3 loop
-      "4", // 4 loop
-      "5", // 4 loop
-      "6", // 4 loop
-      "7", // 4 loop
-      "8", // 4 loop
-      "9", // 4 loop
-  };
   Para.ReWeight = {2.0, 1.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   // Para.SelfEnergyType = FOCK;
   Para.SelfEnergyType = selfenergy::BARE;
@@ -99,7 +81,7 @@ void InitPara() {
   }
 
   for (int i = 0; i < AngBinSize; i++) {
-    Para.AngleTable[i] = diag::Index2Angle(i, AngBinSize);
+    Para.AngleTable[i] = ver::Index2Angle(i, AngBinSize);
     Para.dAngleTable[i] = 2.0 / AngBinSize;
   }
 
@@ -147,7 +129,7 @@ void MonteCarlo() {
   int Block = 0;
 
   LOG_INFO("Loading Weight...")
-  Markov.Weight.LoadWeight();
+  Markov.LoadFile();
 
   while (true) {
     Block++;
@@ -222,7 +204,7 @@ void MonteCarlo() {
 
         if (MessageTimer.check(Para.MessageTimer)) {
           LOG_INFO("Loading Weight...")
-          Markov.Weight.LoadWeight();
+          Markov.LoadFile();
         }
       }
     }

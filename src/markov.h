@@ -33,17 +33,20 @@ public:
   void Measure();
   void ClearStatis();
   void SaveToFile(bool Simple);
+  void LoadFile();
 
   int DynamicTest();
 
   // MC variables
   diag::weight Weight;
   diag::variable &Var;
-  vector<diag::group> &Groups;
 
 private:
-  dse::weightMatrix NewWeight;
+  ver::weightMatrix NewWeight;
   double NewAbsWeight;
+
+  int GetTauNum(int Order);
+  int GetLoopNum(int Order);
 
   // MC updates
 

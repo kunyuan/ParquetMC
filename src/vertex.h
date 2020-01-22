@@ -8,9 +8,29 @@
 double sum2(const momentum &);
 double norm2(const momentum &);
 
-namespace diag {
+namespace ver {
 
 const int MAXSIGMABIN = 100000;
+
+class weightMatrix {
+  // 2x2 matrix of weight; Direct/Exchange and chain/Lver/Rver/other
+public:
+  weightMatrix() { SetZero(); }
+  void SetZero() {
+    for (auto &i : _Weight)
+      i = 0.0;
+  }
+  double Sum() {
+    double sum = 0;
+    for (auto &i : _Weight)
+      sum += i;
+    return sum;
+  }
+  double &operator()(int dir) { return _Weight[dir]; }
+
+private:
+  array<double, 2> _Weight;
+};
 
 class fermi {
 public:
@@ -34,6 +54,21 @@ private:
   double Sigma2[MAXSIGMABIN];
 };
 
+class verTensor {
+public:
+  verTensor();
+  ~verTensor();
+  double &Interaction(int Angle, int ExtQ);
+  double &Estimator(int Order, int Angle, int ExtQ);
+
+private:
+  double *_Estimator;
+  double *_Interaction;
+  int QIndex;
+  int AngleIndex;
+  int OrderIndex;
+};
+
 class verQTheta {
 public:
   verQTheta();
@@ -41,54 +76,21 @@ public:
                    double &WeightDir, double &WeightEx);
 
   void Measure(const momentum &InL, const momentum &InR, const int QIndex,
-               int Order, double Tau, int Channel, double WeightFactor);
+               int Order, double Tau, int Channel, ver::weightMatrix &Weight,
+               double Factor);
   void Update(double Ratio, int Order);
   void Save(bool Simple = false);
   void ClearStatis();
   void LoadWeight();
   void ResetIRScale(int IRScaleBin);
-  double *ChanT;
-  double *dChanT;
-  double *intChanT;
 
-  double *ChanU;
-  double *dChanU;
-
-  double *ChanS;
-  double *dChanS;
-
-  double *ChanI;
-  double *dChanI;
-
-  double &EffInterT(int Angle, int ExtQ);
-  double &DiffInterT(int Order, int Angle, int ExtQ);
-
-  double &EffInterU(int Angle, int ExtQ);
-  double &DiffInterU(int Order, int Angle, int ExtQ);
-
-  double &EffInterS(int Angle, int ExtQ);
-  double &DiffInterS(int Order, int Angle, int ExtQ);
-
-  double &EffInterI(int Angle, int ExtQ);
-  double &DiffInterI(int Order, int Angle, int ExtQ);
-  // double EffInteraction[ScaleBinSize + 1][AngBinSize][ExtMomBinSize];
-  // double DiffInteraction[MaxOrder][ScaleBinSize +
-  // 1][AngBinSize][ExtMomBinSize]; double IntInteraction[MaxOrder][ScaleBinSize
-  // + 1][AngBinSize][ExtMomBinSize];
+  array<verTensor, 4> Chan;
 
   // double TauBasis[TauBinSize][TauBasisNum];
 
   double Normalization;
   double PhyWeightT;
   double PhyWeightI;
-
-  int QIndex;
-  int AngleIndex;
-  int OrderIndex;
-
-  int QIndexI;
-  int AngleIndexI;
-  int OrderIndexI;
 };
 
 double Angle3D(const momentum &K1, const momentum &K2);
@@ -106,5 +108,5 @@ int Scale2Index(const double &Scale);
 double Index2Tau(const int &Index);
 int Tau2Index(const double &Tau);
 
-}; // namespace diag
+}; // namespace ver
 #endif

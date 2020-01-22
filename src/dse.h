@@ -21,26 +21,6 @@ enum channel { I = 0, T, U, S };
 struct bubble;
 struct envelope;
 
-class weightMatrix {
-  // 2x2 matrix of weight; Direct/Exchange and chain/Lver/Rver/other
-public:
-  weightMatrix() { SetZero(); }
-  void SetZero() {
-    for (auto &i : _Weight)
-      i = 0.0;
-  }
-  double Sum() {
-    double sum = 0;
-    for (auto &i : _Weight)
-      sum += i;
-    return sum;
-  }
-  double &operator()(int dir) { return _Weight[dir]; }
-
-private:
-  array<double, 2> _Weight;
-};
-
 struct ver4 {
   int ID;
   int LoopNum;
@@ -54,9 +34,9 @@ struct ver4 {
   vector<bubble> Bubble;     // bubble diagrams and its counter diagram
   vector<envelope> Envelope; // envelop diagrams and its counter diagram
 
-  array<momentum *, 4> LegK;   // external legK index
-  vector<array<int, 4>> T;     // external T list
-  vector<weightMatrix> Weight; // size: equal to T.size()
+  array<momentum *, 4> LegK;        // external legK index
+  vector<array<int, 4>> T;          // external T list
+  vector<ver::weightMatrix> Weight; // size: equal to T.size()
 };
 
 //////////////// Bubble diagrams /////////////////////////////
