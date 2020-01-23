@@ -26,7 +26,14 @@ verTensor::verTensor() {
 
   _Interaction = new double[AngBinSize * ExtMomBinSize];
   _Estimator = new double[MaxOrder * AngBinSize * ExtMomBinSize];
+}
 
+verTensor::~verTensor() {
+  delete[] _Interaction;
+  delete[] _Estimator;
+}
+
+void verTensor::Initialize() {
   for (int inin = 0; inin < AngBinSize; ++inin)
     for (int qIndex = 0; qIndex < ExtMomBinSize; ++qIndex) {
       for (int tIndex = 0; tIndex < TauBinSize; ++tIndex) {
@@ -36,11 +43,6 @@ verTensor::verTensor() {
         }
       }
     }
-}
-
-verTensor::~verTensor() {
-  delete[] _Interaction;
-  delete[] _Estimator;
 }
 
 double &verTensor::Interaction(int Angle, int ExtQ) {
@@ -70,6 +72,9 @@ verQTheta::verQTheta() {
   PhyWeightI = ExtMomBinSize * AngBinSize;
   // PhyWeight = 2.0 * PI / TauBinSize * 64;
   // PhyWeight = 1.0;
+
+  for (auto &c : Chan)
+    c.Initialize();
 }
 
 void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
@@ -89,9 +94,11 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
     if (kDiQ < 1.0 * Para.Kf || kExQ < 1.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
       if (kDiQ < 1.0 * Para.Kf)
-        WeightDir += EffInterT(AngleIndex, 0) * exp(-kDiQ * kDiQ / 0.1);
+        WeightDir +=
+            Chan[ver::T].Interaction(AngleIndex, 0) * exp(-kDiQ * kDiQ / 0.1);
       if (kExQ < 1.0 * Para.Kf)
-        WeightEx -= EffInterT(AngleIndex, 0) * exp(-kExQ * kExQ / 0.1);
+        WeightEx -=
+            Chan[ver::T].Interaction(AngleIndex, 0) * exp(-kExQ * kExQ / 0.1);
       return;
     } else
       return;
@@ -161,19 +168,8 @@ void verQTheta::Measure(const momentum &InL, const momentum &InR,
     // double Factor = 1.0 / pow(2.0 * PI, 2 * Order);
     double CosAng = Angle3D(InL, InR);
     int AngleIndex = Angle2Index(CosAng, AngBinSize);
-    if (Channel == 1) {
-      DiffInterT(Order, AngleIndex, QIndex) += WeightFactor;
-      DiffInterT(0, AngleIndex, QIndex) += WeightFactor;
-    } else if (Channel == 2) {
-      DiffInterU(Order, AngleIndex, QIndex) += WeightFactor;
-      DiffInterU(0, AngleIndex, QIndex) += WeightFactor;
-    } else if (Channel == 3) {
-      DiffInterS(Order, AngleIndex, QIndex) += WeightFactor;
-      DiffInterS(0, AngleIndex, QIndex) += WeightFactor;
-    } else if (Channel == 0) {
-      DiffInterI(Order, AngleIndex, QIndex) += WeightFactor;
-      DiffInterI(0, AngleIndex, QIndex) += WeightFactor;
-    }
+    Chan[Channel].Estimator(Order, AngleIndex, QIndex) += Weight.Sum() * Factor;
+    Chan[Channel].Estimator(0, AngleIndex, QIndex) += Weight.Sum() * Factor;
   }
   return;
 }
@@ -209,16 +205,10 @@ void verQTheta::Save(bool Simple) {
         VerFile << endl;
 
         for (int angle = 0; angle < AngBinSize; ++angle)
-          for (int qindex = 0; qindex < ExtMomBinSize; ++qindex) {
-            if (chan == 0)
-              VerFile << DiffInterI(order, angle, qindex) * PhyWeightI << "  ";
-            else if (chan == 3)
-              VerFile << DiffInterS(order, angle, qindex) * PhyWeightI << "  ";
-            else if (chan == 1)
-              VerFile << DiffInterT(order, angle, qindex) * PhyWeightT << "  ";
-            else if (chan == 2)
-              VerFile << DiffInterU(order, angle, qindex) * PhyWeightT << "  ";
-          }
+          for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
+            for (int chan = 0; chan < 4; chan++)
+              VerFile << Chan[chan].Estimator(order, angle, qindex) * PhyWeightT
+                      << "  ";
         VerFile.close();
       } else {
         LOG_WARNING("Polarization for PID " << Para.PID << " fails to save!");
@@ -232,12 +222,9 @@ void verQTheta::ClearStatis() {
   for (int inin = 0; inin < AngBinSize; ++inin)
     for (int qIndex = 0; qIndex < ExtMomBinSize; ++qIndex) {
       double k = Index2Mom(qIndex);
-      for (int order = 0; order < MaxOrder; ++order) {
-        DiffInterT(order, inin, qIndex) = 0.0;
-        DiffInterU(order, inin, qIndex) = 0.0;
-        DiffInterS(order, inin, qIndex) = 0.0;
-        DiffInterI(order, inin, qIndex) = 0.0;
-      }
+      for (int order = 0; order < MaxOrder; ++order)
+        for (auto &c : Chan)
+          c.Estimator(order, inin, qIndex) = 0.0;
     }
 }
 
@@ -249,16 +236,9 @@ void verQTheta::LoadWeight() {
       VerFile.open(FileName, ios::in);
       if (VerFile.is_open()) {
         for (int angle = 0; angle < AngBinSize; ++angle)
-          for (int qindex = 0; qindex < ExtMomBinSize; ++qindex) {
-            if (chan == 0)
-              VerFile >> EffInterI(angle, qindex);
-            else if (chan == 3)
-              VerFile >> EffInterS(angle, qindex);
-            else if (chan == 1)
-              VerFile >> EffInterT(angle, qindex);
-            else if (chan == 2)
-              VerFile >> EffInterU(angle, qindex);
-          }
+          for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
+            for (auto &c : Chan)
+              VerFile >> c.Interaction(angle, qindex);
         VerFile.close();
       }
     }

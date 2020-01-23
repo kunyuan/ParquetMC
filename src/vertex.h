@@ -10,6 +10,8 @@ double norm2(const momentum &);
 
 namespace ver {
 
+enum channel { I = 0, T, U, S };
+
 const int MAXSIGMABIN = 100000;
 
 class weightMatrix {
@@ -58,6 +60,7 @@ class verTensor {
 public:
   verTensor();
   ~verTensor();
+  void Initialize();
   double &Interaction(int Angle, int ExtQ);
   double &Estimator(int Order, int Angle, int ExtQ);
 
