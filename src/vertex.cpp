@@ -90,7 +90,7 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   WeightEx = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2);
   // return 1.0 / Para.Beta;
   if (VerType == 1) {
-    return;
+    // return;
     if (kDiQ < 1.0 * Para.Kf || kExQ < 1.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
       if (kDiQ < 1.0 * Para.Kf)
@@ -236,8 +236,7 @@ void verQTheta::LoadWeight() {
       if (VerFile.is_open()) {
         for (int angle = 0; angle < AngBinSize; ++angle)
           for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
-            for (auto &c : Chan)
-              VerFile >> c.Interaction(angle, qindex);
+            VerFile >> Chan[chan].Interaction(angle, qindex);
         VerFile.close();
       }
     }

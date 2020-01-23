@@ -125,7 +125,7 @@ void weight::ChanUST(dse::ver4 &Ver4) {
     if (bubble.IsProjected && bubble.HasTU) {
       double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
       double ExQ = (*LegK0[INL] - *LegK0[OUTR]).norm();
-      if (DirQ < 0.0 * Para.Kf || ExQ < 0.0 * Para.Kf) {
+      if (DirQ < 1.0 * Para.Kf || ExQ < 1.0 * Para.Kf) {
         Ratio = Para.Kf / (*LegK0[INL]).norm();
         *bubble.LegK[T][INL] = *LegK0[INL] * Ratio;
         Ratio = Para.Kf / (*LegK0[INR]).norm();
