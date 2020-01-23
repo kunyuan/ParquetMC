@@ -61,8 +61,8 @@ public:
   verTensor();
   ~verTensor();
   void Initialize();
-  double &Interaction(int Angle, int ExtQ);
-  double &Estimator(int Order, int Angle, int ExtQ);
+  double &Interaction(int Angle, int ExtQ, int Dir);
+  double &Estimator(int Order, int Angle, int ExtQ, int Dir);
 
 private:
   double *_Estimator;

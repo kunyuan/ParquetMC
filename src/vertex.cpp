@@ -21,11 +21,11 @@ extern parameter Para;
 
 verTensor::verTensor() {
 
-  AngleIndex = ExtMomBinSize;
-  OrderIndex = ExtMomBinSize * AngBinSize;
+  AngleIndex = ExtMomBinSize * 2;
+  OrderIndex = ExtMomBinSize * AngBinSize * 2;
 
-  _Interaction = new double[AngBinSize * ExtMomBinSize];
-  _Estimator = new double[MaxOrder * AngBinSize * ExtMomBinSize];
+  _Interaction = new double[AngBinSize * ExtMomBinSize * 2];
+  _Estimator = new double[MaxOrder * AngBinSize * ExtMomBinSize * 2];
 }
 
 verTensor::~verTensor() {
@@ -37,20 +37,22 @@ void verTensor::Initialize() {
   for (int inin = 0; inin < AngBinSize; ++inin)
     for (int qIndex = 0; qIndex < ExtMomBinSize; ++qIndex) {
       for (int tIndex = 0; tIndex < TauBinSize; ++tIndex) {
-        Interaction(inin, qIndex) = 0.0;
+        Interaction(inin, qIndex, 0) = 0.0;
+        Interaction(inin, qIndex, 1) = 0.0;
         for (int order = 0; order < MaxOrder; ++order) {
-          Estimator(order, inin, qIndex) = 0.0;
+          Estimator(order, inin, qIndex, 0) = 0.0;
+          Estimator(order, inin, qIndex, 1) = 0.0;
         }
       }
     }
 }
 
-double &verTensor::Interaction(int Angle, int ExtQ) {
-  return _Interaction[Angle * AngleIndex + ExtQ];
+double &verTensor::Interaction(int Angle, int ExtQ, int Dir) {
+  return _Interaction[Angle * AngleIndex + ExtQ * 2 + Dir];
 }
 
-double &verTensor::Estimator(int Order, int Angle, int ExtQ) {
-  return _Estimator[Order * OrderIndex + Angle * AngleIndex + ExtQ];
+double &verTensor::Estimator(int Order, int Angle, int ExtQ, int Dir) {
+  return _Estimator[Order * OrderIndex + Angle * AngleIndex + ExtQ * 2 + Dir];
 }
 
 // double norm2(const momentum &Mom) { return sqrt(sum2(Mom)); }
@@ -93,12 +95,18 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
     // return;
     if (kDiQ < 1.0 * Para.Kf || kExQ < 1.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
-      if (kDiQ < 1.0 * Para.Kf)
-        WeightDir +=
-            Chan[ver::T].Interaction(AngleIndex, 0) * exp(-kDiQ * kDiQ / 0.1);
-      if (kExQ < 1.0 * Para.Kf)
-        WeightEx -=
-            Chan[ver::T].Interaction(AngleIndex, 0) * exp(-kExQ * kExQ / 0.1);
+      if (kDiQ < 1.0 * Para.Kf) {
+        WeightDir += Chan[ver::T].Interaction(AngleIndex, 0, DIR) *
+                     exp(-kDiQ * kDiQ / 0.1);
+        WeightEx += Chan[ver::T].Interaction(AngleIndex, 0, EX) *
+                    exp(-kDiQ * kDiQ / 0.1);
+      }
+      if (kExQ < 1.0 * Para.Kf) {
+        WeightEx -= Chan[ver::T].Interaction(AngleIndex, 0, DIR) *
+                    exp(-kExQ * kExQ / 0.1);
+        WeightEx -= Chan[ver::T].Interaction(AngleIndex, 0, EX) *
+                    exp(-kExQ * kExQ / 0.1);
+      }
       return;
     } else
       return;
@@ -168,8 +176,13 @@ void verQTheta::Measure(const momentum &InL, const momentum &InR,
     // double Factor = 1.0 / pow(2.0 * PI, 2 * Order);
     double CosAng = Angle3D(InL, InR);
     int AngleIndex = Angle2Index(CosAng, AngBinSize);
-    Chan[Channel].Estimator(Order, AngleIndex, QIndex) += Weight.Sum() * Factor;
-    Chan[Channel].Estimator(0, AngleIndex, QIndex) += Weight.Sum() * Factor;
+    Chan[Channel].Estimator(Order, AngleIndex, QIndex, DIR) +=
+        Weight(DIR) * Factor;
+    Chan[Channel].Estimator(0, AngleIndex, QIndex, DIR) += Weight(DIR) * Factor;
+
+    Chan[Channel].Estimator(Order, AngleIndex, QIndex, EX) +=
+        Weight(EX) * Factor;
+    Chan[Channel].Estimator(0, AngleIndex, QIndex, EX) += Weight(EX) * Factor;
   }
   return;
 }
@@ -206,8 +219,10 @@ void verQTheta::Save(bool Simple) {
 
         for (int angle = 0; angle < AngBinSize; ++angle)
           for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
-            VerFile << Chan[chan].Estimator(order, angle, qindex) * PhyWeightT
-                    << "  ";
+            for (int dir = 0; dir < 2; ++dir)
+              VerFile << Chan[chan].Estimator(order, angle, qindex, dir) *
+                             PhyWeightT
+                      << "  ";
         VerFile.close();
       } else {
         LOG_WARNING("Polarization for PID " << Para.PID << " fails to save!");
@@ -222,8 +237,9 @@ void verQTheta::ClearStatis() {
     for (int qIndex = 0; qIndex < ExtMomBinSize; ++qIndex) {
       double k = Index2Mom(qIndex);
       for (int order = 0; order < MaxOrder; ++order)
-        for (auto &c : Chan)
-          c.Estimator(order, inin, qIndex) = 0.0;
+        for (int dir = 0; dir < 2; ++dir)
+          for (auto &c : Chan)
+            c.Estimator(order, inin, qIndex, dir) = 0.0;
     }
 }
 
@@ -236,7 +252,8 @@ void verQTheta::LoadWeight() {
       if (VerFile.is_open()) {
         for (int angle = 0; angle < AngBinSize; ++angle)
           for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
-            VerFile >> Chan[chan].Interaction(angle, qindex);
+            for (int dir = 0; dir < 2; ++dir)
+              VerFile >> Chan[chan].Interaction(angle, qindex, dir);
         VerFile.close();
       }
     }

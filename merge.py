@@ -126,7 +126,8 @@ while True:
 
                             Norm += Norm0
 
-                            f = d.reshape((AngleBinSize, ExtMomBinSize))/Norm0
+                            f = d.reshape(
+                                (AngleBinSize, ExtMomBinSize, 2))/Norm0
                             DataList.append(AngleIntegation(f, 0))
 
                     # print "Norm", Norm
@@ -137,7 +138,7 @@ while True:
             if Norm > 0 and Data0 is not None:
                 print "Total Weight: ", Data0[0]
                 Data0 /= Norm
-                Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
+                Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize, 2))
 
                 # print "Channel: ", chan
                 if DataWithAngle.has_key((order, chan)):
@@ -161,32 +162,51 @@ while True:
             with open("weight{0}.data".format(chan), "w") as file:
                 for angle in range(AngleBinSize):
                     for qidx in range(ExtMomBinSize):
-                        file.write("{0} ".format(
-                            DataWithAngle[(0, chan)][angle, qidx]))
+                        for Dir in range(2):
+                            file.write("{0} ".format(
+                                DataWithAngle[(0, chan)][angle, qidx, Dir]))
 
         with open("data.data", "a") as file:
-            file.write("{0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
-                Data[(0, 1)][0], Data[(0, 1)][0], Data[(0, 2)][0], Data[(0, 3)][0]))
+            file.write("Dir: {0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
+                Data[(0, 1)][0, 0], Data[(0, 1)][0, 0], Data[(0, 2)][0, 0], Data[(0, 3)][0, 0]))
+            file.write("Ex: {0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
+                Data[(0, 1)][0, 1], Data[(0, 1)][0, 1], Data[(0, 2)][0, 1], Data[(0, 3)][0, 1]))
 
-        qData = Data[(0, 1)]
-        qData = 8.0*np.pi*Charge2/(ExtMomBin**2*kF**2+Lambda)-qData
+        # qData = 8.0*np.pi*Charge2/(ExtMomBin**2*kF**2+Lambda)-qData
         # print qData
-        print "  Q/kF,    T,    Error"
-        for i in range(len(qData)):
-            print "{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-                ExtMomBin[i], qData[i], DataErr[(0, 1)][i])
+        i = 0
+        print "T channel:"
+        print "        Q/kF,    Data,    Error"
+        qData0 = Data[(0, 1)][:, 0]
+        print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData0[i], DataErr[(0, 1)][i, 0])
+        qData1 = Data[(0, 1)][:, 1]
+        print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData1[i], DataErr[(0, 1)][i, 1])
+        print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData0[i]+qData1[i], DataErr[(0, 1)][i, 0]+DataErr[(0, 1)][i, 1])
 
-        qData = Data[(0, 2)]
-        print "  Q/kF,    U,    Error"
-        for i in range(len(qData)):
-            print "{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-                ExtMomBin[i], qData[i], DataErr[(0, 2)][i])
+        print "U channel:"
+        print "        Q/kF,    Data,    Error"
+        qData0 = Data[(0, 2)][:, 0]
+        print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData0[i], DataErr[(0, 2)][i, 0])
+        qData1 = Data[(0, 2)][:, 1]
+        print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData1[i], DataErr[(0, 2)][i, 1])
+        print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData0[i]+qData1[i], DataErr[(0, 2)][i, 0]+DataErr[(0, 2)][i, 1])
 
-        qData = Data[(0, 3)]
-        print "  Q/kF,    S,    Error"
-        for i in range(len(qData)):
-            print "{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-                ExtMomBin[i], qData[i], DataErr[(0, 3)][i])
+        print "S channel:"
+        print "        Q/kF,    Data,    Error"
+        qData0 = Data[(0, 3)][:, 0]
+        print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData0[i], DataErr[(0, 3)][i, 0])
+        qData1 = Data[(0, 3)][:, 1]
+        print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData1[i], DataErr[(0, 3)][i, 1])
+        print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData0[i]+qData1[i], DataErr[(0, 3)][i, 0]+DataErr[(0, 3)][i, 1])
 
     if Step >= TotalStep:
         print "End of Simulation!"
