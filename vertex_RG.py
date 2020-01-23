@@ -11,8 +11,8 @@ mat.rcParams["font.family"] = "Times New Roman"
 size = 12
 
 # XType = "Tau"
-# XType = "Mom"
-XType = "Angle"
+XType = "Mom"
+# XType = "Angle"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]

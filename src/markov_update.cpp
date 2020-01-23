@@ -17,7 +17,7 @@ using namespace diag;
 using namespace std;
 
 int markov::GetTauNum(int Order) { return Order + 1; }
-int markov::GetLoopNum(int Order) { return Order; }
+int markov::GetLoopNum(int Order) { return Order + 3; }
 
 void markov::ChangeOrder() {
   Updates Name;

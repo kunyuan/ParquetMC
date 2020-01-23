@@ -90,7 +90,7 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   WeightEx = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2);
   // return 1.0 / Para.Beta;
   if (VerType == 1) {
-    // return 0.0;
+    return;
     if (kDiQ < 1.0 * Para.Kf || kExQ < 1.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
       if (kDiQ < 1.0 * Para.Kf)
@@ -206,9 +206,8 @@ void verQTheta::Save(bool Simple) {
 
         for (int angle = 0; angle < AngBinSize; ++angle)
           for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
-            for (int chan = 0; chan < 4; chan++)
-              VerFile << Chan[chan].Estimator(order, angle, qindex) * PhyWeightT
-                      << "  ";
+            VerFile << Chan[chan].Estimator(order, angle, qindex) * PhyWeightT
+                    << "  ";
         VerFile.close();
       } else {
         LOG_WARNING("Polarization for PID " << Para.PID << " fails to save!");

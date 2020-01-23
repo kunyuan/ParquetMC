@@ -34,7 +34,6 @@ for index, eachline in enumerate(inlist):
     if(os.path.exists(homedir) != True):
         os.system("mkdir "+homedir)
 
-    os.system("cp -r groups "+homedir)
     os.system("cp {0} {1}".format(execute, homedir))
 
     infilepath = homedir+"/infile"
