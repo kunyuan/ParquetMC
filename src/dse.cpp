@@ -193,7 +193,6 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
     Bubble.HasS = false;
 
   if (IsProjected) {
-    return Ver4;
     for (auto &s : SymFactor)
       s *= -1;
     if (HasT || HasU) {

@@ -6,7 +6,7 @@ import time
 import numpy as np
 
 SleepTime = 5
-SpinIndex = 1
+SpinIndex = 2
 
 rs = None
 Lambda = None
@@ -241,14 +241,14 @@ while True:
             DataErr[(o, 3)][i, 1]
 
         print "\n"
-        # print "Total As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        #     ExtMomBin[i], qData0+qData1/2.0, Err0+Err1/2.0)
-        # print "Total Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        #     ExtMomBin[i], qData1/2.0, Err1/2.0)
+        print "Total As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData0+qData1/2.0, Err0+Err1/2.0)
+        print "Total Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData1/2.0, Err1/2.0)
 
-        print "\n"
-        print "Sum:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0+qData1, Err0+Err1)
+        # print "\n"
+        # print "Sum:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+        #     ExtMomBin[i], qData0+qData1, Err0+Err1)
 
     if Step >= TotalStep:
         print "End of Simulation!"
