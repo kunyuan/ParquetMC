@@ -5,7 +5,8 @@ import glob
 import time
 import numpy as np
 
-SleepTime = 10
+SleepTime = 5
+SpinIndex = 1
 
 rs = None
 Lambda = None
@@ -122,6 +123,7 @@ while True:
                             if Data0 is None:
                                 Data0 = d
                             else:
+                                # Data0 = d
                                 Data0 += d
 
                             Norm += Norm0
@@ -175,38 +177,78 @@ while True:
         # qData = 8.0*np.pi*Charge2/(ExtMomBin**2*kF**2+Lambda)-qData
         # print qData
         i = 0
+        o = 0
         print "T channel:"
         print "        Q/kF,    Data,    Error"
-        qData0 = Data[(0, 1)][:, 0]
+        qData0 = Data[(o, 1)][:, 0]
         print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i], DataErr[(0, 1)][i, 0])
-        qData1 = Data[(0, 1)][:, 1]
+            ExtMomBin[i], qData0[i], DataErr[(o, 1)][i, 0])
+        qData1 = Data[(o, 1)][:, 1]
         print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData1[i], DataErr[(0, 1)][i, 1])
-        print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i]+qData1[i], DataErr[(0, 1)][i, 0]+DataErr[(0, 1)][i, 1])
+            ExtMomBin[i], qData1[i], DataErr[(o, 1)][i, 1])
 
-        print "U channel:"
-        print "        Q/kF,    Data,    Error"
-        qData0 = Data[(0, 2)][:, 0]
-        print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i], DataErr[(0, 2)][i, 0])
-        qData1 = Data[(0, 2)][:, 1]
-        print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData1[i], DataErr[(0, 2)][i, 1])
-        print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i]+qData1[i], DataErr[(0, 2)][i, 0]+DataErr[(0, 2)][i, 1])
+        if SpinIndex == 2:
+            print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData0[i]+qData1[i]/2.0, DataErr[(o, 1)][i, 0]+DataErr[(o, 1)][i, 1]/2.0)
+            print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData1[i]/2.0, DataErr[(o, 1)][i, 1]/2.0)
+        else:
+            print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData0[i]+qData1[i], DataErr[(o, 1)][i, 0]+DataErr[(o, 1)][i, 1])
 
-        print "S channel:"
+        print "\nU channel:"
         print "        Q/kF,    Data,    Error"
-        qData0 = Data[(0, 3)][:, 0]
+        qData0 = Data[(o, 2)][:, 0]
         print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i], DataErr[(0, 3)][i, 0])
-        qData1 = Data[(0, 3)][:, 1]
+            ExtMomBin[i], qData0[i], DataErr[(o, 2)][i, 0])
+        qData1 = Data[(o, 2)][:, 1]
         print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData1[i], DataErr[(0, 3)][i, 1])
-        print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i]+qData1[i], DataErr[(0, 3)][i, 0]+DataErr[(0, 3)][i, 1])
+            ExtMomBin[i], qData1[i], DataErr[(o, 2)][i, 1])
+        if SpinIndex == 2:
+            print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData0[i]+qData1[i]/2.0, DataErr[(o, 2)][i, 0]+DataErr[(o, 2)][i, 1]/2.0)
+            print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData1[i]/2.0, DataErr[(o, 2)][i, 1]/2.0)
+        else:
+            print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData0[i]+qData1[i], DataErr[(o, 2)][i, 0]+DataErr[(o, 2)][i, 1])
+
+        print "\nS channel:"
+        print "        Q/kF,    Data,    Error"
+        qData0 = Data[(o, 3)][:, 0]
+        print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData0[i], DataErr[(o, 3)][i, 0])
+        qData1 = Data[(o, 3)][:, 1]
+        print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData1[i], DataErr[(o, 3)][i, 1])
+        if SpinIndex == 2:
+            print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData0[i]+qData1[i]/2.0, DataErr[(o, 3)][i, 0]+DataErr[(o, 3)][i, 1]/2.0)
+            print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData1[i]/2.0, DataErr[(o, 3)][i, 1]/2.0)
+        else:
+            print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData0[i]+qData1[i], DataErr[(o, 3)][i, 0]+DataErr[(o, 3)][i, 1])
+
+        # print "Sum with Spin:"
+        # print (Data[(o, 1)][0, 0]+Data[(o, 2)][0, 0]+Data[(o, 3)][0, 0]) * \
+        #     4+2*(Data[(o, 1)][0, 1]+Data[(o, 2)][0, 1]+Data[(o, 3)][0, 1])
+        qData0 = Data[(o, 1)][i, 0]+Data[(o, 2)][i, 0]+Data[(o, 3)][i, 0]
+        qData1 = Data[(o, 1)][i, 1]+Data[(o, 2)][i, 1]+Data[(o, 3)][i, 1]
+        Err0 = DataErr[(o, 1)][i, 0]+DataErr[(o, 2)][i, 0] + \
+            DataErr[(o, 3)][i, 0]
+        Err1 = DataErr[(o, 1)][i, 1]+DataErr[(o, 2)][i, 1] + \
+            DataErr[(o, 3)][i, 1]
+
+        print "\n"
+        # print "Total As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+        #     ExtMomBin[i], qData0+qData1/2.0, Err0+Err1/2.0)
+        # print "Total Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+        #     ExtMomBin[i], qData1/2.0, Err1/2.0)
+
+        print "\n"
+        print "Sum:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+            ExtMomBin[i], qData0+qData1, Err0+Err1)
 
     if Step >= TotalStep:
         print "End of Simulation!"

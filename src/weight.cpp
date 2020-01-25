@@ -104,7 +104,7 @@ void weight::Vertex4(dse::ver4 &Ver4) {
 }
 
 void weight::ChanUST(dse::ver4 &Ver4) {
-  double Weight = 0.0, WeightDir = 0.0, WeightEx = 0.0;
+  double Weight = 0.0;
   double Ratio;
   array<momentum *, 4> &LegK0 = Ver4.LegK;
 
@@ -244,11 +244,12 @@ void weight::ChanUST(dse::ver4 &Ver4) {
                                    LWeight(EX) * RWeight(DIR));
           CWeight(DIR) += Weight * LWeight(EX) * RWeight(EX);
         } else if (pair.Channel == S) {
-          CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(DIR) +
-                                    LWeight(EX) * RWeight(EX));
+          // see the note "code convention"
+          CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(EX) +
+                                    LWeight(EX) * RWeight(DIR));
 
-          CWeight(EX) += Weight * (LWeight(DIR) * RWeight(EX) +
-                                   LWeight(EX) * RWeight(DIR));
+          CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) +
+                                   LWeight(EX) * RWeight(EX));
         }
       }
     }

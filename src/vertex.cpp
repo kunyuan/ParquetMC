@@ -90,6 +90,7 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   double kExQ = ExQ.norm();
   WeightDir = -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2);
   WeightEx = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2);
+  // WeightEx = 0.0;
   // return 1.0 / Para.Beta;
   if (VerType == 1) {
     // return;
