@@ -44,8 +44,9 @@ struct parameter {
   double UVScale;    // the UV bound of the energy scale
   double UVCoupling; // the coupling constant at the UV scale
   double Mass2;      // screening length^2
-  double Charge2;    // screening length^2
-  double MaxExtMom;  // the maximum external momentum
+  double Lambda;
+  double Charge2;   // screening length^2
+  double MaxExtMom; // the maximum external momentum
   selfenergy SelfEnergyType;
   ver4type Vertex4Type;
 

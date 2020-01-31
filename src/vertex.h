@@ -75,8 +75,8 @@ private:
 class verQTheta {
 public:
   verQTheta();
-  void Interaction(const array<momentum *, 4> &LegK, double Tau, int VerType,
-                   double &WeightDir, double &WeightEx);
+  void Interaction(const array<momentum *, 4> &LegK, double Tau, bool IsRenorm,
+                   int CTOrder, double &WeightDir, double &WeightEx);
 
   void Measure(const momentum &InL, const momentum &InR, const int QIndex,
                int Order, double Tau, int Channel, ver::weightMatrix &Weight,

@@ -80,7 +80,8 @@ verQTheta::verQTheta() {
 }
 
 void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
-                            int VerType, double &WeightDir, double &WeightEx) {
+                            bool IsRenorm, int CounterTermOrder,
+                            double &WeightDir, double &WeightEx) {
 
   // cout << (*LegK[INL])[0] << endl;
   momentum DiQ = *LegK[INL] - *LegK[OUTL];
@@ -88,11 +89,19 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
 
   double kDiQ = DiQ.norm();
   double kExQ = ExQ.norm();
-  WeightDir = -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2);
+
+  WeightDir = 8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2);
   WeightEx = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2);
+  if (CounterTermOrder > 0) {
+    WeightDir =
+        WeightDir * pow(Para.Lambda / 8.0 / PI * WeightDir, CounterTermOrder);
+    WeightEx =
+        WeightEx * pow(Para.Lambda / 8.0 / PI * WeightEx, CounterTermOrder);
+  }
+  WeightDir = -WeightDir; // the interaction carries a sign -1
   // WeightEx = 0.0;
   // return 1.0 / Para.Beta;
-  if (VerType == 1) {
+  if (IsRenorm && CounterTermOrder == 0) {
     // return;
     if (kDiQ < 1.0 * Para.Kf || kExQ < 1.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);

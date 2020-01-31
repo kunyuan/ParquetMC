@@ -28,6 +28,10 @@ struct variable {
 
   array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
   array<double, MaxTauNum> Tau;       // all tau variables
+
+  // variational approach, interactions with counterterms
+  int CurrCTOrder; // the sum of VerOrder
+  array<int, MaxTauNum> CounterTermOrder;
 };
 
 class weight {

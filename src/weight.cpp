@@ -78,13 +78,15 @@ void weight::Ver0(ver4 &Ver4) {
   array<momentum *, 4> &K = Ver4.LegK;
   double &WeightDir = Ver4.Weight[0](DIR); // direct, reducible
   double &WeightEx = Ver4.Weight[0](EX);   // exchange, irreducible
+  int VerIndex = Ver4.T[0][INL];
+  int CTOrder = Var.CounterTermOrder[VerIndex];
   // Ver4.Weight[0] = 1.0 / Para.Beta;
   if (Ver4.RexpandBare) {
     // bare+quantum correction
-    VerQTheta.Interaction(K, 0.0, 1, WeightDir, WeightEx);
+    VerQTheta.Interaction(K, 0.0, true, CTOrder, WeightDir, WeightEx);
   } else {
     // only bare coupling
-    VerQTheta.Interaction(K, 0.0, 0, WeightDir, WeightEx);
+    VerQTheta.Interaction(K, 0.0, false, CTOrder, WeightDir, WeightEx);
   }
   return;
 }

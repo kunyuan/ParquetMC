@@ -25,11 +25,12 @@ parameter Para; // parameters as a global variable
 RandomFactory Random;
 
 int main(int argc, const char *argv[]) {
-  cout << "Order, Beta, Rs, Mass2, Charge2, MaxExtMom(*kF), TotalStep(*1e6), "
+  cout << "Order, Beta, Rs, Mass2, Lambda, Charge2, MaxExtMom(*kF), "
+          "TotalStep(*1e6), "
           "Seed, "
           "PID\n";
-  cin >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >> Para.Charge2 >>
-      Para.MaxExtMom >> Para.TotalStep >> Para.Seed >> Para.PID;
+  cin >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >> Para.Lambda >>
+      Para.Charge2 >> Para.MaxExtMom >> Para.TotalStep >> Para.Seed >> Para.PID;
   InitPara(); // initialize global parameters
   MonteCarlo();
   return 0;
