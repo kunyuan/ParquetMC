@@ -60,6 +60,7 @@ folder = "./Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
 
 #############  3D  ######################################
 kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
+Nf = kF/2.0/np.pi**2
 Bubble = 0.0971916  # 3D, Beta=10, rs=1
 
 Data = {}  # key: (order, channel)
