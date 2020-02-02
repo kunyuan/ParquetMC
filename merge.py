@@ -6,7 +6,7 @@ import time
 import numpy as np
 
 SleepTime = 5
-SpinIndex = 2
+SpinIndex = 1
 
 rs = None
 Lambda = None
