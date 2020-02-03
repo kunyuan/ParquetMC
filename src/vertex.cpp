@@ -103,8 +103,8 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
                     exp(-kDiQ * kDiQ / 0.1);
       }
       if (kExQ < 1.0 * Para.Kf) {
-        WeightEx -= Chan[ver::T].Interaction(AngleIndex, 0, DIR) *
-                    exp(-kExQ * kExQ / 0.1);
+        WeightDir -= Chan[ver::T].Interaction(AngleIndex, 0, DIR) *
+                     exp(-kExQ * kExQ / 0.1);
         WeightEx -= Chan[ver::T].Interaction(AngleIndex, 0, EX) *
                     exp(-kExQ * kExQ / 0.1);
       }
