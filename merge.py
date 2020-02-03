@@ -78,6 +78,12 @@ def AngleIntegation(Data, l):
 
 def PrintInfo(Channel, Data, DataErr):
     i = 0
+    Data = np.copy(Data)
+    DataErr = np.copy(DataErr)
+    Data[:, 0] *= Nf
+    Data[:, 1] *= Nf
+    DataErr[:, 0] *= Nf
+    DataErr[:, 1] *= Nf
     print "\n{0}     Q/kF,    Data,    Error".format(Channel)
     qData0 = Data[:, 0]
     print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
