@@ -77,6 +77,9 @@ verQTheta::verQTheta() {
 
   for (auto &c : Chan)
     c.Initialize();
+
+  for (auto &c : LandauChan)
+    c.Initialize();
 }
 
 void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
@@ -178,22 +181,34 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
 
 void verQTheta::Measure(const momentum &InL, const momentum &InR,
                         const int QIndex, int Order, double dTau, int Channel,
-                        ver::weightMatrix &Weight, double Factor) {
+                        array<ver::weightMatrix, 2> &Weight, double Factor) {
   // cout << Order << ", " << DiagNum << endl;
   if (Order == 0) {
-    Normalization += Weight(DIR) * Factor;
+    Normalization += Weight[0](DIR) * Factor;
     // Normalization += WeightFactor;
   } else {
     // double Factor = 1.0 / pow(2.0 * PI, 2 * Order);
     double CosAng = Angle3D(InL, InR);
     int AngleIndex = Angle2Index(CosAng, AngBinSize);
     Chan[Channel].Estimator(Order, AngleIndex, QIndex, DIR) +=
-        Weight(DIR) * Factor;
-    Chan[Channel].Estimator(0, AngleIndex, QIndex, DIR) += Weight(DIR) * Factor;
+        Weight[0](DIR) * Factor;
+    Chan[Channel].Estimator(0, AngleIndex, QIndex, DIR) +=
+        Weight[0](DIR) * Factor;
 
     Chan[Channel].Estimator(Order, AngleIndex, QIndex, EX) +=
-        Weight(EX) * Factor;
-    Chan[Channel].Estimator(0, AngleIndex, QIndex, EX) += Weight(EX) * Factor;
+        Weight[0](EX) * Factor;
+    Chan[Channel].Estimator(0, AngleIndex, QIndex, EX) +=
+        Weight[0](EX) * Factor;
+
+    LandauChan[Channel].Estimator(Order, AngleIndex, QIndex, DIR) +=
+        Weight[1](DIR) * Factor;
+    LandauChan[Channel].Estimator(0, AngleIndex, QIndex, DIR) +=
+        Weight[1](DIR) * Factor;
+
+    LandauChan[Channel].Estimator(Order, AngleIndex, QIndex, EX) +=
+        Weight[1](EX) * Factor;
+    LandauChan[Channel].Estimator(0, AngleIndex, QIndex, EX) +=
+        Weight[1](EX) * Factor;
   }
   return;
 }

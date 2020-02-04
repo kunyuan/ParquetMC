@@ -42,7 +42,7 @@ public:
   diag::variable &Var;
 
 private:
-  ver::weightMatrix NewWeight;
+  array<ver::weightMatrix, 2> NewWeight;
   double NewAbsWeight;
 
   int GetTauNum(int Order);

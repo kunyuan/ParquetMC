@@ -79,8 +79,8 @@ public:
                    int CTOrder, double &WeightDir, double &WeightEx);
 
   void Measure(const momentum &InL, const momentum &InR, const int QIndex,
-               int Order, double Tau, int Channel, ver::weightMatrix &Weight,
-               double Factor);
+               int Order, double Tau, int Channel,
+               array<ver::weightMatrix, 2> &Weight, double Factor);
   void Update(double Ratio, int Order);
   void Save(bool Simple = false);
   void ClearStatis();
@@ -88,6 +88,7 @@ public:
   void ResetIRScale(int IRScaleBin);
 
   array<verTensor, 4> Chan;
+  array<verTensor, 4> LandauChan;
 
   // double TauBasis[TauBinSize][TauBasisNum];
 

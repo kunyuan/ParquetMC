@@ -23,7 +23,7 @@ struct variable {
   double CurrTau;    // current external tau
   double CurrScale;  // Current (Reference) Scale: Index=1, ..., ScaleBinSize
   int CurrIRScaleBin;
-  ver::weightMatrix CurrWeight;
+  array<ver::weightMatrix, 2> CurrWeight;
   double CurrAbsWeight;
 
   array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
@@ -43,7 +43,7 @@ public:
 
   void Initialization();
 
-  ver::weightMatrix Evaluate(int LoopNum, int Channel);
+  void Evaluate(int LoopNum, int Channel, array<ver::weightMatrix, 2> Weight);
 
   // initialization, read diagrams, then initialize variables
 

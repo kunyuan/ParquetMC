@@ -27,17 +27,18 @@ void weight::Initialization() {
     }
 }
 
-ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
-  static ver::weightMatrix Weight;
+void weight::Evaluate(int LoopNum, int Channel,
+                      array<ver::weightMatrix, 2> Weight) {
   if (LoopNum == 0) {
     // normalization
-    Weight(DIR) = 1.0;
-    Weight(EX) = 0.0;
+    Weight[0](DIR) = 1.0;
+    Weight[0](EX) = 0.0;
   } else {
     // if (Channel != dse::T)
     //   return 0.0;
 
-    Weight.SetZero();
+    Weight[0].SetZero();
+    Weight[1].SetZero();
     ver4 &Root = Ver4Root[LoopNum][Channel];
     if (Root.Weight.size() != 0) {
 
@@ -60,8 +61,11 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
 
       double Factor = 1.0 / pow(2.0 * PI, D * LoopNum);
       for (auto &w : Root.Weight) {
-        Weight(DIR) += w(DIR) * Factor;
-        Weight(EX) += w(EX) * Factor;
+        Weight[0](DIR) += w(DIR) * Factor;
+        Weight[0](EX) += w(EX) * Factor;
+
+        *Root.T[INL] Weight[1](DIR) += w(DIR) * Factor * exp();
+        Weight[1](EX) += w(EX) * Factor;
       }
       // if (LoopNum == 3 && Channel == dse::I) {
       //   cout << "loopnum: " << Root.LoopNum << endl;

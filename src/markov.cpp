@@ -79,8 +79,8 @@ markov::markov() : Var(Weight.Var) {
 
   LOG_INFO("Calculating the weights of all objects...")
 
-  Var.CurrWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrChannel);
-  Var.CurrAbsWeight = abs(Var.CurrWeight.Sum());
+  Weight.Evaluate(Var.CurrOrder, Var.CurrChannel, Var.CurrWeight);
+  Var.CurrAbsWeight = abs(Var.CurrWeight[0].Sum());
 
   LOG_INFO("Initializating variables done.")
 
