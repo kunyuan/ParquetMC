@@ -45,7 +45,7 @@ void InitPara() {
   Para.Type = RG;
   Para.ObsType = FREQ;
 
-  Para.ReWeight = {2.0, 1.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+  Para.ReWeight = {4.0, 1.0, 0.5, 0.25, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   // Para.SelfEnergyType = FOCK;
   Para.SelfEnergyType = selfenergy::BARE;
 

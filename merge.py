@@ -6,16 +6,18 @@ import time
 import numpy as np
 
 SleepTime = 5
-SpinIndex = 1
+SpinIndex = 2
 
 rs = None
 Lambda = None
+Mass2 = None
 Beta = None
 Charge2 = None
 TotalStep = None
 BetaStr = None
 rsStr = None
 ChargeStr = None
+Mass2Str = None
 LambdaStr = None
 
 with open("inlist", "r") as file:
@@ -25,11 +27,13 @@ with open("inlist", "r") as file:
     Beta = float(BetaStr)
     rsStr = para[2]
     rs = float(rsStr)
-    LambdaStr = para[3]
+    Mass2Str = para[3]
+    Mass2 = float(Mass2Str)
+    LambdaStr = para[4]
     Lambda = float(LambdaStr)
-    ChargeStr = para[4]
+    ChargeStr = para[5]
     Charge2 = float(ChargeStr)
-    TotalStep = float(para[6])
+    TotalStep = float(para[7])
 
 print rs, Beta, Lambda, TotalStep
 
@@ -40,7 +44,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 Order = [0, ]
 
-folder = "./Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, LambdaStr)
+folder = "./Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, Mass2Str)
 
 AngleBin = None
 ExtMomBin = None
