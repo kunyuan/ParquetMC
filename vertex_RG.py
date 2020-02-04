@@ -22,6 +22,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 Order = [1, 2, 3]
 SpinIndex = 2
 IsFullVer4 = True
+# IsFullVer4 = False
 
 MaxOrder = None
 rs = None
@@ -268,11 +269,25 @@ elif(XType == "Angle"):
         y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]/2.0
         ErrorPlot(ax2, x, y, ColorList[0], 's',
                   "q/kF={0}, As".format(ExtMomBin[0]))
+        print "As: ", sum(y)/len(y)
 
         x = np.arccos(AngleBin)
         y = AngTotal[:, 0, 1]/2.0
         ErrorPlot(ax2, x, y, ColorList[-1], 's',
                   "q/kF={0}, Aa".format(ExtMomBin[0]))
+        print "Aa: ", sum(y)/len(y)
+
+        x = np.arccos(AngleBin)
+        y = AngLandau[:, 0, 0]+AngLandau[:, 0, 1]/2.0
+        ErrorPlot(ax2, x, y, ColorList[1], 's',
+                  "q/kF={0}, Fs".format(ExtMomBin[0]))
+        print "Fs: ", sum(y)/len(y)
+
+        x = np.arccos(AngleBin)
+        y = AngLandau[:, 0, 1]/2.0
+        ErrorPlot(ax2, x, y, ColorList[-2], 's',
+                  "q/kF={0}, Fa".format(ExtMomBin[0]))
+        print "Fa: ", sum(y)/len(y)
     else:
         x = np.arccos(AngleBin)
         y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]

@@ -35,7 +35,7 @@ with open("inlist", "r") as file:
     Charge2 = float(ChargeStr)
     TotalStep = float(para[7])
 
-print rs, Beta, Lambda, TotalStep
+print rs, Beta, Mass2, Lambda, TotalStep
 
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
