@@ -20,6 +20,8 @@ Channel = [0, 1, 2, 3]
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 Order = [1, 2, 3]
+SpinIndex = 2
+IsFullVer4 = True
 
 MaxOrder = None
 rs = None
@@ -88,11 +90,7 @@ def AngleIntegation(Data, l):
 
 
 def Mirror(x, y):
-    # print x
-    # print len(x)
     x2 = np.zeros(len(x)*2)
-    # x2[:len(x)] = -x[::-1]
-    # x2[len(x):] = x
     x2[:len(x)] = x
     x2[len(x):] = -x[::-1]
     y2 = np.zeros(len(y)*2)
@@ -161,7 +159,7 @@ def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
 
 w = 1-0.429
 
-fig, ax = plt.subplots()
+# fig, ax = plt.subplots()
 # ax=fig.add_axes()
 # ax = fig.add_subplot(122)
 
@@ -230,6 +228,9 @@ elif (XType == "Mom"):
     ax.set_xlabel("$q/k_F$", size=size)
 
 elif(XType == "Angle"):
+
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+
     AngTotal = None
     for chan in Channel[0:]:
         AngData = -DataWithAngle[(0, chan)]*Nf
@@ -237,70 +238,55 @@ elif(XType == "Angle"):
             AngTotal = AngData
         else:
             AngTotal += AngData
-        # for i in range(ExtMomBinSize/8):
-        #     # print i, index
-        #     # print ScaleBin[index]
-        #     index = 8*i
-        #     ErrorPlot(ax, AngleBin, AngData[:, index],
-        #               ColorList[i], 's', "Q {0}".format(ExtMomBin[index]))
-
-        # ErrorPlot(ax, AngleBin, AngData[:, 0]/np.sin(np.arccos(AngleBin)),
-        #           ColorList[0], 's', "Q {0}".format(ExtMomBin[0]))
 
         # AngHalf = np.arccos(AngleBin)/2.0
         # AngTotal[:, 0] += 8.0*np.pi/Mass2*Nf
         # AngTotal[:, 0] += -8.0*np.pi/((2.0*kF*np.sin(AngHalf))**2+Mass2)*Nf
 
-        x2, y2 = Mirror(np.arccos(AngleBin),
-                        AngData[:, 0, 0]+AngData[:, 0, 1]/2.0)
+        x = np.arccos(AngleBin)
+        y = AngData[:, 0, 0]+AngData[:, 0, 1]/SpinIndex
 
-        # x2, y2 = Mirror(np.arccos(AngleBin),
-        #                 AngData[:, 0, 1]/2.0)
-
-        ErrorPlot(ax, x2, y2, ColorList[chan+1], 's',
-                  "q/kF={0}, {1}".format(ExtMomBin[0], ChanName[chan]))
-        # print "dir", sum(AngData[:, 0, 0])/len(AngData[:, 0, 0])
-        # print "ex", sum(AngData[:, 0, 1])/len(AngData[:, 0, 0])
-        # print "As", sum(AngData[:, 0, 0]+AngData[:, 0,
-        #                                          1]/2.0)/len(AngData[:, 0, 0])
-        # print "total", sum(AngTotal[:, 0, 0])/len(AngData[:, 0, 0])
-
-        # ErrorPlot(ax, AngleBin, AngData[:, 0], ColorList[chan+1], 's',
-        #           "q/kF={0}, {1}".format(ExtMomBin[0], ChanName[chan]))
-        # ErrorPlot(ax, np.arccos(AngleBin), AngData[:, 0], ColorList[chan+1], 's',
-        #           "Q {0}, {1}".format(ExtMomBin[0], ChanName[chan]))
-    # print np.arccos(AngleBin)
-    # AngTotal *= -0.0
+        ErrorPlot(ax1, x, y, ColorList[chan+1], 's',
+                  "q/kF={0}, {1}, As, ".format(ExtMomBin[0], ChanName[chan]))
 
     AngHalf = np.arccos(AngleBin)/2.0
+    if IsFullVer4:
+        Bare = np.zeros_like(AngTotal[:, 0, :])
+        Bare[:, 0] += 8.0*np.pi/Mass2*Nf
+        Bare[:, 1] += -8.0 * np.pi / \
+            ((2.0*kF*np.sin(AngHalf))**2+Mass2)*Nf
+        AngTotal[:, 0, 0] += Bare[:, 0]
+        AngTotal[:, 0, 1] += Bare[:, 1]
 
-    Dir = 8.0*np.pi/Mass2*Nf
-    Ex = -8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2)*Nf
-    AngTotal[:, 0, 0] += Dir
-    AngTotal[:, 0, 1] += Ex
+        x = np.arccos(AngleBin)
+        ErrorPlot(ax1, x, Bare[:, 0]+Bare[:, 1]/SpinIndex, ColorList[-1], 's',
+                  "q/kF={0}, Bare".format(ExtMomBin[0]))
 
-    x2, y2 = Mirror(np.arccos(AngleBin),
-                    AngTotal[:, 0, 0]+AngTotal[:, 0, 1]/2.0)
+    AngLandau = AngTotal+DataWithAngle[(0, chan)]*Nf
+    if SpinIndex == 2:
+        x = np.arccos(AngleBin)
+        y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]/2.0
+        ErrorPlot(ax2, x, y, ColorList[0], 's',
+                  "q/kF={0}, As".format(ExtMomBin[0]))
 
-    ErrorPlot(ax, x2, y2, ColorList[0], 's',
-              "q/kF={0}, Total Dir".format(ExtMomBin[0]))
-
-    x2, y2 = Mirror(np.arccos(AngleBin),
-                    AngTotal[:, 0, 1]/2.0)
-    ErrorPlot(ax, x2, y2, ColorList[-1], 's',
-              "q/kF={0}, Total Ex".format(ExtMomBin[0]))
-    # print "Dir total:", sum(AngTotal[:, 0, 0])/len(AngTotal[:, 0, 0])
-    # print "Ex total:", sum(AngTotal[:, 0, 1]/2.0)/len(AngTotal[:, 0, 0])
-    # print "As total:", sum(
-    #     AngTotal[:, 0, 0]+AngTotal[:, 0, 1]/2.0)/len(AngTotal[:, 0, 0])
-
-    # ErrorPlot(ax, np.arccos(AngleBin), AngTotal[:, 0], ColorList[0], 's',
-    #           "Q {0}, Total".format(ExtMomBin[0]))
+        x = np.arccos(AngleBin)
+        y = AngTotal[:, 0, 1]/2.0
+        ErrorPlot(ax2, x, y, ColorList[-1], 's',
+                  "q/kF={0}, Aa".format(ExtMomBin[0]))
+    else:
+        x = np.arccos(AngleBin)
+        y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]
+        ErrorPlot(ax2, x, y, ColorList[-1], 's',
+                  "q/kF={0}, A".format(ExtMomBin[0]))
 
     # ax.set_xlim([-np.arccos(AngleBin[0]), np.arccos(AngleBin[0])])
-    ax.set_xlim([0.0, np.arccos(AngleBin[0])])
+    ax1.set_xlim([0.0, np.pi])
     # ax.set_ylim([0.0, 5.0])
-    ax.set_xlabel("$Angle$", size=size)
+    ax1.set_xlabel("$Angle$", size=size)
+    ax2.set_xlim([0.0, np.pi])
+    ax2.set_xlabel("$Angle$", size=size)
+    ax1.legend(loc=1, frameon=False, fontsize=size)
+    ax2.legend(loc=1, frameon=False, fontsize=size)
 # ax.set_xticks([0.0,0.04,0.08,0.12])
 # ax.set_yticks([0.35,0.4,0.45,0.5])
 # ax.set_ylim([-0.02, 0.125])
@@ -308,13 +294,13 @@ elif(XType == "Angle"):
 # ax.xaxis.set_label_coords(0.97, -0.01)
 # # ax.yaxis.set_label_coords(0.97, -0.01)
 # ax.text(-0.012,0.52, "$-I$", fontsize=size)
-ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
+# ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
 
 # ax.text(0.02,0.47, "$\\sim {\\frac{1}{2}-}\\frac{1}{2} {\\left( \\frac{r}{L} \\right)} ^{2-s}$", fontsize=28)
 
-plt.legend(loc=1, frameon=False, fontsize=size)
+# plt.legend(loc=1, frameon=False, fontsize=size)
 # plt.title("2D density integral")
-plt.tight_layout()
+# plt.tight_layout()
 
 # plt.savefig("spin_rs1_lambda1.pdf")
 plt.show()

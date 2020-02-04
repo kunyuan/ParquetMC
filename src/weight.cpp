@@ -136,7 +136,7 @@ void weight::ChanUST(dse::ver4 &Ver4) {
           // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
           // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
           // double x=
-          bubble.ProjFactor[T] = exp(-DirQ * DirQ / 0.1);
+          bubble.ProjFactor[T] = exp(-DirQ * DirQ / 0.5);
           // if (DirQ < EPS)
           //   bubble.ProjFactor[T] = 1.0;
         }
@@ -145,7 +145,7 @@ void weight::ChanUST(dse::ver4 &Ver4) {
           // *bubble.LegK[U][OUTR] = *bubble.LegK[T][INL];
           // if (ExQ < EPS)
           // bubble.ProjFactor[U] = 1.0;
-          bubble.ProjFactor[U] = exp(-ExQ * ExQ / 0.1);
+          bubble.ProjFactor[U] = exp(-ExQ * ExQ / 0.5);
         }
       }
     }
