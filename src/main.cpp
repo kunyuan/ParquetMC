@@ -43,13 +43,16 @@ void InitPara() {
 
   // Para.Type = POLAR;
   Para.Type = RG;
-  Para.ObsType = FREQ;
+  // Para.ObsType = SCATTERING;
+  Para.ObsType = LANDAU;
 
   Para.ReWeight = {8.0, 1.0, 0.5, 0.125, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   // Para.SelfEnergyType = FOCK;
   Para.SelfEnergyType = selfenergy::BARE;
 
   Para.Vertex4Type = MOM_ANGLE;
+
+  Para.Delta = 0.5;
 
   //// initialize the global parameter //////////////////////
   double Kf;
