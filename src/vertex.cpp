@@ -104,19 +104,19 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   // return 1.0 / Para.Beta;
   if (IsRenorm && CounterTermOrder == 0) {
     // return;
-    if (kDiQ < 2.0 * Para.Kf || kExQ < 2.0 * Para.Kf) {
+    if (kDiQ < 3.0 * Para.Kf || kExQ < 3.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
-      if (kDiQ < 2.0 * Para.Kf) {
+      if (kDiQ < 3.0 * Para.Kf) {
         WeightDir += Chan[ver::T].Interaction(AngleIndex, 0, DIR) *
-                     exp(-kDiQ * kDiQ / (0.5 * Para.Kf * Para.Kf));
+                     exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
         WeightEx += Chan[ver::T].Interaction(AngleIndex, 0, EX) *
-                    exp(-kDiQ * kDiQ / (0.5 * Para.Kf * Para.Kf));
+                    exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
       }
-      if (kExQ < 2.0 * Para.Kf) {
+      if (kExQ < 3.0 * Para.Kf) {
         WeightDir -= Chan[ver::T].Interaction(AngleIndex, 0, DIR) *
-                     exp(-kExQ * kExQ / (0.5 * Para.Kf * Para.Kf));
+                     exp(-kExQ * kExQ / (Para.Delta * Para.Kf * Para.Kf));
         WeightEx -= Chan[ver::T].Interaction(AngleIndex, 0, EX) *
-                    exp(-kExQ * kExQ / (0.5 * Para.Kf * Para.Kf));
+                    exp(-kExQ * kExQ / (Para.Delta * Para.Kf * Para.Kf));
       }
       return;
     } else

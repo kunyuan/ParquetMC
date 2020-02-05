@@ -230,7 +230,7 @@ elif (XType == "Mom"):
 
 elif(XType == "Angle"):
 
-    fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
 
     AngTotal = None
     for chan in Channel[0:]:
@@ -247,8 +247,14 @@ elif(XType == "Angle"):
         x = np.arccos(AngleBin)
         y = AngData[:, 0, 0]+AngData[:, 0, 1]/SpinIndex
 
-        ErrorPlot(ax1, x, y, ColorList[chan+1], 's',
+        ErrorPlot(ax1, x, y, ColorList[chan], 's',
                   "q/kF={0}, {1}, As, ".format(ExtMomBin[0], ChanName[chan]))
+
+        x = np.arccos(AngleBin)
+        y = AngData[:, 0, 1]/SpinIndex
+
+        ErrorPlot(ax2, x, y, ColorList[chan], 's',
+                  "q/kF={0}, {1}, Aa, ".format(ExtMomBin[0], ChanName[chan]))
 
     AngHalf = np.arccos(AngleBin)/2.0
     if IsFullVer4:
@@ -263,35 +269,39 @@ elif(XType == "Angle"):
         ErrorPlot(ax1, x, Bare[:, 0]+Bare[:, 1]/SpinIndex, ColorList[-1], 's',
                   "q/kF={0}, Bare".format(ExtMomBin[0]))
 
+        x = np.arccos(AngleBin)
+        ErrorPlot(ax2, x, Bare[:, 1]/SpinIndex, ColorList[-1], 's',
+                  "q/kF={0}, Bare".format(ExtMomBin[0]))
+
     AngLandau = AngTotal+DataWithAngle[(0, chan)]*Nf
     if SpinIndex == 2:
         x = np.arccos(AngleBin)
         y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]/2.0
-        ErrorPlot(ax2, x, y, ColorList[0], 's',
+        ErrorPlot(ax3, x, y, ColorList[0], 's',
                   "q/kF={0}, As".format(ExtMomBin[0]))
         print "As: ", sum(y)/len(y)
 
         x = np.arccos(AngleBin)
         y = AngTotal[:, 0, 1]/2.0
-        ErrorPlot(ax2, x, y, ColorList[-1], 's',
+        ErrorPlot(ax3, x, y, ColorList[1], 's',
                   "q/kF={0}, Aa".format(ExtMomBin[0]))
         print "Aa: ", sum(y)/len(y)
 
         x = np.arccos(AngleBin)
         y = AngLandau[:, 0, 0]+AngLandau[:, 0, 1]/2.0
-        ErrorPlot(ax2, x, y, ColorList[1], 's',
+        ErrorPlot(ax3, x, y, ColorList[2], 's',
                   "q/kF={0}, Fs".format(ExtMomBin[0]))
         print "Fs: ", sum(y)/len(y)
 
         x = np.arccos(AngleBin)
         y = AngLandau[:, 0, 1]/2.0
-        ErrorPlot(ax2, x, y, ColorList[-2], 's',
+        ErrorPlot(ax3, x, y, ColorList[3], 's',
                   "q/kF={0}, Fa".format(ExtMomBin[0]))
         print "Fa: ", sum(y)/len(y)
     else:
         x = np.arccos(AngleBin)
         y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]
-        ErrorPlot(ax2, x, y, ColorList[-1], 's',
+        ErrorPlot(ax3, x, y, ColorList[-1], 's',
                   "q/kF={0}, A".format(ExtMomBin[0]))
 
     # ax.set_xlim([-np.arccos(AngleBin[0]), np.arccos(AngleBin[0])])
@@ -299,9 +309,12 @@ elif(XType == "Angle"):
     # ax.set_ylim([0.0, 5.0])
     ax1.set_xlabel("$Angle$", size=size)
     ax2.set_xlim([0.0, np.pi])
+    ax3.set_xlim([0.0, np.pi])
     ax2.set_xlabel("$Angle$", size=size)
+    ax3.set_xlabel("$Angle$", size=size)
     ax1.legend(loc=1, frameon=False, fontsize=size)
     ax2.legend(loc=1, frameon=False, fontsize=size)
+    ax3.legend(loc=1, frameon=False, fontsize=size)
 # ax.set_xticks([0.0,0.04,0.08,0.12])
 # ax.set_yticks([0.35,0.4,0.45,0.5])
 # ax.set_ylim([-0.02, 0.125])

@@ -59,10 +59,25 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
       Vertex4(Root);
 
       double Factor = 1.0 / pow(2.0 * PI, D * LoopNum);
+
       for (auto &w : Root.Weight) {
         Weight(DIR) += w(DIR) * Factor;
         Weight(EX) += w(EX) * Factor;
       }
+      // if (Para.ObsType == SCATTERING) {
+      //   for (auto &w : Root.Weight) {
+      //     Weight(DIR) += w(DIR) * Factor;
+      //     Weight(EX) += w(EX) * Factor;
+      //   }
+      // } else if (Para.ObsType == LANDAU) {
+      //   for (int i = 0; i < Root.Weight.size(); ++i) {
+      //     double dTau = Var.Tau[Root.T[i][INR]] - Var.Tau[Root.T[i][INL]];
+      //     auto &w = Root.Weight[i];
+      //     Weight(DIR) += w(DIR) * Factor * cos(2.0 * PI / Para.Beta *
+      //     dTau); Weight(EX) += w(EX) * Factor * cos(2.0 * PI / Para.Beta *
+      //     dTau);
+      //   }
+      // }
       // if (LoopNum == 3 && Channel == dse::I) {
       //   cout << "loopnum: " << Root.LoopNum << endl;
       //   cout << "channel: " << Root.Channel[0] << endl;
@@ -127,25 +142,30 @@ void weight::ChanUST(dse::ver4 &Ver4) {
     if (bubble.IsProjected && bubble.HasTU) {
       double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
       double ExQ = (*LegK0[INL] - *LegK0[OUTR]).norm();
-      if (DirQ < 1.0 * Para.Kf || ExQ < 1.0 * Para.Kf) {
+      if (DirQ < 3.0 * Para.Kf || ExQ < 3.0 * Para.Kf) {
         Ratio = Para.Kf / (*LegK0[INL]).norm();
         *bubble.LegK[T][INL] = *LegK0[INL] * Ratio;
         Ratio = Para.Kf / (*LegK0[INR]).norm();
         *bubble.LegK[T][INR] = *LegK0[INR] * Ratio;
-        if (DirQ < 2.0 * Para.Kf) {
+        if (DirQ < 3.0 * Para.Kf) {
           // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
           // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
           // double x=
-          bubble.ProjFactor[T] = exp(-DirQ * DirQ / (0.5 * Para.Kf * Para.Kf));
+          // bubble.ProjFactor[T] = 1.0;
+
+          bubble.ProjFactor[T] =
+              exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
+
           // if (DirQ < EPS)
           //   bubble.ProjFactor[T] = 1.0;
         }
-        if (ExQ < 2.0 * Para.Kf) {
+        if (ExQ < 3.0 * Para.Kf) {
           // *bubble.LegK[U][OUTL] = *bubble.LegK[T][INR];
           // *bubble.LegK[U][OUTR] = *bubble.LegK[T][INL];
           // if (ExQ < EPS)
           // bubble.ProjFactor[U] = 1.0;
-          bubble.ProjFactor[U] = exp(-ExQ * ExQ / (0.5 * Para.Kf * Para.Kf));
+          bubble.ProjFactor[U] =
+              exp(-ExQ * ExQ / (Para.Delta * Para.Kf * Para.Kf));
         }
       }
     }
@@ -277,7 +297,8 @@ void weight::ChanI(dse::ver4 &Ver4) {
   //   *G[8].K = *G[2].K + OutL - *G[0].K;
 
   //   for (auto &g : Env.G)
-  //     g.Weight = Fermi.Green(Var.Tau[g.OutT] - Var.Tau[g.InT], *(g.K), UP, 0,
+  //     g.Weight = Fermi.Green(Var.Tau[g.OutT] - Var.Tau[g.InT], *(g.K), UP,
+  //     0,
   //                            Var.CurrScale);
 
   //   for (auto &subVer : Env.Ver)

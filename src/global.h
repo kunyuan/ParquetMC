@@ -29,7 +29,7 @@ const int SpinIndex = 2;
 
 enum selfenergy { BARE, FOCK, DRESSED }; // self energy type
 enum type { GU, GW, RG, PARQUET };
-enum obstype { FREQ, EQUALTIME };
+enum obstype { SCATTERING, LANDAU };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 
 typedef Vec<double, D> momentum;
@@ -45,6 +45,7 @@ struct parameter {
   double UVCoupling; // the coupling constant at the UV scale
   double Mass2;      // screening length^2
   double Lambda;
+  double Delta;
   double Charge2;   // screening length^2
   double MaxExtMom; // the maximum external momentum
   selfenergy SelfEnergyType;
