@@ -47,6 +47,7 @@ struct parameter {
   double Lambda;
   double Charge2;   // screening length^2
   double MaxExtMom; // the maximum external momentum
+  double Delta;
   selfenergy SelfEnergyType;
   ver4type Vertex4Type;
 

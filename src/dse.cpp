@@ -202,15 +202,21 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
       Bubble.LegK[T][OUTR] = Bubble.LegK[T][INR];
       Bubble.LegK[U][INL] = Bubble.LegK[T][INL];
       Bubble.LegK[U][INR] = Bubble.LegK[T][INR];
-      Bubble.LegK[U][OUTL] = Bubble.LegK[T][INR];
-      Bubble.LegK[U][OUTR] = Bubble.LegK[T][INL];
+      Bubble.LegK[U][OUTL] = Bubble.LegK[T][INL];
+      Bubble.LegK[U][OUTR] = Bubble.LegK[T][INR];
     }
-    if (HasS)
+    if (HasS) {
       // Bubble.LegK[S] = {Bubble.LegK[T][INL], NextMom(), NextMom(),
       // NextMom()};
       // Bubble.LegK[S] = {NextMom(), NextMom(), NextMom(), NextMom()};
       // no projection for S channel for now
-      Bubble.LegK[S] = Ver4.LegK;
+      // Bubble.LegK[S] = Ver4.LegK;
+
+      Bubble.LegK[S][INL] = NextMom();
+      Bubble.LegK[S][INR] = NextMom();
+      Bubble.LegK[S][OUTL] = Bubble.LegK[S][INL];
+      Bubble.LegK[S][OUTR] = Bubble.LegK[S][INR];
+    }
   } else
     for (auto &c : Channel)
       Bubble.LegK[c] = Ver4.LegK;

@@ -126,31 +126,38 @@ void weight::ChanUST(dse::ver4 &Ver4) {
 
     if (bubble.IsProjected && bubble.HasTU) {
       double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
-      double ExQ = (*LegK0[INL] - *LegK0[OUTR]).norm();
-      if (DirQ < 1.0 * Para.Kf || ExQ < 1.0 * Para.Kf) {
+      if (DirQ < 2.0 * Para.Kf) {
         Ratio = Para.Kf / (*LegK0[INL]).norm();
         *bubble.LegK[T][INL] = *LegK0[INL] * Ratio;
         Ratio = Para.Kf / (*LegK0[INR]).norm();
         *bubble.LegK[T][INR] = *LegK0[INR] * Ratio;
-        if (DirQ < 2.0 * Para.Kf) {
-          // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
-          // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
-          // double x=
-          bubble.ProjFactor[T] = exp(-DirQ * DirQ / (0.5 * Para.Kf * Para.Kf));
-          // if (DirQ < EPS)
-          //   bubble.ProjFactor[T] = 1.0;
-        }
-        if (ExQ < 2.0 * Para.Kf) {
-          // *bubble.LegK[U][OUTL] = *bubble.LegK[T][INR];
-          // *bubble.LegK[U][OUTR] = *bubble.LegK[T][INL];
-          // if (ExQ < EPS)
-          // bubble.ProjFactor[U] = 1.0;
-          bubble.ProjFactor[U] = exp(-ExQ * ExQ / (0.5 * Para.Kf * Para.Kf));
-        }
+        // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
+        // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
+        // double x=
+        bubble.ProjFactor[T] =
+            exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
+        bubble.ProjFactor[U] =
+            exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
+        // if (DirQ < EPS)
+        //   bubble.ProjFactor[T] = 1.0;
       }
     }
 
     if (bubble.IsProjected && bubble.HasS) {
+      double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
+      if (DirQ < 2.0 * Para.Kf) {
+        Ratio = Para.Kf / (*LegK0[INL]).norm();
+        *bubble.LegK[S][INL] = *LegK0[INL] * Ratio;
+        Ratio = Para.Kf / (*LegK0[INR]).norm();
+        *bubble.LegK[S][INR] = *LegK0[INR] * Ratio;
+        // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
+        // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
+        // double x=
+        bubble.ProjFactor[S] =
+            exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
+        // if (DirQ < EPS)
+        //   bubble.ProjFactor[T] = 1.0;
+      }
       // double InL = (*LegK0[INL]).norm();
       // double OutL = (*LegK0[OUTL]).norm();
       // double InR = (*LegK0[INR]).norm();

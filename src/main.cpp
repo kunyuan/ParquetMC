@@ -45,7 +45,7 @@ void InitPara() {
   Para.Type = RG;
   Para.ObsType = FREQ;
 
-  Para.ReWeight = {4.0, 1.0, 0.5, 0.25, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+  Para.ReWeight = {8.0, 1.0, 0.5, 0.125, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   // Para.SelfEnergyType = FOCK;
   Para.SelfEnergyType = selfenergy::BARE;
 
@@ -64,6 +64,7 @@ void InitPara() {
   Para.Ef = Kf * Kf;
   Para.Mu = Para.Ef;
   Para.MaxExtMom *= Kf;
+  Para.Delta = 1.0;
 
   // scale all energy with E_F
   Para.Beta /= Para.Ef;

@@ -5,7 +5,7 @@ import glob
 import time
 import numpy as np
 
-SleepTime = 5
+SleepTime = 10
 SpinIndex = 2
 
 rs = None
