@@ -20,7 +20,7 @@ const int D = 3;
 // number of q bins of the external momentum
 const int ExtMomBinSize = 2;
 // number of bins for the angle between InL and InR legs
-const int AngBinSize = 256;
+const int AngBinSize = 64;
 // number of energy scales, only useful in RG approach
 const int ScaleBinSize = 64;
 const int TauBinSize = 128;
@@ -29,7 +29,7 @@ const int SpinIndex = 2;
 
 enum selfenergy { BARE, FOCK, DRESSED }; // self energy type
 enum type { GU, GW, RG, PARQUET };
-enum obstype { FREQ, EQUALTIME };
+enum obstype { SCATTERING, LANDAU };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 
 typedef Vec<double, D> momentum;
@@ -44,8 +44,10 @@ struct parameter {
   double UVScale;    // the UV bound of the energy scale
   double UVCoupling; // the coupling constant at the UV scale
   double Mass2;      // screening length^2
-  double Charge2;    // screening length^2
-  double MaxExtMom;  // the maximum external momentum
+  double Lambda;
+  double Delta;
+  double Charge2;   // screening length^2
+  double MaxExtMom; // the maximum external momentum
   selfenergy SelfEnergyType;
   ver4type Vertex4Type;
 

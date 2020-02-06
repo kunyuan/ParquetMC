@@ -28,6 +28,15 @@ public:
       sum += i;
     return sum;
   }
+
+  double Abs() {
+    double sum = 0;
+    // for (auto &i : _Weight)
+    //   sum += fabs(i);
+    // sum = fabs(_Weight[DIR] + _Weight[EX] / 2.0) + fabs(_Weight[EX] / 2.0);
+    sum = fabs(_Weight[DIR] + _Weight[EX] / 2.0);
+    return sum;
+  }
   double &operator()(int dir) { return _Weight[dir]; }
 
 private:
@@ -75,8 +84,8 @@ private:
 class verQTheta {
 public:
   verQTheta();
-  void Interaction(const array<momentum *, 4> &LegK, double Tau, int VerType,
-                   double &WeightDir, double &WeightEx);
+  void Interaction(const array<momentum *, 4> &LegK, double Tau, bool IsRenorm,
+                   int CTOrder, double &WeightDir, double &WeightEx);
 
   void Measure(const momentum &InL, const momentum &InR, const int QIndex,
                int Order, double Tau, int Channel, ver::weightMatrix &Weight,

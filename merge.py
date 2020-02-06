@@ -10,12 +10,14 @@ SpinIndex = 2
 
 rs = None
 Lambda = None
+Mass2 = None
 Beta = None
 Charge2 = None
 TotalStep = None
 BetaStr = None
 rsStr = None
 ChargeStr = None
+Mass2Str = None
 LambdaStr = None
 
 with open("inlist", "r") as file:
@@ -25,13 +27,15 @@ with open("inlist", "r") as file:
     Beta = float(BetaStr)
     rsStr = para[2]
     rs = float(rsStr)
-    LambdaStr = para[3]
+    Mass2Str = para[3]
+    Mass2 = float(Mass2Str)
+    LambdaStr = para[4]
     Lambda = float(LambdaStr)
-    ChargeStr = para[4]
+    ChargeStr = para[5]
     Charge2 = float(ChargeStr)
-    TotalStep = float(para[6])
+    TotalStep = float(para[7])
 
-print rs, Beta, Lambda, TotalStep
+print rs, Beta, Mass2, Lambda, TotalStep
 
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
@@ -40,7 +44,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 Order = [0, ]
 
-folder = "./Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, LambdaStr)
+folder = "./Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, Mass2Str)
 
 AngleBin = None
 ExtMomBin = None
@@ -76,9 +80,16 @@ def AngleIntegation(Data, l):
     # return Result
 
 
+def SpinMapping(Data):
+    d = np.copy(Data)
+    d[..., 0] += d[..., 1]/SpinIndex
+    d[..., 1] /= SpinIndex
+    return d
+
+
 def PrintInfo(Channel, Data, DataErr):
     i = 0
-    Data = np.copy(Data)
+    Data = -np.copy(Data)
     DataErr = np.copy(DataErr)
     Data[:, 0] *= Nf
     Data[:, 1] *= Nf
@@ -86,20 +97,16 @@ def PrintInfo(Channel, Data, DataErr):
     DataErr[:, 1] *= Nf
     print "\n{0}     Q/kF,    Data,    Error".format(Channel)
     qData0 = Data[:, 0]
-    print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+    print "As: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
         ExtMomBin[i], qData0[i], DataErr[i, 0])
     qData1 = Data[:, 1]
-    print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+    print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
         ExtMomBin[i], qData1[i], DataErr[i, 1])
 
-    if SpinIndex == 2:
-        print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i]+qData1[i]/2.0, DataErr[i, 0]+DataErr[i, 1]/2.0)
-        print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData1[i]/2.0, DataErr[i, 1]/2.0)
-    else:
-        print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i]+qData1[i], DataErr[i, 0]+DataErr[i, 1])
+    # print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+    #     ExtMomBin[i], qData0[i]+qData1[i]/SpinIndex, DataErr[i, 0]+DataErr[i, 1]/SpinIndex)
+    # print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+    #     ExtMomBin[i], qData1[i]/SpinIndex, DataErr[i, 1]/SpinIndex)
 
 
 while True:
@@ -155,9 +162,10 @@ while True:
 
                             Norm += Norm0
 
-                            f = d.reshape(
+                            dd = d.reshape(
                                 (AngleBinSize, ExtMomBinSize, 2))/Norm0
-                            DataList.append(AngleIntegation(f, 0))
+                            dd = AngleIntegation(dd, 0)
+                            DataList.append(SpinMapping(dd))
 
                     # print "Norm", Norm
 
@@ -176,8 +184,8 @@ while True:
                 else:
                     DataWithAngle[(order, chan)] = Data0
 
-                Data[(order, chan)] = AngleIntegation(
-                    DataWithAngle[(order, chan)], 0)
+                Data[(order, chan)] = SpinMapping(AngleIntegation(
+                    DataWithAngle[(order, chan)], 0))
 
                 # print np.array(DataList)
                 DataErr[(order, chan)] = np.std(np.array(
@@ -201,12 +209,25 @@ while True:
             file.write("Ex: {0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
                 Data[(0, 1)][0, 1], Data[(0, 1)][0, 1], Data[(0, 2)][0, 1], Data[(0, 3)][0, 1]))
 
+        # construct bare interaction
+        AngHalf = np.arccos(AngleBin)/2.0
+        Bare = np.zeros(2)
+        Bare[0] -= 8.0*np.pi/Mass2
+        ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2)
+        Bare[1] += AngleIntegation(ExBare, 0)
+        Bare = SpinMapping(Bare)
+
         o = 0
+        qData = sum([Data[(o, i)] for i in range(4)])
+        qDataErr = sum([DataErr[(o, i)] for i in range(4)])
+        qData[o, :] += Bare[:]
+
+        PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
         PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
         PrintInfo("U", Data[(o, 2)], DataErr[(o, 2)])
         PrintInfo("S", Data[(o, 3)], DataErr[(o, 3)])
-        qData = Data[(o, 1)]+Data[(o, 2)]+Data[(o, 3)]
-        qDataErr = DataErr[(o, 1)]+DataErr[(o, 2)]+DataErr[(o, 3)]
+        # qData = Data[(o, 1)]+Data[(o, 2)]+Data[(o, 3)]
+        # qDataErr = DataErr[(o, 1)]+DataErr[(o, 2)]+DataErr[(o, 3)]
         PrintInfo("Sum", qData, qDataErr)
 
     if Step >= TotalStep:

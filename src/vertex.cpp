@@ -80,7 +80,8 @@ verQTheta::verQTheta() {
 }
 
 void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
-                            int VerType, double &WeightDir, double &WeightEx) {
+                            bool IsRenorm, int CounterTermOrder,
+                            double &WeightDir, double &WeightEx) {
 
   // cout << (*LegK[INL])[0] << endl;
   momentum DiQ = *LegK[INL] - *LegK[OUTL];
@@ -88,26 +89,32 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
 
   double kDiQ = DiQ.norm();
   double kExQ = ExQ.norm();
-  WeightDir = -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2);
+
+  WeightDir = 8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2);
   WeightEx = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2);
+
+  // WeightEx = 0.0;
+  // if (CounterTermOrder > 0) {
+  //   WeightDir =
+  //       WeightDir * pow(Para.Lambda / 8.0 / PI * WeightDir,
+  //       CounterTermOrder);
+  //   WeightEx =
+  //       WeightEx * pow(Para.Lambda / 8.0 / PI * WeightEx, CounterTermOrder);
+  // }
+  WeightDir = -WeightDir; // the interaction carries a sign -1
   // WeightEx = 0.0;
   // return 1.0 / Para.Beta;
-  if (VerType == 1) {
+  if (IsRenorm && CounterTermOrder == 0) {
     // return;
-    if (kDiQ < 1.0 * Para.Kf || kExQ < 1.0 * Para.Kf) {
+    if (kDiQ < 3.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
-      if (kDiQ < 1.0 * Para.Kf) {
-        WeightDir += Chan[ver::T].Interaction(AngleIndex, 0, DIR) *
-                     exp(-kDiQ * kDiQ / 0.1);
-        WeightEx += Chan[ver::T].Interaction(AngleIndex, 0, EX) *
-                    exp(-kDiQ * kDiQ / 0.1);
-      }
-      if (kExQ < 1.0 * Para.Kf) {
-        WeightDir -= Chan[ver::T].Interaction(AngleIndex, 0, DIR) *
-                     exp(-kExQ * kExQ / 0.1);
-        WeightEx -= Chan[ver::T].Interaction(AngleIndex, 0, EX) *
-                    exp(-kExQ * kExQ / 0.1);
-      }
+      double Factor = exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
+      WeightDir += Chan[ver::T].Interaction(AngleIndex, 0, DIR) * Factor;
+      WeightEx += Chan[ver::T].Interaction(AngleIndex, 0, EX) * Factor;
+      WeightDir += Chan[ver::U].Interaction(AngleIndex, 0, DIR) * Factor;
+      WeightEx += Chan[ver::U].Interaction(AngleIndex, 0, EX) * Factor;
+      WeightDir += Chan[ver::S].Interaction(AngleIndex, 0, DIR) * Factor;
+      WeightEx += Chan[ver::S].Interaction(AngleIndex, 0, EX) * Factor;
       return;
     } else
       return;

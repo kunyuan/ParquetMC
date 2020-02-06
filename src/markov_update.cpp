@@ -66,7 +66,7 @@ void markov::ChangeOrder() {
 
   // Weight.ChangeGroup(NewGroup);
   NewWeight = Weight.Evaluate(NewOrder, Var.CurrChannel);
-  NewAbsWeight = fabs(NewWeight.Sum());
+  NewAbsWeight = NewWeight.Abs();
   double R = Prop * NewAbsWeight * Para.ReWeight[NewOrder] / Var.CurrAbsWeight /
              Para.ReWeight[Var.CurrOrder];
 
@@ -99,7 +99,7 @@ void markov::ChangeTau() {
   Var.Tau[TauIndex] = NewTau;
 
   NewWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrChannel);
-  NewAbsWeight = fabs(NewWeight.Sum());
+  NewAbsWeight = NewWeight.Abs();
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
@@ -146,7 +146,7 @@ void markov::ChangeMomentum() {
   }
 
   NewWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrChannel);
-  NewAbsWeight = fabs(NewWeight.Sum());
+  NewAbsWeight = NewWeight.Abs();
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
@@ -207,7 +207,7 @@ void markov::ChangeChannel() {
   Proposed[CHANGE_CHANNEL][Var.CurrOrder] += 1;
 
   NewWeight = Weight.Evaluate(Var.CurrOrder, NewChannel);
-  NewAbsWeight = fabs(NewWeight.Sum());
+  NewAbsWeight = NewWeight.Abs();
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
   if (Random.urn() < R) {
     Accepted[CHANGE_CHANNEL][Var.CurrOrder]++;

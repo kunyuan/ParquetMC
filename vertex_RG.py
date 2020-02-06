@@ -20,10 +20,14 @@ Channel = [0, 1, 2, 3]
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 Order = [1, 2, 3]
+SpinIndex = 2
+IsFullVer4 = True
+# IsFullVer4 = False
 
 MaxOrder = None
 rs = None
 Lambda = None
+Mass2 = None
 Beta = None
 Charge2 = None
 TotalStep = None
@@ -31,6 +35,7 @@ BetaStr = None
 rsStr = None
 ChargeStr = None
 LambdaStr = None
+Mass2Str = None
 
 with open("inlist", "r") as file:
     line = file.readline()
@@ -40,15 +45,17 @@ with open("inlist", "r") as file:
     Beta = float(BetaStr)
     rsStr = para[2]
     rs = float(rsStr)
-    LambdaStr = para[3]
+    Mass2Str = para[3]
+    Mass2 = float(Mass2Str)
+    LambdaStr = para[4]
     Lambda = float(LambdaStr)
-    ChargeStr = para[4]
+    ChargeStr = para[5]
     Charge2 = float(ChargeStr)
-    TotalStep = float(para[5])
+    TotalStep = float(para[6])
 
 Order = range(0, MaxOrder+1)
 
-folder = "./Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
+folder = "./Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Mass2)
 # folder = "./3_Beta{0}_lambda{2}/".format(Beta, rs, Lambda)
 
 ##############   2D    ##################################
@@ -60,6 +67,7 @@ folder = "./Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
 
 #############  3D  ######################################
 kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
+Nf = kF/2.0/np.pi**2
 Bubble = 0.0971916  # 3D, Beta=10, rs=1
 
 Data = {}  # key: (order, channel)
@@ -83,17 +91,14 @@ def AngleIntegation(Data, l):
 
 
 def Mirror(x, y):
-    # print x
-    # print len(x)
     x2 = np.zeros(len(x)*2)
-    # x2[:len(x)] = -x[::-1]
-    # x2[len(x):] = x
     x2[:len(x)] = x
     x2[len(x):] = -x[::-1]
     y2 = np.zeros(len(y)*2)
     y2[:len(y)] = y
     y2[len(y):] = y[::-1]
-    return x2, y2
+    # return x2, y2
+    return np.copy(x), np.copy(y)
 
 # def TauIntegration(Data):
 #     return np.sum(Data, axis=-1) * \
@@ -140,7 +145,7 @@ for order in Order:
                 else:
                     Data0 += d
         Data0 /= Norm
-        Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
+        Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize, 2))
 
         DataWithAngle[(order, chan)] = Data0
 
@@ -155,7 +160,7 @@ def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
 
 w = 1-0.429
 
-fig, ax = plt.subplots()
+# fig, ax = plt.subplots()
 # ax=fig.add_axes()
 # ax = fig.add_subplot(122)
 
@@ -224,48 +229,94 @@ elif (XType == "Mom"):
     ax.set_xlabel("$q/k_F$", size=size)
 
 elif(XType == "Angle"):
+
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+
     AngTotal = None
     for chan in Channel[0:]:
-        AngData = -DataWithAngle[(0, chan)]
+        AngData = -DataWithAngle[(0, chan)]*Nf
         if AngTotal is None:
             AngTotal = AngData
         else:
             AngTotal += AngData
-        # for i in range(ExtMomBinSize/8):
-        #     # print i, index
-        #     # print ScaleBin[index]
-        #     index = 8*i
-        #     ErrorPlot(ax, AngleBin, AngData[:, index],
-        #               ColorList[i], 's', "Q {0}".format(ExtMomBin[index]))
 
-        # ErrorPlot(ax, AngleBin, AngData[:, 0]/np.sin(np.arccos(AngleBin)),
-        #           ColorList[0], 's', "Q {0}".format(ExtMomBin[0]))
+        # AngHalf = np.arccos(AngleBin)/2.0
+        # AngTotal[:, 0] += 8.0*np.pi/Mass2*Nf
+        # AngTotal[:, 0] += -8.0*np.pi/((2.0*kF*np.sin(AngHalf))**2+Mass2)*Nf
 
-        x2, y2 = Mirror(np.arccos(AngleBin), AngData[:, 0])
+        x = np.arccos(AngleBin)
+        y = AngData[:, 0, 0]+AngData[:, 0, 1]/SpinIndex
 
-        ErrorPlot(ax, x2, y2, ColorList[chan+1], 's',
-                  "q/kF={0}, {1}".format(ExtMomBin[0], ChanName[chan]))
+        print "Chan {0} As: {1}".format(ChanName[chan], np.mean(y))
 
-        # ErrorPlot(ax, AngleBin, AngData[:, 0], ColorList[chan+1], 's',
-        #           "q/kF={0}, {1}".format(ExtMomBin[0], ChanName[chan]))
-        # ErrorPlot(ax, np.arccos(AngleBin), AngData[:, 0], ColorList[chan+1], 's',
-        #           "Q {0}, {1}".format(ExtMomBin[0], ChanName[chan]))
-    # print np.arccos(AngleBin)
-    # AngTotal *= -0.0
+        ErrorPlot(ax1, x, y, ColorList[chan], 's',
+                  "q/kF={0}, {1}, As, ".format(ExtMomBin[0], ChanName[chan]))
+
+        x = np.arccos(AngleBin)
+        y = AngData[:, 0, 1]/SpinIndex
+
+        ErrorPlot(ax2, x, y, ColorList[chan], 's',
+                  "q/kF={0}, {1}, Aa, ".format(ExtMomBin[0], ChanName[chan]))
 
     AngHalf = np.arccos(AngleBin)/2.0
-    # AngTotal[:, 0] += 8.0*np.pi/Lambda-8.0 * \
-    #     np.pi / ((2.0*kF*np.sin(AngHalf))**2+Lambda)
-    x2, y2 = Mirror(np.arccos(AngleBin), AngTotal[:, 0])
-    ErrorPlot(ax, x2, y2, ColorList[0], 's',
-              "q/kF={0}, Total".format(ExtMomBin[0]))
+    if IsFullVer4:
+        Bare = np.zeros_like(AngTotal[:, 0, :])
+        Bare[:, 0] += 8.0*np.pi/Mass2*Nf
+        Bare[:, 1] += -8.0 * np.pi / \
+            ((2.0*kF*np.sin(AngHalf))**2+Mass2)*Nf
+        AngTotal[:, 0, 0] += Bare[:, 0]
+        AngTotal[:, 0, 1] += Bare[:, 1]
 
-    # ErrorPlot(ax, np.arccos(AngleBin), AngTotal[:, 0], ColorList[0], 's',
-    #           "Q {0}, Total".format(ExtMomBin[0]))
+        x = np.arccos(AngleBin)
+        ErrorPlot(ax1, x, Bare[:, 0]+Bare[:, 1]/SpinIndex, ColorList[-1], 's',
+                  "q/kF={0}, Bare".format(ExtMomBin[0]))
 
-    ax.set_xlim([-np.arccos(AngleBin[0]), np.arccos(AngleBin[0])])
+        x = np.arccos(AngleBin)
+        ErrorPlot(ax2, x, Bare[:, 1]/SpinIndex, ColorList[-1], 's',
+                  "q/kF={0}, Bare".format(ExtMomBin[0]))
+
+    AngLandau = AngTotal+DataWithAngle[(0, 1)]*Nf
+    if SpinIndex == 2:
+        x = np.arccos(AngleBin)
+        y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]/2.0
+        ErrorPlot(ax3, x, y, ColorList[0], 's',
+                  "q/kF={0}, As".format(ExtMomBin[0]))
+        print "As: ", sum(y)/len(y)
+
+        x = np.arccos(AngleBin)
+        y = AngTotal[:, 0, 1]/2.0
+        ErrorPlot(ax3, x, y, ColorList[1], 's',
+                  "q/kF={0}, Aa".format(ExtMomBin[0]))
+        print "Aa: ", sum(y)/len(y)
+
+        x = np.arccos(AngleBin)
+        y = AngLandau[:, 0, 0]+AngLandau[:, 0, 1]/2.0
+        ErrorPlot(ax3, x, y, ColorList[2], 's',
+                  "q/kF={0}, Fs".format(ExtMomBin[0]))
+        print "Fs: ", sum(y)/len(y)
+
+        x = np.arccos(AngleBin)
+        y = AngLandau[:, 0, 1]/2.0
+        ErrorPlot(ax3, x, y, ColorList[3], 's',
+                  "q/kF={0}, Fa".format(ExtMomBin[0]))
+        print "Fa: ", sum(y)/len(y)
+    else:
+        x = np.arccos(AngleBin)
+        y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]
+        ErrorPlot(ax3, x, y, ColorList[-1], 's',
+                  "q/kF={0}, A".format(ExtMomBin[0]))
+
+    # ax.set_xlim([-np.arccos(AngleBin[0]), np.arccos(AngleBin[0])])
+    ax1.set_xlim([0.0, np.pi])
     # ax.set_ylim([0.0, 5.0])
-    ax.set_xlabel("$Angle$", size=size)
+    ax1.set_xlabel("$Angle$", size=size)
+    ax2.set_xlim([0.0, np.pi])
+    ax3.set_xlim([0.0, np.pi])
+    ax2.set_xlabel("$Angle$", size=size)
+    ax3.set_xlabel("$Angle$", size=size)
+    ax1.legend(loc=1, frameon=False, fontsize=size)
+    ax2.legend(loc=1, frameon=False, fontsize=size)
+    ax3.legend(loc=1, frameon=False, fontsize=size)
 # ax.set_xticks([0.0,0.04,0.08,0.12])
 # ax.set_yticks([0.35,0.4,0.45,0.5])
 # ax.set_ylim([-0.02, 0.125])
@@ -273,13 +324,13 @@ elif(XType == "Angle"):
 # ax.xaxis.set_label_coords(0.97, -0.01)
 # # ax.yaxis.set_label_coords(0.97, -0.01)
 # ax.text(-0.012,0.52, "$-I$", fontsize=size)
-ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
+# ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
 
 # ax.text(0.02,0.47, "$\\sim {\\frac{1}{2}-}\\frac{1}{2} {\\left( \\frac{r}{L} \\right)} ^{2-s}$", fontsize=28)
 
-plt.legend(loc=1, frameon=False, fontsize=size)
+# plt.legend(loc=1, frameon=False, fontsize=size)
 # plt.title("2D density integral")
-plt.tight_layout()
+# plt.tight_layout()
 
 # plt.savefig("spin_rs1_lambda1.pdf")
 plt.show()
