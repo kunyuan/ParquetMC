@@ -80,6 +80,13 @@ def AngleIntegation(Data, l):
     # return Result
 
 
+def SpinMapping(Data):
+    d = np.copy(Data)
+    d[..., 0] += d[..., 1]/SpinIndex
+    d[..., 1] /= SpinIndex
+    return d
+
+
 def PrintInfo(Channel, Data, DataErr):
     i = 0
     Data = -np.copy(Data)
@@ -90,16 +97,16 @@ def PrintInfo(Channel, Data, DataErr):
     DataErr[:, 1] *= Nf
     print "\n{0}     Q/kF,    Data,    Error".format(Channel)
     qData0 = Data[:, 0]
-    print "Dir: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+    print "As: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
         ExtMomBin[i], qData0[i], DataErr[i, 0])
     qData1 = Data[:, 1]
-    print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+    print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
         ExtMomBin[i], qData1[i], DataErr[i, 1])
 
-    print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        ExtMomBin[i], qData0[i]+qData1[i]/SpinIndex, DataErr[i, 0]+DataErr[i, 1]/SpinIndex)
-    print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        ExtMomBin[i], qData1[i]/SpinIndex, DataErr[i, 1]/SpinIndex)
+    # print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+    #     ExtMomBin[i], qData0[i]+qData1[i]/SpinIndex, DataErr[i, 0]+DataErr[i, 1]/SpinIndex)
+    # print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+    #     ExtMomBin[i], qData1[i]/SpinIndex, DataErr[i, 1]/SpinIndex)
 
 
 while True:
@@ -155,9 +162,10 @@ while True:
 
                             Norm += Norm0
 
-                            f = d.reshape(
+                            dd = d.reshape(
                                 (AngleBinSize, ExtMomBinSize, 2))/Norm0
-                            DataList.append(AngleIntegation(f, 0))
+                            dd = AngleIntegation(dd, 0)
+                            DataList.append(SpinMapping(dd))
 
                     # print "Norm", Norm
 
@@ -176,8 +184,8 @@ while True:
                 else:
                     DataWithAngle[(order, chan)] = Data0
 
-                Data[(order, chan)] = AngleIntegation(
-                    DataWithAngle[(order, chan)], 0)
+                Data[(order, chan)] = SpinMapping(AngleIntegation(
+                    DataWithAngle[(order, chan)], 0))
 
                 # print np.array(DataList)
                 DataErr[(order, chan)] = np.std(np.array(
@@ -201,20 +209,18 @@ while True:
             file.write("Ex: {0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
                 Data[(0, 1)][0, 1], Data[(0, 1)][0, 1], Data[(0, 2)][0, 1], Data[(0, 3)][0, 1]))
 
-        o = 0
+        # construct bare interaction
         AngHalf = np.arccos(AngleBin)/2.0
         Bare = np.zeros_like(Data[(0, 1)])
-        # print len(AngHalf)
-        # print len(Bare[:, 1])
         Bare[o, 0] -= 8.0*np.pi/Mass2
         ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2)
         Bare[o, 1] += AngleIntegation(ExBare, 0)
-        print Bare[0, 0]*Nf+np.mean(ExBare)*Nf/2.0
-        qData = Data[(o, 0)]+Data[(o, 1)]+Data[(o, 2)]+Data[(o, 3)]
-        qDataErr = DataErr[(o, 0)]+DataErr[(o, 1)] + \
-            DataErr[(o, 2)]+DataErr[(o, 3)]
-        qData[o, 0] += Bare[o, 0]
-        qData[o, 1] += Bare[o, 1]
+        Bare = SpinMapping(Bare)
+
+        o = 0
+        qData = sum([Data[(o, i)] for i in range(4)])
+        qDataErr = sum([DataErr[(o, i)] for i in range(4)])
+        qData[o, :] += Bare[o, :]
 
         PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
         PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
