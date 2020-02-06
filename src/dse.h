@@ -102,7 +102,6 @@ struct bubble {
 };
 
 //////////////// Envelope diagrams /////////////////////////////
-
 class g2Matrix {
 public:
   g2Matrix() {
@@ -142,7 +141,6 @@ struct envelope {
 };
 
 ////////////// Vertex Creation Class /////////////////////////////////
-
 class verDiag {
 public:
   ver4 Build(array<momentum, MaxMomNum> &loopmom, int LoopNum,
@@ -167,6 +165,36 @@ private:
 };
 
 bool verTest();
+
+///////////////////   Self Energy  ///////////////////////////////////////
+
+struct sigma {
+  int ID;
+  int LoopNum;
+  int TauNum;
+  bool RexpandBare; // reexpand the coupling in the left vertex
+  int InTidx;       // external Tau index
+  int OutTidx;
+  momentum *LegK; // external legK index
+
+  array<gMatrix, 3> G;
+  vector<ver4> LVer; // different Tau arrangement and channel
+  vector<ver4> RVer; // different Tau arrangement and channel
+
+  double Weight; // size: equal to T.size()
+};
+
+////////////// Self Energy Creation Class ////////////////////////////////
+class sigmaDiag {
+public:
+  sigma Build(array<momentum, MaxMomNum> &loopmom, int LoopNum, caltype Type);
+  string ToString(string indent = "", int Level = 0);
+
+private:
+  int MomNum = MaxLoopNum;
+  array<momentum, MaxMomNum> *LoopMom; // all momentum loop variables
+  momentum *NextMom();
+};
 
 } // namespace dse
 #endif

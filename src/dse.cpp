@@ -216,10 +216,12 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
   auto &G = Bubble.G;
   auto &LegK = Bubble.LegK;
 
+  // create G list
   G[0] = gMatrix(Ver4.TauNum, InTL, &(*LoopMom)[LoopIndex]);
   for (auto &c : Bubble.Channel)
     G[c] = gMatrix(Ver4.TauNum, InTL, NextMom());
 
+  // create vertex list
   for (int ol = 0; ol < LoopNum; ol++) {
     // left and right vertex external LegK
     array<momentum *, 4> LLegK[4], RLegK[4];
