@@ -5,7 +5,7 @@ import glob
 import time
 import numpy as np
 
-SleepTime = 10
+SleepTime = 5
 SpinIndex = 2
 
 rs = None
@@ -82,7 +82,7 @@ def AngleIntegation(Data, l):
 
 def PrintInfo(Channel, Data, DataErr):
     i = 0
-    Data = np.copy(Data)
+    Data = -np.copy(Data)
     DataErr = np.copy(DataErr)
     Data[:, 0] *= Nf
     Data[:, 1] *= Nf
@@ -96,14 +96,10 @@ def PrintInfo(Channel, Data, DataErr):
     print "Ex:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
         ExtMomBin[i], qData1[i], DataErr[i, 1])
 
-    if SpinIndex == 2:
-        print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i]+qData1[i]/2.0, DataErr[i, 0]+DataErr[i, 1]/2.0)
-        print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData1[i]/2.0, DataErr[i, 1]/2.0)
-    else:
-        print "Sum: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-            ExtMomBin[i], qData0[i]+qData1[i], DataErr[i, 0]+DataErr[i, 1])
+    print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+        ExtMomBin[i], qData0[i]+qData1[i]/SpinIndex, DataErr[i, 0]+DataErr[i, 1]/SpinIndex)
+    print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+        ExtMomBin[i], qData1[i]/SpinIndex, DataErr[i, 1]/SpinIndex)
 
 
 while True:
@@ -206,11 +202,26 @@ while True:
                 Data[(0, 1)][0, 1], Data[(0, 1)][0, 1], Data[(0, 2)][0, 1], Data[(0, 3)][0, 1]))
 
         o = 0
+        AngHalf = np.arccos(AngleBin)/2.0
+        Bare = np.zeros_like(Data[(0, 1)])
+        # print len(AngHalf)
+        # print len(Bare[:, 1])
+        Bare[o, 0] -= 8.0*np.pi/Mass2
+        ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2)
+        Bare[o, 1] += AngleIntegation(ExBare, 0)
+        print Bare[0, 0]*Nf+np.mean(ExBare)*Nf/2.0
+        qData = Data[(o, 0)]+Data[(o, 1)]+Data[(o, 2)]+Data[(o, 3)]
+        qDataErr = DataErr[(o, 0)]+DataErr[(o, 1)] + \
+            DataErr[(o, 2)]+DataErr[(o, 3)]
+        qData[o, 0] += Bare[o, 0]
+        qData[o, 1] += Bare[o, 1]
+
+        PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
         PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
         PrintInfo("U", Data[(o, 2)], DataErr[(o, 2)])
         PrintInfo("S", Data[(o, 3)], DataErr[(o, 3)])
-        qData = Data[(o, 1)]+Data[(o, 2)]+Data[(o, 3)]
-        qDataErr = DataErr[(o, 1)]+DataErr[(o, 2)]+DataErr[(o, 3)]
+        # qData = Data[(o, 1)]+Data[(o, 2)]+Data[(o, 3)]
+        # qDataErr = DataErr[(o, 1)]+DataErr[(o, 2)]+DataErr[(o, 3)]
         PrintInfo("Sum", qData, qDataErr)
 
     if Step >= TotalStep:

@@ -106,7 +106,7 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   // return 1.0 / Para.Beta;
   if (IsRenorm && CounterTermOrder == 0) {
     // return;
-    if (kDiQ < 3.0 * Para.Kf) {
+    if (kDiQ < 0.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
       double Factor = exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
       WeightDir += Chan[ver::T].Interaction(AngleIndex, 0, DIR) * Factor;

@@ -247,6 +247,8 @@ elif(XType == "Angle"):
         x = np.arccos(AngleBin)
         y = AngData[:, 0, 0]+AngData[:, 0, 1]/SpinIndex
 
+        print "Chan {0} As: {1}".format(ChanName[chan], np.mean(y))
+
         ErrorPlot(ax1, x, y, ColorList[chan], 's',
                   "q/kF={0}, {1}, As, ".format(ExtMomBin[0], ChanName[chan]))
 

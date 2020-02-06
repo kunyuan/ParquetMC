@@ -38,7 +38,7 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
     //   return 0.0;
     Weight.SetZero();
     // if (Channel == dse::U || Channel == dse::S || Channel == dse::I) {
-    //   // cout << "Reject" << Channel << endl;
+    //   //   // cout << "Reject" << Channel << endl;
     //   if (LoopNum == Para.Order)
     //     return Weight;
     // }
@@ -65,30 +65,19 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
 
       double Factor = 1.0 / pow(2.0 * PI, D * LoopNum);
 
-      for (auto &w : Root.Weight) {
-        Weight(DIR) += w(DIR) * Factor;
-        Weight(EX) += w(EX) * Factor;
+      //////// Measure Scattering amplitude ////////////////////
+      // for (auto &w : Root.Weight) {
+      //   Weight(DIR) += w(DIR) * Factor;
+      //   Weight(EX) += w(EX) * Factor;
+      // }
+
+      /////// Measure Landau Parameters  /////////////////////////
+      for (int i = 0; i < Root.Weight.size(); ++i) {
+        double dTau = Var.Tau[Root.T[i][INR]] - Var.Tau[Root.T[i][INL]];
+        auto &w = Root.Weight[i];
+        Weight(DIR) += w(DIR) * Factor * cos(2.0 * PI / Para.Beta * dTau);
+        Weight(EX) += w(EX) * Factor * cos(2.0 * PI / Para.Beta * dTau);
       }
-      // if (Para.ObsType == SCATTERING) {
-      //   for (auto &w : Root.Weight) {
-      //     Weight(DIR) += w(DIR) * Factor;
-      //     Weight(EX) += w(EX) * Factor;
-      //   }
-      // } else if (Para.ObsType == LANDAU) {
-      //   for (int i = 0; i < Root.Weight.size(); ++i) {
-      //     double dTau = Var.Tau[Root.T[i][INR]] - Var.Tau[Root.T[i][INL]];
-      //     auto &w = Root.Weight[i];
-      //     Weight(DIR) += w(DIR) * Factor * cos(2.0 * PI / Para.Beta *
-      //     dTau); Weight(EX) += w(EX) * Factor * cos(2.0 * PI / Para.Beta *
-      //     dTau);
-      //   }
-      // }
-      // if (LoopNum == 3 && Channel == dse::I) {
-      //   cout << "loopnum: " << Root.LoopNum << endl;
-      //   cout << "channel: " << Root.Channel[0] << endl;
-      //   cout << Weight << endl;
-      // }
-      // cout << count << endl;
     }
   }
   return Weight;
@@ -146,7 +135,7 @@ void weight::ChanUST(dse::ver4 &Ver4) {
 
     if (bubble.IsProjected) {
       double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
-      if (DirQ < 3.0 * Para.Kf) {
+      if (DirQ < 0.0 * Para.Kf) {
         Ratio = Para.Kf / (*LegK0[INL]).norm();
         *bubble.LegK[T][INL] = *LegK0[INL] * Ratio;
         Ratio = Para.Kf / (*LegK0[INR]).norm();
