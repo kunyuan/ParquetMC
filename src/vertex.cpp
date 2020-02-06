@@ -92,6 +92,8 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
 
   WeightDir = 8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2);
   WeightEx = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2);
+
+  // WeightEx = 0.0;
   // if (CounterTermOrder > 0) {
   //   WeightDir =
   //       WeightDir * pow(Para.Lambda / 8.0 / PI * WeightDir,
@@ -104,20 +106,15 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   // return 1.0 / Para.Beta;
   if (IsRenorm && CounterTermOrder == 0) {
     // return;
-    if (kDiQ < 2.0 * Para.Kf) {
+    if (kDiQ < 3.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
-      WeightDir += Chan[ver::T].Interaction(AngleIndex, 0, DIR) *
-                   exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
-      WeightEx += Chan[ver::T].Interaction(AngleIndex, 0, EX) *
-                  exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
-      WeightDir += Chan[ver::U].Interaction(AngleIndex, 0, DIR) *
-                   exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
-      WeightEx += Chan[ver::U].Interaction(AngleIndex, 0, EX) *
-                  exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
-      WeightDir += Chan[ver::S].Interaction(AngleIndex, 0, DIR) *
-                   exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
-      WeightEx += Chan[ver::S].Interaction(AngleIndex, 0, EX) *
-                  exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
+      double Factor = exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
+      WeightDir += Chan[ver::T].Interaction(AngleIndex, 0, DIR) * Factor;
+      WeightEx += Chan[ver::T].Interaction(AngleIndex, 0, EX) * Factor;
+      WeightDir += Chan[ver::U].Interaction(AngleIndex, 0, DIR) * Factor;
+      WeightEx += Chan[ver::U].Interaction(AngleIndex, 0, EX) * Factor;
+      WeightDir += Chan[ver::S].Interaction(AngleIndex, 0, DIR) * Factor;
+      WeightEx += Chan[ver::S].Interaction(AngleIndex, 0, EX) * Factor;
       return;
     } else
       return;

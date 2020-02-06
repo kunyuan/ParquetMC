@@ -28,7 +28,7 @@ void weight::Initialization() {
 }
 
 ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
-  static ver::weightMatrix Weight;
+  ver::weightMatrix Weight;
   if (LoopNum == 0) {
     // normalization
     Weight(DIR) = 1.0;
@@ -36,8 +36,13 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
   } else {
     // if (Channel != dse::T)
     //   return 0.0;
-
     Weight.SetZero();
+    // if (Channel == dse::U || Channel == dse::S || Channel == dse::I) {
+    //   // cout << "Reject" << Channel << endl;
+    //   if (LoopNum == Para.Order)
+    //     return Weight;
+    // }
+
     ver4 &Root = Ver4Root[LoopNum][Channel];
     if (Root.Weight.size() != 0) {
 
@@ -139,9 +144,9 @@ void weight::ChanUST(dse::ver4 &Ver4) {
       else
         bubble.ProjFactor[chan] = 1.0;
 
-    if (bubble.IsProjected && bubble.HasTU) {
+    if (bubble.IsProjected) {
       double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
-      if (DirQ < 2.0 * Para.Kf) {
+      if (DirQ < 3.0 * Para.Kf) {
         Ratio = Para.Kf / (*LegK0[INL]).norm();
         *bubble.LegK[T][INL] = *LegK0[INL] * Ratio;
         Ratio = Para.Kf / (*LegK0[INR]).norm();
@@ -149,69 +154,13 @@ void weight::ChanUST(dse::ver4 &Ver4) {
         // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
         // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
         // double x=
-        bubble.ProjFactor[T] =
-            exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
-        bubble.ProjFactor[U] =
-            exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
+        double Factor = exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
+        bubble.ProjFactor[T] = Factor;
+        bubble.ProjFactor[U] = Factor;
+        bubble.ProjFactor[S] = Factor;
         // if (DirQ < EPS)
         //   bubble.ProjFactor[T] = 1.0;
       }
-    }
-
-    if (bubble.IsProjected && bubble.HasS) {
-      double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
-      if (DirQ < 2.0 * Para.Kf) {
-        Ratio = Para.Kf / (*LegK0[INL]).norm();
-        *bubble.LegK[S][INL] = *LegK0[INL] * Ratio;
-        Ratio = Para.Kf / (*LegK0[INR]).norm();
-        *bubble.LegK[S][INR] = *LegK0[INR] * Ratio;
-        // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
-        // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
-        // double x=
-        bubble.ProjFactor[S] =
-            exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
-        // if (DirQ < EPS)
-        //   bubble.ProjFactor[T] = 1.0;
-      }
-      // double InL = (*LegK0[INL]).norm();
-      // double OutL = (*LegK0[OUTL]).norm();
-      // double InR = (*LegK0[INR]).norm();
-      // double OutR = (*LegK0[OUTR]).norm();
-
-      // double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
-      // if (DirQ < 1.0 * Para.Kf) {
-      //   Ratio = Para.Kf / (*LegK0[INL]).norm();
-      //   *bubble.LegK[S][INL] = *LegK0[INL] * Ratio;
-      //   Ratio = Para.Kf / (*LegK0[INR]).norm();
-      //   *bubble.LegK[S][INR] = *LegK0[INR] * Ratio;
-      //   *bubble.LegK[S][OUTL] = *bubble.LegK[S][INL];
-      //   *bubble.LegK[S][OUTR] = *bubble.LegK[S][INR];
-      //   bubble.ProjFactor[S] = exp(-DirQ * DirQ / 0.1);
-      // }
-      // if ((InL < 1.1 * Para.Kf && InL > 0.9 * Para.Kf) &&
-      //     (OutL < 1.1 * Para.Kf && OutL > 0.9 * Para.Kf) &&
-      //     (InR < 1.1 * Para.Kf && InR > 0.9 * Para.Kf) &&
-      //     (OutR < 1.1 * Para.Kf && OutR > 0.9 * Para.Kf)) {
-      //   Ratio = Para.Kf / (*LegK0[INL]).norm();
-      //   *bubble.LegK[S][INL] = *LegK0[INL] * Ratio;
-      //   Ratio = Para.Kf / (*LegK0[INR]).norm();
-      //   *bubble.LegK[S][INR] = *LegK0[INR] * Ratio;
-      //   Ratio = Para.Kf / (*LegK0[OUTL]).norm();
-      //   *bubble.LegK[S][OUTL] = *LegK0[OUTL] * Ratio;
-      //   Ratio = Para.Kf / (*LegK0[OUTR]).norm();
-      //   *bubble.LegK[S][OUTR] = *LegK0[OUTR] * Ratio;
-      //   bubble.ProjFactor[S] = 1.0;
-      // }
-      //   double InQ = (*LegK0[INL] + *LegK0[INR]).norm();
-      //   if (InQ < 1.0 * Para.Kf) {
-      //     Ratio = Para.Kf / (*LegK0[INL]).norm();
-      //     *bubble.LegK[S][INL] = *LegK0[INL] * Ratio;
-      //     Ratio = Para.Kf / (*LegK0[OUTL]).norm();
-      //     *bubble.LegK[S][OUTL] = *LegK0[OUTL] * Ratio;
-      //     *bubble.LegK[S][INR] = *bubble.LegK[S][INL] * (-1.0);
-      //     *bubble.LegK[S][OUTR] = *bubble.LegK[S][OUTL] * (-1.0);
-      //     bubble.ProjFactor[S] = exp(-InQ * InQ / 0.1);
-      //   }
     }
 
     for (auto &chan : bubble.Channel) {

@@ -195,28 +195,20 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
   if (IsProjected) {
     for (auto &s : SymFactor)
       s *= -1;
-    if (HasT || HasU) {
-      Bubble.LegK[T][INL] = NextMom();
-      Bubble.LegK[T][INR] = NextMom();
-      Bubble.LegK[T][OUTL] = Bubble.LegK[T][INL];
-      Bubble.LegK[T][OUTR] = Bubble.LegK[T][INR];
-      Bubble.LegK[U][INL] = Bubble.LegK[T][INL];
-      Bubble.LegK[U][INR] = Bubble.LegK[T][INR];
-      Bubble.LegK[U][OUTL] = Bubble.LegK[T][INL];
-      Bubble.LegK[U][OUTR] = Bubble.LegK[T][INR];
-    }
-    if (HasS) {
-      // Bubble.LegK[S] = {Bubble.LegK[T][INL], NextMom(), NextMom(),
-      // NextMom()};
-      // Bubble.LegK[S] = {NextMom(), NextMom(), NextMom(), NextMom()};
-      // no projection for S channel for now
-      // Bubble.LegK[S] = Ver4.LegK;
+    Bubble.LegK[T][INL] = NextMom();
+    Bubble.LegK[T][INR] = NextMom();
+    Bubble.LegK[T][OUTL] = Bubble.LegK[T][INL];
+    Bubble.LegK[T][OUTR] = Bubble.LegK[T][INR];
 
-      Bubble.LegK[S][INL] = NextMom();
-      Bubble.LegK[S][INR] = NextMom();
-      Bubble.LegK[S][OUTL] = Bubble.LegK[S][INL];
-      Bubble.LegK[S][OUTR] = Bubble.LegK[S][INR];
-    }
+    Bubble.LegK[U][INL] = Bubble.LegK[T][INL];
+    Bubble.LegK[U][INR] = Bubble.LegK[T][INR];
+    Bubble.LegK[U][OUTL] = Bubble.LegK[T][INL];
+    Bubble.LegK[U][OUTR] = Bubble.LegK[T][INR];
+
+    Bubble.LegK[S][INL] = Bubble.LegK[T][INL];
+    Bubble.LegK[S][INR] = Bubble.LegK[T][INR];
+    Bubble.LegK[S][OUTL] = Bubble.LegK[T][INL];
+    Bubble.LegK[S][OUTR] = Bubble.LegK[T][INR];
   } else
     for (auto &c : Channel)
       Bubble.LegK[c] = Ver4.LegK;
@@ -265,7 +257,10 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
         Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
                            Ver4.RenormVer4, Ver4.RenormVer4, true);
       } else if (c == S) {
-        Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, T}, LEFT,
+        // Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, T},
+        // LEFT,
+        //                    Ver4.RenormVer4, Ver4.RexpandBare, false);
+        Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, T, U}, LEFT,
                            Ver4.RenormVer4, Ver4.RexpandBare, false);
         Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
                            Ver4.RenormVer4, Ver4.RenormVer4, true);

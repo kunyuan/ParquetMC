@@ -28,6 +28,15 @@ public:
       sum += i;
     return sum;
   }
+
+  double Abs() {
+    double sum = 0;
+    // for (auto &i : _Weight)
+    //   sum += fabs(i);
+    // sum = fabs(_Weight[DIR] + _Weight[EX] / 2.0) + fabs(_Weight[EX] / 2.0);
+    sum = fabs(_Weight[DIR] + _Weight[EX] / 2.0);
+    return sum;
+  }
   double &operator()(int dir) { return _Weight[dir]; }
 
 private:

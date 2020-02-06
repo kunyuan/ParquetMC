@@ -273,7 +273,7 @@ elif(XType == "Angle"):
         ErrorPlot(ax2, x, Bare[:, 1]/SpinIndex, ColorList[-1], 's',
                   "q/kF={0}, Bare".format(ExtMomBin[0]))
 
-    AngLandau = AngTotal+DataWithAngle[(0, chan)]*Nf
+    AngLandau = AngTotal+DataWithAngle[(0, 1)]*Nf
     if SpinIndex == 2:
         x = np.arccos(AngleBin)
         y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]/2.0
