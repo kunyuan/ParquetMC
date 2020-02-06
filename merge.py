@@ -211,16 +211,16 @@ while True:
 
         # construct bare interaction
         AngHalf = np.arccos(AngleBin)/2.0
-        Bare = np.zeros_like(Data[(0, 1)])
-        Bare[o, 0] -= 8.0*np.pi/Mass2
+        Bare = np.zeros(2)
+        Bare[0] -= 8.0*np.pi/Mass2
         ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2)
-        Bare[o, 1] += AngleIntegation(ExBare, 0)
+        Bare[1] += AngleIntegation(ExBare, 0)
         Bare = SpinMapping(Bare)
 
         o = 0
         qData = sum([Data[(o, i)] for i in range(4)])
         qDataErr = sum([DataErr[(o, i)] for i in range(4)])
-        qData[o, :] += Bare[o, :]
+        qData[o, :] += Bare[:]
 
         PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
         PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
