@@ -21,10 +21,10 @@ void weight::Initialization() {
   for (int c = 0; c < 5; c++)
     for (int order = 1; order <= Para.Order; order++) {
       vector<dse::channel> chan;
-      if (c <= 4)
+      if (c < 4)
         chan = {Chan[c]};
       else
-        chan = Chan;
+        chan = {dse::I, dse::T, dse::U, dse::S};
       // Ver4Root[order][c] =
       //     VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
       Ver4Root[order][c] =
@@ -38,10 +38,7 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
   if (LoopNum == 0) {
     // normalization
     Weight(EX) = 0.0;
-    if (Channel == dse::T)
-      Weight(DIR) = 1.0;
-    else
-      Weight(DIR) = 0.0;
+    Weight(DIR) = 1.0;
   } else {
     // if (Channel != dse::T)
     //   return 0.0;

@@ -50,7 +50,7 @@ public:
 private:
   dse::verDiag VerDiag; // diagram factory
   // diagram for different order and channel
-  dse::ver4 Ver4Root[MaxOrder][4];
+  dse::ver4 Ver4Root[MaxOrder][5];
 
   void Vertex4(dse::ver4 &Ver4);
 
