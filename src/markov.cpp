@@ -112,7 +112,8 @@ markov::markov() : Var(Weight.Var) {
 };
 
 void markov::Measure() {
-  double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
+  double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder] *
+                         Para.ReWeightChan[Var.CurrOrder]);
   int TauIndex = GetTauNum(Var.CurrOrder) - 1;
 
   Weight.VerQTheta.Measure(Var.LoopMom[1], Var.LoopMom[2], Var.CurrExtMomBin,

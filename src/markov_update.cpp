@@ -83,6 +83,8 @@ void markov::ChangeOrder() {
     Var.CurrOrder = NewOrder;
     Var.CurrWeight = NewWeight;
     Var.CurrAbsWeight = NewAbsWeight;
+    if (NewOrder == 0)
+      Var.CurrChannel == dse::T;
   }
   return;
 };
@@ -208,7 +210,8 @@ void markov::ChangeChannel() {
 
   NewWeight = Weight.Evaluate(Var.CurrOrder, NewChannel);
   NewAbsWeight = NewWeight.Abs();
-  double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
+  double R = Prop * NewAbsWeight * Para.ReWeightChan[NewChannel] /
+             Var.CurrAbsWeight / Para.ReWeightChan[Var.CurrChannel];
   if (Random.urn() < R) {
     Accepted[CHANGE_CHANNEL][Var.CurrOrder]++;
     Var.CurrVersion++;

@@ -63,6 +63,7 @@ struct parameter {
   int Sweep;             // how many MC steps between two measuring
   std::vector<std::string> GroupName; // ID for each group
   std::vector<double> ReWeight;       // reweight factor for each group
+  std::vector<double> ReWeightChan;   // reweight factor for each group
 
   // others
   int PrinterTimer;  // how many seconds between to printing to screen

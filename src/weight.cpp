@@ -37,8 +37,11 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
   ver::weightMatrix Weight;
   if (LoopNum == 0) {
     // normalization
-    Weight(DIR) = 1.0;
     Weight(EX) = 0.0;
+    if (Channel == dse::T)
+      Weight(DIR) = 1.0;
+    else
+      Weight(DIR) = 0.0;
   } else {
     // if (Channel != dse::T)
     //   return 0.0;
@@ -102,11 +105,7 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
           double G3 =
               Fermi.Green(dTau3, *Root.LegK[OUTL], UP, 0, Var.CurrScale);
 
-          Weight(DIR) = Root.Weight[i].Sum() * G1 * G2 * G3;
-          //   auto &w = Root.Weight[i];
-          //   Weight(DIR) += w(DIR) * Factor * cos(2.0 * PI / Para.Beta *
-          //   dTau); Weight(EX) += w(EX) * Factor * cos(2.0 * PI / Para.Beta *
-          //   dTau);
+          Weight(DIR) = Root.Weight[i].Sum() * G1 * G2 * G3 / 2.0 * Factor;
         }
       }
     }
