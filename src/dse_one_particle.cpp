@@ -32,10 +32,11 @@ sigma sigmaDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
 
   Sigma.G[0] = gMatrix(Sigma.TauNum, Sigma.InTidx, &(*LoopMom)[2]);
   Sigma.G[1] = gMatrix(Sigma.TauNum, Sigma.InTidx, &(*LoopMom)[3]);
+  Sigma.G[2] = gMatrix(Sigma.TauNum, Sigma.InTidx, NextMom());
 
-  //   for (int ol = 0; ol < LoopNum; ++ol) {
-  //     ver4 LVer =
-  //   }
+  for (int ol = 0; ol < LoopNum; ++ol) {
+    ver4 LVer =
+  }
 }
 
 // ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,

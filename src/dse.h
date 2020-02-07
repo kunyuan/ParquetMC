@@ -178,8 +178,7 @@ struct sigma {
   momentum *LegK; // external legK index
 
   array<gMatrix, 3> G;
-  vector<ver4> LVer; // different Tau arrangement and channel
-  vector<ver4> RVer; // different Tau arrangement and channel
+  ver4 RVer;
 
   double Weight; // size: equal to T.size()
 };
