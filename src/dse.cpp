@@ -49,6 +49,8 @@ ver4 verDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
 
   if (Type == PARQUET)
     return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, false, false);
+  else if (Type == BARE)
+    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, false, false, false);
   else
     ABORT("Not implemented!");
 }

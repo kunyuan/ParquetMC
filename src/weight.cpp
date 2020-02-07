@@ -17,12 +17,18 @@ using namespace dse;
 void weight::Initialization() {
 
   // vector<dse::channel> Chan = {dse::T, dse::U, dse::S};
-  dse::channel Chan[4] = {dse::I, dse::T, dse::U, dse::S};
-  for (int c = 0; c < 4; c++)
+  vector<dse::channel> Chan = {dse::I, dse::T, dse::U, dse::S, dse::SIGMA};
+  for (int c = 0; c < 5; c++)
     for (int order = 1; order <= Para.Order; order++) {
-      vector<dse::channel> chan = {Chan[c]};
+      vector<dse::channel> chan;
+      if (c <= 4)
+        chan = {Chan[c]};
+      else
+        chan = Chan;
+      // Ver4Root[order][c] =
+      //     VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
       Ver4Root[order][c] =
-          VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
+          VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::BARE);
       LOG_INFO(VerDiag.ToString(Ver4Root[order][c]));
     }
 }
@@ -63,21 +69,46 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
 
       Vertex4(Root);
 
-      double Factor = 1.0 / pow(2.0 * PI, D * LoopNum);
+      if (Channel <= 4) {
+        double Factor = 1.0 / pow(2.0 * PI, D * LoopNum);
 
-      //////// Measure Scattering amplitude ////////////////////
-      for (auto &w : Root.Weight) {
-        Weight(DIR) += w(DIR) * Factor;
-        Weight(EX) += w(EX) * Factor;
+        //////// Measure Scattering amplitude ////////////////////
+        for (auto &w : Root.Weight) {
+          Weight(DIR) += w(DIR) * Factor;
+          Weight(EX) += w(EX) * Factor;
+        }
+
+        /////// Measure Landau Parameters  /////////////////////////
+        // for (int i = 0; i < Root.Weight.size(); ++i) {
+        //   double dTau = Var.Tau[Root.T[i][INR]] - Var.Tau[Root.T[i][INL]];
+        //   auto &w = Root.Weight[i];
+        //   Weight(DIR) += w(DIR) * Factor * cos(2.0 * PI / Para.Beta * dTau);
+        //   Weight(EX) += w(EX) * Factor * cos(2.0 * PI / Para.Beta * dTau);
+        // }
+
+      } else if (Channel == dse::SIGMA) {
+        Weight(EX) = 0.0;
+        double Factor = 1.0 / pow(2.0 * PI, D * (LoopNum + 2));
+        /////////// Evaluate Sigma ////////////////////////////////
+        for (int i = 0; i < Root.Weight.size(); ++i) {
+          double dTau1 = Var.Tau[Root.T[i][INR]] - Var.Tau[LoopNum + 1];
+          double G1 = Fermi.Green(dTau1, *Root.LegK[INR], UP, 0, Var.CurrScale);
+
+          double dTau2 = Var.Tau[LoopNum + 1] - Var.Tau[Root.T[i][OUTR]];
+          double G2 =
+              Fermi.Green(dTau2, *Root.LegK[OUTR], UP, 0, Var.CurrScale);
+
+          double dTau3 = Var.Tau[LoopNum + 1] - Var.Tau[Root.T[i][OUTL]];
+          double G3 =
+              Fermi.Green(dTau3, *Root.LegK[OUTL], UP, 0, Var.CurrScale);
+
+          Weight(DIR) = Root.Weight[i].Sum() * G1 * G2 * G3;
+          //   auto &w = Root.Weight[i];
+          //   Weight(DIR) += w(DIR) * Factor * cos(2.0 * PI / Para.Beta *
+          //   dTau); Weight(EX) += w(EX) * Factor * cos(2.0 * PI / Para.Beta *
+          //   dTau);
+        }
       }
-
-      /////// Measure Landau Parameters  /////////////////////////
-      // for (int i = 0; i < Root.Weight.size(); ++i) {
-      //   double dTau = Var.Tau[Root.T[i][INR]] - Var.Tau[Root.T[i][INL]];
-      //   auto &w = Root.Weight[i];
-      //   Weight(DIR) += w(DIR) * Factor * cos(2.0 * PI / Para.Beta * dTau);
-      //   Weight(EX) += w(EX) * Factor * cos(2.0 * PI / Para.Beta * dTau);
-      // }
     }
   }
   return Weight;

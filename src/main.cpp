@@ -46,7 +46,8 @@ void InitPara() {
   Para.ObsType = SCATTERING;
   // Para.ObsType = LANDAU;
 
-  Para.ReWeight = {8.0, 0.8, 0.8, 0.4, 0.4, 0.05, 1.0, 1.0, 1.0, 1.0};
+  // Para.ReWeight = {1.0, 0.8, 0.8, 0.8, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
+  Para.ReWeight = {8.0, 0.8, 0.4, 0.2, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
   // Para.SelfEnergyType = FOCK;
   Para.SelfEnergyType = selfenergy::BARE;
 

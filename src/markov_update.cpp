@@ -197,7 +197,7 @@ void markov::ChangeChannel() {
   if (Var.CurrOrder == 0)
     return;
   double Prop = 1.0;
-  int NewChannel = int(Random.urn() * 4);
+  int NewChannel = int(Random.urn() * 5);
   // Var.CurrChannel = dse::T;
   // if (Var.CurrChannel == dse::U) {
   //   Var.CurrChannel = OldChannel;

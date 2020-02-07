@@ -16,7 +16,7 @@ namespace dse {
 using namespace std;
 
 enum caltype { BARE, RG, PARQUET, RENORMALIZED, VARIATIONAL };
-enum channel { I = 0, T, U, S };
+enum channel { I = 0, T, U, S, SIGMA };
 
 struct bubble;
 struct envelope;
