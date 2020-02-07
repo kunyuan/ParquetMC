@@ -10,7 +10,7 @@
 
 namespace mc {
 using namespace std;
-const int MCUpdates = 7;
+const int MCUpdates = 9;
 
 typedef array<double, ExtMomBinSize> polar;
 
@@ -72,7 +72,9 @@ private:
     CHANGE_TAU,
     CHANGE_MOM,
     CHANGE_SCALE,
-    CHANGE_CHANNEL,
+    VER2VER,
+    VER2SIGMA,
+    SIGMA2VER,
     END
   };
   std::string _DetailBalanceStr(Updates op);

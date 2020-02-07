@@ -3,16 +3,20 @@
 
 // #include "utility/vector.h"
 #include "global.h"
+#include <Eigen/Dense>
 #include <array>
 
 double sum2(const momentum &);
 double norm2(const momentum &);
 
 namespace ver {
+using Eigen::MatrixXd;
 
 enum channel { I = 0, T, U, S };
 
 const int MAXSIGMABIN = 100000;
+const int SIGMA_TAU_BIN = 128;
+const int SIGMA_K_BIN = 128;
 
 class weightMatrix {
   // 2x2 matrix of weight; Direct/Exchange and chain/Lver/Rver/other
@@ -61,8 +65,10 @@ private:
   double Fock(double k);
   // warning: this function only works for T=0 and 3D!!!!
   double GetSigma(double k);
-  double Sigma[MAXSIGMABIN];
-  double Sigma2[MAXSIGMABIN];
+  // double Sigma[MAXSIGMABIN];
+  // double Sigma2[MAXSIGMABIN];
+
+  // MatrixXd Sigma(SigmaMomBinSize, SigmaTauBinSize);
 };
 
 class verTensor {
@@ -81,6 +87,17 @@ private:
   int OrderIndex;
 };
 
+// class sigmaTensor {
+// public:
+//   sigmaTensor();
+//   ~sigmaTensor();
+//   void Initialize();
+//   double &Interaction(int Angle, int ExtQ, int Dir);
+//   double &Estimator(int Order, int Angle, int ExtQ, int Dir);
+
+// private:
+// }
+
 class verQTheta {
 public:
   verQTheta();
@@ -97,6 +114,7 @@ public:
   void ResetIRScale(int IRScaleBin);
 
   array<verTensor, 4> Chan;
+  MatrixXd Sigma;
 
   // double TauBasis[TauBinSize][TauBasisNum];
 

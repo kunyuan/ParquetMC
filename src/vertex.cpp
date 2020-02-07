@@ -277,80 +277,8 @@ fermi::fermi() {
   UpperBound2 = 1.2 * Para.Ef;
   LowerBound2 = 0.8 * Para.Ef;
   DeltaK2 = UpperBound2 / MAXSIGMABIN;
-  if (Para.SelfEnergyType == FOCK)
-    BuildFockSigma();
-}
 
-double fermi::Fock(double k) {
-  // warning: this function only works for T=0!!!!
-  double l = sqrt(Para.Mass2);
-  double kF = Para.Kf;
-  double fock = 1.0 + l / kF * atan((k - kF) / l);
-  fock -= l / kF * atan((k + kF) / l);
-  fock -= (l * l - k * k + kF * kF) / 4.0 / k / kF *
-          log((l * l + (k - kF) * (k - kF)) / (l * l + (k + kF) * (k + kF)));
-  fock *= (-2.0 * kF) / PI;
-
-  double shift = 1.0 - l / kF * atan(2.0 * kF / l);
-  shift -= l * l / 4.0 / kF / kF * log(l * l / (l * l + 4.0 * kF * kF));
-  shift *= (-2.0 * kF) / PI;
-
-  return fock - shift;
-}
-
-double fermi::BuildFockSigma() {
-  ASSERT_ALLWAYS(D == 3, "The Fock self energy is for 3D!");
-  double fock, k;
-  for (int i = 0; i < MAXSIGMABIN; ++i) {
-    // k: (0^+, UpBound^-)
-    // i=0 ==> k==0.5*DeltaK
-    // i=MAXSIGMABIN-1 ==> k==(MAXSIGMABIN-0.5)*DeltaK
-    k = (i + 0.5) * DeltaK + LowerBound;
-    Sigma[i] = Fock(k);
-    if (i > 0 && k <= LowerBound2 && k >= UpperBound2) {
-      ASSERT_ALLWAYS(
-          Equal(Sigma[i - 1], Sigma[i], 5.0e-5),
-          fmt::format("Fock are not accurate enough! At k={0}: {1} vs {2}\n", k,
-                      Sigma[i - 1], Sigma[i]));
-    }
-    // cout << k << " : " << Sigma[i] << " vs " << Fock(k) << endl;
-  }
-
-  for (int i = 0; i < MAXSIGMABIN; ++i) {
-    // k: (0^+, UpBound^-)
-    // i=0 ==> k==0.5*DeltaK
-    // i=MAXSIGMABIN-1 ==> k==(MAXSIGMABIN-0.5)*DeltaK
-    k = (i + 0.5) * DeltaK2 + LowerBound2;
-    Sigma2[i] = Fock(k);
-    if (i > 0) {
-      ASSERT_ALLWAYS(Equal(Sigma2[i - 1], Sigma2[i], 5.0e-5),
-                     fmt::format("The 2rd level Fock are not accurate enough!"
-                                 "level! At k={0}: {1} vs {2}\n",
-                                 k, Sigma2[i - 1], Sigma2[i]));
-    }
-    // cout << k << " : " << Sigma[i] << " vs " << Fock(k) << endl;
-  }
-};
-
-double fermi::FockSigma(const momentum &Mom) {
-  double k = Mom.norm(); // bare propagator
-  double fock;
-  if (k >= LowerBound2 && k < UpperBound2) {
-    int i = (k - LowerBound2) / DeltaK2;
-    fock = Sigma2[i];
-  } else if ((k >= LowerBound && k < LowerBound2) ||
-             (k >= UpperBound2 && k < UpperBound)) {
-    int i = (k - LowerBound) / DeltaK;
-    fock = Sigma[i];
-  } else {
-    fock = Fock(k);
-  }
-  // ASSERT_ALLWAYS(
-  //     Equal(fock, Fock(k), 5.0e-5),
-  //     fmt::format("Fock are not accurate enough! At k={0}: {1} vs {2}\n",
-  //     k,
-  //                 fock, Fock(k)));
-  return fock + k * k;
+  Sigma = MatrixXd::Zero(SigmaMomBinSize, SigmaTauBinSize);
 }
 
 double fermi::PhyGreen(double Tau, const momentum &Mom, int GType,
@@ -377,8 +305,6 @@ double fermi::PhyGreen(double Tau, const momentum &Mom, int GType,
   k = Mom.norm();
   if (Para.SelfEnergyType == selfenergy::BARE)
     Ek = k * k; // bare propagator
-  else if (Para.SelfEnergyType == selfenergy::FOCK)
-    Ek = FockSigma(Mom); // Fock diagram dressed propagator
   else
     ABORT("Green function is not implemented!");
 

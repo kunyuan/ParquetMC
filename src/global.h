@@ -24,6 +24,8 @@ const int AngBinSize = 64;
 // number of energy scales, only useful in RG approach
 const int ScaleBinSize = 64;
 const int TauBinSize = 128;
+const int SigmaMomBinSize = 128;
+const int SigmaTauBinSize = 128;
 const int TauBasisNum = 32;
 const int SpinIndex = 2;
 

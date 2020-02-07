@@ -16,7 +16,13 @@ using namespace mc;
 using namespace diag;
 using namespace std;
 
-int markov::GetTauNum(int Order) { return Order + 1; }
+int markov::GetTauNum(int Order) {
+  if (Var.CurrChannel == dse::SIGMA)
+    return Order + 2;
+  else
+    return Order + 1;
+}
+
 int markov::GetLoopNum(int Order) { return Order + 3; }
 
 void markov::ChangeOrder() {
@@ -197,21 +203,29 @@ void markov::ChangeChannel() {
   if (Var.CurrOrder == 0)
     return;
   double Prop = 1.0;
-  int NewChannel = int(Random.urn() * 4);
+  int NewChannel = int(Random.urn() * 5);
   // Var.CurrChannel = dse::T;
   // if (Var.CurrChannel == dse::U) {
   //   Var.CurrChannel = OldChannel;
   //   return;
   // }
+  Updates Name;
 
-  Proposed[CHANGE_CHANNEL][Var.CurrOrder] += 1;
+  if (Var.CurrChannel != dse::SIGMA && NewChannel == dse::SIGMA)
+    Name = VER2SIGMA;
+  else if (Var.CurrChannel == dse::SIGMA && NewChannel != dse::SIGMA)
+    Name = SIGMA2VER;
+  else
+    Name = VER2VER;
+
+  Proposed[Name][Var.CurrOrder] += 1;
 
   NewWeight = Weight.Evaluate(Var.CurrOrder, NewChannel);
   NewAbsWeight = NewWeight.Abs();
   double R = Prop * NewAbsWeight * Para.ReWeightChan[NewChannel] /
              Var.CurrAbsWeight / Para.ReWeightChan[Var.CurrChannel];
   if (Random.urn() < R) {
-    Accepted[CHANGE_CHANNEL][Var.CurrOrder]++;
+    Accepted[Name][Var.CurrOrder]++;
     Var.CurrVersion++;
     Var.CurrWeight = NewWeight;
     Var.CurrAbsWeight = NewAbsWeight;
