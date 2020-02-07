@@ -278,7 +278,7 @@ fermi::fermi() {
   LowerBound2 = 0.8 * Para.Ef;
   DeltaK2 = UpperBound2 / MAXSIGMABIN;
 
-  Sigma = MatrixXd::Zero(SigmaMomBinSize, SigmaTauBinSize);
+  // Sigma = MatrixXd::Zero(SigmaMomBinSize, SigmaTauBinSize);
 }
 
 double fermi::PhyGreen(double Tau, const momentum &Mom, int GType,
