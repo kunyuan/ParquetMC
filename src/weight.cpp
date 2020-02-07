@@ -25,10 +25,10 @@ void weight::Initialization() {
         chan = {Chan[c]};
       else
         chan = {dse::I, dse::T, dse::U, dse::S};
-      // Ver4Root[order][c] =
-      //     VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
       Ver4Root[order][c] =
-          VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::BARE);
+          VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
+      // Ver4Root[order][c] =
+      //     VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::BARE);
       LOG_INFO(VerDiag.ToString(Ver4Root[order][c]));
     }
 }
