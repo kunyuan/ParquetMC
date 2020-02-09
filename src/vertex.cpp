@@ -94,12 +94,13 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   WeightEx = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2);
 
   // WeightEx = 0.0;
-  if (CounterTermOrder > 0) {
-    WeightDir =
-        WeightDir * pow(Para.Lambda / 8.0 / PI * WeightDir, CounterTermOrder);
-    WeightEx =
-        WeightEx * pow(Para.Lambda / 8.0 / PI * WeightEx, CounterTermOrder);
-  }
+  // if (CounterTermOrder > 0) {
+  //   WeightDir =
+  //       WeightDir * pow(Para.Lambda / 8.0 / PI * WeightDir,
+  //       CounterTermOrder);
+  //   WeightEx =
+  //       WeightEx * pow(Para.Lambda / 8.0 / PI * WeightEx, CounterTermOrder);
+  // }
   WeightDir = -WeightDir; // the interaction carries a sign -1
   // WeightEx = 0.0;
   // return 1.0 / Para.Beta;

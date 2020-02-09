@@ -62,7 +62,7 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
   Ver4.ID = DiagNum;
   DiagNum++;
   Ver4.LoopNum = LoopNum;
-  Ver4.TauNum = 2 * (LoopNum + 1);
+  Ver4.TauNum = LoopNum + 1;
   Ver4.LegK = LegK;
   Ver4.Side = Side;
   Ver4.IsFullVer4 = IsFullVer4;
