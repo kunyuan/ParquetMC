@@ -29,7 +29,7 @@ const int SigmaTauBinSize = 128;
 const int TauBasisNum = 32;
 const int SpinIndex = 2;
 
-enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL };
+enum type { GU, GW, RG, PARQUET, BARE };
 enum obstype { SCATTERING, LANDAU };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 
@@ -39,8 +39,8 @@ typedef Vec<double, D> momentum;
 /////////// Global Parameter ////////////////////
 struct parameter {
   // physical parameters
-  double Rs, Ef, Kf,
-      Mu;            // r_s, fermi energy, fermi momentum, chemical potential
+  double Rs, Ef, Kf, Mu,
+      Nf;            // r_s, fermi energy, fermi momentum, chemical potential
   double Beta;       // inverse temperature
   double UVScale;    // the UV bound of the energy scale
   double UVCoupling; // the coupling constant at the UV scale
@@ -55,6 +55,7 @@ struct parameter {
   int Order;
   type Type;             // polarization, RG
   obstype ObsType;       // 0: static polarization, 1: equal-time polarization
+  bool LambdaCT;         // shift of the screening length
   bool UseVer4;          // use vertex4 to calculate weight or not
   int TotalStep;         // total steps of the Monte Carlo
   int Seed;              // rng seed

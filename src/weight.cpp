@@ -17,20 +17,30 @@ using namespace dse;
 void weight::Initialization() {
 
   // vector<dse::channel> Chan = {dse::T, dse::U, dse::S};
-  vector<dse::channel> Chan = {dse::I, dse::T, dse::U, dse::S, dse::SIGMA};
-  for (int c = 0; c < 5; c++)
-    for (int order = 1; order <= Para.Order; order++) {
-      vector<dse::channel> chan;
-      if (c < 4)
-        chan = {Chan[c]};
-      else
-        chan = {dse::I, dse::T, dse::U, dse::S};
-      // Ver4Root[order][c] =
-      //     VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
-      Ver4Root[order][c] =
-          VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::BARE);
+  // vector<dse::channel> Chan = {dse::I,    dse::T,    dse::U,    dse::S,
+  //                              dse::T_CT, dse::U_CT, dse::SIGMA};
+  // for (int c = 0; c < 7; c++)
+  auto type = dse::caltype::BARE;
+  for (int order = 1; order <= Para.Order; order++) {
+    //     vector<dse::channel> chan;
+    //     if (c < 6)
+    //       chan = {Chan[c]};
+    //     else if (c == 6)
+    //       chan = {dse::I, dse::T, dse::U, dse::S, dse::T_CT, dse::U_CT};
+    //     else
+    //       chan = {Chan[c]};
+    // Ver4Root[order][c] =
+    //     VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
+    Ver4Root[order][0] = VerDiag.Build(Var.LoopMom, order, {dse::I}, type);
+    Ver4Root[order][1] = VerDiag.Build(Var.LoopMom, order, {dse::T}, type);
+    Ver4Root[order][2] = VerDiag.Build(Var.LoopMom, order, {dse::U}, type);
+    Ver4Root[order][3] = VerDiag.Build(Var.LoopMom, order, {dse::S}, type);
+    // Ver4Root[order][4] =
+    //     VerDiag.Build(Var.LoopMom, order,
+    //                   {dse::I, dse::U, dse::S, dse::T_CT, dse::U_CT}, type);
+    for (int c = 0; c < 4; ++c)
       LOG_INFO(VerDiag.ToString(Ver4Root[order][c]));
-    }
+  }
 }
 
 ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
@@ -171,9 +181,8 @@ void weight::ChanUST(dse::ver4 &Ver4) {
         // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
         // double x=
         double Factor = exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
-        bubble.ProjFactor[T] = Factor;
-        bubble.ProjFactor[U] = Factor;
-        bubble.ProjFactor[S] = Factor;
+        for (auto &chan : bubble.Channel)
+          bubble.ProjFactor[chan] = Factor;
         // if (DirQ < EPS)
         //   bubble.ProjFactor[T] = 1.0;
       }
@@ -197,13 +206,14 @@ void weight::ChanUST(dse::ver4 &Ver4) {
           // if (chan > 3)
           //   ABORT("too many chan " << chan);
           if (abs(bubble.ProjFactor[chan]) > EPS)
-            if (chan == S)
+            if (chan == S) {
               // LVer to RVer
               G[S](lt, rt) = Fermi.Green(dTau, *G[S].K, UP, 0, Var.CurrScale);
-            else
+            } else {
               // RVer to LVer
               G[chan](rt, lt) =
                   Fermi.Green(-dTau, *G[chan].K, UP, 0, Var.CurrScale);
+            }
         }
       }
 
@@ -239,6 +249,33 @@ void weight::ChanUST(dse::ver4 &Ver4) {
 
           CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) +
                                    LWeight(EX) * RWeight(EX));
+        }
+      }
+    }
+
+    /////////////////// Lambda counterterm ///////////////////////
+    if (Para.LambdaCT && Ver4.LoopNum > 0) {
+      for (auto &chan : bubble.Channel) {
+        if (chan == T || chan == U) {
+          double q;
+          if (chan == T) {
+            q = (*LegK0[INL] - *LegK0[OUTL]).norm();
+          } else if (chan == U) {
+            q = (*LegK0[INL] - *LegK0[OUTR]).norm();
+          }
+          double Weight =
+              8.0 * PI * Para.Charge2 / (q * q + Para.Mass2 + Para.Lambda);
+          double Bubble = pow(Weight, Ver4.LoopNum + 1);
+          for (int l = 0; l < Ver4.LoopNum; ++l) {
+            double dTau = Var.Tau[InTL + l * 2] - Var.Tau[InTL + l * 2 + 1];
+            Bubble *= Fermi.Green(dTau, Var.LoopMom[l], UP, 0, Var.CurrScale) *
+                      Fermi.Green(-dTau, Var.LoopMom[l], UP, 0, Var.CurrScale);
+          }
+          double Factor = -Para.Lambda / Para.Nf;
+          if (chan == T)
+            Ver4.Weight[0](DIR) += Bubble * Factor;
+          if (chan == U)
+            Ver4.Weight[0](EX) += -Bubble * Factor;
         }
       }
     }

@@ -163,6 +163,8 @@ private:
              int LoopIndex, bool IsProjected = false);
   ver4 ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
                int LoopIndex, bool IsProjected = false);
+  ver4 LambdaCT(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
+                int LoopIndex, bool IsProjected = false);
   momentum *NextMom();
 };
 

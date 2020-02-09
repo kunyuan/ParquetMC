@@ -73,23 +73,35 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
   //     RexpandBare && RenormVer4,
   //     "RenormVer4 and RexpandBare can not be true at the same time!");
 
+  // vector<channel> UT_CT;
   vector<channel> UST;
   vector<channel> II;
   for (auto &chan : Channel) {
     if (chan == I)
       II.push_back(chan);
-    else
+    else if (chan == T || chan == U || chan == S)
       UST.push_back(chan);
+    // else
+    //   UT_CT.push_back(chan);
   }
 
   if (LoopNum == 0) {
     // the same for left and right vertex with loopnum=0
     Ver4 = Ver0(Ver4, InTL);
   } else {
+    // if (Para.LambdaCT) {
+    // if (UT_CT.size() > 0) {
+    //   // the tidx for the lambda counterterm
+    //   array<int, 4> LegT = {InTL, InTL, InTL, InTL};
+    //   int Tidx = AddToTList(Ver4.T, LegT);
+    // }
+    // }
     // normal diagram
     Ver4 = ChanI(Ver4, II, InTL, LoopNum, LoopIndex, false);
     Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, false);
 
+    // if (Para.Type == type::VARIATIONAL)
+    //   Ver4 = ChanUST(Ver4, UT_CT, InTL, LoopNum, LoopIndex, false);
     // counter diagrams if the vertex is on the right
     if (IsFullVer4) {
       if (Ver4.RenormVer4) {
@@ -99,12 +111,16 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
         //                "Right vertex should contain one U, S, T channels!");
         Ver4 = ChanI(Ver4, II, InTL, LoopNum, LoopIndex, true);
         Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, true);
+        // if (Para.Type == type::VARIATIONAL)
+        //   Ver4 = ChanUST(Ver4, UT_CT, InTL, LoopNum, LoopIndex, true);
       }
     } else {
       if (Ver4.RexpandBare) {
         // counter diagrams if the vertex is on the left
         Ver4 = ChanI(Ver4, {I}, InTL, LoopNum, LoopIndex, true);
         Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);
+        // if (Para.Type == type::VARIATIONAL)
+        //   Ver4 = ChanUST(Ver4, UT_CT, InTL, LoopNum, LoopIndex, true);
       }
     }
   }
@@ -154,18 +170,27 @@ vector<mapT2> CreateMapT2(ver4 &Ver4, ver4 LVer, ver4 RVer, channel Chan,
       GT[T] = {RvT[OUTL], LvT[INR]};
       GT[U] = {RvT[OUTL], LvT[INR]};
       GT[S] = {LvT[OUTL], RvT[INR]};
+      // GT[T_CT] = {RvT[OUTL], LvT[INR]};
+      // GT[U_CT] = {RvT[OUTL], LvT[INR]};
 
       if (IsProjected == false) {
         LegT[T] = {LvT[INL], LvT[OUTL], RvT[INR], RvT[OUTR]};
         LegT[U] = {LvT[INL], RvT[OUTR], RvT[INR], LvT[OUTL]};
         LegT[S] = {LvT[INL], RvT[OUTL], LvT[INR], RvT[OUTR]};
+
+        // lambda counterterm is equal time!
+        // LegT[T_CT] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
+        // LegT[U_CT] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
       } else {
         // LegT[T] = {LvT[INL], LvT[INL], RvT[INR], RvT[INR]};
         // LegT[U] = {LvT[INL], RvT[INR], RvT[INR], LvT[INL]};
-        LegT[S] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
 
         LegT[T] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
         LegT[U] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
+        LegT[S] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
+
+        // LegT[U_CT] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
+        // LegT[T_CT] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
       }
 
       // add T array into the T pool of the vertex
@@ -211,6 +236,16 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
     Bubble.LegK[S][INR] = Bubble.LegK[T][INR];
     Bubble.LegK[S][OUTL] = Bubble.LegK[T][INL];
     Bubble.LegK[S][OUTR] = Bubble.LegK[T][INR];
+
+    // Bubble.LegK[T_CT][INL] = Bubble.LegK[T][INL];
+    // Bubble.LegK[T_CT][INR] = Bubble.LegK[T][INR];
+    // Bubble.LegK[T_CT][OUTL] = Bubble.LegK[T][INL];
+    // Bubble.LegK[T_CT][OUTR] = Bubble.LegK[T][INR];
+
+    // Bubble.LegK[U_CT][INL] = Bubble.LegK[T][INL];
+    // Bubble.LegK[U_CT][INR] = Bubble.LegK[T][INR];
+    // Bubble.LegK[U_CT][OUTL] = Bubble.LegK[T][INL];
+    // Bubble.LegK[U_CT][OUTR] = Bubble.LegK[T][INR];
   } else
     for (auto &c : Channel)
       Bubble.LegK[c] = Ver4.LegK;
@@ -219,8 +254,9 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
   auto &LegK = Bubble.LegK;
 
   G[0] = gMatrix(Ver4.TauNum, InTL, &(*LoopMom)[LoopIndex]);
-  for (auto &c : Bubble.Channel)
+  for (auto &c : Bubble.Channel) {
     G[c] = gMatrix(Ver4.TauNum, InTL, NextMom());
+  }
 
   for (int ol = 0; ol < LoopNum; ol++) {
     // left and right vertex external LegK
@@ -238,13 +274,15 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
     LLegK[S] = {LegK[S][INL], G[S].K, LegK[S][INR], G[0].K};
     RLegK[S] = {G[0].K, LegK[S][OUTL], G[S].K, LegK[S][OUTR]};
 
+    // ////////////////// T_CT channel ////////////////////////////
+    // LLegK[T_CT] = {LegK[T_CT][INL], LegK[T_CT][OUTL], G[T_CT].K, G[0].K};
+    // RLegK[T_CT] = {G[0].K, G[T_CT].K, LegK[T_CT][INR], LegK[T_CT][OUTR]};
+
+    // ////////////////// U_CT channel ////////////////////////////
+    // LLegK[U_CT] = {LegK[U_CT][INL], LegK[U_CT][OUTR], G[U_CT].K, G[0].K};
+    // RLegK[U_CT] = {G[0].K, G[U_CT].K, LegK[U_CT][INR], LegK[U_CT][OUTL]};
+
     for (auto &c : Bubble.Channel) {
-      // if (ol == 1 && c == T && LoopNum == 2)
-      //   continue;
-
-      // if (IsProjected && c == S)
-      //   continue;
-
       pair Pair;
       Pair.Channel = c;
       Pair.SymFactor = SymFactor[c];
@@ -259,26 +297,23 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
         Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
                            Ver4.RenormVer4, Ver4.RenormVer4, true);
       } else if (c == S) {
-        // Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, T},
-        // LEFT,
-        //                    Ver4.RenormVer4, Ver4.RexpandBare, false);
         Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, T, U}, LEFT,
                            Ver4.RenormVer4, Ver4.RexpandBare, false);
         Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
                            Ver4.RenormVer4, Ver4.RenormVer4, true);
-        // Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1,
-        //                    {
-        //                        I,
-        //                    },
-        //                    LEFT, Ver4.RenormVer4, Ver4.RexpandBare, false);
-        // Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T}, RIGHT,
-        //                    Ver4.RenormVer4, Ver4.RenormVer4, true);
       }
+      //  else if (c == U_CT || c == T_CT) {
+      //   Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {T_CT}, LEFT,
+      //                      false, false, false);
+      //   Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx, {T_CT}, RIGHT,
+      //   false,
+      //                      false, true);
+      // }
       Pair.Map = CreateMapT2(Ver4, Pair.LVer, Pair.RVer, c, IsProjected);
-      Bubble.Pair.push_back(Pair);
+      if (Pair.Map.size() > 0)
+        Bubble.Pair.push_back(Pair);
     }
   }
-
   Ver4.Bubble.push_back(Bubble);
   return Ver4;
 }
