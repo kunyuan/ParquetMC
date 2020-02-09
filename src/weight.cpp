@@ -266,16 +266,21 @@ void weight::ChanUST(dse::ver4 &Ver4) {
           double Weight =
               8.0 * PI * Para.Charge2 / (q * q + Para.Mass2 + Para.Lambda);
           double Bubble = pow(Weight, Ver4.LoopNum + 1);
+          // cout << Bubble << endl;
           for (int l = 0; l < Ver4.LoopNum; ++l) {
             double dTau = Var.Tau[InTL + l * 2] - Var.Tau[InTL + l * 2 + 1];
-            Bubble *= Fermi.Green(dTau, Var.LoopMom[l], UP, 0, Var.CurrScale) *
-                      Fermi.Green(-dTau, Var.LoopMom[l], UP, 0, Var.CurrScale);
+            // cout << "Tau " << dTau << ", InTL " << InTL << endl;
+            Bubble *=
+                Fermi.Green(dTau, Var.LoopMom[l + 3], UP, 0, Var.CurrScale) *
+                Fermi.Green(-dTau, Var.LoopMom[l + 3], UP, 0, Var.CurrScale);
           }
           double Factor = -Para.Lambda / Para.Nf;
           if (chan == T)
             Ver4.Weight[0](DIR) += Bubble * Factor;
           if (chan == U)
             Ver4.Weight[0](EX) += -Bubble * Factor;
+          // cout << Bubble * Factor << ", " << Bubble << "," << Para.Lambda
+          //      << endl;
         }
       }
     }

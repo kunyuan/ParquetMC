@@ -27,7 +27,6 @@ public:
   void ChangeTau();
   void ChangeMomentum();
   void ChangeOrder();
-  void ChangeVerOrder();
   void ChangeScale();
   void ChangeChannel();
 
