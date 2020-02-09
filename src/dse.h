@@ -16,7 +16,7 @@ namespace dse {
 using namespace std;
 
 enum caltype { BARE, RG, PARQUET, RENORMALIZED, VARIATIONAL };
-enum channel { I = 0, T, U, S, SIGMA };
+enum channel { I = 0, T, U, S, T_CT, U_CT, SIGMA };
 
 struct bubble;
 struct envelope;
@@ -92,12 +92,13 @@ struct pair {
 struct bubble {
   int InTL;
   bool IsProjected;
+  bool IsLambdaCT;
   bool HasTU;
   bool HasS;
   vector<channel> Channel; // list of channels except I
-  array<double, 4> ProjFactor;
-  array<array<momentum *, 4>, 4> LegK; // legK index for different channel
-  array<gMatrix, 4> G;
+  array<double, 6> ProjFactor;
+  array<array<momentum *, 4>, 6> LegK; // legK index for different channel
+  array<gMatrix, 6> G;
   vector<pair> Pair; // different Tau arrangement and channel
 };
 

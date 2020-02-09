@@ -32,8 +32,10 @@ void weight::Initialization() {
     // Ver4Root[order][c] =
     //     VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
     Ver4Root[order][0] = VerDiag.Build(Var.LoopMom, order, {dse::I}, type);
-    Ver4Root[order][1] = VerDiag.Build(Var.LoopMom, order, {dse::T}, type);
-    Ver4Root[order][2] = VerDiag.Build(Var.LoopMom, order, {dse::U}, type);
+    Ver4Root[order][1] =
+        VerDiag.Build(Var.LoopMom, order, {dse::T, dse::T_CT}, type);
+    Ver4Root[order][2] =
+        VerDiag.Build(Var.LoopMom, order, {dse::U, dse::U_CT}, type);
     Ver4Root[order][3] = VerDiag.Build(Var.LoopMom, order, {dse::S}, type);
     // Ver4Root[order][4] =
     //     VerDiag.Build(Var.LoopMom, order,
@@ -254,36 +256,36 @@ void weight::ChanUST(dse::ver4 &Ver4) {
     }
 
     /////////////////// Lambda counterterm ///////////////////////
-    if (Para.LambdaCT && Ver4.LoopNum > 0) {
-      for (auto &chan : bubble.Channel) {
-        if (chan == T || chan == U) {
-          double q;
-          if (chan == T) {
-            q = (*LegK0[INL] - *LegK0[OUTL]).norm();
-          } else if (chan == U) {
-            q = (*LegK0[INL] - *LegK0[OUTR]).norm();
-          }
-          double Weight =
-              8.0 * PI * Para.Charge2 / (q * q + Para.Mass2 + Para.Lambda);
-          double Bubble = pow(Weight, Ver4.LoopNum + 1);
-          // cout << Bubble << endl;
-          for (int l = 0; l < Ver4.LoopNum; ++l) {
-            double dTau = Var.Tau[InTL + l * 2] - Var.Tau[InTL + l * 2 + 1];
-            // cout << "Tau " << dTau << ", InTL " << InTL << endl;
-            Bubble *=
-                Fermi.Green(dTau, Var.LoopMom[l + 3], UP, 0, Var.CurrScale) *
-                Fermi.Green(-dTau, Var.LoopMom[l + 3], UP, 0, Var.CurrScale);
-          }
-          double Factor = -Para.Lambda / Para.Nf;
-          if (chan == T)
-            Ver4.Weight[0](DIR) += Bubble * Factor;
-          if (chan == U)
-            Ver4.Weight[0](EX) += -Bubble * Factor;
-          // cout << Bubble * Factor << ", " << Bubble << "," << Para.Lambda
-          //      << endl;
-        }
-      }
-    }
+    // if (Para.LambdaCT && Ver4.LoopNum > 0) {
+    //   for (auto &chan : bubble.Channel) {
+    //     if (chan == T || chan == U) {
+    //       double q;
+    //       if (chan == T) {
+    //         q = (*LegK0[INL] - *LegK0[OUTL]).norm();
+    //       } else if (chan == U) {
+    //         q = (*LegK0[INL] - *LegK0[OUTR]).norm();
+    //       }
+    //       double Weight =
+    //           8.0 * PI * Para.Charge2 / (q * q + Para.Mass2 + Para.Lambda);
+    //       double Bubble = pow(Weight, Ver4.LoopNum + 1);
+    //       // cout << Bubble << endl;
+    //       for (int l = 0; l < Ver4.LoopNum; ++l) {
+    //         double dTau = Var.Tau[InTL + l * 2] - Var.Tau[InTL + l * 2 + 1];
+    //         // cout << "Tau " << dTau << ", InTL " << InTL << endl;
+    //         Bubble *=
+    //             Fermi.Green(dTau, Var.LoopMom[l + 3], UP, 0, Var.CurrScale) *
+    //             Fermi.Green(-dTau, Var.LoopMom[l + 3], UP, 0, Var.CurrScale);
+    //       }
+    //       double Factor = -Para.Lambda / Para.Nf;
+    //       if (chan == T)
+    //         Ver4.Weight[0](DIR) += Bubble * Factor;
+    //       if (chan == U)
+    //         Ver4.Weight[0](EX) += -Bubble * Factor;
+    //       // cout << Bubble * Factor << ", " << Bubble << "," << Para.Lambda
+    //       //      << endl;
+    //     }
+    //   }
+    // }
   }
 }
 
