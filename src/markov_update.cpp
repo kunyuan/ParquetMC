@@ -33,7 +33,7 @@ void markov::ChangeOrder() {
   if (Random.urn() < 0.5) {
     // increase order
     Name = INCREASE_ORDER;
-    if (Var.CurrOrder + Var.CurrCTOrder == Para.Order)
+    if (Var.CurrOrder == Para.Order)
       return;
     NewOrder = Var.CurrOrder + 1;
     static momentum NewMom;
@@ -50,9 +50,6 @@ void markov::ChangeOrder() {
     if (Var.CurrOrder == 0)
       Var.CurrChannel = dse::T;
 
-    if (Para.Type == VARIATIONAL)
-      Var.CounterTermOrder[GetTauNum(Var.CurrOrder, Var.CurrChannel)] = 0;
-
   } else {
     // decrese order
     if (Var.CurrOrder == 0)
@@ -65,11 +62,6 @@ void markov::ChangeOrder() {
     Name = DECREASE_ORDER;
     NewOrder = Var.CurrOrder - 1;
 
-    if (Para.Type == VARIATIONAL) {
-      if (Var.CounterTermOrder[GetTauNum(Var.CurrOrder, Var.CurrChannel) - 1] !=
-          0)
-        return;
-    }
     // Remove OldTau
     int TauToRemove = GetTauNum(Var.CurrOrder, Var.CurrChannel) - 1;
     Prop = RemoveOldTau(Var.Tau[TauToRemove]);
@@ -103,7 +95,7 @@ void markov::ChangeOrder() {
 };
 
 void markov::ChangeTau() {
-  int TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder) - 1);
+  int TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder, Var.CurrChannel) - 1);
 
   Proposed[CHANGE_TAU][Var.CurrOrder]++;
 
@@ -209,40 +201,6 @@ void markov::ChangeChannel() {
     Var.CurrChannel = NewChannel;
   }
   return;
-}
-
-void markov::ChangeVerOrder() {
-  if (Para.Type != VARIATIONAL)
-    return;
-  if (Var.CurrOrder == 0)
-    return;
-  int VerIndex = Random.irn(0, GetTauNum(Var.CurrOrder, Var.CurrChannel));
-  int OldVerOrder = Var.CounterTermOrder[VerIndex];
-  int OldOrder = Var.CurrOrder;
-  if (Random.urn() < 0.5) {
-    if (Var.CurrOrder + Var.CurrCTOrder == Para.Order)
-      return;
-    Var.CounterTermOrder[VerIndex]++;
-    Var.CurrCTOrder++;
-  } else {
-    if (Var.CounterTermOrder[VerIndex] == 0)
-      return;
-    Var.CounterTermOrder[VerIndex]--;
-    Var.CurrCTOrder--;
-  }
-
-  Proposed[CHANGE_VERORDER][Var.CurrOrder] += 1;
-  double Prop = 1.0;
-
-  NewWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrChannel);
-  NewAbsWeight = NewWeight.Abs();
-  double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
-  if (Random.urn() < R) {
-    Accepted[CHANGE_VERORDER][Var.CurrOrder]++;
-  } else {
-    Var.CounterTermOrder[VerIndex] = OldVerOrder;
-    Var.CurrOrder = OldOrder;
-  }
 }
 
 double markov::GetNewTau(double &NewTau) {

@@ -92,7 +92,6 @@ markov::markov() : Var(Weight.Var) {
   UpdatesName[CHANGE_MOM] = NAME(CHANGE_MOM);
   UpdatesName[CHANGE_TAU] = NAME(CHANGE_TAU);
   UpdatesName[CHANGE_SCALE] = NAME(CHANGE_SCALE);
-  UpdatesName[CHANGE_VERORDER] = NAME(CHANGE_VERORDER);
   UpdatesName[VER2VER] = NAME(VER2VER);
   UpdatesName[SIGMA2VER] = NAME(SIGMA2VER);
   UpdatesName[VER2SIGMA] = NAME(VER2SIGMA);
@@ -117,7 +116,7 @@ markov::markov() : Var(Weight.Var) {
 void markov::Measure() {
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder] *
                          Para.ReWeightChan[Var.CurrChannel]);
-  int TauIndex = GetTauNum(Var.CurrOrder) - 1;
+  int TauIndex = GetTauNum(Var.CurrOrder, Var.CurrChannel) - 1;
 
   Weight.VerQTheta.Measure(Var.LoopMom[1], Var.LoopMom[2], Var.CurrExtMomBin,
                            Var.CurrOrder, Var.Tau[TauIndex] - Var.Tau[0],

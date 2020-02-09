@@ -302,10 +302,7 @@ double fermi::PhyGreen(double Tau, const momentum &Mom, int GType,
   }
 
   k = Mom.norm();
-  if (Para.SelfEnergyType == selfenergy::BARE)
-    Ek = k * k; // bare propagator
-  else
-    ABORT("Green function is not implemented!");
+  Ek = k * k; // bare propagator
 
   //// enforce an UV cutoff for the Green's function ////////
   // if(Ek>8.0*EF) then
