@@ -30,7 +30,7 @@ const int TauBasisNum = 32;
 const int SpinIndex = 2;
 
 enum selfenergy { BARE, FOCK, DRESSED }; // self energy type
-enum type { GU, GW, RG, PARQUET };
+enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL };
 enum obstype { SCATTERING, LANDAU };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 

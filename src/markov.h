@@ -10,7 +10,7 @@
 
 namespace mc {
 using namespace std;
-const int MCUpdates = 9;
+const int MCUpdates = 10;
 
 typedef array<double, ExtMomBinSize> polar;
 
@@ -27,6 +27,7 @@ public:
   void ChangeTau();
   void ChangeMomentum();
   void ChangeOrder();
+  void ChangeVerOrder();
   void ChangeScale();
   void ChangeChannel();
 
@@ -45,7 +46,7 @@ private:
   ver::weightMatrix NewWeight;
   double NewAbsWeight;
 
-  int GetTauNum(int Order);
+  int GetTauNum(int Order, int Channel);
   int GetLoopNum(int Order);
 
   // MC updates
@@ -72,6 +73,7 @@ private:
     CHANGE_TAU,
     CHANGE_MOM,
     CHANGE_SCALE,
+    CHANGE_VERORDER,
     VER2VER,
     VER2SIGMA,
     SIGMA2VER,
