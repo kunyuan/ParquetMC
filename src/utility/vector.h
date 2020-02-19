@@ -66,7 +66,7 @@ public:
 
   Vec operator+(const Vec &v2) const {
     Vec v;
-    for (int j = 0; j < D; j++)
+    for (int j = 0; j < D; ++j)
       v[j] = _Array[j] + v2._Array[j];
     return v;
   }

@@ -245,20 +245,39 @@ void weight::ChanUST(dse::ver4 &Ver4) {
           }
         }
       }
+    } else {
+      for (auto &pair : bubble.Pair) {
+        if (pair.Channel == dse::T) {
+          double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
+          Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
+          for (int l = Ver4.Loopidx; l < Ver4.Loopidx + Ver4.LoopNum; ++l) {
+            Weight *= Fermi.Green(Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
+                                  Var.CurrScale) *
+                      Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
+                                  Var.CurrScale);
+          }
+          double Factor =
+              pow(Para.Lambda / (8.0 * PI), Ver4.LoopNum) *
+              pow(8.0 * PI / (DirQ * DirQ + Para.Lambda + Para.Mass2),
+                  Ver4.LoopNum + 1);
+          Ver4.Weight[0](DIR) += Weight * Factor;
+        } else if (pair.Channel == dse::U) {
+          double DirQ = (*LegK0[INR] - *LegK0[OUTL]).norm();
+          Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
+          for (int l = Ver4.Loopidx; l < Ver4.Loopidx + Ver4.LoopNum; ++l) {
+            Weight *= Fermi.Green(Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
+                                  Var.CurrScale) *
+                      Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
+                                  Var.CurrScale);
+          }
+          double Factor =
+              pow(Para.Lambda / (8.0 * PI), Ver4.LoopNum) *
+              pow(8.0 * PI / (DirQ * DirQ + Para.Lambda + Para.Mass2),
+                  Ver4.LoopNum + 1);
+          Ver4.Weight[0](EX) += Weight * Factor;
+        }
+      }
     }
-    // else {
-    //   for (auto &pair : bubble.Pair) {
-    //     if (pair.Channel == dse::T) {
-    //       double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
-    //       Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
-    //       Weight *= Fermi.Green(Para.Beta / 2.0, *G[S].K, UP, 0,
-    //       Var.CurrScale)
-
-    //     } else if (pair.Channel == dse::U) {
-    //       double DirQ = (*LegK0[INR] - *LegK0[OUTL]).norm();
-    //     }
-    //   }
-    // }
   }
 }
 

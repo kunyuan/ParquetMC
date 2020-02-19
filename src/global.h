@@ -39,7 +39,7 @@ typedef Vec<double, D> momentum;
 /////////// Global Parameter ////////////////////
 struct parameter {
   // physical parameters
-  double Rs, Ef, Kf,
+  double Rs, Ef, Kf, Nf,
       Mu;            // r_s, fermi energy, fermi momentum, chemical potential
   double Beta;       // inverse temperature
   double UVScale;    // the UV bound of the energy scale

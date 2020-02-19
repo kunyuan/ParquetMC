@@ -66,6 +66,7 @@ void InitPara() {
   Para.Kf = Kf;
   Para.Ef = Kf * Kf;
   Para.Mu = Para.Ef;
+  Para.Nf = Kf / (4.0 * PI * PI) * SpinIndex;
   Para.MaxExtMom *= Kf;
   Para.Delta = 1.0;
 

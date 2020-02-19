@@ -26,6 +26,8 @@ struct ver4 {
   int LoopNum;
   int TauNum;
   int Side; // right side vertex is always a full gamma4
+  int InTL;
+  int Loopidx;
 
   bool IsFullVer4;
   bool RenormVer4;  // renormalize the current vertex
