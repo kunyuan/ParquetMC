@@ -18,7 +18,7 @@ void weight::Initialization() {
 
   // vector<dse::channel> Chan = {dse::T, dse::U, dse::S};
   vector<dse::channel> Chan = {dse::I, dse::T, dse::U, dse::S, dse::SIGMA};
-  for (int c = 0; c < 5; c++)
+  for (int c = 0; c < 4; c++)
     for (int order = 1; order <= Para.Order; order++) {
       vector<dse::channel> chan;
       if (c < 4)
@@ -260,7 +260,7 @@ void weight::ChanUST(dse::ver4 &Ver4) {
               pow(Para.Lambda / (8.0 * PI), Ver4.LoopNum) *
               pow(8.0 * PI / (DirQ * DirQ + Para.Lambda + Para.Mass2),
                   Ver4.LoopNum + 1);
-          Ver4.Weight[0](DIR) += Weight * Factor;
+          Ver4.Weight[0](DIR) += -Weight * Factor;
         } else if (pair.Channel == dse::U) {
           double DirQ = (*LegK0[INR] - *LegK0[OUTL]).norm();
           Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
@@ -274,7 +274,7 @@ void weight::ChanUST(dse::ver4 &Ver4) {
               pow(Para.Lambda / (8.0 * PI), Ver4.LoopNum) *
               pow(8.0 * PI / (DirQ * DirQ + Para.Lambda + Para.Mass2),
                   Ver4.LoopNum + 1);
-          Ver4.Weight[0](EX) += Weight * Factor;
+          Ver4.Weight[0](EX) += -Weight * Factor;
         }
       }
     }

@@ -85,7 +85,7 @@ struct parameter {
 //////////   Diagram  ////////////////////////////
 const int MaxOrder = 9;              // Max diagram order
 const int MaxLoopNum = MaxOrder + 3; // Max diagram order
-const int MaxMomNum = get_power<2, MaxOrder + 1>::value * 8;
+const int MaxMomNum = get_power<2, MaxOrder + 1>::value * 32;
 const int MaxTauNum = MaxOrder + 1; // Max tau number in one group
 
 //////////   Generic Global Constants  /////////////////

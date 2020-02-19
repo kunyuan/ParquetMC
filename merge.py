@@ -4,16 +4,19 @@ import re
 import glob
 import time
 import numpy as np
+from color import *
 
 SleepTime = 5
 SpinIndex = 2
 
+order = None
 rs = None
 Lambda = None
 Mass2 = None
 Beta = None
 Charge2 = None
 TotalStep = None
+OrderStr = None
 BetaStr = None
 rsStr = None
 ChargeStr = None
@@ -23,6 +26,8 @@ LambdaStr = None
 with open("inlist", "r") as file:
     line = file.readline()
     para = line.split(" ")
+    OrderStr = para[0]
+    order = int(OrderStr)
     BetaStr = para[1]
     Beta = float(BetaStr)
     rsStr = para[2]
@@ -42,7 +47,8 @@ Channel = [0, 1, 2, 3]
 # Channel = [3]
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
-Order = [0, ]
+Order = range(order+1)
+# Order = [0, 1, 2, 3, ]
 
 folder = "./Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, Mass2Str)
 
@@ -63,7 +69,7 @@ DataErr = {}  # key: (order, channel)
 
 #############  3D  ######################################
 kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
-Nf = kF/2.0/np.pi**2
+Nf = kF/4.0/np.pi**2*SpinIndex
 Bubble = 0.0971916  # 3D, Beta=10, rs=1
 Step = None
 
@@ -95,7 +101,7 @@ def PrintInfo(Channel, Data, DataErr):
     Data[:, 1] *= Nf
     DataErr[:, 0] *= Nf
     DataErr[:, 1] *= Nf
-    print "\n{0}     Q/kF,    Data,    Error".format(Channel)
+    print "{0}     Q/kF,    Data,    Error".format(Channel)
     qData0 = Data[:, 0]
     print "As: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
         ExtMomBin[i], qData0[i], DataErr[i, 0])
@@ -212,23 +218,29 @@ while True:
         # construct bare interaction
         AngHalf = np.arccos(AngleBin)/2.0
         Bare = np.zeros(2)
-        Bare[0] -= 8.0*np.pi/Mass2
-        ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2)
+        Bare[0] -= 8.0*np.pi/(Mass2+Lambda)
+        ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2+Lambda)
         Bare[1] += AngleIntegation(ExBare, 0)
         Bare = SpinMapping(Bare)
 
-        o = 0
-        qData = sum([Data[(o, i)] for i in range(4)])
-        qDataErr = sum([DataErr[(o, i)] for i in range(4)])
-        qData[o, :] += Bare[:]
+        qData = np.zeros_like(Data[(1, 0)])
+        qData[0, :] += Bare[:]
+        qDataErr = np.zeros_like(DataErr[(1, 0)])
+        for o in Order[1:]:
+            print green("Order {0}".format(o))
+            qData += sum([Data[(o, i)] for i in range(4)])
+            qDataErr += sum([DataErr[(o, i)] for i in range(4)])
+            # PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
+            # PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
+            # PrintInfo("U", Data[(o, 2)], DataErr[(o, 2)])
+            # PrintInfo("S", Data[(o, 3)], DataErr[(o, 3)])
+            PrintInfo("Sum", qData, qDataErr)
+            # print "\n"
 
-        PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
-        PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
-        PrintInfo("U", Data[(o, 2)], DataErr[(o, 2)])
-        PrintInfo("S", Data[(o, 3)], DataErr[(o, 3)])
-        # qData = Data[(o, 1)]+Data[(o, 2)]+Data[(o, 3)]
-        # qDataErr = DataErr[(o, 1)]+DataErr[(o, 2)]+DataErr[(o, 3)]
-        PrintInfo("Sum", qData, qDataErr)
+        qData = sum([Data[(0, i)] for i in range(4)])
+        qData[0, :] += Bare[:]
+        qDataErr = sum([DataErr[(0, i)] for i in range(4)])
+        PrintInfo("\nTotal", qData, qDataErr)
 
     if Step >= TotalStep:
         print "End of Simulation!"
