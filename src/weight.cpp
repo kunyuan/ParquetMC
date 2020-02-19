@@ -162,24 +162,24 @@ void weight::ChanUST(dse::ver4 &Ver4) {
       else
         bubble.ProjFactor[chan] = 1.0;
 
-    if (bubble.IsProjected) {
-      double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
-      if (DirQ < 3.0 * Para.Kf) {
-        Ratio = Para.Kf / (*LegK0[INL]).norm();
-        *bubble.LegK[T][INL] = *LegK0[INL] * Ratio;
-        Ratio = Para.Kf / (*LegK0[INR]).norm();
-        *bubble.LegK[T][INR] = *LegK0[INR] * Ratio;
-        // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
-        // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
-        // double x=
-        double Factor = exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
-        bubble.ProjFactor[T] = Factor;
-        bubble.ProjFactor[U] = Factor;
-        bubble.ProjFactor[S] = Factor;
-        // if (DirQ < EPS)
-        //   bubble.ProjFactor[T] = 1.0;
-      }
-    }
+    // if (bubble.IsProjected) {
+    //   double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
+    //   if (DirQ < 0.0 * Para.Kf) {
+    //     Ratio = Para.Kf / (*LegK0[INL]).norm();
+    //     *bubble.LegK[T][INL] = *LegK0[INL] * Ratio;
+    //     Ratio = Para.Kf / (*LegK0[INR]).norm();
+    //     *bubble.LegK[T][INR] = *LegK0[INR] * Ratio;
+    //     // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
+    //     // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
+    //     // double x=
+    //     double Factor = exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
+    //     bubble.ProjFactor[T] = Factor;
+    //     bubble.ProjFactor[U] = Factor;
+    //     bubble.ProjFactor[S] = Factor;
+    //     // if (DirQ < EPS)
+    //     //   bubble.ProjFactor[T] = 1.0;
+    //   }
+    // }
 
     for (auto &chan : bubble.Channel) {
       array<momentum *, 4> &LegK = bubble.LegK[chan];
@@ -209,41 +209,56 @@ void weight::ChanUST(dse::ver4 &Ver4) {
         }
       }
 
-    // for vertex4 with one or more loops
-    for (auto &pair : bubble.Pair) {
-      if (abs(bubble.ProjFactor[pair.Channel]) < EPS)
-        continue;
-      ver4 &LVer = pair.LVer;
-      ver4 &RVer = pair.RVer;
-      Vertex4(LVer);
-      Vertex4(RVer);
+    if (!bubble.IsProjected) {
+      // for vertex4 with one or more loops
+      for (auto &pair : bubble.Pair) {
+        if (abs(bubble.ProjFactor[pair.Channel]) < EPS)
+          continue;
+        ver4 &LVer = pair.LVer;
+        ver4 &RVer = pair.RVer;
+        Vertex4(LVer);
+        Vertex4(RVer);
 
-      for (auto &map : pair.Map) {
-        Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
-        Weight *= G[0](map.G0T) * G[pair.Channel](map.GT);
-        auto &CWeight = Ver4.Weight[map.Tidx];
-        auto &LWeight = LVer.Weight[map.LVerTidx];
-        auto &RWeight = RVer.Weight[map.RVerTidx];
-        if (pair.Channel == T) {
-          CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(DIR) * SpinIndex +
-                                    LWeight(DIR) * RWeight(EX) +
-                                    LWeight(EX) * RWeight(DIR));
-          CWeight(EX) += Weight * LWeight(EX) * RWeight(EX);
-        } else if (pair.Channel == U) {
-          CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) * SpinIndex +
-                                   LWeight(DIR) * RWeight(EX) +
-                                   LWeight(EX) * RWeight(DIR));
-          CWeight(DIR) += Weight * LWeight(EX) * RWeight(EX);
-        } else if (pair.Channel == S) {
-          // see the note "code convention"
-          CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(EX) +
-                                    LWeight(EX) * RWeight(DIR));
+        for (auto &map : pair.Map) {
+          Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
+          Weight *= G[0](map.G0T) * G[pair.Channel](map.GT);
+          auto &CWeight = Ver4.Weight[map.Tidx];
+          auto &LWeight = LVer.Weight[map.LVerTidx];
+          auto &RWeight = RVer.Weight[map.RVerTidx];
+          if (pair.Channel == T) {
+            CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(DIR) * SpinIndex +
+                                      LWeight(DIR) * RWeight(EX) +
+                                      LWeight(EX) * RWeight(DIR));
+            CWeight(EX) += Weight * LWeight(EX) * RWeight(EX);
+          } else if (pair.Channel == U) {
+            CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) * SpinIndex +
+                                     LWeight(DIR) * RWeight(EX) +
+                                     LWeight(EX) * RWeight(DIR));
+            CWeight(DIR) += Weight * LWeight(EX) * RWeight(EX);
+          } else if (pair.Channel == S) {
+            // see the note "code convention"
+            CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(EX) +
+                                      LWeight(EX) * RWeight(DIR));
 
-          CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) +
-                                   LWeight(EX) * RWeight(EX));
+            CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) +
+                                     LWeight(EX) * RWeight(EX));
+          }
         }
       }
     }
+    // else {
+    //   for (auto &pair : bubble.Pair) {
+    //     if (pair.Channel == dse::T) {
+    //       double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
+    //       Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
+    //       Weight *= Fermi.Green(Para.Beta / 2.0, *G[S].K, UP, 0,
+    //       Var.CurrScale)
+
+    //     } else if (pair.Channel == dse::U) {
+    //       double DirQ = (*LegK0[INR] - *LegK0[OUTL]).norm();
+    //     }
+    //   }
+    // }
   }
 }
 

@@ -51,6 +51,8 @@ ver4 verDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
     return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, false, false);
   else if (Type == BARE)
     return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, false, false, false);
+  else if (Type == RENORMALIZED)
+    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, true, true);
   else
     ABORT("Not implemented!");
 }
