@@ -16,95 +16,57 @@ namespace dse {
 using namespace std;
 
 enum caltype { BARE, RG, PARQUET, RENORMALIZED, VARIATIONAL };
-enum channel { I = 0, T, U, S, SIGMA };
+enum channel { I = 0, T, U, S, IC, TC, UC, SC };
+const double SymFactor[8] = {1.0, -1.0, 1.0, 0.5, -1.0, 1.0, -0.5};
 
 struct bubble;
 struct envelope;
 
+class gList {
+public:
+  vector<array<int, 2>> T;
+  vector<double> Weight;
+};
+
 struct ver4 {
   int ID;
+  int Side; // right side vertex is always a full gamma4
   int LoopNum;
   int TauNum;
-  int Side; // right side vertex is always a full gamma4
   int InTL;
   int Loopidx;
-  int ProjTidx; // the Tidx of the projected Weight, assume all external T are
-  // the same after the projection
   bool HasBeenBoxed; // if this vertex has been the children of a boxed parent
                      // vertex
 
-  bool IsFullVer4;
-  bool RenormVer4;  // renormalize the current vertex
-  bool RexpandBare; // reexpand the coupling in the left vertex
+  vector<channel> Channel; // list of channels except I
 
-  vector<bubble> Bubble;     // bubble diagrams and its counter diagram
-  vector<envelope> Envelope; // envelop diagrams and its counter diagram
+  /////////// bubble diagrams ////////////////////
+  array<momentum, 8> K; // momentum for internal K
+  array<gList, 8> G;
+  // G lists for each channel, G0 is shared for all diagrams
+  vector<pair> Pair; // different arrangement of LVer and RVer
+  ///////////////////////////////////////////////
 
-  array<momentum *, 4> LegK;        // external legK index
+  // vector<envelope> Envelope; // envelop diagrams and its counter diagram
+
   vector<array<int, 4>> T;          // external T list
   vector<ver::weightMatrix> Weight; // size: equal to T.size()
 };
 
 //////////////// Bubble diagrams /////////////////////////////
-
-class gMatrix {
-public:
-  gMatrix() {
-    _TauNum = 0;
-    _InTL = 0;
-  }
-  gMatrix(int TauNum, int InTL, momentum *k) {
-    _TauNum = TauNum;
-    _InTL = InTL;
-    K = k;
-    _G.resize(TauNum * TauNum);
-    for (auto &g : _G)
-      g = 0.0;
-  }
-  double &operator()(int l, int r) {
-    return _G[(l - _InTL) * _TauNum + r - _InTL];
-  }
-
-  double &operator()(const array<int, 2> &t) {
-    return _G[(t[IN] - _InTL) * _TauNum + t[OUT] - _InTL];
-  }
-
-  momentum *K;
-
-private:
-  int _TauNum;
-  int _InTL;
-  vector<double> _G;
-};
-
-struct mapT2 {
+struct index {
   int LVerTidx; // LVer T index
   int RVerTidx; // RVer T index
   // map LVer T index and RVer T index to merged T index
-  int Tidx; // three channels
-  // LVer T and RVer T to Internal T for G1 and G2
-  array<int, 2> G0T; // the shared G
-  array<int, 2> GT;
+  int Tidx;
+  // LVer T and RVer T to Internal G1 and G2
+  array<int, 2> Gidx; // G1 and G2 index
 };
 
 struct pair {
   ver4 LVer;
   ver4 RVer;
-  channel Channel;
-  double SymFactor;
-  vector<mapT2> Map;
-};
-
-struct bubble {
-  int InTL;
-  bool IsProjected;
-  bool HasTU;
-  bool HasS;
-  vector<channel> Channel; // list of channels except I
-  array<double, 4> ProjFactor;
-  array<array<momentum *, 4>, 4> LegK; // legK index for different channel
-  array<gMatrix, 4> G;
-  vector<pair> Pair; // different Tau arrangement and channel
+  vector<index> Map;
 };
 
 //////////////// Envelope diagrams /////////////////////////////
