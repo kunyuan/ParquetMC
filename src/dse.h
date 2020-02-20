@@ -28,6 +28,8 @@ struct ver4 {
   int Side; // right side vertex is always a full gamma4
   int InTL;
   int Loopidx;
+  int ProjTidx; // the Tidx of the projected Weight, assume all external T are
+                // the same after the projection
 
   bool IsFullVer4;
   bool RenormVer4;  // renormalize the current vertex

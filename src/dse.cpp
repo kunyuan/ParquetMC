@@ -170,6 +170,8 @@ vector<mapT2> CreateMapT2(ver4 &Ver4, ver4 LVer, ver4 RVer, channel Chan,
 
       // add T array into the T pool of the vertex
       Tidx = AddToTList(Ver4.T, LegT[Chan]);
+      if (IsProjected)
+        Ver4.ProjTidx = Tidx;
       Map.push_back(mapT2{lt, rt, Tidx, G0T, GT[Chan]});
     }
   return Map;

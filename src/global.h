@@ -27,7 +27,7 @@ const int TauBinSize = 128;
 const int SigmaMomBinSize = 128;
 const int SigmaTauBinSize = 128;
 const int TauBasisNum = 32;
-const int SpinIndex = 2;
+const int SpinIndex = 1;
 
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
 enum obstype { SCATTERING, LANDAU };
@@ -85,7 +85,7 @@ struct parameter {
 //////////   Diagram  ////////////////////////////
 const int MaxOrder = 9;              // Max diagram order
 const int MaxLoopNum = MaxOrder + 3; // Max diagram order
-const int MaxMomNum = get_power<2, MaxOrder + 1>::value * 32;
+const int MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
 const int MaxTauNum = MaxOrder + 1; // Max tau number in one group
 
 //////////   Generic Global Constants  /////////////////
