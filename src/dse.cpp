@@ -266,12 +266,26 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
 
       if (c == U || c == T) {
         if (!IsProjected) {
-          Pair.LVer =
-              Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, S}, LEFT,
-                     Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
-          Pair.RVer =
-              Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
-                     Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
+          // Pair.LVer =
+          //     Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, S}, LEFT,
+          //            Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
+          // Pair.RVer =
+          //     Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
+          //            Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
+
+          Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1,
+                             {
+                                 I,
+                             },
+                             LEFT, Ver4.RenormVer4, Ver4.RexpandBare, false,
+                             HasBeenBoxed);
+          Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx,
+                             {
+                                 I,
+                                 T,
+                             },
+                             RIGHT, Ver4.RenormVer4, Ver4.RenormVer4, true,
+                             HasBeenBoxed);
         } else {
           Pair.LVer =
               Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I}, LEFT,
