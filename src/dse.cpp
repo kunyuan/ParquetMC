@@ -23,68 +23,57 @@ int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> T) {
   return TList.size() - 1;
 }
 
-momentum *verDiag::NextMom() {
-  MomNum += 1;
-  ASSERT_ALLWAYS(MomNum < MaxMomNum, "Too many momentum variables! " << MomNum);
-  return &(*LoopMom)[MomNum - 1];
+int AddToTList(vector<array<int, 2>> &TList, const array<int, 2> T) {
+  // find the T array in the list, if failed, create a new array
+  for (int i = 0; i < TList.size(); i++) {
+    auto t = TList[i];
+    if (t[OUT] == T[OUT] && t[IN] == T[IN])
+      return i;
+  }
+  TList.push_back(T);
+  return TList.size() - 1;
 }
 
-ver4 verDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
-                    vector<channel> Channel, caltype Type) {
+ver4 verDiag::Build(int LoopNum, vector<channel> Channel, caltype Type) {
   ASSERT_ALLWAYS(LoopNum > 0, "LoopNum must be larger than zero!");
   DiagNum = 0;
   MomNum = MaxLoopNum;
-  LoopMom = &loopMom;
-  array<momentum *, 4> LegK;
   // if (Channel.size() == 1 && Channel[0] == S) {
   //   LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
   // } else {
   //   LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
   // }
 
-  if (Channel.size() == 1) {
-    LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
-    // LegK = {&(*LoopMom)[1], &(*LoopMom)[1], &(*LoopMom)[2], &(*LoopMom)[2]};
-  }
+  // if (Channel.size() == 1) {
+  //   LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
+  //   // LegK = {&(*LoopMom)[1], &(*LoopMom)[1], &(*LoopMom)[2],
+  //   &(*LoopMom)[2]};
+  // }
 
-  if (Type == PARQUET)
-    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, false, false,
-                  false);
-  else if (Type == BARE)
-    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, false, false, false,
-                  false);
+  if (Type == BARE)
+    return Vertex(0, LoopNum, 3, Channel, LEFT, false);
   else if (Type == RENORMALIZED)
-    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, true, true, false);
+    return Vertex(0, LoopNum, 3, Channel, RIGHT, false);
   else
     ABORT("Not implemented!");
 }
 
-ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
-                     int LoopIndex, vector<channel> Channel, int Side,
-                     bool RenormVer4, bool RexpandBare, bool IsFullVer4,
-                     bool HasBeenBoxed) {
+ver4 verDiag::Vertex(int InTL, int LoopNum, int LoopIndex,
+                     vector<channel> Channel, int Side, bool HasBeenBoxed) {
   ver4 Ver4;
   Ver4.ID = DiagNum;
   DiagNum++;
   Ver4.LoopNum = LoopNum;
   Ver4.TauNum = LoopNum + 1;
-  Ver4.LegK = LegK;
   Ver4.Side = Side;
   Ver4.InTL = InTL;
   Ver4.Loopidx = LoopIndex;
-  Ver4.IsFullVer4 = IsFullVer4;
-  Ver4.RenormVer4 = RenormVer4;
-  Ver4.RexpandBare = RexpandBare;
   Ver4.HasBeenBoxed = HasBeenBoxed;
-
-  // ASSERT_ALLWAYS(
-  //     RexpandBare && RenormVer4,
-  //     "RenormVer4 and RexpandBare can not be true at the same time!");
 
   vector<channel> UST;
   vector<channel> II;
   for (auto &chan : Channel) {
-    if (chan == I)
+    if (chan == I || chan == IC)
       II.push_back(chan);
     else
       UST.push_back(chan);
@@ -99,22 +88,22 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
     Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, false);
 
     // counter diagrams if the vertex is on the right
-    if (IsFullVer4) {
-      if (Ver4.RenormVer4) {
-        Ver4 = ChanI(Ver4, II, InTL, LoopNum, LoopIndex, true);
-        Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, true);
-      }
-    } else {
-      if (Ver4.RexpandBare) {
-        // counter diagrams if the vertex is on the left
-        Ver4 = ChanI(Ver4, {I}, InTL, LoopNum, LoopIndex, true);
-        // Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);
-        if (Ver4.HasBeenBoxed)
-          Ver4 = ChanUST(Ver4, {T}, InTL, LoopNum, LoopIndex, true);
-        else
-          Ver4 = ChanUST(Ver4, {T, U}, InTL, LoopNum, LoopIndex, true);
-      }
-    }
+    // if (IsFullVer4) {
+    //   if (Ver4.RenormVer4) {
+    //     Ver4 = ChanI(Ver4, II, InTL, LoopNum, LoopIndex, true);
+    //     Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, true);
+    //   }
+    // } else {
+    //   if (Ver4.RexpandBare) {
+    //     // counter diagrams if the vertex is on the left
+    //     Ver4 = ChanI(Ver4, {I}, InTL, LoopNum, LoopIndex, true);
+    //     // Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);
+    //     if (Ver4.HasBeenBoxed)
+    //       Ver4 = ChanUST(Ver4, {T}, InTL, LoopNum, LoopIndex, true);
+    //     else
+    //       Ver4 = ChanUST(Ver4, {T, U}, InTL, LoopNum, LoopIndex, true);
+    //   }
+    // }
   }
 
   Ver4.Weight.resize(Ver4.T.size());
@@ -126,31 +115,19 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
 
 ver4 verDiag::Ver0(ver4 Ver4, int InTL) {
   ////////////// bare interaction ///////////
-  // if (Ver4.Side == LEFT)
-  //   // Side==left, then make sure INL Tau are the last TauIndex
-  //   Ver4.T.push_back({InTL, InTL, InTL, InTL});
-  // else
-  //   // Side==right, then make sure INR Tau are the last TauIndex
-  //   Ver4.T.push_back({InTL + 1, InTL + 1, InTL + 1, InTL + 1});
-
-  // if (Ver4.RexpandBare == true) {
-  //   //////////// dressed interaction ///////////
-  //   Ver4.T.push_back({InTL, InTL, InTL + 1, InTL + 1});
-  //   Ver4.T.push_back({InTL, InTL + 1, InTL + 1, InTL});
-  // }
-
   Ver4.T.push_back({InTL, InTL, InTL, InTL});
   return Ver4;
 }
 
-vector<mapT2> CreateMapT2(ver4 &Ver4, ver4 LVer, ver4 RVer, channel Chan,
-                          bool IsProjected) {
+vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
+                                channel Chan) {
   ///////////   External and Internal Tau  ////////////////
-  vector<mapT2> Map;
-  array<int, 2> G0T;
-  array<array<int, 2>, 4> GT;
-  array<array<int, 4>, 4> LegT;
+  vector<indexMap> Map;
+  int GT0, GT;
+  array<int, 4> LegT;
   int Tidx;
+  ASSERT_ALLWAYS(Chan != I && Chan != IC,
+                 "CreateIndexMap is not for I and IC channel!");
 
   for (int lt = 0; lt < LVer.T.size(); ++lt)
     for (int rt = 0; rt < RVer.T.size(); ++rt) {
@@ -158,29 +135,35 @@ vector<mapT2> CreateMapT2(ver4 &Ver4, ver4 LVer, ver4 RVer, channel Chan,
       auto &LvT = LVer.T[lt];
       auto &RvT = RVer.T[rt];
 
-      G0T = {LvT[OUTR], RvT[INL]};
-      GT[T] = {RvT[OUTL], LvT[INR]};
-      GT[U] = {RvT[OUTL], LvT[INR]};
-      GT[S] = {LvT[OUTL], RvT[INR]};
+      GT0 = AddToTList(Ver4.G[0].T, {LvT[OUTR], RvT[INL]});
 
-      if (IsProjected == false) {
-        LegT[T] = {LvT[INL], LvT[OUTL], RvT[INR], RvT[OUTR]};
-        LegT[U] = {LvT[INL], RvT[OUTR], RvT[INR], LvT[OUTL]};
-        LegT[S] = {LvT[INL], RvT[OUTL], LvT[INR], RvT[OUTR]};
-      } else {
-        // LegT[T] = {LvT[INL], LvT[INL], RvT[INR], RvT[INR]};
-        // LegT[U] = {LvT[INL], RvT[INR], RvT[INR], LvT[INL]};
-        LegT[S] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
+      array<int, 2> GTpair;
 
-        LegT[T] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
-        LegT[U] = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
+      if (Chan == T || Chan == TC || Chan == U || Chan == UC)
+        GTpair = {RvT[OUTL], LvT[INR]};
+      else if (Chan == S || Chan == SC)
+        GTpair = {LvT[OUTL], RvT[INR]};
+
+      GT = AddToTList(Ver4.G[Chan].T, GTpair);
+      //  G0T = {LvT[OUTR], RvT[INL]};
+      // GT[T] = {RvT[OUTL], LvT[INR]};
+      // GT[U] = {RvT[OUTL], LvT[INR]};
+      // GT[S] = {LvT[OUTL], RvT[INR]};
+
+            if (Chan == T)
+        LegT = {LvT[INL], LvT[OUTL], RvT[INR], RvT[OUTR]};
+      else if (Chan == U)
+        LegT = {LvT[INL], RvT[OUTR], RvT[INR], LvT[OUTL]};
+      else if (Chan == S)
+        LegT = {LvT[INL], RvT[OUTL], LvT[INR], RvT[OUTR]};
+      else {
+        // counterterms are equal-time
+        LegT = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
       }
 
       // add T array into the T pool of the vertex
-      Tidx = AddToTList(Ver4.T, LegT[Chan]);
-      if (IsProjected)
-        Ver4.ProjTidx = Tidx;
-      Map.push_back(mapT2{lt, rt, Tidx, G0T, GT[Chan]});
+      Tidx = AddToTList(Ver4.T, LegT);
+      Map.push_back(indexMap{lt, rt, Tidx, GT0, GT});
     }
   return Map;
 }

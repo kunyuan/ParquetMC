@@ -22,8 +22,7 @@ const double SymFactor[8] = {1.0, -1.0, 1.0, 0.5, -1.0, 1.0, -0.5};
 struct bubble;
 struct envelope;
 
-class gList {
-public:
+struct gList {
   vector<array<int, 2>> T;
   vector<double> Weight;
 };
@@ -37,7 +36,6 @@ struct ver4 {
   int Loopidx;
   bool HasBeenBoxed; // if this vertex has been the children of a boxed parent
                      // vertex
-
   vector<channel> Channel; // list of channels except I
 
   /////////// bubble diagrams ////////////////////
@@ -45,28 +43,28 @@ struct ver4 {
   array<gList, 8> G;
   // G lists for each channel, G0 is shared for all diagrams
   vector<pair> Pair; // different arrangement of LVer and RVer
-  ///////////////////////////////////////////////
 
   // vector<envelope> Envelope; // envelop diagrams and its counter diagram
 
-  vector<array<int, 4>> T;          // external T list
-  vector<ver::weightMatrix> Weight; // size: equal to T.size()
+  vector<array<int, 4>> T;                // external T list
+  vector<ver::weightMatrix> Weight;       // size: equal to T.size()
+  array<ver::weightMatrix, 4> ChanWeight; // weight of four channel
 };
 
-//////////////// Bubble diagrams /////////////////////////////
-struct index {
+struct indexMap {
   int LVerTidx; // LVer T index
   int RVerTidx; // RVer T index
   // map LVer T index and RVer T index to merged T index
   int Tidx;
-  // LVer T and RVer T to Internal G1 and G2
-  array<int, 2> Gidx; // G1 and G2 index
+  // LVer T and RVer T to Internal G0 and G
+  int G0idx;
+  int Gidx;
 };
 
 struct pair {
   ver4 LVer;
   ver4 RVer;
-  vector<index> Map;
+  vector<indexMap> Map;
 };
 
 //////////////// Envelope diagrams /////////////////////////////
@@ -113,8 +111,7 @@ struct envelope {
 
 class verDiag {
 public:
-  ver4 Build(array<momentum, MaxMomNum> &loopmom, int LoopNum,
-             vector<channel> Channel, caltype Type);
+  ver4 Build(int LoopNum, vector<channel> Channel, caltype Type);
   string ToString(const ver4 &Vertex, string indent = "", int Level = 0);
 
 private:
@@ -122,9 +119,8 @@ private:
   int MomNum = MaxLoopNum;
   array<momentum, MaxMomNum> *LoopMom; // all momentum loop variables
 
-  ver4 Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum, int LoopIndex,
-              vector<channel> Channel, int Side, bool RenormVer4,
-              bool RexpandBare, bool IsFullVer4, bool HasBeenBoxed);
+  ver4 Vertex(int InTL, int LoopNum, int LoopIndex, vector<channel> Channel,
+              int Side, bool HasBeenBoxed);
 
   ver4 Ver0(ver4 Ver4, int InTL);
   ver4 ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
