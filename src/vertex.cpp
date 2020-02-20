@@ -95,7 +95,7 @@ void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   WeightEx = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
   if (Boxed)
     WeightEx = 0.0;
-  WeightEx = 0.0;
+  // WeightEx = 0.0;
 
   // WeightEx = 0.0;
   // if (CounterTermOrder > 0) {
