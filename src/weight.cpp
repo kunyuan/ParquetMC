@@ -116,15 +116,14 @@ void weight::Ver0(ver4 &Ver4) {
   array<momentum *, 4> &K = Ver4.LegK;
   double &WeightDir = Ver4.Weight[0](DIR); // direct, reducible
   double &WeightEx = Ver4.Weight[0](EX);   // exchange, irreducible
-  int VerIndex = Ver4.T[0][INL];
-  int CTOrder = Var.CounterTermOrder[VerIndex];
   // Ver4.Weight[0] = 1.0 / Para.Beta;
   if (Ver4.RexpandBare) {
     // bare+quantum correction
-    VerQTheta.Interaction(K, 0.0, true, CTOrder, WeightDir, WeightEx);
+    VerQTheta.Interaction(K, 0.0, true, Ver4.HasBeenBoxed, WeightDir, WeightEx);
   } else {
     // only bare coupling
-    VerQTheta.Interaction(K, 0.0, false, CTOrder, WeightDir, WeightEx);
+    VerQTheta.Interaction(K, 0.0, false, Ver4.HasBeenBoxed, WeightDir,
+                          WeightEx);
   }
   return;
 }
@@ -150,16 +149,16 @@ void weight::ChanUST(dse::ver4 &Ver4) {
 
   // if (Ver4.ContainProj) {
   // }
-
   for (auto &bubble : Ver4.Bubble) {
     auto &G = bubble.G;
     const momentum &K0 = *G[0].K;
     int InTL = bubble.InTL;
 
     for (auto &chan : bubble.Channel)
-      if (bubble.IsProjected)
-        bubble.ProjFactor[chan] = 0.0;
-      else
+      if (Ver4.HasBeenBoxed || bubble.IsProjected) {
+        bubble.ProjFactor[chan] = Para.Lambda / (8.0 * PI * Para.Nf);
+        // bubble.ProjFactor[chan] = -1.0;
+      } else
         bubble.ProjFactor[chan] = 1.0;
 
     // if (bubble.IsProjected) {
@@ -191,108 +190,106 @@ void weight::ChanUST(dse::ver4 &Ver4) {
         *G[S].K = *LegK[INL] + *LegK[INR] - K0;
     }
 
-    for (int lt = InTL; lt < InTL + Ver4.TauNum - 1; ++lt)
-      for (int rt = InTL + 1; rt < InTL + Ver4.TauNum; ++rt) {
-        double dTau = Var.Tau[rt] - Var.Tau[lt];
-        G[0](lt, rt) = Fermi.Green(dTau, K0, UP, 0, Var.CurrScale);
-        for (auto &chan : bubble.Channel) {
-          // if (chan > 3)
-          //   ABORT("too many chan " << chan);
-          if (abs(bubble.ProjFactor[chan]) > EPS)
-            if (chan == S)
-              // LVer to RVer
-              G[S](lt, rt) = Fermi.Green(dTau, *G[S].K, UP, 0, Var.CurrScale);
-            else
-              // RVer to LVer
-              G[chan](rt, lt) =
-                  Fermi.Green(-dTau, *G[chan].K, UP, 0, Var.CurrScale);
-        }
-      }
-
-    if (!bubble.IsProjected) {
-      // for vertex4 with one or more loops
-      for (auto &pair : bubble.Pair) {
-        if (abs(bubble.ProjFactor[pair.Channel]) < EPS)
-          continue;
-        ver4 &LVer = pair.LVer;
-        ver4 &RVer = pair.RVer;
-        Vertex4(LVer);
-        Vertex4(RVer);
-
-        for (auto &map : pair.Map) {
-          Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
-          Weight *= G[0](map.G0T) * G[pair.Channel](map.GT);
-          auto &CWeight = Ver4.Weight[map.Tidx];
-          auto &LWeight = LVer.Weight[map.LVerTidx];
-          auto &RWeight = RVer.Weight[map.RVerTidx];
-          if (pair.Channel == T) {
-            CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(DIR) * SpinIndex +
-                                      LWeight(DIR) * RWeight(EX) +
-                                      LWeight(EX) * RWeight(DIR));
-            CWeight(EX) += Weight * LWeight(EX) * RWeight(EX);
-          } else if (pair.Channel == U) {
-            CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) * SpinIndex +
-                                     LWeight(DIR) * RWeight(EX) +
-                                     LWeight(EX) * RWeight(DIR));
-            CWeight(DIR) += Weight * LWeight(EX) * RWeight(EX);
-          } else if (pair.Channel == S) {
-            // see the note "code convention"
-            CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(EX) +
-                                      LWeight(EX) * RWeight(DIR));
-
-            CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) +
-                                     LWeight(EX) * RWeight(EX));
+    if (!(Ver4.HasBeenBoxed || bubble.IsProjected)) {
+      for (int lt = InTL; lt < InTL + Ver4.TauNum - 1; ++lt)
+        for (int rt = InTL + 1; rt < InTL + Ver4.TauNum; ++rt) {
+          double dTau = Var.Tau[rt] - Var.Tau[lt];
+          G[0](lt, rt) = Fermi.Green(dTau, K0, UP, 0, Var.CurrScale);
+          for (auto &chan : bubble.Channel) {
+            // if (chan > 3)
+            //   ABORT("too many chan " << chan);
+            if (abs(bubble.ProjFactor[chan]) > EPS)
+              if (chan == S)
+                // LVer to RVer
+                G[S](lt, rt) = Fermi.Green(dTau, *G[S].K, UP, 0, Var.CurrScale);
+              else
+                // RVer to LVer
+                G[chan](rt, lt) =
+                    Fermi.Green(-dTau, *G[chan].K, UP, 0, Var.CurrScale);
           }
         }
-      }
     } else {
-      for (auto chan : bubble.Channel) {
-        if (chan == dse::T) {
-          double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
-          Weight = -1.0;
-          for (int l = Ver4.Loopidx; l < Ver4.Loopidx + Ver4.LoopNum; ++l) {
-            Weight *= Fermi.Green(Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
-                                  Var.CurrScale) *
-                      Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
-                                  Var.CurrScale) *
-                      SpinIndex;
+      for (int lt = InTL; lt < InTL + Ver4.TauNum - 1; ++lt)
+        for (int rt = InTL + 1; rt < InTL + Ver4.TauNum; ++rt) {
+          double dTau = Var.Tau[rt] - Var.Tau[lt];
+          G[0](lt, rt) = Fermi.Green(dTau, K0, UP, 0, Var.CurrScale);
+          for (auto &chan : bubble.Channel) {
+            // if (chan > 3)
+            //   ABORT("too many chan " << chan);
+            if (abs(bubble.ProjFactor[chan]) > EPS)
+              // RVer to LVer
+              G[chan](rt, lt) = Fermi.Green(-dTau, K0, UP, 0, Var.CurrScale);
           }
-          double Factor =
-              pow(-Para.Lambda / (8.0 * PI) / Para.Nf, Ver4.LoopNum) *
-              pow(-8.0 * PI / (DirQ * DirQ + Para.Lambda + Para.Mass2),
-                  Ver4.LoopNum + 1);
-          // cout << Weight << ", " << Factor << ", " << Weight * Factor <<
-          // endl; cout << "Transfer Mom: " << DirQ / Para.Kf << endl; int l =
-          // Ver4.Loopidx; cout << "K1: " << Var.LoopMom[l].norm() / Para.Kf <<
-          // endl; cout << Fermi.Green(Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
-          //                     Var.CurrScale) *
-          //             Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
-          //                         Var.CurrScale)
-          //      << endl;
-          // cout << Fermi.Green(Para.Beta / 4.0, Var.LoopMom[l], UP, 0,
-          //                     Var.CurrScale) *
-          //             Fermi.Green(-Para.Beta / 4.0, Var.LoopMom[l], UP, 0,
-          //                         Var.CurrScale)
-          //      << endl;
-          Ver4.Weight[Ver4.ProjTidx](DIR) += Weight * Factor;
-        } else if (chan == dse::U) {
-          double DirQ = (*LegK0[INR] - *LegK0[OUTL]).norm();
-          Weight = 1.0;
-          for (int l = Ver4.Loopidx; l < Ver4.Loopidx + Ver4.LoopNum; ++l) {
-            Weight *= Fermi.Green(Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
-                                  Var.CurrScale) *
-                      Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
-                                  Var.CurrScale) *
-                      SpinIndex;
-          }
-          double Factor =
-              pow(-Para.Lambda / (8.0 * PI) / Para.Nf, Ver4.LoopNum) *
-              pow(-8.0 * PI / (DirQ * DirQ + Para.Lambda + Para.Mass2),
-                  Ver4.LoopNum + 1);
-          Ver4.Weight[Ver4.ProjTidx](EX) += Weight * Factor;
+        }
+    }
+
+    // for vertex4 with one or more loops
+    for (auto &pair : bubble.Pair) {
+      if (abs(bubble.ProjFactor[pair.Channel]) < EPS)
+        continue;
+      ver4 &LVer = pair.LVer;
+      ver4 &RVer = pair.RVer;
+      Vertex4(LVer);
+      Vertex4(RVer);
+
+      for (auto &map : pair.Map) {
+        Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
+        Weight *= G[0](map.G0T) * G[pair.Channel](map.GT);
+        auto &CWeight = Ver4.Weight[map.Tidx];
+        auto &LWeight = LVer.Weight[map.LVerTidx];
+        auto &RWeight = RVer.Weight[map.RVerTidx];
+        if (pair.Channel == T) {
+          CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(DIR) * SpinIndex +
+                                    LWeight(DIR) * RWeight(EX) +
+                                    LWeight(EX) * RWeight(DIR));
+          CWeight(EX) += Weight * LWeight(EX) * RWeight(EX);
+        } else if (pair.Channel == U) {
+          CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) * SpinIndex +
+                                   LWeight(DIR) * RWeight(EX) +
+                                   LWeight(EX) * RWeight(DIR));
+          CWeight(DIR) += Weight * LWeight(EX) * RWeight(EX);
+        } else if (pair.Channel == S) {
+          // see the note "code convention"
+          CWeight(DIR) += Weight * (LWeight(DIR) * RWeight(EX) +
+                                    LWeight(EX) * RWeight(DIR));
+
+          CWeight(EX) += Weight * (LWeight(DIR) * RWeight(DIR) +
+                                   LWeight(EX) * RWeight(EX));
         }
       }
     }
+    // for (auto chan : bubble.Channel) {
+    //   if (chan == dse::T) {
+    //     double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
+    //     Weight = -1.0;
+    //     for (int l = Ver4.Loopidx; l < Ver4.Loopidx + Ver4.LoopNum; ++l) {
+    //       Weight *= Fermi.Green(Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
+    //                             Var.CurrScale) *
+    //                 Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
+    //                             Var.CurrScale) *
+    //                 SpinIndex;
+    //     }
+    //     double Factor =
+    //         pow(-Para.Lambda / (8.0 * PI) / Para.Nf, Ver4.LoopNum) *
+    //         pow(-8.0 * PI / (DirQ * DirQ + Para.Lambda + Para.Mass2),
+    //             Ver4.LoopNum + 1);
+    //     Ver4.Weight[Ver4.ProjTidx](DIR) += Weight * Factor;
+    //   }
+
+    // cout << Weight << ", " << Factor << ", " << Weight * Factor <<
+    // endl; cout << "Transfer Mom: " << DirQ / Para.Kf << endl; int l =
+    // Ver4.Loopidx; cout << "K1: " << Var.LoopMom[l].norm() / Para.Kf
+    // << endl; cout << Fermi.Green(Para.Beta / 2.0, Var.LoopMom[l], UP,
+    // 0,
+    //                     Var.CurrScale) *
+    //             Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
+    //                         Var.CurrScale)
+    //      << endl;
+    // cout << Fermi.Green(Para.Beta / 4.0, Var.LoopMom[l], UP, 0,
+    //                     Var.CurrScale) *
+    //             Fermi.Green(-Para.Beta / 4.0, Var.LoopMom[l], UP, 0,
+    //                         Var.CurrScale)
+    //      << endl;
   }
 }
 

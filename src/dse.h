@@ -29,7 +29,9 @@ struct ver4 {
   int InTL;
   int Loopidx;
   int ProjTidx; // the Tidx of the projected Weight, assume all external T are
-                // the same after the projection
+  // the same after the projection
+  bool HasBeenBoxed; // if this vertex has been the children of a boxed parent
+                     // vertex
 
   bool IsFullVer4;
   bool RenormVer4;  // renormalize the current vertex
@@ -160,7 +162,7 @@ private:
 
   ver4 Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum, int LoopIndex,
               vector<channel> Channel, int Side, bool RenormVer4,
-              bool RexpandBare, bool IsFullVer4);
+              bool RexpandBare, bool IsFullVer4, bool HasBeenBoxed);
 
   ver4 Ver0(ver4 Ver4, int InTL);
   ver4 ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,

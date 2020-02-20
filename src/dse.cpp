@@ -48,18 +48,21 @@ ver4 verDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
   }
 
   if (Type == PARQUET)
-    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, false, false);
+    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, false, false,
+                  false);
   else if (Type == BARE)
-    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, false, false, false);
+    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, false, false, false,
+                  false);
   else if (Type == RENORMALIZED)
-    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, true, true);
+    return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, true, true, false);
   else
     ABORT("Not implemented!");
 }
 
 ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
                      int LoopIndex, vector<channel> Channel, int Side,
-                     bool RenormVer4, bool RexpandBare, bool IsFullVer4) {
+                     bool RenormVer4, bool RexpandBare, bool IsFullVer4,
+                     bool HasBeenBoxed) {
   ver4 Ver4;
   Ver4.ID = DiagNum;
   DiagNum++;
@@ -72,6 +75,7 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
   Ver4.IsFullVer4 = IsFullVer4;
   Ver4.RenormVer4 = RenormVer4;
   Ver4.RexpandBare = RexpandBare;
+  Ver4.HasBeenBoxed = HasBeenBoxed;
 
   // ASSERT_ALLWAYS(
   //     RexpandBare && RenormVer4,
@@ -104,7 +108,8 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
       if (Ver4.RexpandBare) {
         // counter diagrams if the vertex is on the left
         Ver4 = ChanI(Ver4, {I}, InTL, LoopNum, LoopIndex, true);
-        Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);
+        // Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);
+        Ver4 = ChanUST(Ver4, {T}, InTL, LoopNum, LoopIndex, true);
       }
     }
   }
@@ -257,16 +262,34 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
       int RInTL = InTL + (ol + 1);
       int Rlopidx = LoopIndex + 1 + ol;
 
+      bool HasBeenBoxed = Ver4.HasBeenBoxed || IsProjected;
+
       if (c == U || c == T) {
-        Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, S}, LEFT,
-                           Ver4.RenormVer4, Ver4.RexpandBare, false);
-        Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
-                           Ver4.RenormVer4, Ver4.RenormVer4, true);
+        if (!IsProjected) {
+          Pair.LVer =
+              Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, S}, LEFT,
+                     Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
+          Pair.RVer =
+              Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
+                     Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
+        } else {
+          Pair.LVer =
+              Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I}, LEFT,
+                     Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
+          Pair.RVer =
+              Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T}, RIGHT,
+                     Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
+        }
       } else if (c == S) {
-        Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, T, U}, LEFT,
-                           Ver4.RenormVer4, Ver4.RexpandBare, false);
-        Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
-                           Ver4.RenormVer4, Ver4.RenormVer4, true);
+        if (!IsProjected) {
+          Pair.LVer =
+              Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, T, U}, LEFT,
+                     Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
+          Pair.RVer =
+              Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
+                     Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
+        } else
+          continue;
       }
       Pair.Map = CreateMapT2(Ver4, Pair.LVer, Pair.RVer, c, IsProjected);
       Bubble.Pair.push_back(Pair);
@@ -362,18 +385,20 @@ ver4 verDiag::ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
   array<momentum *, 4> LegK[10];
   vector<channel> ALL = {I, U, S, T};
 
+  bool HasBeenBoxed = Ver4.HasBeenBoxed || IsProjected;
+
   // LD Vertex
   LegK[0] = {InL, G[1].K, G[3].K, G[0].K};
   Env.Ver[0] = Vertex(LegK[0], LDInTL, 0, LoopIndex, ALL, LEFT, Ver4.RenormVer4,
-                      Ver4.RenormVer4, true);
+                      Ver4.RenormVer4, true, HasBeenBoxed);
 
   // LU Vertex
   LegK[1] = {G[1].K, OutL, G[2].K, G[4].K};
   LegK[2] = {G[1].K, OutR, G[2].K, G[6].K};
   Env.Ver[1] = Vertex(LegK[1], LUInTL, 0, LoopIndex, ALL, LEFT, Ver4.RenormVer4,
-                      Ver4.RenormVer4, true);
+                      Ver4.RenormVer4, true, Ver4.HasBeenBoxed);
   Env.Ver[2] = Vertex(LegK[2], LUInTL, 0, LoopIndex, ALL, LEFT, Ver4.RenormVer4,
-                      Ver4.RenormVer4, true);
+                      Ver4.RenormVer4, true, HasBeenBoxed);
 
   // RD Vertex
   LegK[3] = {G[0].K, G[2].K, InR, G[5].K};
@@ -381,7 +406,7 @@ ver4 verDiag::ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
   LegK[5] = {G[0].K, G[2].K, G[8].K, OutL};
   for (int i = 3; i <= 5; i++)
     Env.Ver[i] = Vertex(LegK[i], RDInTL, 0, LoopIndex, ALL, RIGHT,
-                        Ver4.RenormVer4, Ver4.RenormVer4, true);
+                        Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
 
   // RU Vertex
   LegK[6] = {G[4].K, G[3].K, G[5].K, OutR};
@@ -390,7 +415,7 @@ ver4 verDiag::ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
   LegK[9] = {G[6].K, G[3].K, InR, G[8].K};
   for (int i = 6; i <= 9; i++)
     Env.Ver[i] = Vertex(LegK[i], RUInTL, 0, LoopIndex, ALL, RIGHT,
-                        Ver4.RenormVer4, Ver4.RenormVer4, true);
+                        Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
 
   //////// T map (for all four envelope diagram) //////
   // four diagrams have the same sub-vertex Tau configuration
@@ -412,11 +437,12 @@ string verDiag::ToString(const ver4 &Ver4, string indent, int Level) {
   //     indent +
   //     "==============================================================\n";
   string Info =
-      indent +
-      fmt::format("├Level: {0}, {1}Ver4 ID: {2}, LoopNum: {3}, "
-                  "RexpandBare: {4}, RenormVer4: {5}, IsFullVer4: {6}\n",
-                  Level, SideStr, Ver4.ID, Ver4.LoopNum, Ver4.RexpandBare,
-                  Ver4.RenormVer4, Ver4.IsFullVer4);
+      indent + fmt::format("├Level: {0}, {1}Ver4 ID: {2}, LoopNum: {3}, "
+                           "RexpandBare: {4}, RenormVer4: {5}, IsFullVer4: "
+                           "{6}, Boxed: {7}\n",
+                           Level, SideStr, Ver4.ID, Ver4.LoopNum,
+                           Ver4.RexpandBare, Ver4.RenormVer4, Ver4.IsFullVer4,
+                           Ver4.HasBeenBoxed);
   Info += indent + "├─T: ";
   for (auto &t : Ver4.T)
     Info +=
