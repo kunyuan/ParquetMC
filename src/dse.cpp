@@ -109,7 +109,10 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
         // counter diagrams if the vertex is on the left
         Ver4 = ChanI(Ver4, {I}, InTL, LoopNum, LoopIndex, true);
         // Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);
-        Ver4 = ChanUST(Ver4, {T}, InTL, LoopNum, LoopIndex, true);
+        if (Ver4.HasBeenBoxed)
+          Ver4 = ChanUST(Ver4, {T}, InTL, LoopNum, LoopIndex, true);
+        else
+          Ver4 = ChanUST(Ver4, {T, U}, InTL, LoopNum, LoopIndex, true);
       }
     }
   }
@@ -266,26 +269,12 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
 
       if (c == U || c == T) {
         if (!IsProjected) {
-          // Pair.LVer =
-          //     Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, S}, LEFT,
-          //            Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
-          // Pair.RVer =
-          //     Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
-          //            Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
-
-          Pair.LVer = Vertex(LLegK[c], InTL, ol, LoopIndex + 1,
-                             {
-                                 I,
-                             },
-                             LEFT, Ver4.RenormVer4, Ver4.RexpandBare, false,
-                             HasBeenBoxed);
-          Pair.RVer = Vertex(RLegK[c], RInTL, oR, Rlopidx,
-                             {
-                                 I,
-                                 T,
-                             },
-                             RIGHT, Ver4.RenormVer4, Ver4.RenormVer4, true,
-                             HasBeenBoxed);
+          Pair.LVer =
+              Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, S}, LEFT,
+                     Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
+          Pair.RVer =
+              Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
+                     Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
         } else {
           Pair.LVer =
               Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I}, LEFT,
