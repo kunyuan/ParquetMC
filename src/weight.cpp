@@ -16,23 +16,13 @@ using namespace dse;
 
 void weight::Initialization() {
 
-  // vector<dse::channel> Chan = {dse::T, dse::U, dse::S};
-  vector<dse::channel> Chan = {dse::I, dse::T, dse::U, dse::S, dse::SIGMA};
-  for (int c = 0; c < 4; c++)
-    for (int order = 1; order <= Para.Order; order++) {
-      vector<dse::channel> chan;
-      if (c < 4)
-        chan = {Chan[c]};
-      else
-        chan = {dse::I, dse::T, dse::U, dse::S};
-      // Ver4Root[order][c] =
-      //     VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
-      // Ver4Root[order][c] =
-      //     VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::BARE);
-      Ver4Root[order][c] =
-          VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::RENORMALIZED);
-      LOG_INFO(VerDiag.ToString(Ver4Root[order][c]));
-    }
+  vector<dse::channel> Chan = {dse::I,  dse::T,  dse::U,  dse::S,
+                               dse::IC, dse::TC, dse::UC, dse::SC};
+  for (int order = 1; order <= Para.Order; order++) {
+    vector<dse::channel> chan;
+    Ver4Root[order] = VerDiag.Vertex(order, 3, 0, chan, RIGHT, false);
+    LOG_INFO(VerDiag.ToString(Ver4Root[order]));
+  }
 }
 
 ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
@@ -272,38 +262,6 @@ void weight::ChanUST(dse::ver4 &Ver4) {
         }
       }
     }
-    // for (auto chan : bubble.Channel) {
-    //   if (chan == dse::T) {
-    //     double DirQ = (*LegK0[INL] - *LegK0[OUTL]).norm();
-    //     Weight = -1.0;
-    //     for (int l = Ver4.Loopidx; l < Ver4.Loopidx + Ver4.LoopNum; ++l) {
-    //       Weight *= Fermi.Green(Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
-    //                             Var.CurrScale) *
-    //                 Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
-    //                             Var.CurrScale) *
-    //                 SpinIndex;
-    //     }
-    //     double Factor =
-    //         pow(-Para.Lambda / (8.0 * PI) / Para.Nf, Ver4.LoopNum) *
-    //         pow(-8.0 * PI / (DirQ * DirQ + Para.Lambda + Para.Mass2),
-    //             Ver4.LoopNum + 1);
-    //     Ver4.Weight[Ver4.ProjTidx](DIR) += Weight * Factor;
-    //   }
-
-    // cout << Weight << ", " << Factor << ", " << Weight * Factor <<
-    // endl; cout << "Transfer Mom: " << DirQ / Para.Kf << endl; int l =
-    // Ver4.Loopidx; cout << "K1: " << Var.LoopMom[l].norm() / Para.Kf
-    // << endl; cout << Fermi.Green(Para.Beta / 2.0, Var.LoopMom[l], UP,
-    // 0,
-    //                     Var.CurrScale) *
-    //             Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[l], UP, 0,
-    //                         Var.CurrScale)
-    //      << endl;
-    // cout << Fermi.Green(Para.Beta / 4.0, Var.LoopMom[l], UP, 0,
-    //                     Var.CurrScale) *
-    //             Fermi.Green(-Para.Beta / 4.0, Var.LoopMom[l], UP, 0,
-    //                         Var.CurrScale)
-    //      << endl;
   }
 }
 

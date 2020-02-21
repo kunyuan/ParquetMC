@@ -34,35 +34,9 @@ int AddToTList(vector<array<int, 2>> &TList, const array<int, 2> T) {
   return TList.size() - 1;
 }
 
-ver4 verDiag::Build(int LoopNum, vector<channel> Channel, caltype Type) {
-  ASSERT_ALLWAYS(LoopNum > 0, "LoopNum must be larger than zero!");
-  DiagNum = 0;
-  MomNum = MaxLoopNum;
-  // if (Channel.size() == 1 && Channel[0] == S) {
-  //   LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
-  // } else {
-  //   LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
-  // }
-
-  // if (Channel.size() == 1) {
-  //   LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
-  //   // LegK = {&(*LoopMom)[1], &(*LoopMom)[1], &(*LoopMom)[2],
-  //   &(*LoopMom)[2]};
-  // }
-
-  // if (Type == BARE)
-  //   return Vertex(0, LoopNum, 3, Channel, LEFT, false);
-  // else if (Type == RENORMALIZED)
-  return Vertex(0, LoopNum, 3, Channel, RIGHT, false);
-  // else
-  // ABORT("Not implemented!");
-}
-
-ver4 verDiag::Vertex(int InTL, int LoopNum, int LoopIndex,
+ver4 verDiag::Vertex(int LoopNum, int LoopIndex, int InTL,
                      vector<channel> Channel, int Side, bool InBox) {
   ver4 Ver4;
-  Ver4.ID = DiagNum;
-  DiagNum++;
   Ver4.LoopNum = LoopNum;
   Ver4.TauNum = LoopNum + 1;
   Ver4.Side = Side;
@@ -73,6 +47,10 @@ ver4 verDiag::Vertex(int InTL, int LoopNum, int LoopIndex,
   vector<channel> UST;
   vector<channel> II;
   for (auto &chan : Channel) {
+    // if one wants the bare diagrams, filter all counter diagrams!
+    if (Para.Type == BARE)
+      if (chan == IC || chan == TC || chan == UC || chan == SC)
+        continue;
     if (chan == I || chan == IC)
       II.push_back(chan);
     else
@@ -81,40 +59,20 @@ ver4 verDiag::Vertex(int InTL, int LoopNum, int LoopIndex,
 
   if (LoopNum == 0) {
     // the same for left and right vertex with loopnum=0
-    Ver4 = Ver0(Ver4, InTL);
+    Ver4 = Ver0(Ver4);
   } else {
     // normal diagram
-    Ver4 = ChanI(Ver4, II, InTL, LoopNum, LoopIndex, false);
-    Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex);
-
-    // counter diagrams if the vertex is on the right
-    // if (IsFullVer4) {
-    //   if (Ver4.RenormVer4) {
-    //     Ver4 = ChanI(Ver4, II, InTL, LoopNum, LoopIndex, true);
-    //     Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, true);
-    //   }
-    // } else {
-    //   if (Ver4.RexpandBare) {
-    //     // counter diagrams if the vertex is on the left
-    //     Ver4 = ChanI(Ver4, {I}, InTL, LoopNum, LoopIndex, true);
-    //     // Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);
-    //     if (Ver4.HasBeenBoxed)
-    //       Ver4 = ChanUST(Ver4, {T}, InTL, LoopNum, LoopIndex, true);
-    //     else
-    //       Ver4 = ChanUST(Ver4, {T, U}, InTL, LoopNum, LoopIndex, true);
-    //   }
-    // }
+    Ver4 = ChanI(Ver4, II);
+    Ver4 = ChanUST(Ver4, UST);
   }
 
   Ver4.Weight.resize(Ver4.T.size());
-  for (auto &d : Ver4.Weight)
-    d.SetZero();
-
   return Ver4;
 }
 
-ver4 verDiag::Ver0(ver4 Ver4, int InTL) {
+ver4 verDiag::Ver0(ver4 Ver4) {
   ////////////// bare interaction ///////////
+  int InTL = Ver4.InTL;
   Ver4.T.push_back({InTL, InTL, InTL, InTL});
   return Ver4;
 }
@@ -177,18 +135,18 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
   return Map;
 }
 
-ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
-                      int LoopIndex) {
-
-  for (int ol = 0; ol < LoopNum; ol++) {
+ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel) {
+  for (int ol = 0; ol < Ver4.LoopNum; ol++) {
     for (auto &chan : Channel) {
       pair Pair;
       ////////////////////   Right SubVer  ///////////////////
-      int oR = LoopNum - 1 - ol;
-      int RInTL = InTL + (ol + 1);
-      int Llopidx = LoopIndex + 1;
-      int Rlopidx = LoopIndex + 1 + ol;
+      int InTL = Ver4.InTL;
+      int oR = Ver4.LoopNum - 1 - ol;
+      int RInTL = Ver4.InTL + (ol + 1);
+      int Llopidx = Ver4.Loopidx + 1;
+      int Rlopidx = Ver4.Loopidx + 1 + ol;
       bool InBox = Ver4.InBox;
+      vector<channel> FULLCHAN = {I, T, U, S, IC, TC, UC, SC};
 
       if (chan == TC || chan == UC || chan == SC)
         InBox = true;
@@ -199,15 +157,13 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
       case TC:
       case UC:
         Pair.LVer =
-            Vertex(InTL, ol, Llopidx, {I, U, S, IC, UC, SC, TC}, LEFT, InBox);
-        Pair.RVer = Vertex(RInTL, oR, Rlopidx, {I, T, U, S, IC, TC, UC, SC},
-                           RIGHT, InBox);
+            Vertex(ol, Llopidx, InTL, {I, U, S, IC, UC, SC, TC}, LEFT, InBox);
+        Pair.RVer = Vertex(RInTL, oR, Rlopidx, FULLCHAN, RIGHT, InBox);
       case S:
       case SC:
         Pair.LVer =
-            Vertex(InTL, ol, Llopidx, {I, T, U, IC, TC, UC, SC}, LEFT, InBox);
-        Pair.RVer = Vertex(RInTL, oR, Rlopidx, {I, T, U, S, IC, TC, UC, SC},
-                           RIGHT, InBox);
+            Vertex(ol, Llopidx, InTL, {I, T, U, IC, TC, UC, SC}, LEFT, InBox);
+        Pair.RVer = Vertex(RInTL, oR, Rlopidx, FULLCHAN, RIGHT, InBox);
         break;
       default:
         ABORT("The channel does not exist!");
@@ -263,15 +219,11 @@ vector<mapT4> CreateMapT4(ver4 &Ver4, ver4 LDVer, ver4 LUVer, ver4 RDVer,
   return Map;
 }
 
-ver4 verDiag::ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
-                    int LoopIndex, bool IsProjected) {
-  if (Channel.size() == 0 || Channel[0] != I)
+ver4 verDiag::ChanI(ver4 Ver4, vector<channel> Channel) {
+  if (Channel.size() == 0)
     return Ver4;
 
-  if (LoopNum != 3)
-    return Ver4;
-
-  if (IsProjected)
+  if (Ver4.LoopNum != 3)
     return Ver4;
 
   // envelope Env;
@@ -358,17 +310,15 @@ ver4 verDiag::ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
 string verDiag::ToString(const ver4 &Ver4, string indent, int Level) {
   string SideStr;
   if (Ver4.Side == LEFT)
-    SideStr = "L";
+    SideStr = "LEFT";
   else
-    SideStr = "R";
+    SideStr = "RIGHT";
   // string Info =
   //     indent +
   //     "==============================================================\n";
   string Info =
-      indent + fmt::format("├Level: {0}, {1}Ver4 ID: {2}, LoopNum: {3}, "
-                           "RexpandBare: {4}, RenormVer4: {5}, IsFullVer4: "
-                           "{6}, Boxed: {7}\n",
-                           Level, SideStr, Ver4.ID, Ver4.LoopNum, Ver4.InBox);
+      indent + fmt::format("├Level: {0}, {1}, LoopNum: {2}, Boxed: {3}\n",
+                           Level, SideStr, Ver4.LoopNum, Ver4.InBox);
   Info += indent + "├─T: ";
   for (auto &t : Ver4.T)
     Info +=

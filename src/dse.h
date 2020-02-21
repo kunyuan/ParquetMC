@@ -15,7 +15,6 @@ extern parameter Para;
 namespace dse {
 using namespace std;
 
-enum caltype { BARE, RG, PARQUET, RENORMALIZED, VARIATIONAL };
 enum channel { I = 0, T, U, S, IC, TC, UC, SC };
 const double SymFactor[8] = {1.0, -1.0, 1.0, 0.5, -1.0, 1.0, -0.5};
 
@@ -28,11 +27,10 @@ struct gList {
 };
 
 struct ver4 {
-  int ID;
   int Side; // right side vertex is always a full gamma4
-  int LoopNum;
   int TauNum;
   int InTL;
+  int LoopNum;
   int Loopidx;
   bool InBox; // if this vertex has been the children of a boxed parent
               // vertex
@@ -112,22 +110,14 @@ struct envelope {
 
 class verDiag {
 public:
-  ver4 Build(int LoopNum, vector<channel> Channel, caltype Type);
+  ver4 Vertex(int LoopNum, int LoopIndex, int InTL, vector<channel> Channel,
+              int Side, bool InBox);
   string ToString(const ver4 &Vertex, string indent = "", int Level = 0);
 
 private:
-  int DiagNum = 0;
-  int MomNum = MaxLoopNum;
-  array<momentum, MaxMomNum> *LoopMom; // all momentum loop variables
-
-  ver4 Vertex(int InTL, int LoopNum, int LoopIndex, vector<channel> Channel,
-              int Side, bool InBox);
-
-  ver4 Ver0(ver4 Ver4, int InTL);
-  ver4 ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
-             int LoopIndex, bool IsProjected = false);
-  ver4 ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
-               int LoopIndex);
+  ver4 Ver0(ver4 Ver4);
+  ver4 ChanI(ver4 Ver4, vector<channel> Channel);
+  ver4 ChanUST(ver4 Ver4, vector<channel> Channel);
   momentum *NextMom();
 };
 
