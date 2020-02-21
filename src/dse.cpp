@@ -48,9 +48,9 @@ ver4 verDiag::Vertex(int LoopNum, int LoopIndex, int InTL,
   vector<channel> II;
   for (auto &chan : Channel) {
     // if one wants the bare diagrams, filter all counter diagrams!
-    if (Para.Type == BARE)
-      if (chan == IC || chan == TC || chan == UC || chan == SC)
-        continue;
+    if (Para.Type == BARE && chan >= IC)
+      continue;
+
     if (chan == I || chan == IC)
       II.push_back(chan);
     else
@@ -103,10 +103,6 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
         ABORT("The channel does not exist!");
 
       GT = AddToTList(Ver4.G[Chan].T, GTpair);
-      //  G0T = {LvT[OUTR], RvT[INL]};
-      // GT[T] = {RvT[OUTL], LvT[INR]};
-      // GT[U] = {RvT[OUTL], LvT[INR]};
-      // GT[S] = {LvT[OUTL], RvT[INR]};
 
       switch (Chan) {
       case T:
@@ -136,18 +132,20 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
 }
 
 ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel) {
+  int InTL = Ver4.InTL;
+  vector<channel> GAMMA4 = {I, T, U, S, IC, TC, UC, SC};
+  vector<channel> F = {I, U, S, IC, TC, UC, SC};
+  vector<channel> V = {I, T, U, IC, TC, UC, SC};
+
   for (int ol = 0; ol < Ver4.LoopNum; ol++) {
     for (auto &chan : Channel) {
       pair Pair;
       ////////////////////   Right SubVer  ///////////////////
-      int InTL = Ver4.InTL;
       int oR = Ver4.LoopNum - 1 - ol;
       int RInTL = Ver4.InTL + (ol + 1);
       int Llopidx = Ver4.Loopidx + 1;
-      int Rlopidx = Ver4.Loopidx + 1 + ol;
-      bool InBox = Ver4.InBox;
-      vector<channel> FULLCHAN = {I, T, U, S, IC, TC, UC, SC};
 
+      bool InBox = Ver4.InBox;
       if (chan == TC || chan == UC || chan == SC)
         InBox = true;
 
@@ -156,14 +154,12 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel) {
       case U:
       case TC:
       case UC:
-        Pair.LVer =
-            Vertex(ol, Llopidx, InTL, {I, U, S, IC, UC, SC, TC}, LEFT, InBox);
-        Pair.RVer = Vertex(RInTL, oR, Rlopidx, FULLCHAN, RIGHT, InBox);
+        Pair.LVer = Vertex(ol, Llopidx, InTL, F, LEFT, InBox);
+        Pair.RVer = Vertex(oR, Llopidx + ol, RInTL, GAMMA4, RIGHT, InBox);
       case S:
       case SC:
-        Pair.LVer =
-            Vertex(ol, Llopidx, InTL, {I, T, U, IC, TC, UC, SC}, LEFT, InBox);
-        Pair.RVer = Vertex(RInTL, oR, Rlopidx, FULLCHAN, RIGHT, InBox);
+        Pair.LVer = Vertex(ol, Llopidx, InTL, V, LEFT, InBox);
+        Pair.RVer = Vertex(oR, Llopidx + ol, RInTL, GAMMA4, RIGHT, InBox);
         break;
       default:
         ABORT("The channel does not exist!");
