@@ -34,6 +34,7 @@ struct ver4 {
   int Loopidx;
   bool InBox; // if this vertex has been the children of a boxed parent
               // vertex
+  bool HasCT; // contain projected counter-term or not
   vector<channel> Channel; // list of channels except I
 
   /////////// bubble diagrams ////////////////////

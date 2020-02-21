@@ -79,9 +79,8 @@ verQTheta::verQTheta() {
     c.Initialize();
 }
 
-void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
-                            bool IsRenorm, bool Boxed, double &WeightDir,
-                            double &WeightEx) {
+void verQTheta::Interaction(const momentum *LegK[4], double Tau, bool IsRenorm,
+                            bool Boxed, double &WeightDir, double &WeightEx) {
 
   // cout << (*LegK[INL])[0] << endl;
   momentum DiQ = *LegK[INL] - *LegK[OUTL];

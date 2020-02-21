@@ -57,6 +57,14 @@ ver4 verDiag::Vertex(int LoopNum, int LoopIndex, int InTL,
       UST.push_back(chan);
   }
 
+  // check if there is any counter-term or not
+  Ver4.HasCT = false;
+  if (Para.Type != BARE) {
+    for (auto &chan : Channel)
+      if (chan >= 4)
+        Ver4.HasCT = true;
+  }
+
   if (LoopNum == 0) {
     // the same for left and right vertex with loopnum=0
     Ver4 = Ver0(Ver4);

@@ -16,10 +16,9 @@ using namespace dse;
 
 void weight::Initialization() {
 
-  vector<dse::channel> Chan = {dse::I,  dse::T,  dse::U,  dse::S,
-                               dse::IC, dse::TC, dse::UC, dse::SC};
+  vector<channel> Chan = {I, T, U, S, IC, TC, UC, SC};
   for (int order = 1; order <= Para.Order; order++) {
-    vector<dse::channel> chan;
+    vector<channel> chan;
     Ver4Root[order] = VerDiag.Vertex(order, 3, 0, chan, RIGHT, false);
     LOG_INFO(VerDiag.ToString(Ver4Root[order]));
   }
@@ -35,31 +34,17 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
     // if (Channel != dse::T)
     //   return 0.0;
     Weight.SetZero();
-    // if (Channel == dse::U || Channel == dse::S || Channel == dse::I) {
-    //   //   // cout << "Reject" << Channel << endl;
-    //   if (LoopNum == Para.Order)
-    //     return Weight;
-    // }
 
-    ver4 &Root = Ver4Root[LoopNum][Channel];
+    ver4 &Root = Ver4Root[LoopNum];
     if (Root.Weight.size() != 0) {
 
-      // if (Para.Counter == 12898) {
-      //   cout << Root.ID << endl;
-      // }
+      for (int c = 0; c < 4; ++c)
+        Root.ChanWeight[c].SetZero();
 
-      *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
-      *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
+      auto OUTL = Var.LoopMom[1] - Var.LoopMom[0];
+      auto OUTR = Var.LoopMom[2] + Var.LoopMom[0];
 
-      // if (Channel == dse::S) {
-      //   *Root.LegK[INR] = Var.LoopMom[0] - Var.LoopMom[1];
-      //   *Root.LegK[OUTR] = Var.LoopMom[0] - Var.LoopMom[2];
-      // } else {
-      //   *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
-      //   *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
-      // }
-
-      Vertex4(Root);
+      Vertex4(Root, {&Var.LoopMom[1], &OUTL, &Var.LoopMom[2], &OUTR});
 
       if (Channel <= 4) {
         double Factor = 1.0 / pow(2.0 * PI, D * LoopNum);
@@ -69,74 +54,43 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
           Weight(DIR) += w(DIR) * Factor;
           Weight(EX) += w(EX) * Factor;
         }
-
-        /////// Measure Landau Parameters  /////////////////////////
-        // for (int i = 0; i < Root.Weight.size(); ++i) {
-        //   double dTau = Var.Tau[Root.T[i][INR]] - Var.Tau[Root.T[i][INL]];
-        //   auto &w = Root.Weight[i];
-        //   Weight(DIR) += w(DIR) * Factor * cos(2.0 * PI / Para.Beta * dTau);
-        //   Weight(EX) += w(EX) * Factor * cos(2.0 * PI / Para.Beta * dTau);
-        // }
-
-      } else if (Channel == dse::SIGMA) {
-        Weight(EX) = 0.0;
-        double Factor = 1.0 / pow(2.0 * PI, D * (LoopNum + 2));
-        /////////// Evaluate Sigma ////////////////////////////////
-        for (int i = 0; i < Root.Weight.size(); ++i) {
-          double dTau1 = Var.Tau[Root.T[i][INR]] - Var.Tau[LoopNum + 1];
-          double G1 = Fermi.Green(dTau1, *Root.LegK[INR], UP, 0, Var.CurrScale);
-
-          double dTau2 = Var.Tau[LoopNum + 1] - Var.Tau[Root.T[i][OUTR]];
-          double G2 =
-              Fermi.Green(dTau2, *Root.LegK[OUTR], UP, 0, Var.CurrScale);
-
-          double dTau3 = Var.Tau[LoopNum + 1] - Var.Tau[Root.T[i][OUTL]];
-          double G3 =
-              Fermi.Green(dTau3, *Root.LegK[OUTL], UP, 0, Var.CurrScale);
-
-          Weight(DIR) = Root.Weight[i].Sum() * G1 * G2 * G3 / 2.0 * Factor;
-        }
       }
     }
   }
   return Weight;
 }
 
-void weight::Ver0(ver4 &Ver4) {
-  array<momentum *, 4> &K = Ver4.LegK;
+void weight::Ver0(ver4 &Ver4, const momentum *LegK[4]) {
   double &WeightDir = Ver4.Weight[0](DIR); // direct, reducible
   double &WeightEx = Ver4.Weight[0](EX);   // exchange, irreducible
   // Ver4.Weight[0] = 1.0 / Para.Beta;
-  if (Ver4.RexpandBare) {
-    // bare+quantum correction
-    VerQTheta.Interaction(K, 0.0, true, Ver4.HasBeenBoxed, WeightDir, WeightEx);
-  } else {
+  if (Para.Type == BARE || (Para.Type == LEFT && Para.Type == PARQUET)) {
     // only bare coupling
-    VerQTheta.Interaction(K, 0.0, false, Ver4.HasBeenBoxed, WeightDir,
-                          WeightEx);
+    VerQTheta.Interaction(LegK, 0.0, false, Ver4.InBox, WeightDir, WeightEx);
+  } else {
+    // bare+quantum correction
+    VerQTheta.Interaction(LegK, 0.0, true, Ver4.InBox, WeightDir, WeightEx);
   }
   return;
 }
-void weight::Vertex4(dse::ver4 &Ver4) {
+void weight::Vertex4(ver4 &Ver4, const momentum *LegK[4]) {
   // cout << Ver4.LoopNum << endl;
   if (Ver4.LoopNum == 0) {
-    Ver0(Ver4);
+    Ver0(Ver4, LegK);
   } else {
     for (auto &w : Ver4.Weight)
       w.SetZero();
 
-    ChanUST(Ver4);
+    ChanUST(Ver4, LegK);
     if (Ver4.LoopNum >= 3)
       ChanI(Ver4);
   }
   return;
 }
 
-void weight::ChanUST(dse::ver4 &Ver4) {
+void weight::ChanUST(ver4 &Ver4, const momentum *LegK[4]) {
   double Weight = 0.0;
   double Ratio;
-  array<momentum *, 4> &LegK0 = Ver4.LegK;
-
   // array<momentum *, 4> LLegK[4], RLegK[4];
 
   // ////////////////// T channel ////////////////////////////
@@ -153,6 +107,19 @@ void weight::ChanUST(dse::ver4 &Ver4) {
 
   // if (Ver4.ContainProj) {
   // }
+  momentum &K0 = Var.LoopMom[Ver4.Loopidx];
+  for (auto chan : Ver4.Channel) {
+    if (chan == T)
+      Ver4.K[chan] = *LegK[OUTL] + K0 - *LegK[INL];
+    else if (chan == U)
+      Ver4.K[chan] = *LegK[OUTR] + K0 - *LegK[INL];
+    else if (chan == S)
+      Ver4.K[chan] = *LegK[INL] + *LegK[INR] - K0;
+  }
+  ///////////// Check if the projected counter-terms exist or not ///////
+
+  //////////////////////////////////////////////////////////////////////
+
   for (auto &bubble : Ver4.Bubble) {
     auto &G = bubble.G;
     const momentum &K0 = *G[0].K;
@@ -175,10 +142,9 @@ void weight::ChanUST(dse::ver4 &Ver4) {
     //     // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
     //     // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
     //     // double x=
-    //     double Factor = exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
-    //     bubble.ProjFactor[T] = Factor;
-    //     bubble.ProjFactor[U] = Factor;
-    //     bubble.ProjFactor[S] = Factor;
+    //     double Factor = exp(-DirQ * DirQ / (Para.Delta * Para.Kf *
+    //     Para.Kf)); bubble.ProjFactor[T] = Factor; bubble.ProjFactor[U] =
+    //     Factor; bubble.ProjFactor[S] = Factor;
     //     // if (DirQ < EPS)
     //     //   bubble.ProjFactor[T] = 1.0;
     //   }
