@@ -101,11 +101,6 @@ markov::markov() : Var(Weight.Var) {
   ///=== Do all kinds of test  =======================//
   ///==== Set Reweighting factor =====================//
   AdjustGroupReWeight();
-
-  for (int i = 0; i < MaxTauNum; i++) {
-    Var.CounterTermOrder[i] = 0;
-  }
-  Var.CurrCTOrder = 0;
 };
 
 void markov::Measure() {

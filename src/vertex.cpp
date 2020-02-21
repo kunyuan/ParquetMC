@@ -12,13 +12,6 @@ using namespace std;
 
 extern parameter Para;
 
-// double sum2(const momentum &Mom) {
-//   double Sum2 = 0.0;
-//   for (int i = 0; i < D; i++)
-//     Sum2 += Mom[i] * Mom[i];
-//   return Sum2;
-// }
-
 verTensor::verTensor() {
 
   AngleIndex = ExtMomBinSize * 2;
@@ -79,102 +72,24 @@ verQTheta::verQTheta() {
     c.Initialize();
 }
 
-void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
-                            bool IsRenorm, bool Boxed, double &WeightDir,
-                            double &WeightEx) {
+weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
+                                    double Tau, bool IsRenorm, bool Boxed) {
 
-  // cout << (*LegK[INL])[0] << endl;
+  weightMatrix Weight;
+
   momentum DiQ = *LegK[INL] - *LegK[OUTL];
   momentum ExQ = *LegK[INL] - *LegK[OUTR];
 
   double kDiQ = DiQ.norm();
   double kExQ = ExQ.norm();
 
-  WeightDir =
+  Weight[DIR] =
       -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
-  WeightEx = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+  Weight[EX] =
+      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
   if (Boxed)
-    WeightEx = 0.0;
-  // WeightEx = 0.0;
-
-  // WeightEx = 0.0;
-  // if (CounterTermOrder > 0) {
-  //   WeightDir =
-  //       WeightDir * pow(Para.Lambda / 8.0 / PI * WeightDir,
-  //       CounterTermOrder);
-  //   WeightEx =
-  //       WeightEx * pow(Para.Lambda / 8.0 / PI * WeightEx, CounterTermOrder);
-  // }
-  // WeightDir = -WeightDir; // the interaction carries a sign -1
-  // WeightEx = 0.0;
-  // return 1.0 / Para.Beta;
-  if (IsRenorm) {
-    // return;
-    if (kDiQ < 0.0 * Para.Kf) {
-      int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
-      double Factor = exp(-kDiQ * kDiQ / (Para.Delta * Para.Kf * Para.Kf));
-      WeightDir += Chan[ver::T].Interaction(AngleIndex, 0, DIR) * Factor;
-      WeightEx += Chan[ver::T].Interaction(AngleIndex, 0, EX) * Factor;
-      WeightDir += Chan[ver::U].Interaction(AngleIndex, 0, DIR) * Factor;
-      WeightEx += Chan[ver::U].Interaction(AngleIndex, 0, EX) * Factor;
-      WeightDir += Chan[ver::S].Interaction(AngleIndex, 0, DIR) * Factor;
-      WeightEx += Chan[ver::S].Interaction(AngleIndex, 0, EX) * Factor;
-      return;
-    } else
-      return;
-
-    // return 0.0;
-    // if (k < Para.MaxExtMom) {
-    //   int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]),
-    //   AngBinSize);
-    // if ((k > 0.2 * Para.Kf && k < 1.8 * Para.Kf) || k > 2.2 * Para.Kf)
-    //   return 0.0;
-    // else
-    // if (AngleIndex >= AngBinSize) {
-    //   // cout << (*LegK[INL])[0] << endl;
-    //   // cout << (*LegK[INL])[1] << endl;
-    //   // cout << (*LegK[INL])[2] << endl;
-    //   ABORT("Angle too large!" << AngleIndex);
-    // }
-    // if (ExtQ >= ExtMomBinSize) {
-    //   ABORT("Q too large " << ExtQ);
-    // }
-    // if (TauIndex >= TauBinSize) {
-    //   ABORT("Tau too large " << TauIndex);
-    // }
-
-    // if (k < 0.05 * Para.Kf) {
-    // return EffInterT(AngleIndex, 0)/();
-    // else if (k > 1.8 * Para.Kf && k < 2.2 * Para.Kf) {
-    //   if (((*LegK[INL]).norm() > 0.8 * Para.Kf &&
-    //        (*LegK[INL]).norm() < 1.2 * Para.Kf) &&
-    //       ((*LegK[INR]).norm() > 0.8 * Para.Kf &&
-    //        (*LegK[INR]).norm() < 1.2 * Para.Kf) &&
-    //       ((*LegK[OUTL]).norm() > 0.8 * Para.Kf &&
-    //        (*LegK[OUTL]).norm() < 1.2 * Para.Kf) &&
-    //       ((*LegK[OUTR]).norm() > 0.8 * Para.Kf &&
-    //        (*LegK[OUTR]).norm() < 1.2 * Para.Kf)) {
-    //     return EffInterT(AngBinSize / 2, Mom2Index(2.0 * Para.Kf),
-    //     TauIndex);
-    //     // return 0.5;
-    //     // return EffInterT(AngleIndex, Mom2Index(2.0 * Para.Kf),
-    //     TauIndex);
-    //   } else
-    //     // return EffInterT(AngleIndex, Mom2Index(k), TauIndex);
-    //     return 0.0;
-    // } else
-    //   return 0.0;
-    // double Upper = EffInter(AngleIndex, Mom2Index(k), Tau2Index(Tau));
-    // double Lower = EffInter(AngleIndex, Mom2Index(k), Tau2Index(Tau));
-    // double UpperTau = Index2Tau(TauIndex + 1);
-    // double LowerTau = Index2Tau(TauIndex);
-    // // cout << Upper << " : " << Lower << endl;
-    // return Lower + (Upper - Lower) / (UpperTau - LowerTau) * (Tau -
-    // LowerTau);
-    // } else {
-    //   return 0.0;
-    // }
-  }
+    Weight[EX] = 0.0;
+  return Weight;
 }
 
 void verQTheta::Measure(const momentum &InL, const momentum &InR,

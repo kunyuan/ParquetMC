@@ -42,8 +42,8 @@ void InitPara() {
   LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
 
   // Para.Type = BARE;
-  Para.Type = RENORMALIZED;
-  Para.ObsType = SCATTERING;
+  Para.Type = VARIATIONAL;
+  Para.ObsType = GAMMA_K;
   // Para.ObsType = LANDAU;
 
   // Para.ReWeight = {1.0, 0.8, 0.8, 0.8, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};

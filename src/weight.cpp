@@ -59,17 +59,8 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
 }
 
 void weight::Ver0(ver4 &Ver4) {
-  const auto &LegK = Ver4.LegK;
-  double &WeightDir = Ver4.Weight[0][DIR]; // direct, reducible
-  double &WeightEx = Ver4.Weight[0][EX];   // exchange, irreducible
-  // Ver4.Weight[0] = 1.0 / Para.Beta;
-  if (Para.Type == BARE || (Para.Type == LEFT && Para.Type == PARQUET)) {
-    // only bare coupling
-    VerQTheta.Interaction(LegK, 0.0, false, Ver4.InBox, WeightDir, WeightEx);
-  } else {
-    // bare+quantum correction
-    VerQTheta.Interaction(LegK, 0.0, true, Ver4.InBox, WeightDir, WeightEx);
-  }
+  // only bare coupling
+  Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox);
   return;
 }
 void weight::Vertex4(ver4 &Ver4) {

@@ -30,7 +30,7 @@ const int TauBasisNum = 32;
 const int SPIN = 1;
 
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
-enum obstype { SCATTERING, LANDAU };
+enum obstype { SIGMA, POLAR, GAMMA_K, GAMMA_W };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 
 typedef Vec<double, D> momentum;
@@ -85,7 +85,8 @@ struct parameter {
 //////////   Diagram  ////////////////////////////
 const int MaxOrder = 9;              // Max diagram order
 const int MaxLoopNum = MaxOrder + 3; // Max diagram order
-const int MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
+// const int MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
+const int MaxMomNum = MaxLoopNum;
 const int MaxTauNum = MaxOrder + 1; // Max tau number in one group
 
 //////////   Generic Global Constants  /////////////////
