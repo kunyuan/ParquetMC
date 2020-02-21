@@ -159,7 +159,7 @@ void MonteCarlo() {
       } else if (x < 3.0 / 5.0) {
         Markov.ChangeTau();
       } else if (x < 4.0 / 5.0) {
-        Markov.ChangeChannel();
+        // Markov.ChangeChannel();
         // } else if (x < 5.0 / 5.0) {
         //   Markov.ChangeScale();
         // ;

@@ -46,19 +46,14 @@ markov::markov() : Var(Weight.Var) {
   Var.CurrExtMomBin = 0;
 
   // Var.LoopMom[0].fill(0.0);
-  Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
+  // Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
 
   for (int i = 1; i < D; i++) {
-    Var.LoopMom[1][i] = 0.0;
-    Var.LoopMom[2][i] = 0.0;
+    Var.LoopMom[INL][i] = 0.0;
+    Var.LoopMom[OUTL][i] = 0.0;
   }
-  Var.LoopMom[1][0] = Para.Kf;
-  Var.LoopMom[2][0] = Para.Kf;
-
-  // initialize external tau
-  // Var.Tau[0] = 0.0;
-  // Var.Tau[1] = 1.0e-10; // do not make Tau[1]==Tau[0], otherwise the Green's
-  // function is not well-defined
+  Var.LoopMom[INL][0] = Para.Kf;
+  Var.LoopMom[OUTL][0] = Para.Kf;
 
   Var.CurrTau = Var.Tau[1] - Var.Tau[0];
 

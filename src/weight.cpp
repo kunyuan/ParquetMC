@@ -17,7 +17,7 @@ void weight::Initialization() {
   array<momentum *, 4> ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1],
                                   &Var.LoopMom[2], &Var.LoopMom[3]};
 
-  vector<channel> Chan = {I, T, U, S, IC, TC, UC, SC};
+  vector<channel> Chan = {I, T, U, S, TC, UC};
   for (int order = 1; order <= Para.Order; order++) {
     Ver4Root[order] =
         VerDiag.Vertex(0, order, 4, 0, Chan, ExtLegK, RIGHT, false);
@@ -145,10 +145,12 @@ void weight::ChanUST(ver4 &Ver4) {
         DirW = Lw[EX] * Rw[EX];
         break;
       case S:
-      case SC:
         // see the note "code convention"
         DirW = Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         ExW = Lw[DIR] * Rw[DIR] + Lw[EX] * Rw[EX];
+        break;
+      default:
+        ABORT("Channel does not exist!");
         break;
       }
 

@@ -15,10 +15,10 @@ extern parameter Para;
 namespace dse {
 using namespace std;
 
-enum channel { I = 0, T, U, S, IC, TC, UC, SC };
+enum channel { I = 0, T, U, S, TC, UC };
 const double SymFactor[8] = {1.0, -1.0, 1.0, 0.5, -1.0, 1.0, -0.5};
 
-struct bubble;
+struct pair;
 struct envelope;
 
 struct green {
@@ -41,8 +41,8 @@ struct ver4 {
   array<momentum *, 4> LegK; // external K
 
   /////////// bubble diagrams ////////////////////
-  array<momentum, 8> K; // momentum for internal K
-  array<vector<green>, 8> G;
+  array<momentum, 4> K; // momentum for internal K
+  array<vector<green>, 4> G;
   // G lists for each channel, G0 is shared for all diagrams
   vector<pair> Pair; // different arrangement of LVer and RVer
 
@@ -112,7 +112,6 @@ struct envelope {
 };
 
 ////////////// Vertex Creation Class /////////////////////////////////
-
 class verDiag {
 public:
   ver4 Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
@@ -126,6 +125,10 @@ private:
   ver4 ChanUST(ver4 Ver4, vector<channel> Channel);
   momentum *NextMom();
 };
+
+class sigmaDiag {};
+
+class polarDiag {};
 
 bool verTest();
 

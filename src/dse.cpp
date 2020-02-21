@@ -51,10 +51,10 @@ ver4 verDiag::Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
   vector<channel> II;
   for (auto &chan : Channel) {
     // if one wants the bare diagrams, filter all counter diagrams!
-    if (Para.Type == BARE && chan >= IC)
+    if (Para.Type == BARE && chan >= 4)
       continue;
 
-    if (chan == I || chan == IC)
+    if (chan == I)
       II.push_back(chan);
     else
       UST.push_back(chan);
@@ -95,8 +95,7 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
   int GT0, GT, Tidx;
   array<int, 2> GTpair;
   array<int, 4> LegT;
-  ASSERT_ALLWAYS(Chan != I && Chan != IC,
-                 "CreateIndexMap is not for I and IC channel!");
+  ASSERT_ALLWAYS(Chan != I, "CreateIndexMap is not for I channel!");
 
   for (int lt = 0; lt < LVer.T.size(); ++lt)
     for (int rt = 0; rt < RVer.T.size(); ++rt) {
@@ -108,7 +107,7 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
 
       if (Chan == T || Chan == TC || Chan == U || Chan == UC)
         GTpair = {RvT[OUTL], LvT[INR]};
-      else if (Chan == S || Chan == SC)
+      else if (Chan == S)
         GTpair = {LvT[OUTL], RvT[INR]};
       else
         ABORT("The channel does not exist!");
@@ -127,7 +126,6 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
         break;
       case TC:
       case UC:
-      case SC:
         // counterterms are equal-time
         LegT = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
       default:
@@ -144,11 +142,14 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
 
 ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel) {
   int InTL = Ver4.InTL;
-  vector<channel> FULL = {I, T, U, S, IC, TC, UC, SC};
-  vector<channel> F = {I, U, S, IC, TC, UC, SC};
-  vector<channel> V = {I, T, U, IC, TC, UC, SC};
   auto LegK = Ver4.LegK;
   auto K = Ver4.K;
+
+  vector<channel> FULL = {I, T, U, S, TC, UC};
+  vector<channel> F = {I, U, S, TC, UC};
+  vector<channel> V = {I, T, U, TC, UC};
+  vector<channel> FULL_CT = {I, T, TC};
+  vector<channel> F_CT = {I, TC};
 
   array<momentum *, 4> LLegK[4], RLegK[4];
 
@@ -174,25 +175,26 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel) {
       int Llopidx = Ver4.Loopidx + 1;
       int Rlopidx = Ver4.Loopidx + 1 + ol;
 
-      bool InBox = Ver4.InBox;
-      if (chan == TC || chan == UC || chan == SC)
-        InBox = true;
-
       switch (chan) {
       case T:
       case U:
+        Pair.LVer =
+            Vertex(Level, ol, Llopidx, InTL, F, LLegK[chan], LEFT, Ver4.InBox);
+        Pair.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK[chan], RIGHT,
+                           Ver4.InBox);
+        break;
+      case S:
+        Pair.LVer =
+            Vertex(Level, ol, Llopidx, InTL, V, LLegK[chan], LEFT, Ver4.InBox);
+        Pair.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK[chan], RIGHT,
+                           Ver4.InBox);
+        break;
       case TC:
       case UC:
         Pair.LVer =
-            Vertex(Level, ol, Llopidx, InTL, F, LLegK[chan], LEFT, InBox);
-        Pair.RVer =
-            Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK[chan], RIGHT, InBox);
-      case S:
-      case SC:
-        Pair.LVer =
-            Vertex(Level, ol, Llopidx, InTL, V, LLegK[chan], LEFT, InBox);
-        Pair.RVer =
-            Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK[chan], RIGHT, InBox);
+            Vertex(Level, ol, Llopidx, InTL, F_CT, LLegK[chan], LEFT, true);
+        Pair.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL_CT, RLegK[chan],
+                           RIGHT, true);
         break;
       default:
         ABORT("The channel does not exist!");

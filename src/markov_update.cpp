@@ -122,11 +122,9 @@ void markov::ChangeTau() {
 };
 
 void markov::ChangeMomentum() {
-  int LoopIndex = Random.irn(0, GetLoopNum(Var.CurrOrder) - 1);
-  // int LoopIndex = int(Random.urn() * (Var.CurrGroup->Order + 3));
-
-  // InL momentum is locked
-  if (LoopIndex == INL)
+  int LoopIndex = Random.irn(2, GetLoopNum(Var.CurrOrder) - 1);
+  // the INL, OUTL, OUTR momentum are fixed
+  if (LoopIndex == OUTR)
     return;
 
   Proposed[CHANGE_MOM][Var.CurrOrder]++;
@@ -137,17 +135,10 @@ void markov::ChangeMomentum() {
 
   CurrMom = Var.LoopMom[LoopIndex];
 
-  if (LoopIndex == OUTL) {
-    // transfer momentum
-    Prop = ShiftExtTransferK(Var.CurrExtMomBin, NewExtMomBin);
-    Var.LoopMom[OUTL] = Var.LoopMom[INL] - Para.ExtMomTable[NewExtMomBin];
-    if (Var.LoopMom[LoopIndex].norm() > Para.MaxExtMom) {
-      Var.LoopMom[LoopIndex] = CurrMom;
-      return;
-    }
-  } else if (LoopIndex == 2) {
+  if (LoopIndex == INR) {
     // InR momentum
-    Prop = ShiftExtLegK(CurrMom, Var.LoopMom[LoopIndex]);
+    Prop = ShiftExtLegK(CurrMom, Var.LoopMom[INR]);
+    Var.LoopMom[OUTR] = Var.LoopMom[INR];
   } else {
     Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
   }
@@ -161,47 +152,12 @@ void markov::ChangeMomentum() {
     Var.CurrVersion++;
     Var.CurrWeight = NewWeight;
     Var.CurrAbsWeight = NewAbsWeight;
-    if (LoopIndex == 0)
-      Var.CurrExtMomBin = NewExtMomBin;
   } else {
     Var.LoopMom[LoopIndex] = CurrMom;
+    if (LoopIndex == INR)
+      Var.LoopMom[OUTR] = CurrMom;
   }
 };
-
-void markov::ChangeChannel() {
-  if (Var.CurrOrder == 0)
-    return;
-  double Prop = 1.0;
-  int NewChannel = int(Random.urn() * 4);
-  // Var.CurrChannel = dse::T;
-  // if (Var.CurrChannel == dse::U) {
-  //   Var.CurrChannel = OldChannel;
-  //   return;
-  // }
-  Updates Name;
-
-  if (Var.CurrChannel != dse::SIGMA && NewChannel == dse::SIGMA)
-    Name = VER2SIGMA;
-  else if (Var.CurrChannel == dse::SIGMA && NewChannel != dse::SIGMA)
-    Name = SIGMA2VER;
-  else
-    Name = VER2VER;
-
-  Proposed[Name][Var.CurrOrder] += 1;
-
-  NewWeight = Weight.Evaluate(Var.CurrOrder, NewChannel);
-  NewAbsWeight = NewWeight.Abs();
-  double R = Prop * NewAbsWeight * Para.ReWeightChan[NewChannel] /
-             Var.CurrAbsWeight / Para.ReWeightChan[Var.CurrChannel];
-  if (Random.urn() < R) {
-    Accepted[Name][Var.CurrOrder]++;
-    Var.CurrVersion++;
-    Var.CurrWeight = NewWeight;
-    Var.CurrAbsWeight = NewAbsWeight;
-    Var.CurrChannel = NewChannel;
-  }
-  return;
-}
 
 double markov::GetNewTau(double &NewTau) {
   double Step = 1.0;
