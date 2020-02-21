@@ -147,6 +147,20 @@ void weight::ChanUST(dse::ver4 &Ver4) {
   double Ratio;
   array<momentum *, 4> &LegK0 = Ver4.LegK;
 
+  // array<momentum *, 4> LLegK[4], RLegK[4];
+
+  // ////////////////// T channel ////////////////////////////
+  // LLegK[T] = {LegK[T][INL], LegK[T][OUTL], G[T].K, G[0].K};
+  // RLegK[T] = {G[0].K, G[T].K, LegK[T][INR], LegK[T][OUTR]};
+
+  // ////////////////// U channel ////////////////////////////
+  // LLegK[U] = {LegK[U][INL], LegK[U][OUTR], G[U].K, G[0].K};
+  // RLegK[U] = {G[0].K, G[U].K, LegK[U][INR], LegK[U][OUTL]};
+
+  // ////////////////// S channel ////////////////////////////
+  // LLegK[S] = {LegK[S][INL], G[S].K, LegK[S][INR], G[0].K};
+  // RLegK[S] = {G[0].K, LegK[S][OUTL], G[S].K, LegK[S][OUTR]};
+
   // if (Ver4.ContainProj) {
   // }
   for (auto &bubble : Ver4.Bubble) {

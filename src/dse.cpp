@@ -50,16 +50,16 @@ ver4 verDiag::Build(int LoopNum, vector<channel> Channel, caltype Type) {
   //   &(*LoopMom)[2]};
   // }
 
-  if (Type == BARE)
-    return Vertex(0, LoopNum, 3, Channel, LEFT, false);
-  else if (Type == RENORMALIZED)
-    return Vertex(0, LoopNum, 3, Channel, RIGHT, false);
-  else
-    ABORT("Not implemented!");
+  // if (Type == BARE)
+  //   return Vertex(0, LoopNum, 3, Channel, LEFT, false);
+  // else if (Type == RENORMALIZED)
+  return Vertex(0, LoopNum, 3, Channel, RIGHT, false);
+  // else
+  // ABORT("Not implemented!");
 }
 
 ver4 verDiag::Vertex(int InTL, int LoopNum, int LoopIndex,
-                     vector<channel> Channel, int Side, bool HasBeenBoxed) {
+                     vector<channel> Channel, int Side, bool InBox) {
   ver4 Ver4;
   Ver4.ID = DiagNum;
   DiagNum++;
@@ -68,7 +68,7 @@ ver4 verDiag::Vertex(int InTL, int LoopNum, int LoopIndex,
   Ver4.Side = Side;
   Ver4.InTL = InTL;
   Ver4.Loopidx = LoopIndex;
-  Ver4.HasBeenBoxed = HasBeenBoxed;
+  Ver4.InBox = InBox;
 
   vector<channel> UST;
   vector<channel> II;
@@ -85,7 +85,7 @@ ver4 verDiag::Vertex(int InTL, int LoopNum, int LoopIndex,
   } else {
     // normal diagram
     Ver4 = ChanI(Ver4, II, InTL, LoopNum, LoopIndex, false);
-    Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, false);
+    Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex);
 
     // counter diagrams if the vertex is on the right
     // if (IsFullVer4) {
@@ -123,9 +123,9 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
                                 channel Chan) {
   ///////////   External and Internal Tau  ////////////////
   vector<indexMap> Map;
-  int GT0, GT;
+  int GT0, GT, Tidx;
+  array<int, 2> GTpair;
   array<int, 4> LegT;
-  int Tidx;
   ASSERT_ALLWAYS(Chan != I && Chan != IC,
                  "CreateIndexMap is not for I and IC channel!");
 
@@ -137,12 +137,12 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
 
       GT0 = AddToTList(Ver4.G[0].T, {LvT[OUTR], RvT[INL]});
 
-      array<int, 2> GTpair;
-
       if (Chan == T || Chan == TC || Chan == U || Chan == UC)
         GTpair = {RvT[OUTL], LvT[INR]};
       else if (Chan == S || Chan == SC)
         GTpair = {LvT[OUTL], RvT[INR]};
+      else
+        ABORT("The channel does not exist!");
 
       GT = AddToTList(Ver4.G[Chan].T, GTpair);
       //  G0T = {LvT[OUTR], RvT[INL]};
@@ -150,15 +150,24 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
       // GT[U] = {RvT[OUTL], LvT[INR]};
       // GT[S] = {LvT[OUTL], RvT[INR]};
 
-            if (Chan == T)
+      switch (Chan) {
+      case T:
         LegT = {LvT[INL], LvT[OUTL], RvT[INR], RvT[OUTR]};
-      else if (Chan == U)
+        break;
+      case U:
         LegT = {LvT[INL], RvT[OUTR], RvT[INR], LvT[OUTL]};
-      else if (Chan == S)
+        break;
+      case S:
         LegT = {LvT[INL], RvT[OUTL], LvT[INR], RvT[OUTR]};
-      else {
+        break;
+      case TC:
+      case UC:
+      case SC:
         // counterterms are equal-time
         LegT = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
+      default:
+        ABORT("The channel does not exist!");
+        break;
       }
 
       // add T array into the T pool of the vertex
@@ -169,120 +178,47 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
 }
 
 ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
-                      int LoopIndex, bool IsProjected) {
-  bubble Bubble;
-  Bubble.IsProjected = IsProjected;
-  Bubble.InTL = InTL;
-  Bubble.Channel = Channel;
-  array<double, 4> SymFactor = {0.0, -1.0, 1.0, -0.5};
-  bool HasT = bool(std::count(Channel.begin(), Channel.end(), T));
-  bool HasU = bool(std::count(Channel.begin(), Channel.end(), U));
-  bool HasS = bool(std::count(Channel.begin(), Channel.end(), S));
-  if (HasT || HasU)
-    Bubble.HasTU = true;
-  else
-    Bubble.HasTU = false;
-  if (HasS)
-    Bubble.HasS = true;
-  else
-    Bubble.HasS = false;
-
-  if (IsProjected) {
-    for (auto &s : SymFactor)
-      s *= -1;
-    // Bubble.LegK[T][INL] = NextMom();
-    // Bubble.LegK[T][INR] = NextMom();
-    // Bubble.LegK[T][OUTL] = Bubble.LegK[T][INL];
-    // Bubble.LegK[T][OUTR] = Bubble.LegK[T][INR];
-
-    // Bubble.LegK[U][INL] = Bubble.LegK[T][INL];
-    // Bubble.LegK[U][INR] = Bubble.LegK[T][INR];
-    // Bubble.LegK[U][OUTL] = Bubble.LegK[T][INL];
-    // Bubble.LegK[U][OUTR] = Bubble.LegK[T][INR];
-
-    // Bubble.LegK[S][INL] = Bubble.LegK[T][INL];
-    // Bubble.LegK[S][INR] = Bubble.LegK[T][INR];
-    // Bubble.LegK[S][OUTL] = Bubble.LegK[T][INL];
-    // Bubble.LegK[S][OUTR] = Bubble.LegK[T][INR];
-    for (auto &c : Channel)
-      Bubble.LegK[c] = Ver4.LegK;
-  } else
-    for (auto &c : Channel)
-      Bubble.LegK[c] = Ver4.LegK;
-
-  auto &G = Bubble.G;
-  auto &LegK = Bubble.LegK;
-
-  G[0] = gMatrix(Ver4.TauNum, InTL, &(*LoopMom)[LoopIndex]);
-  for (auto &c : Bubble.Channel)
-    G[c] = gMatrix(Ver4.TauNum, InTL, NextMom());
+                      int LoopIndex) {
 
   for (int ol = 0; ol < LoopNum; ol++) {
-    // left and right vertex external LegK
-    array<momentum *, 4> LLegK[4], RLegK[4];
-
-    ////////////////// T channel ////////////////////////////
-    LLegK[T] = {LegK[T][INL], LegK[T][OUTL], G[T].K, G[0].K};
-    RLegK[T] = {G[0].K, G[T].K, LegK[T][INR], LegK[T][OUTR]};
-
-    ////////////////// U channel ////////////////////////////
-    LLegK[U] = {LegK[U][INL], LegK[U][OUTR], G[U].K, G[0].K};
-    RLegK[U] = {G[0].K, G[U].K, LegK[U][INR], LegK[U][OUTL]};
-
-    ////////////////// S channel ////////////////////////////
-    LLegK[S] = {LegK[S][INL], G[S].K, LegK[S][INR], G[0].K};
-    RLegK[S] = {G[0].K, LegK[S][OUTL], G[S].K, LegK[S][OUTR]};
-
-    for (auto &c : Bubble.Channel) {
-      // if (ol == 1 && c == T && LoopNum == 2)
-      //   continue;
-
-      // if (IsProjected && c == S)
-      //   continue;
-
+    for (auto &chan : Channel) {
       pair Pair;
-      Pair.Channel = c;
-      Pair.SymFactor = SymFactor[c];
       ////////////////////   Right SubVer  ///////////////////
       int oR = LoopNum - 1 - ol;
       int RInTL = InTL + (ol + 1);
+      int Llopidx = LoopIndex + 1;
       int Rlopidx = LoopIndex + 1 + ol;
+      bool InBox = Ver4.InBox;
 
-      bool HasBeenBoxed = Ver4.HasBeenBoxed || IsProjected;
+      if (chan == TC || chan == UC || chan == SC)
+        InBox = true;
 
-      if (c == U || c == T) {
-        if (!IsProjected) {
-          Pair.LVer =
-              Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, U, S}, LEFT,
-                     Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
-          Pair.RVer =
-              Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
-                     Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
-        } else {
-          Pair.LVer =
-              Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I}, LEFT,
-                     Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
-          Pair.RVer =
-              Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T}, RIGHT,
-                     Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
-        }
-      } else if (c == S) {
-        if (!IsProjected) {
-          Pair.LVer =
-              Vertex(LLegK[c], InTL, ol, LoopIndex + 1, {I, T, U}, LEFT,
-                     Ver4.RenormVer4, Ver4.RexpandBare, false, HasBeenBoxed);
-          Pair.RVer =
-              Vertex(RLegK[c], RInTL, oR, Rlopidx, {I, T, U, S}, RIGHT,
-                     Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
-        } else
-          continue;
+      switch (chan) {
+      case T:
+      case U:
+      case TC:
+      case UC:
+        Pair.LVer =
+            Vertex(InTL, ol, Llopidx, {I, U, S, IC, UC, SC, TC}, LEFT, InBox);
+        Pair.RVer = Vertex(RInTL, oR, Rlopidx, {I, T, U, S, IC, TC, UC, SC},
+                           RIGHT, InBox);
+      case S:
+      case SC:
+        Pair.LVer =
+            Vertex(InTL, ol, Llopidx, {I, T, U, IC, TC, UC, SC}, LEFT, InBox);
+        Pair.RVer = Vertex(RInTL, oR, Rlopidx, {I, T, U, S, IC, TC, UC, SC},
+                           RIGHT, InBox);
+        break;
+      default:
+        ABORT("The channel does not exist!");
+        break;
       }
-      Pair.Map = CreateMapT2(Ver4, Pair.LVer, Pair.RVer, c, IsProjected);
-      Bubble.Pair.push_back(Pair);
+
+      Pair.Channel = chan;
+      Pair.Map = CreateIndexMap(Ver4, Pair.LVer, Pair.RVer, chan);
+      Ver4.Pair.push_back(Pair);
     }
   }
-
-  Ver4.Bubble.push_back(Bubble);
   return Ver4;
 }
 
@@ -338,78 +274,84 @@ ver4 verDiag::ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
   if (IsProjected)
     return Ver4;
 
-  envelope Env;
-  Env.IsProjected = IsProjected;
-  Env.InTL = InTL;
-  if (IsProjected == false)
-    Env.LegK = Ver4.LegK;
-  auto &G = Env.G;
+  // envelope Env;
+  // Env.IsProjected = IsProjected;
+  // Env.InTL = InTL;
+  // if (IsProjected == false)
+  //   Env.LegK = Ver4.LegK;
+  // auto &G = Env.G;
 
-  int LDInTL = InTL;
-  int LUInTL = InTL + 1;
-  int RDInTL = InTL + 2;
-  int RUInTL = InTL + 3;
+  // int LDInTL = InTL;
+  // int LUInTL = InTL + 1;
+  // int RDInTL = InTL + 2;
+  // int RUInTL = InTL + 3;
 
-  /////// Initialize G Tau and K Table  /////////
-  G[0] = g2Matrix(LDInTL, RDInTL, &(*LoopMom)[LoopIndex]);
-  G[1] = g2Matrix(LDInTL, LUInTL, &(*LoopMom)[LoopIndex + 1]);
-  G[2] = g2Matrix(RDInTL, LUInTL, &(*LoopMom)[LoopIndex + 2]);
-  G[3] = g2Matrix(RUInTL, LDInTL, NextMom());
-  G[4] = g2Matrix(LUInTL, RUInTL, NextMom());
-  G[5] = g2Matrix(RDInTL, RUInTL, NextMom());
-  G[6] = g2Matrix(LUInTL, RUInTL, NextMom());
-  G[7] = g2Matrix(RUInTL, RDInTL, NextMom());
-  G[8] = g2Matrix(RUInTL, RDInTL, NextMom());
+  // /////// Initialize G Tau and K Table  /////////
+  // G[0] = g2Matrix(LDInTL, RDInTL, &(*LoopMom)[LoopIndex]);
+  // G[1] = g2Matrix(LDInTL, LUInTL, &(*LoopMom)[LoopIndex + 1]);
+  // G[2] = g2Matrix(RDInTL, LUInTL, &(*LoopMom)[LoopIndex + 2]);
+  // G[3] = g2Matrix(RUInTL, LDInTL, NextMom());
+  // G[4] = g2Matrix(LUInTL, RUInTL, NextMom());
+  // G[5] = g2Matrix(RDInTL, RUInTL, NextMom());
+  // G[6] = g2Matrix(LUInTL, RUInTL, NextMom());
+  // G[7] = g2Matrix(RUInTL, RDInTL, NextMom());
+  // G[8] = g2Matrix(RUInTL, RDInTL, NextMom());
 
-  momentum *InL = Ver4.LegK[INL];
-  momentum *OutL = Ver4.LegK[OUTL];
-  momentum *InR = Ver4.LegK[INR];
-  momentum *OutR = Ver4.LegK[OUTR];
+  // momentum *InL = Ver4.LegK[INL];
+  // momentum *OutL = Ver4.LegK[OUTL];
+  // momentum *InR = Ver4.LegK[INR];
+  // momentum *OutR = Ver4.LegK[OUTR];
 
-  //////// Initialize all sub-vertex ///////////
+  // //////// Initialize all sub-vertex ///////////
 
-  array<momentum *, 4> LegK[10];
-  vector<channel> ALL = {I, U, S, T};
+  // array<momentum *, 4> LegK[10];
+  // vector<channel> ALL = {I, U, S, T};
 
-  bool HasBeenBoxed = Ver4.HasBeenBoxed || IsProjected;
+  // bool HasBeenBoxed = Ver4.HasBeenBoxed || IsProjected;
 
-  // LD Vertex
-  LegK[0] = {InL, G[1].K, G[3].K, G[0].K};
-  Env.Ver[0] = Vertex(LegK[0], LDInTL, 0, LoopIndex, ALL, LEFT, Ver4.RenormVer4,
-                      Ver4.RenormVer4, true, HasBeenBoxed);
+  // // LD Vertex
+  // LegK[0] = {InL, G[1].K, G[3].K, G[0].K};
+  // Env.Ver[0] = Vertex(LegK[0], LDInTL, 0, LoopIndex, ALL, LEFT,
+  // Ver4.RenormVer4,
+  //                     Ver4.RenormVer4, true, HasBeenBoxed);
 
-  // LU Vertex
-  LegK[1] = {G[1].K, OutL, G[2].K, G[4].K};
-  LegK[2] = {G[1].K, OutR, G[2].K, G[6].K};
-  Env.Ver[1] = Vertex(LegK[1], LUInTL, 0, LoopIndex, ALL, LEFT, Ver4.RenormVer4,
-                      Ver4.RenormVer4, true, Ver4.HasBeenBoxed);
-  Env.Ver[2] = Vertex(LegK[2], LUInTL, 0, LoopIndex, ALL, LEFT, Ver4.RenormVer4,
-                      Ver4.RenormVer4, true, HasBeenBoxed);
+  // // LU Vertex
+  // LegK[1] = {G[1].K, OutL, G[2].K, G[4].K};
+  // LegK[2] = {G[1].K, OutR, G[2].K, G[6].K};
+  // Env.Ver[1] = Vertex(LegK[1], LUInTL, 0, LoopIndex, ALL, LEFT,
+  // Ver4.RenormVer4,
+  //                     Ver4.RenormVer4, true, Ver4.HasBeenBoxed);
+  // Env.Ver[2] = Vertex(LegK[2], LUInTL, 0, LoopIndex, ALL, LEFT,
+  // Ver4.RenormVer4,
+  //                     Ver4.RenormVer4, true, HasBeenBoxed);
 
-  // RD Vertex
-  LegK[3] = {G[0].K, G[2].K, InR, G[5].K};
-  LegK[4] = {G[0].K, G[2].K, G[7].K, OutR};
-  LegK[5] = {G[0].K, G[2].K, G[8].K, OutL};
-  for (int i = 3; i <= 5; i++)
-    Env.Ver[i] = Vertex(LegK[i], RDInTL, 0, LoopIndex, ALL, RIGHT,
-                        Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
+  // // RD Vertex
+  // LegK[3] = {G[0].K, G[2].K, InR, G[5].K};
+  // LegK[4] = {G[0].K, G[2].K, G[7].K, OutR};
+  // LegK[5] = {G[0].K, G[2].K, G[8].K, OutL};
+  // for (int i = 3; i <= 5; i++)
+  //   Env.Ver[i] = Vertex(LegK[i], RDInTL, 0, LoopIndex, ALL, RIGHT,
+  //                       Ver4.RenormVer4, Ver4.RenormVer4, true,
+  //                       HasBeenBoxed);
 
-  // RU Vertex
-  LegK[6] = {G[4].K, G[3].K, G[5].K, OutR};
-  LegK[7] = {G[6].K, G[3].K, G[5].K, OutL};
-  LegK[8] = {G[4].K, G[3].K, InR, G[7].K};
-  LegK[9] = {G[6].K, G[3].K, InR, G[8].K};
-  for (int i = 6; i <= 9; i++)
-    Env.Ver[i] = Vertex(LegK[i], RUInTL, 0, LoopIndex, ALL, RIGHT,
-                        Ver4.RenormVer4, Ver4.RenormVer4, true, HasBeenBoxed);
+  // // RU Vertex
+  // LegK[6] = {G[4].K, G[3].K, G[5].K, OutR};
+  // LegK[7] = {G[6].K, G[3].K, G[5].K, OutL};
+  // LegK[8] = {G[4].K, G[3].K, InR, G[7].K};
+  // LegK[9] = {G[6].K, G[3].K, InR, G[8].K};
+  // for (int i = 6; i <= 9; i++)
+  //   Env.Ver[i] = Vertex(LegK[i], RUInTL, 0, LoopIndex, ALL, RIGHT,
+  //                       Ver4.RenormVer4, Ver4.RenormVer4, true,
+  //                       HasBeenBoxed);
 
-  //////// T map (for all four envelope diagram) //////
-  // four diagrams have the same sub-vertex Tau configuration
-  // so here we just use the first diagram
-  Env.Map = CreateMapT4(Ver4, Env.Ver[0], Env.Ver[1], Env.Ver[3], Env.Ver[6]);
+  // //////// T map (for all four envelope diagram) //////
+  // // four diagrams have the same sub-vertex Tau configuration
+  // // so here we just use the first diagram
+  // Env.Map = CreateMapT4(Ver4, Env.Ver[0], Env.Ver[1], Env.Ver[3],
+  // Env.Ver[6]);
 
-  Env.SymFactor = {-1.0, 1.0, -1.0, 1.0};
-  Ver4.Envelope.push_back(Env);
+  // Env.SymFactor = {-1.0, 1.0, -1.0, 1.0};
+  // Ver4.Envelope.push_back(Env);
   return Ver4;
 }
 
@@ -426,77 +368,56 @@ string verDiag::ToString(const ver4 &Ver4, string indent, int Level) {
       indent + fmt::format("├Level: {0}, {1}Ver4 ID: {2}, LoopNum: {3}, "
                            "RexpandBare: {4}, RenormVer4: {5}, IsFullVer4: "
                            "{6}, Boxed: {7}\n",
-                           Level, SideStr, Ver4.ID, Ver4.LoopNum,
-                           Ver4.RexpandBare, Ver4.RenormVer4, Ver4.IsFullVer4,
-                           Ver4.HasBeenBoxed);
+                           Level, SideStr, Ver4.ID, Ver4.LoopNum, Ver4.InBox);
   Info += indent + "├─T: ";
   for (auto &t : Ver4.T)
     Info +=
         fmt::format("({0}, {1}, {2}, {3}), ", t[INL], t[OUTL], t[INR], t[OUTR]);
 
   Info += "\n";
-  if (Ver4.Bubble.size() > 0)
-    Info += indent + "├─LegK: ";
-  else
-    Info += indent + "└─LegK: ";
+  Info += indent + fmt::format("└─\n");
+  // Info += indent + ". │\n";
+  for (int p = 0; p < Ver4.Pair.size(); p++) {
+    pair pp = Ver4.Pair[p];
+    Info += indent + fmt::format(". ├PAIR - Channel: {0}, LVerLoopNum: {1}\n",
+                                 pp.Channel, pp.LVer.LoopNum);
 
-  momentum *start = &(*LoopMom)[0];
-  // momentum *InL = Ver4.LegK[INL];
+    // Info += indent + " . │\n";
+    Info += indent + fmt::format(". ├─Map:");
+    for (auto &m : pp.Map)
+      Info += fmt::format("({0},{1}):{2}, ", m.LVerTidx, m.RVerTidx, m.Tidx);
 
-  Info += fmt::format("{0}, {1}, {2}, {3}", Ver4.LegK[INL] - start,
-                      Ver4.LegK[OUTL] - start, Ver4.LegK[INR] - start,
-                      Ver4.LegK[OUTR] - start);
+    Info += "\n" + indent + ". │\n";
+    Info += ToString(pp.LVer, indent + ". ", Level + 1);
+    // Info +=
+    //     indent +
+    //     ".....................................................\n";
 
-  // Info += "\n" + indent;
-  // Info += "---------------------------------------------------------\n";
-  Info += "\n";
+    Info += indent + ". │\n";
+    Info += ToString(pp.RVer, indent + ". ", Level + 1);
+    Info += indent + ".  \n";
+    // Info += "\n";
+    // Info += indent + "\n";
+    // Info += "\n" + indent + " . │\n";
+    // Info += "\n" + indent;
+    // Info += ".....................................................\n";
 
-  for (auto &bubble : Ver4.Bubble) {
-    Info +=
-        indent + fmt::format("└─BUBBLE - Projected: {0}\n", bubble.IsProjected);
-    // Info += indent + ". │\n";
-    for (int p = 0; p < bubble.Pair.size(); p++) {
-      pair pp = bubble.Pair[p];
-      Info += indent + fmt::format(". ├PAIR - Channel: {0}, LVerLoopNum: {1}\n",
-                                   pp.Channel, pp.LVer.LoopNum);
+    // Info += fmt::format("  G1 Internal T Map: ");
+    // for (auto &m : pp.Map)
+    //   Info += fmt::format("({0}, {1}): {2}-{3},
+    //   ", m.LVerTidx, m.RVerTidx, m.GT[0],
+    //                       m.G1T[1]);
+    // Info += "\n";
 
-      // Info += indent + " . │\n";
-      Info += indent + fmt::format(". ├─Map:");
-      for (auto &m : pp.Map)
-        Info += fmt::format("({0},{1}):{2}, ", m.LVerTidx, m.RVerTidx, m.Tidx);
+    // Info += fmt::format("  G2 Internal T Map: ");
+    // for (auto &m : pp.Map)
+    //   Info += fmt::format("({0}, {1}): {2}-{3},
+    //   ", m.LVerT, m.RVerT, m.G2T[0],
+    //                       m.G2T[1]);
+    // Info += indent + "__\n";
 
-      Info += "\n" + indent + ". │\n";
-      Info += ToString(pp.LVer, indent + ". ", Level + 1);
-      // Info +=
-      //     indent +
-      //     ".....................................................\n";
-
-      Info += indent + ". │\n";
-      Info += ToString(pp.RVer, indent + ". ", Level + 1);
-      Info += indent + ".  \n";
-      // Info += "\n";
-      // Info += indent + "\n";
-      // Info += "\n" + indent + " . │\n";
-      // Info += "\n" + indent;
-      // Info += ".....................................................\n";
-
-      // Info += fmt::format("  G1 Internal T Map: ");
-      // for (auto &m : pp.Map)
-      //   Info += fmt::format("({0}, {1}): {2}-{3},
-      //   ", m.LVerTidx, m.RVerTidx, m.GT[0],
-      //                       m.G1T[1]);
-      // Info += "\n";
-
-      // Info += fmt::format("  G2 Internal T Map: ");
-      // for (auto &m : pp.Map)
-      //   Info += fmt::format("({0}, {1}): {2}-{3},
-      //   ", m.LVerT, m.RVerT, m.G2T[0],
-      //                       m.G2T[1]);
-      // Info += indent + "__\n";
-
-      // Info += indent + "--------------------------------------"
-      //                  "----------------------\n";
-    }
+    // Info += indent + "--------------------------------------"
+    //                  "----------------------\n";
   }
 
   // Info += "=======================================================\n";

@@ -34,8 +34,8 @@ struct ver4 {
   int TauNum;
   int InTL;
   int Loopidx;
-  bool HasBeenBoxed; // if this vertex has been the children of a boxed parent
-                     // vertex
+  bool InBox; // if this vertex has been the children of a boxed parent
+              // vertex
   vector<channel> Channel; // list of channels except I
 
   /////////// bubble diagrams ////////////////////
@@ -62,6 +62,7 @@ struct indexMap {
 };
 
 struct pair {
+  channel Channel;
   ver4 LVer;
   ver4 RVer;
   vector<indexMap> Map;
@@ -120,13 +121,13 @@ private:
   array<momentum, MaxMomNum> *LoopMom; // all momentum loop variables
 
   ver4 Vertex(int InTL, int LoopNum, int LoopIndex, vector<channel> Channel,
-              int Side, bool HasBeenBoxed);
+              int Side, bool InBox);
 
   ver4 Ver0(ver4 Ver4, int InTL);
   ver4 ChanI(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
              int LoopIndex, bool IsProjected = false);
   ver4 ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
-               int LoopIndex, bool IsProjected = false);
+               int LoopIndex);
   momentum *NextMom();
 };
 
