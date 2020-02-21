@@ -27,7 +27,7 @@ const int TauBinSize = 128;
 const int SigmaMomBinSize = 128;
 const int SigmaTauBinSize = 128;
 const int TauBasisNum = 32;
-const int SpinIndex = 1;
+const int SPIN = 1;
 
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
 enum obstype { SCATTERING, LANDAU };

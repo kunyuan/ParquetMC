@@ -23,26 +23,29 @@ int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> T) {
   return TList.size() - 1;
 }
 
-int AddToTList(vector<array<int, 2>> &TList, const array<int, 2> T) {
+int AddToGList(vector<green> &GList, const array<int, 2> T) {
   // find the T array in the list, if failed, create a new array
-  for (int i = 0; i < TList.size(); i++) {
-    auto t = TList[i];
+  for (int i = 0; i < GList.size(); i++) {
+    auto t = GList[i].T;
     if (t[OUT] == T[OUT] && t[IN] == T[IN])
       return i;
   }
-  TList.push_back(T);
-  return TList.size() - 1;
+  GList.push_back(green({T, 0.0}));
+  return GList.size() - 1;
 }
 
-ver4 verDiag::Vertex(int LoopNum, int LoopIndex, int InTL,
-                     vector<channel> Channel, int Side, bool InBox) {
+ver4 verDiag::Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
+                     const vector<channel> &Channel,
+                     const array<momentum *, 4> &LegK, int Side, bool InBox) {
   ver4 Ver4;
+  Ver4.Level = Level;
   Ver4.LoopNum = LoopNum;
   Ver4.TauNum = LoopNum + 1;
   Ver4.Side = Side;
   Ver4.InTL = InTL;
   Ver4.Loopidx = LoopIndex;
   Ver4.InBox = InBox;
+  Ver4.LegK = LegK;
 
   vector<channel> UST;
   vector<channel> II;
@@ -101,7 +104,7 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
       auto &LvT = LVer.T[lt];
       auto &RvT = RVer.T[rt];
 
-      GT0 = AddToTList(Ver4.G[0].T, {LvT[OUTR], RvT[INL]});
+      GT0 = AddToGList(Ver4.G[0], {LvT[OUTR], RvT[INL]});
 
       if (Chan == T || Chan == TC || Chan == U || Chan == UC)
         GTpair = {RvT[OUTL], LvT[INR]};
@@ -110,7 +113,7 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
       else
         ABORT("The channel does not exist!");
 
-      GT = AddToTList(Ver4.G[Chan].T, GTpair);
+      GT = AddToGList(Ver4.G[Chan], GTpair);
 
       switch (Chan) {
       case T:
@@ -141,17 +144,35 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
 
 ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel) {
   int InTL = Ver4.InTL;
-  vector<channel> GAMMA4 = {I, T, U, S, IC, TC, UC, SC};
+  vector<channel> FULL = {I, T, U, S, IC, TC, UC, SC};
   vector<channel> F = {I, U, S, IC, TC, UC, SC};
   vector<channel> V = {I, T, U, IC, TC, UC, SC};
+  auto LegK = Ver4.LegK;
+  auto K = Ver4.K;
+
+  array<momentum *, 4> LLegK[4], RLegK[4];
+
+  ////////////////// T channel ////////////////////////////
+  LLegK[T] = {LegK[INL], LegK[OUTL], &K[T], &K[0]};
+  RLegK[T] = {&K[0], &K[T], LegK[INR], LegK[OUTR]};
+
+  ////////////////// U channel ////////////////////////////
+  LLegK[U] = {LegK[INL], LegK[OUTR], &K[U], &K[0]};
+  RLegK[U] = {&K[0], &K[U], LegK[INR], LegK[OUTL]};
+
+  ////////////////// S channel ////////////////////////////
+  LLegK[S] = {LegK[INL], &K[S], LegK[INR], &K[0]};
+  RLegK[S] = {&K[0], LegK[OUTL], &K[S], LegK[OUTR]};
 
   for (int ol = 0; ol < Ver4.LoopNum; ol++) {
     for (auto &chan : Channel) {
       pair Pair;
       ////////////////////   Right SubVer  ///////////////////
+      int Level = Ver4.Level + 1;
       int oR = Ver4.LoopNum - 1 - ol;
       int RInTL = Ver4.InTL + (ol + 1);
       int Llopidx = Ver4.Loopidx + 1;
+      int Rlopidx = Ver4.Loopidx + 1 + ol;
 
       bool InBox = Ver4.InBox;
       if (chan == TC || chan == UC || chan == SC)
@@ -162,12 +183,16 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel) {
       case U:
       case TC:
       case UC:
-        Pair.LVer = Vertex(ol, Llopidx, InTL, F, LEFT, InBox);
-        Pair.RVer = Vertex(oR, Llopidx + ol, RInTL, GAMMA4, RIGHT, InBox);
+        Pair.LVer =
+            Vertex(Level, ol, Llopidx, InTL, F, LLegK[chan], LEFT, InBox);
+        Pair.RVer =
+            Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK[chan], RIGHT, InBox);
       case S:
       case SC:
-        Pair.LVer = Vertex(ol, Llopidx, InTL, V, LEFT, InBox);
-        Pair.RVer = Vertex(oR, Llopidx + ol, RInTL, GAMMA4, RIGHT, InBox);
+        Pair.LVer =
+            Vertex(Level, ol, Llopidx, InTL, V, LLegK[chan], LEFT, InBox);
+        Pair.RVer =
+            Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK[chan], RIGHT, InBox);
         break;
       default:
         ABORT("The channel does not exist!");
@@ -311,7 +336,7 @@ ver4 verDiag::ChanI(ver4 Ver4, vector<channel> Channel) {
   return Ver4;
 }
 
-string verDiag::ToString(const ver4 &Ver4, string indent, int Level) {
+string verDiag::ToString(const ver4 &Ver4, string indent) {
   string SideStr;
   if (Ver4.Side == LEFT)
     SideStr = "LEFT";
@@ -322,7 +347,7 @@ string verDiag::ToString(const ver4 &Ver4, string indent, int Level) {
   //     "==============================================================\n";
   string Info =
       indent + fmt::format("├Level: {0}, {1}, LoopNum: {2}, Boxed: {3}\n",
-                           Level, SideStr, Ver4.LoopNum, Ver4.InBox);
+                           Ver4.Level, SideStr, Ver4.LoopNum, Ver4.InBox);
   Info += indent + "├─T: ";
   for (auto &t : Ver4.T)
     Info +=
@@ -342,13 +367,13 @@ string verDiag::ToString(const ver4 &Ver4, string indent, int Level) {
       Info += fmt::format("({0},{1}):{2}, ", m.LVerTidx, m.RVerTidx, m.Tidx);
 
     Info += "\n" + indent + ". │\n";
-    Info += ToString(pp.LVer, indent + ". ", Level + 1);
+    Info += ToString(pp.LVer, indent + ". ");
     // Info +=
     //     indent +
     //     ".....................................................\n";
 
     Info += indent + ". │\n";
-    Info += ToString(pp.RVer, indent + ". ", Level + 1);
+    Info += ToString(pp.RVer, indent + ". ");
     Info += indent + ".  \n";
     // Info += "\n";
     // Info += indent + "\n";

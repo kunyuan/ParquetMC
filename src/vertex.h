@@ -41,7 +41,7 @@ public:
     sum = fabs(_Weight[DIR] + _Weight[EX] / 2.0);
     return sum;
   }
-  double &operator()(int dir) { return _Weight[dir]; }
+  double &operator[](int dir) { return _Weight[dir]; }
 
 private:
   array<double, 2> _Weight;
@@ -101,7 +101,7 @@ private:
 class verQTheta {
 public:
   verQTheta();
-  void Interaction(const momentum *LegK[4], double Tau, bool IsRenorm,
+  void Interaction(const array<momentum *, 4> &LegK, double Tau, bool IsRenorm,
                    bool Boxed, double &WeightDir, double &WeightEx);
 
   void Measure(const momentum &InL, const momentum &InR, const int QIndex,

@@ -79,8 +79,9 @@ verQTheta::verQTheta() {
     c.Initialize();
 }
 
-void verQTheta::Interaction(const momentum *LegK[4], double Tau, bool IsRenorm,
-                            bool Boxed, double &WeightDir, double &WeightEx) {
+void verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
+                            bool IsRenorm, bool Boxed, double &WeightDir,
+                            double &WeightEx) {
 
   // cout << (*LegK[INL])[0] << endl;
   momentum DiQ = *LegK[INL] - *LegK[OUTL];
@@ -181,19 +182,19 @@ void verQTheta::Measure(const momentum &InL, const momentum &InR,
                         ver::weightMatrix &Weight, double Factor) {
   // cout << Order << ", " << DiagNum << endl;
   if (Order == 0) {
-    Normalization += Weight(DIR) * Factor;
+    Normalization += Weight[DIR] * Factor;
     // Normalization += WeightFactor;
   } else {
     // double Factor = 1.0 / pow(2.0 * PI, 2 * Order);
     double CosAng = Angle3D(InL, InR);
     int AngleIndex = Angle2Index(CosAng, AngBinSize);
     Chan[Channel].Estimator(Order, AngleIndex, QIndex, DIR) +=
-        Weight(DIR) * Factor;
-    Chan[Channel].Estimator(0, AngleIndex, QIndex, DIR) += Weight(DIR) * Factor;
+        Weight[DIR] * Factor;
+    Chan[Channel].Estimator(0, AngleIndex, QIndex, DIR) += Weight[DIR] * Factor;
 
     Chan[Channel].Estimator(Order, AngleIndex, QIndex, EX) +=
-        Weight(EX) * Factor;
-    Chan[Channel].Estimator(0, AngleIndex, QIndex, EX) += Weight(EX) * Factor;
+        Weight[EX] * Factor;
+    Chan[Channel].Estimator(0, AngleIndex, QIndex, EX) += Weight[EX] * Factor;
   }
   return;
 }

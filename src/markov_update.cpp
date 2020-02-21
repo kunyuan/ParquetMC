@@ -17,13 +17,13 @@ using namespace diag;
 using namespace std;
 
 int markov::GetTauNum(int Order, int Channel) {
-  if (Channel == dse::SIGMA)
-    return Order + 2;
-  else
-    return Order + 1;
+  // if (Channel == dse::SIGMA)
+  //   return Order + 2;
+  // else
+  return Order + 1;
 }
 
-int markov::GetLoopNum(int Order) { return Order + 3; }
+int markov::GetLoopNum(int Order) { return Order + 4; }
 
 void markov::ChangeOrder() {
   Updates Name;
@@ -126,7 +126,7 @@ void markov::ChangeMomentum() {
   // int LoopIndex = int(Random.urn() * (Var.CurrGroup->Order + 3));
 
   // InL momentum is locked
-  if (LoopIndex == 1)
+  if (LoopIndex == INL)
     return;
 
   Proposed[CHANGE_MOM][Var.CurrOrder]++;
@@ -137,10 +137,10 @@ void markov::ChangeMomentum() {
 
   CurrMom = Var.LoopMom[LoopIndex];
 
-  if (LoopIndex == 0) {
+  if (LoopIndex == OUTL) {
     // transfer momentum
     Prop = ShiftExtTransferK(Var.CurrExtMomBin, NewExtMomBin);
-    Var.LoopMom[LoopIndex] = Para.ExtMomTable[NewExtMomBin];
+    Var.LoopMom[OUTL] = Var.LoopMom[INL] - Para.ExtMomTable[NewExtMomBin];
     if (Var.LoopMom[LoopIndex].norm() > Para.MaxExtMom) {
       Var.LoopMom[LoopIndex] = CurrMom;
       return;

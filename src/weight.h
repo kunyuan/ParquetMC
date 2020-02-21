@@ -52,12 +52,12 @@ private:
   // diagram for different order and channel
   dse::ver4 Ver4Root[MaxOrder];
 
-  void Vertex4(dse::ver4 &Ver4, const momentum *LegK[4]);
+  void Vertex4(dse::ver4 &Ver4);
 
-  void Ver0(dse::ver4 &Ver4, const momentum *LegK[4]);
+  void Ver0(dse::ver4 &Ver4);
 
   void ChanI(dse::ver4 &Ver4);
-  void ChanUST(dse::ver4 &Ver4, const momentum *LegK[4]);
+  void ChanUST(dse::ver4 &Ver4);
 };
 
 }; // namespace diag

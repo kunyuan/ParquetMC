@@ -21,12 +21,13 @@ const double SymFactor[8] = {1.0, -1.0, 1.0, 0.5, -1.0, 1.0, -0.5};
 struct bubble;
 struct envelope;
 
-struct gList {
-  vector<array<int, 2>> T;
-  vector<double> Weight;
+struct green {
+  array<int, 2> T;
+  double Weight;
 };
 
 struct ver4 {
+  int Level;
   int Side; // right side vertex is always a full gamma4
   int TauNum;
   int InTL;
@@ -36,17 +37,20 @@ struct ver4 {
               // vertex
   bool HasCT; // contain projected counter-term or not
   vector<channel> Channel; // list of channels except I
+  // array<momentum, 4> ProjLegK; // projected external K derived from LegK
+  array<momentum *, 4> LegK; // external K
 
   /////////// bubble diagrams ////////////////////
   array<momentum, 8> K; // momentum for internal K
-  array<gList, 8> G;
+  array<vector<green>, 8> G;
   // G lists for each channel, G0 is shared for all diagrams
   vector<pair> Pair; // different arrangement of LVer and RVer
 
   // vector<envelope> Envelope; // envelop diagrams and its counter diagram
 
-  vector<array<int, 4>> T;                // external T list
-  vector<ver::weightMatrix> Weight;       // size: equal to T.size()
+  vector<array<int, 4>> T;          // external T list
+  vector<ver::weightMatrix> Weight; // size: equal to T.size()
+
   array<ver::weightMatrix, 4> ChanWeight; // weight of four channel
 };
 
@@ -111,9 +115,10 @@ struct envelope {
 
 class verDiag {
 public:
-  ver4 Vertex(int LoopNum, int LoopIndex, int InTL, vector<channel> Channel,
+  ver4 Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
+              const vector<channel> &Channel, const array<momentum *, 4> &LegK,
               int Side, bool InBox);
-  string ToString(const ver4 &Vertex, string indent = "", int Level = 0);
+  string ToString(const ver4 &Vertex, string indent = "");
 
 private:
   ver4 Ver0(ver4 Ver4);
