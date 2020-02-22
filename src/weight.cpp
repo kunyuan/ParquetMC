@@ -19,8 +19,11 @@ void weight::Initialization() {
 
   vector<channel> Chan = {I, T, U, S, TC, UC};
   for (int order = 1; order <= Para.Order; order++) {
-    Ver4Root[order] =
-        VerDiag.Vertex(0, order, 4, 0, Chan, ExtLegK, RIGHT, false);
+    Ver4Root[order] = VerDiag.Vertex(0,     // level
+                                     order, // loopNum
+                                     4, // loop index of the first internal K
+                                     0, // tau index of the InTL leg
+                                     Chan, ExtLegK, RIGHT, false);
     LOG_INFO(VerDiag.ToString(Ver4Root[order]));
   }
 }
@@ -111,20 +114,20 @@ void weight::ChanUST(ver4 &Ver4) {
   ///////////// Check if the projected counter-terms exist or not ///////
 
   // for vertex4 with one or more loops
-  for (auto &pair : Ver4.Pair) {
-    ver4 &LVer = pair.LVer;
-    ver4 &RVer = pair.RVer;
+  for (auto &b : Ver4.Bubble) {
+    ver4 &LVer = b.LVer;
+    ver4 &RVer = b.RVer;
     Vertex4(LVer);
     Vertex4(RVer);
 
-    for (auto &map : pair.Map) {
-      Weight = SymFactor[pair.Channel];
-      Weight *= G[0][map.G0idx].Weight * G[pair.Channel][map.Gidx].Weight;
+    for (auto &map : b.Map) {
+      Weight = SymFactor[b.Channel];
+      Weight *= G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
 
       auto &Lw = LVer.Weight[map.LVerTidx];
       auto &Rw = RVer.Weight[map.RVerTidx];
 
-      switch (pair.Channel) {
+      switch (b.Channel) {
       case T:
       case TC:
         DirW = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
@@ -149,8 +152,8 @@ void weight::ChanUST(ver4 &Ver4) {
       Ver4.Weight[map.Tidx][EX] += ExW * Weight;
 
       if (Ver4.Level == 0) {
-        Ver4.ChanWeight[pair.Channel][DIR] += DirW * Weight;
-        Ver4.ChanWeight[pair.Channel][EX] += ExW * Weight;
+        Ver4.ChanWeight[b.Channel][DIR] += DirW * Weight;
+        Ver4.ChanWeight[b.Channel][EX] += ExW * Weight;
       }
     }
   }

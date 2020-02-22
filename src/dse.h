@@ -16,9 +16,9 @@ namespace dse {
 using namespace std;
 
 enum channel { I = 0, T, U, S, TC, UC };
-const double SymFactor[8] = {1.0, -1.0, 1.0, 0.5, -1.0, 1.0, -0.5};
+const double SymFactor[6] = {1.0, -1.0, 1.0, 0.5, +1.0, -1.0};
 
-struct pair;
+struct bubble;
 struct envelope;
 
 struct green {
@@ -41,10 +41,10 @@ struct ver4 {
   array<momentum *, 4> LegK; // external K
 
   /////////// bubble diagrams ////////////////////
-  array<momentum, 4> K; // momentum for internal K
+  vector<bubble> Bubble; // different arrangement of LVer and RVer
+  array<momentum, 4> K;  // momentum for internal K
   array<vector<green>, 4> G;
   // G lists for each channel, G0 is shared for all diagrams
-  vector<pair> Pair; // different arrangement of LVer and RVer
 
   // vector<envelope> Envelope; // envelop diagrams and its counter diagram
 
@@ -64,7 +64,7 @@ struct indexMap {
   int Gidx;
 };
 
-struct pair {
+struct bubble {
   channel Channel;
   ver4 LVer;
   ver4 RVer;
@@ -120,9 +120,9 @@ public:
   string ToString(const ver4 &Vertex, string indent = "");
 
 private:
-  ver4 Ver0(ver4 Ver4);
-  ver4 ChanI(ver4 Ver4, vector<channel> Channel);
-  ver4 ChanUST(ver4 Ver4, vector<channel> Channel);
+  void Ver0(ver4 &Ver4);
+  void ChanI(ver4 &Ver4, const vector<channel> &Channel);
+  void ChanUST(ver4 &Ver4, const vector<channel> &Channel);
   momentum *NextMom();
 };
 
