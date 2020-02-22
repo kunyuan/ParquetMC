@@ -44,7 +44,7 @@ struct ver4 {
   /////////// bubble diagrams ////////////////////
   vector<bubble> Bubble; // different arrangement of LVer and RVer
   array<momentum, 4> K;  // momentum for internal K
-  array<vector<green>, 4> G;
+  array<vector<green>, 6> G;
   // G lists for each channel, G0 is shared for all diagrams
 
   // vector<envelope> Envelope; // envelop diagrams and its counter diagram

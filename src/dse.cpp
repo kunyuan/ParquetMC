@@ -10,21 +10,27 @@
 using namespace dse;
 using namespace std;
 
-int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> T) {
+int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> &T) {
   // find the T array in the list, if failed, create a new array
+  cout << "AddTtoList" << endl;
   for (int i = 0; i < TList.size(); i++) {
     auto t = TList[i];
+    cout << "List: " << t[0] << ", " << t[1] << ", " << t[2] << ", " << t[3]
+         << endl;
+
     ASSERT_ALLWAYS(t[INL] == T[INL],
                    "left Tin must be the same for all subvertex!"
                        << t[INL] << " vs " << T[INL]);
     if (t[OUTL] == T[OUTL] && t[INR] == T[INR] && t[OUTR] == T[OUTR])
       return i;
   }
+  cout << "Added: " << T[0] << ", " << T[1] << ", " << T[2] << ", " << T[3]
+       << endl;
   TList.push_back(T);
   return TList.size() - 1;
 }
 
-int AddToGList(vector<green> &GList, const array<int, 2> T) {
+int AddToGList(vector<green> &GList, const array<int, 2> &T) {
   // find the T array in the list, if failed, create a new array
   for (int i = 0; i < GList.size(); i++) {
     auto t = GList[i].T;
@@ -48,31 +54,30 @@ ver4 verDiag::Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
   Ver4.InBox = InBox;
   Ver4.LegK = LegK;
 
-  vector<channel> UST;
-  vector<channel> II;
-  for (auto &chan : Channel) {
-    if (Para.Type == BARE && chan >= 4)
-      // if one wants bare diagrams, filter all counter diagrams!
-      continue;
-
-    if (chan == I)
-      II.push_back(chan);
-    else
-      UST.push_back(chan);
-  }
-
-  // check if there is any counter-term or not
-  Ver4.HasCT = false;
-  if (Para.Type != BARE) {
-    for (auto &chan : Channel)
-      if (chan >= 4)
-        Ver4.HasCT = true;
-  }
-
   if (LoopNum == 0) {
     // the same for left and right vertex with loopnum=0
     Ver0(Ver4);
   } else {
+    vector<channel> UST;
+    vector<channel> II;
+    for (auto &chan : Channel) {
+      if (Para.Type == BARE && chan >= 4)
+        // if one wants bare diagrams, filter all counter diagrams!
+        continue;
+
+      if (chan == I)
+        II.push_back(chan);
+      else
+        UST.push_back(chan);
+    }
+
+    // check if there is any counter-term or not
+    Ver4.HasCT = false;
+    if (Para.Type != BARE) {
+      for (auto &chan : Channel)
+        if (chan >= 4)
+          Ver4.HasCT = true;
+    }
     // normal diagram
     ChanI(Ver4, II);
     ChanUST(Ver4, UST);
@@ -85,7 +90,11 @@ ver4 verDiag::Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
 void verDiag::Ver0(ver4 &Ver4) {
   ////////////// bare interaction ///////////
   int InTL = Ver4.InTL;
-  Ver4.T.push_back({InTL, InTL, InTL, InTL});
+
+  // cout << "Ver0: " << InTL << ", Order: " << Ver4.LoopNum
+  //      << ", Level: " << Ver4.Level << ", Tsize: " << Ver4.T.size() << endl;
+
+  AddToTList(Ver4.T, {InTL, InTL, InTL, InTL});
 }
 
 vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
@@ -105,36 +114,39 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
 
       GT0 = AddToGList(Ver4.G[0], {LvT[OUTR], RvT[INL]});
 
-      if (Chan == T || Chan == TC || Chan == U || Chan == UC)
-        GTpair = {RvT[OUTL], LvT[INR]};
-      else if (Chan == S)
-        GTpair = {LvT[OUTL], RvT[INR]};
-      else
-        ABORT("The channel does not exist!");
-
-      GT = AddToGList(Ver4.G[Chan], GTpair);
-
       switch (Chan) {
       case T:
         LegT = {LvT[INL], LvT[OUTL], RvT[INR], RvT[OUTR]};
+        GTpair = {RvT[OUTL], LvT[INR]};
         break;
       case U:
         LegT = {LvT[INL], RvT[OUTR], RvT[INR], LvT[OUTL]};
+        GTpair = {RvT[OUTL], LvT[INR]};
         break;
       case S:
         LegT = {LvT[INL], RvT[OUTL], LvT[INR], RvT[OUTR]};
+        GTpair = {LvT[OUTL], RvT[INR]};
         break;
       case TC:
       case UC:
         // counterterms are equal-time
         LegT = {LvT[INL], LvT[INL], LvT[INL], LvT[INL]};
+        GTpair = {RvT[OUTL], LvT[INR]};
         break;
       default:
         ABORT("The channel does not exist! " << Chan);
         break;
       }
 
+      GT = AddToGList(Ver4.G[Chan], GTpair);
+
       // add T array into the T pool of the vertex
+      // cout << Ver4.InTL << "; " << LegT[0] << ", " << LegT[1] << ", " <<
+      // LegT[2]
+      //      << ", " << LegT[3] << endl;
+      // int tail = Ver4.T.size();
+      // if (tail > 0)
+      //   cout << Ver4.InTL << "; " << Ver4.T[tail - 1][0] << ", " << endl;
       Tidx = AddToTList(Ver4.T, LegT);
       Map.push_back(indexMap{lt, rt, Tidx, GT0, GT});
     }
@@ -171,8 +183,8 @@ void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
   LLegK[UC] = LLegK[U];
   RLegK[UC] = RLegK[U];
 
-  for (int ol = 0; ol < Ver4.LoopNum; ol++) {
-    for (auto &chan : Channel) {
+  for (auto &chan : Channel) {
+    for (int ol = 0; ol < Ver4.LoopNum; ol++) {
       bubble bub;
       ////////////////////   Right SubVer  ///////////////////
       int Level = Ver4.Level + 1;
