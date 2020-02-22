@@ -12,11 +12,11 @@ using namespace std;
 
 int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> &T) {
   // find the T array in the list, if failed, create a new array
-  cout << "AddTtoList" << endl;
+  // cout << "AddTtoList" << endl;
   for (int i = 0; i < TList.size(); i++) {
     auto t = TList[i];
-    cout << "List: " << t[0] << ", " << t[1] << ", " << t[2] << ", " << t[3]
-         << endl;
+    // cout << "List: " << t[0] << ", " << t[1] << ", " << t[2] << ", " << t[3]
+    //      << endl;
 
     ASSERT_ALLWAYS(t[INL] == T[INL],
                    "left Tin must be the same for all subvertex!"
@@ -24,8 +24,8 @@ int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> &T) {
     if (t[OUTL] == T[OUTL] && t[INR] == T[INR] && t[OUTR] == T[OUTR])
       return i;
   }
-  cout << "Added: " << T[0] << ", " << T[1] << ", " << T[2] << ", " << T[3]
-       << endl;
+  // cout << "Added: " << T[0] << ", " << T[1] << ", " << T[2] << ", " << T[3]
+  //      << endl;
   TList.push_back(T);
   return TList.size() - 1;
 }
@@ -364,9 +364,11 @@ string verDiag::ToString(const ver4 &Ver4, string indent) {
   //     indent +
   //     "==============================================================\n";
   string Info =
-      indent + fmt::format("├Level: {0}, {1}, LoopNum: {2}, Boxed: {3}\n",
-                           Ver4.Level, SideStr, Ver4.LoopNum, Ver4.InBox);
-  Info += indent + "├─T: ";
+      indent +
+      fmt::format("├Level: {0}, {1}, LoopNum: {2}, Boxed: {3}, G0:{4}\n",
+                  Ver4.Level, SideStr, Ver4.LoopNum, Ver4.InBox,
+                  Ver4.G[0].size());
+  Info += indent + fmt::format("├─T[{0}]: ", Ver4.T.size());
   for (auto &t : Ver4.T)
     Info +=
         fmt::format("({0}, {1}, {2}, {3}), ", t[INL], t[OUTL], t[INR], t[OUTR]);
@@ -376,10 +378,18 @@ string verDiag::ToString(const ver4 &Ver4, string indent) {
   for (int p = 0; p < Ver4.Bubble.size(); p++) {
     Info += indent + ". │\n";
     bubble pp = Ver4.Bubble[p];
-    Info += indent + fmt::format(". ├PAIR - Channel: {0}, LVerLoopNum: {1}\n",
-                                 ChanName[pp.Channel], pp.LVer.LoopNum);
+    Info += indent +
+            fmt::format(". ├PAIR - Channel: {0}, LVerLoopNum: {1}, G: {2}\n",
+                        ChanName[pp.Channel], pp.LVer.LoopNum,
+                        Ver4.G[pp.Channel].size());
 
     // Info += indent + " . │\n";
+    Info += indent + fmt::format(". ├─G[{0}, {1}]:", ChanName[pp.Channel],
+                                 Ver4.G[pp.Channel].size());
+    for (auto &g : Ver4.G[pp.Channel])
+      Info += fmt::format("({0},{1}), ", g.T[IN], g.T[OUT]);
+
+    Info += "\n";
     Info += indent + fmt::format(". ├─Map:");
     for (auto &m : pp.Map)
       Info += fmt::format("({0},{1}):{2}, ", m.LVerTidx, m.RVerTidx, m.Tidx);

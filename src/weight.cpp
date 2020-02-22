@@ -19,12 +19,18 @@ void weight::Initialization() {
 
   vector<channel> Chan = {I, T, U, S, TC, UC};
   for (int order = 1; order <= Para.Order; order++) {
+    LOG_INFO("Generating order " << order);
     Ver4Root[order] = VerDiag.Vertex(0,     // level
                                      order, // loopNum
                                      4, // loop index of the first internal K
                                      0, // tau index of the InTL leg
                                      Chan, ExtLegK, RIGHT, false);
-    LOG_INFO(VerDiag.ToString(Ver4Root[order]));
+    if (order < 5)
+      LOG_INFO(VerDiag.ToString(Ver4Root[order]));
+  }
+  for (int order = 1; order <= Para.Order; order++) {
+    LOG_INFO(fmt::format(" Order {0}: ExtT Num {1}\n", order,
+                         Ver4Root[order].T.size()));
   }
 }
 
