@@ -45,6 +45,7 @@ double weight::Evaluate(int LoopNum, diagram Diagram) {
     if (Root.Weight.size() != 0) {
       Vertex4(Root, true);
       for (auto &w : _ChanWeight)
+        // collapse all channel to I
         _ChanWeight[0] += w;
       return _ChanWeight[0].Abs();
     }
