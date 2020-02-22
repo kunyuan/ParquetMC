@@ -53,8 +53,6 @@ struct ver4 {
 
   vector<array<int, 4>> T;          // external T list
   vector<ver::weightMatrix> Weight; // size: equal to T.size()
-
-  array<ver::weightMatrix, 4> ChanWeight; // weight of four channel
 };
 
 struct indexMap {
