@@ -129,9 +129,8 @@ void verQTheta::Save(bool Simple) {
 
       if (VerFile.is_open()) {
 
-        VerFile << fmt::sprintf(
-            "#PID:%d, Type:%d, rs:%.3f, Beta: %.3f, Step: %d\n", Para.PID,
-            Para.ObsType, Para.Rs, Para.Beta, Para.Counter);
+        VerFile << fmt::sprintf("#PID:%d, rs:%.3f, Beta: %.3f, Step: %d\n",
+                                Para.PID, Para.Rs, Para.Beta, Para.Counter);
 
         VerFile << "# Norm: " << Normalization << endl;
 
@@ -302,13 +301,6 @@ int ver::Angle2Index(const double &Angle, const int &AngleNum) {
   double dAngle = 2.0 / AngleNum;
   return int((Angle + 1.0) / dAngle);
   // }
-}
-
-double ver::Index2Scale(const int &Index) {
-  return Index * Para.UVScale / ScaleBinSize;
-}
-int ver::Scale2Index(const double &Scale) {
-  return int((Scale / Para.UVScale) * ScaleBinSize);
 }
 
 int ver::Tau2Index(const double &Tau) {

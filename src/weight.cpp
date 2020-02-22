@@ -34,27 +34,21 @@ void weight::Initialization() {
   }
 }
 
-ver::weightMatrix weight::Evaluate(int LoopNum, speed Speed) {
+double weight::Evaluate(int LoopNum, diagram Diagram) {
   if (LoopNum == 0) {
     // normalization
-    Weight[EX] = 0.0;
-    Weight[DIR] = 1.0;
+    return 1.0;
   } else {
     // if (Channel != dse::T)
     //   return 0.0;
     ver4 &Root = Ver4Root[LoopNum];
     if (Root.Weight.size() != 0) {
-      if (Speed == FAST) {
-        Weight.SetZero();
-        Vertex4(Root);
-      } else if (Speed = MODERATE) {
-        for (auto &w : ChanWeight)
-          w.SetZero();
-        Vertex4(Root);
-      }
+      Vertex4(Root, true);
+      for (auto &w : _ChanWeight)
+        _ChanWeight[0] += w;
+      return _ChanWeight[0].Abs();
     }
   }
-  return Weight;
 }
 
 void weight::Ver0(ver4 &Ver4) {
@@ -62,22 +56,27 @@ void weight::Ver0(ver4 &Ver4) {
   Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox);
   return;
 }
-void weight::Vertex4(ver4 &Ver4) {
+void weight::Vertex4(ver4 &Ver4, bool IsFast) {
   // cout << Ver4.LoopNum << endl;
   if (Ver4.LoopNum == 0) {
     Ver0(Ver4);
   } else {
-    for (auto &w : Ver4.Weight)
-      w.SetZero();
+    if (Ver4.Level > 0 || IsFast == false) {
+      for (auto &w : Ver4.Weight)
+        w.SetZero();
+    } else {
+      for (auto &w : _ChanWeight)
+        w.SetZero();
+    }
 
-    ChanUST(Ver4);
+    ChanUST(Ver4, IsFast);
     if (Ver4.LoopNum >= 3)
-      ChanI(Ver4);
+      ChanI(Ver4, IsFast);
   }
   return;
 }
 
-void weight::ChanUST(ver4 &Ver4) {
+void weight::ChanUST(ver4 &Ver4, bool IsFast) {
   double Weight = 0.0;
   double Ratio, dTau, ProjFactor;
   double DirW, ExW;
@@ -108,7 +107,7 @@ void weight::ChanUST(ver4 &Ver4) {
     // calculate G table
     for (auto &g : G[chan]) {
       dTau = Var.Tau[g.T[OUT]] - Var.Tau[g.T[IN]];
-      g.Weight = Fermi.Green(dTau, Ver4.K[chan], UP, 0, Var.CurrScale);
+      g.Weight = Fermi.Green(dTau, Ver4.K[chan], UP, 0, 0);
     }
   }
   ///////////// Check if the projected counter-terms exist or not ///////
@@ -117,8 +116,8 @@ void weight::ChanUST(ver4 &Ver4) {
   for (auto &b : Ver4.Bubble) {
     ver4 &LVer = b.LVer;
     ver4 &RVer = b.RVer;
-    Vertex4(LVer);
-    Vertex4(RVer);
+    Vertex4(LVer, IsFast);
+    Vertex4(RVer, IsFast);
 
     ProjFactor = SymFactor[b.Channel] * Factor;
     if (b.Channel == TC || b.Channel == UC)
@@ -149,21 +148,25 @@ void weight::ChanUST(ver4 &Ver4) {
         break;
       }
 
-      Ver4.Weight[map.Tidx][DIR] += DirW * Weight;
-      Ver4.Weight[map.Tidx][EX] += ExW * Weight;
-
-      if (Ver4.Level == 0) {
-        // calculate contributions from different channels for the root
-        // vertex4
-        channel chan = ChanMap[b.Channel];
-        Ver4.ChanWeight[chan][DIR] += DirW * Weight;
-        Ver4.ChanWeight[chan][EX] += ExW * Weight;
+      if (Ver4.Level > 0) {
+        Ver4.Weight[map.Tidx][DIR] += DirW * Weight;
+        Ver4.Weight[map.Tidx][EX] += ExW * Weight;
+      } else {
+        if (IsFast) {
+          // calculate contributions from different channels for the root
+          // vertex4
+          channel chan = ChanMap[b.Channel];
+          _ChanWeight[chan][DIR] += DirW * Weight;
+          _ChanWeight[chan][EX] += ExW * Weight;
+        } else {
+          // TODO: add slow measure
+        }
       }
     }
   }
 }
 
-void weight::ChanI(dse::ver4 &Ver4) {
+void weight::ChanI(dse::ver4 &Ver4, bool IsFast) {
   if (Ver4.LoopNum != 3)
     return;
   // for (auto &Env : Ver4.Envelope) {

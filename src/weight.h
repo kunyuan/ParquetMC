@@ -40,7 +40,9 @@ public:
 
   void Initialization();
 
-  double Evaluate(int LoopNum, speed Speed = FAST);
+  double Evaluate(int LoopNum, diagram Diagram);
+
+  void EvaluateChanVer4(int LoopNum, array<ver::weightMatrix, 4> ChanWeight);
 
   // initialization, read diagrams, then initialize variables
 
@@ -48,15 +50,14 @@ private:
   dse::verDiag VerDiag; // diagram factory
   // diagram for different order and channel
   dse::ver4 Ver4Root[MaxOrder];
-  array<ver::weightMatrix, 4> ChanWeight;
-  ver::weightMatrix Weight;
+  array<ver::weightMatrix, 4> _ChanWeight;
 
-  void Vertex4(dse::ver4 &Ver4);
+  void Vertex4(dse::ver4 &Ver4, bool IsFast);
 
   void Ver0(dse::ver4 &Ver4);
 
-  void ChanI(dse::ver4 &Ver4);
-  void ChanUST(dse::ver4 &Ver4);
+  void ChanI(dse::ver4 &Ver4, bool IsFast);
+  void ChanUST(dse::ver4 &Ver4, bool IsFast);
 };
 
 }; // namespace diag

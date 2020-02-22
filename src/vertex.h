@@ -42,6 +42,12 @@ public:
     return sum;
   }
   double &operator[](int dir) { return _Weight[dir]; }
+  const double &operator[](int dir) const { return _Weight[dir]; }
+  weightMatrix &operator+=(const weightMatrix &a) {
+    _Weight[DIR] += a[DIR];
+    _Weight[EX] += a[EX];
+    return *this;
+  }
 
 private:
   array<double, 2> _Weight;

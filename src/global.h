@@ -30,9 +30,8 @@ const int TauBasisNum = 32;
 const int SPIN = 1;
 
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
-enum diagram { SIGMA, POLAR, GAMMA_K, GAMMA_W };
+enum diagram { SIGMA, POLAR, GAMMA };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
-enum speed { FAST, MODERATE, SLOW };
 
 typedef Vec<double, D> momentum;
 // typedef std::array<double, D> momentum;
