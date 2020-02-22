@@ -51,8 +51,8 @@ ver4 verDiag::Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
   vector<channel> UST;
   vector<channel> II;
   for (auto &chan : Channel) {
-    // if one wants the bare diagrams, filter all counter diagrams!
     if (Para.Type == BARE && chan >= 4)
+      // if one wants bare diagrams, filter all counter diagrams!
       continue;
 
     if (chan == I)
@@ -360,28 +360,28 @@ string verDiag::ToString(const ver4 &Ver4, string indent) {
         fmt::format("({0}, {1}, {2}, {3}), ", t[INL], t[OUTL], t[INR], t[OUTR]);
 
   Info += "\n";
-  if (Ver4.Bubble.size() > 0)
-    Info += indent + fmt::format("└─\n");
-  // Info += indent + ". │\n";
+  // Info += indent + fmt::format("└─\n");
   for (int p = 0; p < Ver4.Bubble.size(); p++) {
-    auto pp = Ver4.Bubble[p];
+    Info += indent + ". │\n";
+    bubble pp = Ver4.Bubble[p];
     Info += indent + fmt::format(". ├PAIR - Channel: {0}, LVerLoopNum: {1}\n",
-                                 pp.Channel, pp.LVer.LoopNum);
+                                 ChanName[pp.Channel], pp.LVer.LoopNum);
 
     // Info += indent + " . │\n";
     Info += indent + fmt::format(". ├─Map:");
     for (auto &m : pp.Map)
       Info += fmt::format("({0},{1}):{2}, ", m.LVerTidx, m.RVerTidx, m.Tidx);
 
-    Info += "\n" + indent + ". │\n";
+    Info += "\n";
+    // Info += "\n" + indent + ". │\n";
     Info += ToString(pp.LVer, indent + ". ");
     // Info +=
     //     indent +
     //     ".....................................................\n";
 
-    Info += indent + ". │\n";
+    // Info += indent + ". │\n";
     Info += ToString(pp.RVer, indent + ". ");
-    Info += indent + ".  \n";
+    // Info += indent + ".  \n";
     // Info += "\n";
     // Info += indent + "\n";
     // Info += "\n" + indent + " . │\n";
