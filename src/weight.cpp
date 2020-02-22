@@ -34,8 +34,7 @@ void weight::Initialization() {
   }
 }
 
-ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
-  ver::weightMatrix Weight;
+ver::weightMatrix weight::Evaluate(int LoopNum, speed Speed) {
   if (LoopNum == 0) {
     // normalization
     Weight[EX] = 0.0;
@@ -43,24 +42,15 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
   } else {
     // if (Channel != dse::T)
     //   return 0.0;
-    Weight.SetZero();
-
     ver4 &Root = Ver4Root[LoopNum];
     if (Root.Weight.size() != 0) {
-
-      for (int c = 0; c < 4; ++c)
-        Root.ChanWeight[c].SetZero();
-
-      Vertex4(Root);
-
-      if (Channel <= 4) {
-        double Factor = 1.0 / pow(2.0 * PI, D * LoopNum);
-
-        //////// Measure Scattering amplitude ////////////////////
-        for (auto &w : Root.Weight) {
-          Weight[DIR] += w[DIR] * Factor;
-          Weight[EX] += w[EX] * Factor;
-        }
+      if (Speed == FAST) {
+        Weight.SetZero();
+        Vertex4(Root);
+      } else if (Speed = MODERATE) {
+        for (auto &w : ChanWeight)
+          w.SetZero();
+        Vertex4(Root);
       }
     }
   }
@@ -80,11 +70,6 @@ void weight::Vertex4(ver4 &Ver4) {
     for (auto &w : Ver4.Weight)
       w.SetZero();
 
-    // calculate four channels for the root vertex
-    if (Ver4.Level == 0)
-      for (auto &w : Ver4.ChanWeight)
-        w.SetZero();
-
     ChanUST(Ver4);
     if (Ver4.LoopNum >= 3)
       ChanI(Ver4);
@@ -94,27 +79,36 @@ void weight::Vertex4(ver4 &Ver4) {
 
 void weight::ChanUST(ver4 &Ver4) {
   double Weight = 0.0;
-  double Ratio, dTau;
+  double Ratio, dTau, ProjFactor;
   double DirW, ExW;
   const auto &LegK = Ver4.LegK;
   auto &G = Ver4.G;
+  double Factor = 1.0 / pow(2.0 * PI, D * Ver4.LoopNum);
 
+  // calculate K table
+  Ver4.K[0] = Var.LoopMom[Ver4.Loopidx];
   for (auto chan : Ver4.Channel) {
-    if (chan < 4) {
+    switch (chan) {
+    case T:
+      Ver4.K[T] = *LegK[OUTL] + Ver4.K[0] - *LegK[INL];
+      break;
+    case U:
+      Ver4.K[U] = *LegK[OUTR] + Ver4.K[0] - *LegK[INL];
+      break;
+    case S:
+      Ver4.K[S] = *LegK[INL] + *LegK[INR] - Ver4.K[0];
+      break;
+    case TC:
+    case UC:
+      ProjFactor = Para.Lambda / (8.0 * PI * Para.Nf);
+      Ver4.K[chan] = Ver4.K[0];
+      break;
+    }
 
-      if (chan == 0)
-        Ver4.K[0] = Var.LoopMom[Ver4.Loopidx];
-      else if (chan == T)
-        Ver4.K[T] = *LegK[OUTL] + Ver4.K[0] - *LegK[INL];
-      else if (chan == U)
-        Ver4.K[U] = *LegK[OUTR] + Ver4.K[0] - *LegK[INL];
-      else if (chan == S)
-        Ver4.K[S] = *LegK[INL] + *LegK[INR] - Ver4.K[0];
-
-      for (auto &g : G[chan]) {
-        dTau = Var.Tau[g.T[OUT]] - Var.Tau[g.T[IN]];
-        g.Weight = Fermi.Green(dTau, Ver4.K[chan], UP, 0, Var.CurrScale);
-      }
+    // calculate G table
+    for (auto &g : G[chan]) {
+      dTau = Var.Tau[g.T[OUT]] - Var.Tau[g.T[IN]];
+      g.Weight = Fermi.Green(dTau, Ver4.K[chan], UP, 0, Var.CurrScale);
     }
   }
   ///////////// Check if the projected counter-terms exist or not ///////
@@ -126,8 +120,12 @@ void weight::ChanUST(ver4 &Ver4) {
     Vertex4(LVer);
     Vertex4(RVer);
 
+    ProjFactor = SymFactor[b.Channel] * Factor;
+    if (b.Channel == TC || b.Channel == UC)
+      ProjFactor *= Para.Lambda / (8.0 * PI * Para.Nf);
+
     for (auto &map : b.Map) {
-      Weight = SymFactor[b.Channel];
+      Weight = ProjFactor;
       Weight *= G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
 
       auto &Lw = LVer.Weight[map.LVerTidx];
@@ -149,17 +147,17 @@ void weight::ChanUST(ver4 &Ver4) {
         DirW = Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         ExW = Lw[DIR] * Rw[DIR] + Lw[EX] * Rw[EX];
         break;
-      default:
-        ABORT("Channel does not exist!");
-        break;
       }
 
       Ver4.Weight[map.Tidx][DIR] += DirW * Weight;
       Ver4.Weight[map.Tidx][EX] += ExW * Weight;
 
       if (Ver4.Level == 0) {
-        Ver4.ChanWeight[b.Channel][DIR] += DirW * Weight;
-        Ver4.ChanWeight[b.Channel][EX] += ExW * Weight;
+        // calculate contributions from different channels for the root
+        // vertex4
+        channel chan = ChanMap[b.Channel];
+        Ver4.ChanWeight[chan][DIR] += DirW * Weight;
+        Ver4.ChanWeight[chan][EX] += ExW * Weight;
       }
     }
   }

@@ -18,11 +18,10 @@ struct variable {
   int CurrOrder;
   int CurrChannel; // 0: I, 1: T, 2: U, 3: S
   long int CurrVersion;
+  diagram CurrDiagram;
 
   int CurrExtMomBin; // current bin of the external momentum
   double CurrTau;    // current external tau
-  double CurrScale;  // Current (Reference) Scale: Index=1, ..., ScaleBinSize
-  int CurrIRScaleBin;
   ver::weightMatrix CurrWeight;
   double CurrAbsWeight;
 
@@ -41,7 +40,7 @@ public:
 
   void Initialization();
 
-  ver::weightMatrix Evaluate(int LoopNum, int Channel);
+  double Evaluate(int LoopNum, speed Speed = FAST);
 
   // initialization, read diagrams, then initialize variables
 
@@ -49,6 +48,8 @@ private:
   dse::verDiag VerDiag; // diagram factory
   // diagram for different order and channel
   dse::ver4 Ver4Root[MaxOrder];
+  array<ver::weightMatrix, 4> ChanWeight;
+  ver::weightMatrix Weight;
 
   void Vertex4(dse::ver4 &Ver4);
 

@@ -43,16 +43,11 @@ void InitPara() {
 
   // Para.Type = BARE;
   Para.Type = VARIATIONAL;
-  Para.ObsType = GAMMA_K;
   // Para.ObsType = LANDAU;
 
   // Para.ReWeight = {1.0, 0.8, 0.8, 0.8, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
   Para.ReWeight = {40.0, 0.8, 0.4, 0.2, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
   Para.ReWeightChan = {1.0, 1.0, 1.0, 1.0, 1.0};
-
-  Para.Vertex4Type = MOM_ANGLE;
-
-  Para.Delta = 1.0;
 
   //// initialize the global parameter //////////////////////
   double Kf;
@@ -72,19 +67,6 @@ void InitPara() {
 
   // scale all energy with E_F
   Para.Beta /= Para.Ef;
-  Para.UVScale = 2.0 * Para.Kf;
-  Para.UVCoupling = 1.0 * Para.Ef;
-
-  double dScale = Para.UVScale / ScaleBinSize;
-  for (int i = 0; i < (ScaleBinSize + 1); i++) {
-    Para.ScaleTable[i] = i * dScale;
-    Para.dScaleTable[i] = dScale;
-  }
-
-  Para.ScaleTable[0] = 1.0e-6;
-  for (int i = 0; i < ScaleBinSize + 1; i++) {
-    Para.dScaleTable[i] = Para.ScaleTable[i + 1] - Para.ScaleTable[i];
-  }
 
   for (int i = 0; i < AngBinSize; i++) {
     Para.AngleTable[i] = ver::Index2Angle(i, AngBinSize);
@@ -102,9 +84,6 @@ void InitPara() {
   Para.ExtMomTable[1][0] = 2. * Para.Kf;
 
   LOG_INFO("Inverse Temperature: " << Para.Beta << "\n"
-                                   << "UV Energy Scale: " << Para.UVScale
-                                   << "\n"
-                                   << "UV Coupling: " << Para.UVCoupling << "\n"
                                    << "r_s: " << Para.Rs << "\n"
                                    << "Fermi Mom: " << Para.Kf << "\n"
                                    << "Fermi Energy: " << Para.Ef << "\n");

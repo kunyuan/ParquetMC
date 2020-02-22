@@ -30,8 +30,9 @@ const int TauBasisNum = 32;
 const int SPIN = 1;
 
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
-enum obstype { SIGMA, POLAR, GAMMA_K, GAMMA_W };
+enum diagram { SIGMA, POLAR, GAMMA_K, GAMMA_W };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
+enum speed { FAST, MODERATE, SLOW };
 
 typedef Vec<double, D> momentum;
 // typedef std::array<double, D> momentum;
@@ -40,27 +41,23 @@ typedef Vec<double, D> momentum;
 struct parameter {
   // physical parameters
   double Rs, Ef, Kf, Nf,
-      Mu;            // r_s, fermi energy, fermi momentum, chemical potential
-  double Beta;       // inverse temperature
-  double UVScale;    // the UV bound of the energy scale
-  double UVCoupling; // the coupling constant at the UV scale
-  double Mass2;      // screening length^2
+      Mu;       // r_s, fermi energy, fermi momentum, chemical potential
+  double Beta;  // inverse temperature
+  double Mass2; // screening length^2
   double Lambda;
   double Delta;
   double Charge2;   // screening length^2
   double MaxExtMom; // the maximum external momentum
-  ver4type Vertex4Type;
 
   // MC inputs
   int Order;
-  type Type;             // polarization, RG
-  obstype ObsType;       // 0: static polarization, 1: equal-time polarization
-  bool UseVer4;          // use vertex4 to calculate weight or not
-  int TotalStep;         // total steps of the Monte Carlo
-  int Seed;              // rng seed
-  int PID;               // ID of the job
-  long long int Counter; // counter to save the current MC step
-  int Sweep;             // how many MC steps between two measuring
+  type Type;
+  bool UseVer4;                       // use vertex4 to calculate weight or not
+  int TotalStep;                      // total steps of the Monte Carlo
+  int Seed;                           // rng seed
+  int PID;                            // ID of the job
+  long long int Counter;              // counter to save the current MC step
+  int Sweep;                          // how many MC steps between two measuring
   std::vector<std::string> GroupName; // ID for each group
   std::vector<double> ReWeight;       // reweight factor for each group
   std::vector<double> ReWeightChan;   // reweight factor for each group
@@ -76,8 +73,6 @@ struct parameter {
       ExtMomTable; // external bosonic Momentum (transfer momentum)
   std::array<momentum, AngBinSize>
       ExtLegKTable; // external fermionic Momentum (LegK momentum)
-  std::array<double, ScaleBinSize + 1> ScaleTable;
-  std::array<double, ScaleBinSize + 1> dScaleTable;
   std::array<double, AngBinSize> AngleTable;
   std::array<double, AngBinSize> dAngleTable;
 };
