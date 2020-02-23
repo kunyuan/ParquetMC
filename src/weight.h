@@ -34,6 +34,7 @@ struct variable {
 class weight {
 public:
   variable Var; // The variable of the integral
+  array<ver::weightMatrix, 4> ChanWeight;
 
   ver::fermi Fermi;         // propagator factory
   ver::verQTheta VerQTheta; // vertex factory
@@ -41,6 +42,9 @@ public:
   void Initialization();
 
   double Evaluate(int LoopNum, diagram Diagram);
+  double EvaluateUST(int LoopNum);
+
+  void MeasureUST();
 
   void EvaluateChanVer4(int LoopNum, array<ver::weightMatrix, 4> ChanWeight);
 
@@ -50,7 +54,6 @@ private:
   dse::verDiag VerDiag; // diagram factory
   // diagram for different order and channel
   dse::ver4 Ver4Root[MaxOrder];
-  array<ver::weightMatrix, 4> _ChanWeight;
 
   void Vertex4(dse::ver4 &Ver4, bool IsFast);
 

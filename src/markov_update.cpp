@@ -72,8 +72,7 @@ void markov::ChangeOrder() {
   Proposed[Name][Var.CurrOrder] += 1;
 
   // Weight.ChangeGroup(NewGroup);
-  NewWeight = Weight.Evaluate(NewOrder, Var.CurrChannel);
-  NewAbsWeight = NewWeight.Abs();
+  NewAbsWeight = Weight.Evaluate(NewOrder, Var.CurrDiagram);
   double R = Prop * NewAbsWeight * Para.ReWeight[NewOrder] / Var.CurrAbsWeight /
              Para.ReWeight[Var.CurrOrder];
 
@@ -88,7 +87,6 @@ void markov::ChangeOrder() {
     Accepted[Name][Var.CurrOrder]++;
     Var.CurrVersion++;
     Var.CurrOrder = NewOrder;
-    Var.CurrWeight = NewWeight;
     Var.CurrAbsWeight = NewAbsWeight;
   }
   return;
@@ -105,14 +103,12 @@ void markov::ChangeTau() {
 
   Var.Tau[TauIndex] = NewTau;
 
-  NewWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrChannel);
-  NewAbsWeight = NewWeight.Abs();
+  NewAbsWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrDiagram);
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
     Accepted[CHANGE_TAU][Var.CurrOrder]++;
     Var.CurrVersion++;
-    Var.CurrWeight = NewWeight;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     // retore the old Tau if the update is rejected
@@ -143,14 +139,12 @@ void markov::ChangeMomentum() {
     Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
   }
 
-  NewWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrChannel);
-  NewAbsWeight = NewWeight.Abs();
+  NewAbsWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrDiagram);
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
     Accepted[CHANGE_MOM][Var.CurrOrder]++;
     Var.CurrVersion++;
-    Var.CurrWeight = NewWeight;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.LoopMom[LoopIndex] = CurrMom;

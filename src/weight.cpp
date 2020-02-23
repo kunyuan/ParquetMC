@@ -44,10 +44,27 @@ double weight::Evaluate(int LoopNum, diagram Diagram) {
     ver4 &Root = Ver4Root[LoopNum];
     if (Root.Weight.size() != 0) {
       Vertex4(Root, true);
-      for (auto &w : _ChanWeight)
+      for (auto &w : ChanWeight)
         // collapse all channel to I
-        _ChanWeight[0] += w;
-      return _ChanWeight[0].Abs();
+        ChanWeight[0] += w;
+      return ChanWeight[0].Abs();
+    }
+  }
+}
+
+void weight::MeasureUST() {
+  ver4 &Root = Ver4Root[Var.CurrOrder];
+  double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder] *
+                         Para.ReWeightChan[Var.CurrChannel]);
+
+  VerQTheta.Measure(Var.LoopMom[1], Var.LoopMom[2], Var.CurrExtMomBin,
+                    Var.CurrOrder, , Factor);
+  if (LoopNum == 0) {
+    // normalization
+    return 1.0;
+  } else {
+    if (Root.Weight.size() != 0) {
+      Vertex4(Root, true);
     }
   }
 }
@@ -66,7 +83,7 @@ void weight::Vertex4(ver4 &Ver4, bool IsFast) {
       for (auto &w : Ver4.Weight)
         w.SetZero();
     } else {
-      for (auto &w : _ChanWeight)
+      for (auto &w : ChanWeight)
         w.SetZero();
     }
 
@@ -157,8 +174,8 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
           // calculate contributions from different channels for the root
           // vertex4
           channel chan = ChanMap[b.Channel];
-          _ChanWeight[chan][DIR] += DirW * Weight;
-          _ChanWeight[chan][EX] += ExW * Weight;
+          ChanWeight[chan][DIR] += DirW * Weight;
+          ChanWeight[chan][EX] += ExW * Weight;
         } else {
           // TODO: add slow measure
         }
