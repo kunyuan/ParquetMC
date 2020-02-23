@@ -53,6 +53,7 @@ ver4 verDiag::Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
   Ver4.Loopidx = LoopIndex;
   Ver4.InBox = InBox;
   Ver4.LegK = LegK;
+  Ver4.Channel = Channel;
 
   if (LoopNum == 0) {
     // the same for left and right vertex with loopnum=0
@@ -164,26 +165,29 @@ void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
   vector<channel> FULL_CT = {I, T, TC};
   vector<channel> F_CT = {I, TC};
 
-  array<momentum *, 4> LLegK[6], RLegK[6];
-
-  ////////////////// T channel ////////////////////////////
-  LLegK[T] = {LegK[INL], LegK[OUTL], &K[T], &K[0]};
-  RLegK[T] = {&K[0], &K[T], LegK[INR], LegK[OUTR]};
-
-  ////////////////// U channel ////////////////////////////
-  LLegK[U] = {LegK[INL], LegK[OUTR], &K[U], &K[0]};
-  RLegK[U] = {&K[0], &K[U], LegK[INR], LegK[OUTL]};
-
-  ////////////////// S channel ////////////////////////////
-  LLegK[S] = {LegK[INL], &K[S], LegK[INR], &K[0]};
-  RLegK[S] = {&K[0], LegK[OUTL], &K[S], LegK[OUTR]};
-
-  LLegK[TC] = LLegK[T];
-  RLegK[TC] = RLegK[T];
-  LLegK[UC] = LLegK[U];
-  RLegK[UC] = RLegK[U];
+  array<momentum *, 4> LLegK, RLegK;
 
   for (auto &chan : Channel) {
+    switch (chan) {
+    case T:
+    case TC:
+      LLegK = {LegK[INL], LegK[OUTL], &K[chan], &K[0]};
+      RLegK = {&K[0], &K[chan], LegK[INR], LegK[OUTR]};
+      break;
+    case U:
+    case UC:
+      LLegK = {LegK[INL], LegK[OUTR], &K[chan], &K[0]};
+      RLegK = {&K[0], &K[chan], LegK[INR], LegK[OUTL]};
+      break;
+    case S:
+      LLegK = {LegK[INL], &K[chan], LegK[INR], &K[0]};
+      RLegK = {&K[0], LegK[OUTL], &K[chan], LegK[OUTR]};
+      break;
+    default:
+      ABORT("Channel does not exist! " << chan);
+      break;
+    }
+
     for (int ol = 0; ol < Ver4.LoopNum; ol++) {
       bubble bub;
       ////////////////////   Right SubVer  ///////////////////
@@ -196,23 +200,20 @@ void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
       switch (chan) {
       case T:
       case U:
-        bub.LVer =
-            Vertex(Level, ol, Llopidx, InTL, F, LLegK[chan], LEFT, Ver4.InBox);
-        bub.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK[chan], RIGHT,
-                          Ver4.InBox);
+        bub.LVer = Vertex(Level, ol, Llopidx, InTL, F, LLegK, LEFT, Ver4.InBox);
+        bub.RVer =
+            Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK, RIGHT, Ver4.InBox);
         break;
       case S:
-        bub.LVer =
-            Vertex(Level, ol, Llopidx, InTL, V, LLegK[chan], LEFT, Ver4.InBox);
-        bub.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK[chan], RIGHT,
-                          Ver4.InBox);
+        bub.LVer = Vertex(Level, ol, Llopidx, InTL, V, LLegK, LEFT, Ver4.InBox);
+        bub.RVer =
+            Vertex(Level, oR, Rlopidx, RInTL, FULL, RLegK, RIGHT, Ver4.InBox);
         break;
       case TC:
       case UC:
-        bub.LVer =
-            Vertex(Level, ol, Llopidx, InTL, F_CT, LLegK[chan], LEFT, true);
-        bub.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL_CT, RLegK[chan],
-                          RIGHT, true);
+        bub.LVer = Vertex(Level, ol, Llopidx, InTL, F_CT, LLegK, LEFT, true);
+        bub.RVer =
+            Vertex(Level, oR, Rlopidx, RInTL, FULL_CT, RLegK, RIGHT, true);
         break;
       default:
         ABORT("The channel does not exist!");

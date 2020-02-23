@@ -47,8 +47,10 @@ double weight::Evaluate(int LoopNum, diagram Diagram) {
       for (auto &w : ChanWeight)
         // collapse all channel to I
         ChanWeight[0] += w;
+      // cout << ChanWeight[0].Abs() << endl;
       return ChanWeight[0].Abs();
-    }
+    } else
+      return 0.0;
   }
 }
 
@@ -67,6 +69,11 @@ void weight::MeasureUST() {
 void weight::Ver0(ver4 &Ver4) {
   // only bare coupling
   Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox);
+  cout << "ver0: " << Ver4.Weight[0][DIR] << Ver4.Weight[0][EX] << endl;
+  cout << "LegK0: " << (*Ver4.LegK[0]).norm() << endl;
+  cout << "LegK1: " << (*Ver4.LegK[1]).norm() << endl;
+  cout << "LegK2: " << (*Ver4.LegK[2]).norm() << endl;
+  cout << "LegK3: " << (*Ver4.LegK[3]).norm() << endl;
   return;
 }
 void weight::Vertex4(ver4 &Ver4, bool IsFast) {
@@ -89,6 +96,14 @@ void weight::Vertex4(ver4 &Ver4, bool IsFast) {
   return;
 }
 
+void weight::EvaluateG(vector<green> &G, const momentum &K) {
+  // calculate G table
+  for (auto &g : G) {
+    g.Weight = Fermi.Green(Var.Tau[g.T[OUT]] - Var.Tau[g.T[IN]], K, UP, 0, 0);
+    // cout << g.Weight << endl;
+  }
+}
+
 void weight::ChanUST(ver4 &Ver4, bool IsFast) {
   double Weight = 0.0;
   double Ratio, dTau, ProjFactor;
@@ -99,7 +114,9 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
 
   // calculate K table
   Ver4.K[0] = Var.LoopMom[Ver4.Loopidx];
+  EvaluateG(G[0], Ver4.K[0]);
   for (auto chan : Ver4.Channel) {
+    // cout << "chan: " << chan << endl;
     switch (chan) {
     case T:
       Ver4.K[T] = *LegK[OUTL] + Ver4.K[0] - *LegK[INL];
@@ -112,16 +129,11 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
       break;
     case TC:
     case UC:
-      ProjFactor = Para.Lambda / (8.0 * PI * Para.Nf);
       Ver4.K[chan] = Ver4.K[0];
       break;
     }
-
-    // calculate G table
-    for (auto &g : G[chan]) {
-      dTau = Var.Tau[g.T[OUT]] - Var.Tau[g.T[IN]];
-      g.Weight = Fermi.Green(dTau, Ver4.K[chan], UP, 0, 0);
-    }
+    if (chan != I)
+      EvaluateG(G[chan], Ver4.K[chan]);
   }
   ///////////// Check if the projected counter-terms exist or not ///////
 
@@ -137,8 +149,12 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
       ProjFactor *= Para.Lambda / (8.0 * PI * Para.Nf);
 
     for (auto &map : b.Map) {
-      Weight = ProjFactor;
-      Weight *= G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
+      Weight =
+          ProjFactor * G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
+
+      // cout << G[0][map.G0idx].Weight << ", " << G[b.Channel][map.Gidx].Weight
+      //      << ", " << b.Channel << ", GNum: " << G[b.Channel].size() << ", "
+      //      << map.Gidx << endl;
 
       auto &Lw = LVer.Weight[map.LVerTidx];
       auto &Rw = RVer.Weight[map.RVerTidx];
@@ -161,6 +177,9 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
         break;
       }
 
+      cout << "DIR: " << Lw[DIR] << ", " << Rw[DIR] << endl;
+      cout << "EX:  " << Lw[EX] << ", " << Rw[EX] << endl;
+
       if (Ver4.Level > 0) {
         Ver4.Weight[map.Tidx][DIR] += DirW * Weight;
         Ver4.Weight[map.Tidx][EX] += ExW * Weight;
@@ -171,6 +190,8 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
           channel chan = ChanMap[b.Channel];
           ChanWeight[chan][DIR] += DirW * Weight;
           ChanWeight[chan][EX] += ExW * Weight;
+          // cout << DirW << ", " << ExW << ", " << Weight << ", " << ProjFactor
+          //      << endl;
         } else {
           // TODO: add slow measure
         }
