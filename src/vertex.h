@@ -111,7 +111,7 @@ public:
                            bool IsRenorm, bool Boxed);
 
   void Measure(const momentum &InL, const momentum &InR, const int QIndex,
-               int Order, double Tau, int Channel, ver::weightMatrix &Weight,
+               int Order, const array<ver::weightMatrix, 4> &Weight,
                double Factor);
   void Update(double Ratio, int Order);
   void Save(bool Simple = false);

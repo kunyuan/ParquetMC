@@ -53,20 +53,15 @@ double weight::Evaluate(int LoopNum, diagram Diagram) {
 }
 
 void weight::MeasureUST() {
-  ver4 &Root = Ver4Root[Var.CurrOrder];
+  if (Var.CurrOrder != 0) {
+    ver4 &Root = Ver4Root[Var.CurrOrder];
+    // if (Root.Weight.size() != 0) {
+    Vertex4(Root, true);
+  }
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder] *
                          Para.ReWeightChan[Var.CurrChannel]);
-
   VerQTheta.Measure(Var.LoopMom[1], Var.LoopMom[2], Var.CurrExtMomBin,
-                    Var.CurrOrder, , Factor);
-  if (LoopNum == 0) {
-    // normalization
-    return 1.0;
-  } else {
-    if (Root.Weight.size() != 0) {
-      Vertex4(Root, true);
-    }
-  }
+                    Var.CurrOrder, ChanWeight, Factor);
 }
 
 void weight::Ver0(ver4 &Ver4) {

@@ -101,15 +101,7 @@ markov::markov() : Var(Weight.Var) {
   AdjustGroupReWeight();
 };
 
-void markov::Measure() {
-  double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder] *
-                         Para.ReWeightChan[Var.CurrChannel]);
-  int TauIndex = GetTauNum(Var.CurrOrder, Var.CurrChannel) - 1;
-
-  Weight.VerQTheta.Measure(Var.LoopMom[1], Var.LoopMom[2], Var.CurrExtMomBin,
-                           Var.CurrOrder, Var.Tau[TauIndex] - Var.Tau[0],
-                           Var.CurrChannel, Var.CurrWeight, Factor);
-};
+void markov::Measure() { Weight.MeasureUST(); };
 
 void markov::AdjustGroupReWeight(){};
 

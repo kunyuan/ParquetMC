@@ -94,23 +94,28 @@ weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
 }
 
 void verQTheta::Measure(const momentum &InL, const momentum &InR,
-                        const int QIndex, int Order, double dTau, int Channel,
-                        ver::weightMatrix &Weight, double Factor) {
+                        const int QIndex, int Order,
+                        const array<ver::weightMatrix, 4> &Weight,
+                        double Factor) {
   // cout << Order << ", " << DiagNum << endl;
   if (Order == 0) {
-    Normalization += Weight[DIR] * Factor;
+    Normalization += 1.0 * Factor;
     // Normalization += WeightFactor;
   } else {
     // double Factor = 1.0 / pow(2.0 * PI, 2 * Order);
     double CosAng = Angle3D(InL, InR);
     int AngleIndex = Angle2Index(CosAng, AngBinSize);
-    Chan[Channel].Estimator(Order, AngleIndex, QIndex, DIR) +=
-        Weight[DIR] * Factor;
-    Chan[Channel].Estimator(0, AngleIndex, QIndex, DIR) += Weight[DIR] * Factor;
+    for (int chan = 0; chan < 4; ++chan) {
+      Chan[chan].Estimator(Order, AngleIndex, QIndex, DIR) +=
+          Weight[chan][DIR] * Factor;
+      Chan[chan].Estimator(0, AngleIndex, QIndex, DIR) +=
+          Weight[chan][DIR] * Factor;
 
-    Chan[Channel].Estimator(Order, AngleIndex, QIndex, EX) +=
-        Weight[EX] * Factor;
-    Chan[Channel].Estimator(0, AngleIndex, QIndex, EX) += Weight[EX] * Factor;
+      Chan[chan].Estimator(Order, AngleIndex, QIndex, EX) +=
+          Weight[chan][EX] * Factor;
+      Chan[chan].Estimator(0, AngleIndex, QIndex, EX) +=
+          Weight[chan][EX] * Factor;
+    }
   }
   return;
 }
