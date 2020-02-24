@@ -152,8 +152,8 @@ void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
   int InTL = Ver4.InTL;
   vector<channel> FULL = {I, T, U, S, TC, UC};
   vector<channel> F = {I, U, S, TC, UC};
-  // vector<channel> FULL = {I, T, U};
-  // vector<channel> F = {I, U};
+  // vector<channel> FULL = {I, T, TC};
+  // vector<channel> F = {I, TC};
   vector<channel> V = {I, T, U, TC, UC};
   vector<channel> FULL_CT = {I, T, TC};
   vector<channel> F_CT = {I, TC};
@@ -173,12 +173,26 @@ void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
 
       switch (chan) {
       case T:
+        if (!Ver4.InBox) {
+          bub.LVer = Vertex(Level, ol, Llopidx, InTL, F, LEFT, Ver4.InBox);
+          bub.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL, RIGHT, Ver4.InBox);
+        } else {
+          bub.LVer = Vertex(Level, ol, Llopidx, InTL, F_CT, LEFT, true);
+          bub.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL_CT, RIGHT, true);
+        }
+        break;
       case U:
+        ASSERT_ALLWAYS(
+            Ver4.InBox == false,
+            "Ver4 in a box can not have U diagram! Level: " << Level);
         bub.LVer = Vertex(Level, ol, Llopidx, InTL, F, LEFT, Ver4.InBox);
         bub.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL, RIGHT, Ver4.InBox);
         break;
       case S:
         // continue;
+        ASSERT_ALLWAYS(
+            Ver4.InBox == false,
+            "Ver4 in a box can not have S diagram! Level: " << Level);
         bub.LVer = Vertex(Level, ol, Llopidx, InTL, V, LEFT, Ver4.InBox);
         bub.RVer = Vertex(Level, oR, Rlopidx, RInTL, FULL, RIGHT, Ver4.InBox);
         break;

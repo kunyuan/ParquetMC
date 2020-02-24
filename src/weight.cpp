@@ -2,6 +2,7 @@
 #include "global.h"
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
+#include "utility/timer.h"
 #include "utility/vector.h"
 #include <array>
 #include <iostream>
@@ -17,7 +18,9 @@ void weight::Initialization() {
   array<momentum *, 4> ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1],
                                   &Var.LoopMom[2], &Var.LoopMom[3]};
 
-  vector<channel> Chan = {I, T, U, S, TC, UC};
+  // vector<channel> Chan = {I, T, U, S, TC, UC};
+  // vector<channel> Chan = {T, TC};
+  vector<channel> Chan = {U, UC};
   for (int order = 1; order <= Para.Order; order++) {
     LOG_INFO("Generating order " << order);
     Ver4Root[order] = VerDiag.Vertex(0,     // level
@@ -169,10 +172,6 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
       Weight =
           ProjFactor * G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
 
-      // cout << G[0][map.G0idx].Weight << ", " << G[b.Channel][map.Gidx].Weight
-      //      << ", " << b.Channel << ", GNum: " << G[b.Channel].size() << ", "
-      //      << map.Gidx << endl;
-
       auto &Lw = LVer.Weight[map.LVerTidx];
       auto &Rw = RVer.Weight[map.RVerTidx];
 
@@ -299,5 +298,15 @@ void weight::ChanI(dse::ver4 &Ver4, bool IsFast) {
   //   }
   // }
 
+  return;
+}
+
+void weight::Benchmark(int LoopNum, diagram Diagram, int Step) {
+  timer Timer;
+  Timer.start();
+  for (int i = 0; i < Step; i++)
+    Evaluate(LoopNum, Diagram);
+  LOG_INFO(Timer << "s per " << Step << " step for LoopNum " << LoopNum
+                 << " Diagram " << Diagram);
   return;
 }

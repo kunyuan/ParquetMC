@@ -48,6 +48,7 @@ public:
   void EvaluateChanVer4(int LoopNum, array<ver::weightMatrix, 4> ChanWeight);
 
   // initialization, read diagrams, then initialize variables
+  void Benchmark(int LoopNum, diagram Diagram, int Step);
 
 private:
   dse::verDiag VerDiag; // diagram factory

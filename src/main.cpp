@@ -44,7 +44,7 @@ void InitPara() {
   // Para.Type = BARE;
   Para.Type = VARIATIONAL;
 
-  Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
+  Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
   // Para.ReWeight = {40.0, 0.8, 0.4, 0.2, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
   Para.ReWeightDiag = {1.0, 1.0, 1.0, 1.0, 1.0};
 
@@ -209,5 +209,10 @@ void MonteCarlo() {
   Interrupt.Delay(); // the process can not be killed in saving
   Markov.SaveToFile(false);
   Interrupt.Resume(); // after this point, the process can be killed
+
+  for (int order = 1; order < Para.Order; ++order) {
+    Markov.Weight.Benchmark(order, GAMMA, 1000);
+  }
+
   LOG_INFO("Quit Markov.");
 }
