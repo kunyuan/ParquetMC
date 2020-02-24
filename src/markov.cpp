@@ -51,9 +51,13 @@ markov::markov() : Var(Weight.Var) {
   for (int i = 1; i < D; i++) {
     Var.LoopMom[INL][i] = 0.0;
     Var.LoopMom[OUTL][i] = 0.0;
+    Var.LoopMom[INR][i] = 0.0;
+    Var.LoopMom[OUTR][i] = 0.0;
   }
   Var.LoopMom[INL][0] = Para.Kf;
   Var.LoopMom[OUTL][0] = Para.Kf;
+  Var.LoopMom[INR][0] = Para.Kf;
+  Var.LoopMom[OUTR][0] = Para.Kf;
 
   Var.CurrTau = Var.Tau[1] - Var.Tau[0];
 

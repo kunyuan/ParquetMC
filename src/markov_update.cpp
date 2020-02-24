@@ -120,7 +120,7 @@ void markov::ChangeTau() {
 void markov::ChangeMomentum() {
   int LoopIndex = Random.irn(2, GetLoopNum(Var.CurrOrder) - 1);
   // the INL, OUTL, OUTR momentum are fixed
-  if (LoopIndex == OUTR)
+  if (LoopIndex == OUTL || LoopIndex == OUTR)
     return;
 
   Proposed[CHANGE_MOM][Var.CurrOrder]++;

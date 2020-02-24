@@ -70,10 +70,6 @@ void weight::Ver0(ver4 &Ver4) {
   // only bare coupling
   Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox);
   cout << "ver0: " << Ver4.Weight[0][DIR] << Ver4.Weight[0][EX] << endl;
-  cout << "LegK0: " << (*Ver4.LegK[0]).norm() << endl;
-  cout << "LegK1: " << (*Ver4.LegK[1]).norm() << endl;
-  cout << "LegK2: " << (*Ver4.LegK[2]).norm() << endl;
-  cout << "LegK3: " << (*Ver4.LegK[3]).norm() << endl;
   return;
 }
 void weight::Vertex4(ver4 &Ver4, bool IsFast) {
@@ -112,6 +108,11 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
   auto &G = Ver4.G;
   double Factor = 1.0 / pow(2.0 * PI, D * Ver4.LoopNum);
 
+  cout << "LegK0: " << (*Ver4.LegK[0]).norm() << endl;
+  cout << "LegK1: " << (*Ver4.LegK[1]).norm() << endl;
+  cout << "LegK2: " << (*Ver4.LegK[2]).norm() << endl;
+  cout << "LegK3: " << (*Ver4.LegK[3]).norm() << endl;
+
   // calculate K table
   Ver4.K[0] = Var.LoopMom[Ver4.Loopidx];
   EvaluateG(G[0], Ver4.K[0]);
@@ -135,6 +136,7 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
     if (chan != I)
       EvaluateG(G[chan], Ver4.K[chan]);
   }
+
   ///////////// Check if the projected counter-terms exist or not ///////
 
   // for vertex4 with one or more loops
