@@ -46,7 +46,7 @@ private:
   ver::weightMatrix NewWeight;
   double NewAbsWeight;
 
-  int GetTauNum(int Order, int Channel);
+  int GetTauNum(int Order, diagram Diag);
   int GetLoopNum(int Order);
 
   // MC updates

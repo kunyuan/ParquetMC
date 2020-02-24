@@ -16,7 +16,6 @@ using namespace std;
 
 struct variable {
   int CurrOrder;
-  int CurrChannel; // 0: I, 1: T, 2: U, 3: S
   long int CurrVersion;
   diagram CurrDiagram;
 

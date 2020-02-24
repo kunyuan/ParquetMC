@@ -16,7 +16,7 @@ using namespace mc;
 using namespace diag;
 using namespace std;
 
-int markov::GetTauNum(int Order, int Channel) {
+int markov::GetTauNum(int Order, diagram Diag) {
   // if (Channel == dse::SIGMA)
   //   return Order + 2;
   // else
@@ -40,7 +40,7 @@ void markov::ChangeOrder() {
     double NewTau;
     // Generate New Tau
     Prop = GetNewTau(NewTau);
-    int NewTauIndex = GetTauNum(Var.CurrOrder, Var.CurrChannel);
+    int NewTauIndex = GetTauNum(Var.CurrOrder, Var.CurrDiagram);
     Var.Tau[NewTauIndex] = NewTau;
     // Generate New Mom
     Prop *= GetNewK(NewMom);
@@ -48,7 +48,7 @@ void markov::ChangeOrder() {
 
     // if the current order is zero, then set channel of order 1 at T
     if (Var.CurrOrder == 0)
-      Var.CurrChannel = dse::T;
+      Var.CurrDiagram = GAMMA;
 
   } else {
     // decrese order
@@ -56,14 +56,14 @@ void markov::ChangeOrder() {
       return;
 
     // if the current order is one, then decrease order is possible only for T
-    if (Var.CurrOrder == 1 && Var.CurrChannel != dse::T)
+    if (Var.CurrOrder == 1 && Var.CurrDiagram != GAMMA)
       return;
 
     Name = DECREASE_ORDER;
     NewOrder = Var.CurrOrder - 1;
 
     // Remove OldTau
-    int TauToRemove = GetTauNum(Var.CurrOrder, Var.CurrChannel) - 1;
+    int TauToRemove = GetTauNum(Var.CurrOrder, Var.CurrDiagram) - 1;
     Prop = RemoveOldTau(Var.Tau[TauToRemove]);
     // Remove OldMom
     int LoopToRemove = GetLoopNum(Var.CurrOrder) - 1;
@@ -93,7 +93,7 @@ void markov::ChangeOrder() {
 };
 
 void markov::ChangeTau() {
-  int TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder, Var.CurrChannel) - 1);
+  int TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder, Var.CurrDiagram) - 1);
 
   Proposed[CHANGE_TAU][Var.CurrOrder]++;
 

@@ -64,7 +64,7 @@ void weight::MeasureUST() {
     Vertex4(Root, true);
   }
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder] *
-                         Para.ReWeightChan[Var.CurrChannel]);
+                         Para.ReWeightDiag[Var.CurrDiagram]);
   VerQTheta.Measure(Var.LoopMom[1], Var.LoopMom[2], Var.CurrExtMomBin,
                     Var.CurrOrder, ChanWeight, Factor);
 }

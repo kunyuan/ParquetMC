@@ -68,8 +68,6 @@ markov::markov() : Var(Weight.Var) {
   // Var.CurrGroup = &Groups[0];
   Var.CurrOrder = 0;
 
-  Var.CurrChannel = dse::T;
-
   Var.CurrDiagram = GAMMA;
 
   // initialize RG staff
