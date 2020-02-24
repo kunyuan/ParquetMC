@@ -24,8 +24,10 @@ void weight::Initialization() {
                                      order, // loopNum
                                      4, // loop index of the first internal K
                                      0, // tau index of the InTL leg
-                                     Chan, ExtLegK, RIGHT, false);
+                                     Chan, RIGHT, false);
     VerDiag.ResetMomMap(Ver4Root[order], ExtLegK);
+    // the vertex LegK must be initialized after the memory allocaiton of the
+    // vertex tree
     if (order < 5)
       LOG_INFO(VerDiag.ToString(Ver4Root[order]));
   }

@@ -116,8 +116,7 @@ struct envelope {
 class verDiag {
 public:
   ver4 Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
-              const vector<channel> &Channel, const array<momentum *, 4> &LegK,
-              int Side, bool InBox);
+              const vector<channel> &Channel, int Side, bool InBox);
   string ToString(const ver4 &Vertex, string indent = "");
   void ResetMomMap(ver4 &Ver4, const array<momentum *, 4> &LegK);
   // the LegK pointers of Ver4 must be reset after all memory allocation is
