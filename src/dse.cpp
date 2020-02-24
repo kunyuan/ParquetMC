@@ -376,9 +376,9 @@ string verDiag::ToString(const ver4 &Ver4, string indent) {
   Info += "\n";
   Info += indent + fmt::format("├─K : ");
   auto &LegK = Ver4.LegK;
-  Info += fmt::format("({0}, {1}, {2}, {3}),  K0: {4}", fmt::ptr(LegK[INL]),
-                      fmt::ptr(LegK[OUTL]), fmt::ptr(LegK[INR]),
-                      fmt::ptr(LegK[OUTR]), fmt::ptr(&Ver4.K[0]));
+  Info +=
+      fmt::format("({}, {}, {}, {})", fmt::ptr(LegK[INL]), fmt::ptr(LegK[OUTL]),
+                  fmt::ptr(LegK[INR]), fmt::ptr(LegK[OUTR]));
   Info += "\n";
   // Info += indent + fmt::format("└─\n");
   for (int p = 0; p < Ver4.Bubble.size(); p++) {

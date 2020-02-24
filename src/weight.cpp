@@ -118,7 +118,7 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
   double DirW, ExW;
   const auto &LegK = Ver4.LegK;
   auto &G = Ver4.G;
-  double Factor = 1.0 / pow(2.0 * PI, D * Ver4.LoopNum);
+  double Factor = 1.0 / pow(2.0 * PI, D);
 
   // calculate K table
   Ver4.K[0] = Var.LoopMom[Ver4.Loopidx];
