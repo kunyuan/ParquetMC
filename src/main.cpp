@@ -41,10 +41,10 @@ void InitPara() {
   string LogFile = "_" + to_string(Para.PID) + ".log";
   LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
 
-  Para.Type = BARE;
-  // Para.Type = VARIATIONAL;
+  // Para.Type = BARE;
+  Para.Type = VARIATIONAL;
 
-  Para.ReWeight = {1.0, 0.8, 0.4, 0.4, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
+  Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
   // Para.ReWeight = {40.0, 0.8, 0.4, 0.2, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
   Para.ReWeightDiag = {1.0, 1.0, 1.0, 1.0, 1.0};
 
