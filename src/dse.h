@@ -17,7 +17,7 @@ using namespace std;
 
 enum channel { I = 0, T, U, S, TC, UC };
 const string ChanName[] = {"I", "T", "U", "S", "TC", "UC"};
-const double SymFactor[6] = {1.0, -1.0, 1.0, 0.5, +1.0, -1.0};
+const double SymFactor[6] = {1.0, -1.0, 1.0, -0.5, +1.0, -1.0};
 const channel ChanMap[] = {I, T, U,
                            S, T, U}; // map channels to a more compact form
 
