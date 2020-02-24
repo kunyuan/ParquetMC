@@ -119,12 +119,14 @@ public:
               const vector<channel> &Channel, const array<momentum *, 4> &LegK,
               int Side, bool InBox);
   string ToString(const ver4 &Vertex, string indent = "");
+  void ResetMomMap(ver4 &Ver4, const array<momentum *, 4> &LegK);
+  // the LegK pointers of Ver4 must be reset after all memory allocation is
+  // done.
 
 private:
   void Ver0(ver4 &Ver4);
   void ChanI(ver4 &Ver4, const vector<channel> &Channel);
   void ChanUST(ver4 &Ver4, const vector<channel> &Channel);
-  momentum *NextMom();
 };
 
 class sigmaDiag {};

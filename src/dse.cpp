@@ -95,6 +95,13 @@ void verDiag::Ver0(ver4 &Ver4) {
   // cout << "Ver0: " << InTL << ", Order: " << Ver4.LoopNum
   //      << ", Level: " << Ver4.Level << ", Tsize: " << Ver4.T.size() << endl;
 
+  auto &LegK = Ver4.LegK;
+
+  // cout << "ver0LegK0: " << LegK[INL] << endl;
+  // cout << "ver0LegK1: " << LegK[OUTL] << endl;
+  // cout << "ver0LegK2: " << LegK[INR] << endl;
+  // cout << "ver0LegK3: " << LegK[OUTR] << endl;
+
   AddToTList(Ver4.T, {InTL, InTL, InTL, InTL});
 }
 
@@ -156,8 +163,8 @@ vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
 
 void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
   int InTL = Ver4.InTL;
-  auto LegK = Ver4.LegK;
-  auto K = Ver4.K;
+  auto &LegK = Ver4.LegK;
+  auto &K = Ver4.K;
 
   vector<channel> FULL = {I, T, U, S, TC, UC};
   vector<channel> F = {I, U, S, TC, UC};
@@ -187,6 +194,10 @@ void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
       ABORT("Channel does not exist! " << chan);
       break;
     }
+    // cout << "LegK0: " << LegK[INL] << endl;
+    // cout << "LegK1: " << LegK[OUTL] << endl;
+    // cout << "LegK2: " << LegK[INR] << endl;
+    // cout << "LegK3: " << LegK[OUTR] << endl;
 
     for (int ol = 0; ol < Ver4.LoopNum; ol++) {
       bubble bub;
@@ -224,6 +235,37 @@ void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
       bub.Map = CreateIndexMap(Ver4, bub.LVer, bub.RVer, chan);
       Ver4.Bubble.push_back(bub);
     }
+  }
+}
+
+void verDiag::ResetMomMap(ver4 &Ver4, const array<momentum *, 4> &LegK) {
+  Ver4.LegK = LegK;
+  auto &K = Ver4.K;
+  array<momentum *, 4> LLegK, RLegK;
+
+  for (auto &bub : Ver4.Bubble) {
+    auto chan = bub.Channel;
+    switch (chan) {
+    case T:
+    case TC:
+      LLegK = {LegK[INL], LegK[OUTL], &K[chan], &K[0]};
+      RLegK = {&K[0], &K[chan], LegK[INR], LegK[OUTR]};
+      break;
+    case U:
+    case UC:
+      LLegK = {LegK[INL], LegK[OUTR], &K[chan], &K[0]};
+      RLegK = {&K[0], &K[chan], LegK[INR], LegK[OUTL]};
+      break;
+    case S:
+      LLegK = {LegK[INL], &K[chan], LegK[INR], &K[0]};
+      RLegK = {&K[0], LegK[OUTL], &K[chan], LegK[OUTR]};
+      break;
+    default:
+      ABORT("Channel does not exist! " << chan);
+      break;
+    }
+    ResetMomMap(bub.LVer, LLegK);
+    ResetMomMap(bub.RVer, RLegK);
   }
 }
 
@@ -369,11 +411,16 @@ string verDiag::ToString(const ver4 &Ver4, string indent) {
       fmt::format("├Level: {0}, {1}, LoopNum: {2}, Boxed: {3}, G0:{4}\n",
                   Ver4.Level, SideStr, Ver4.LoopNum, Ver4.InBox,
                   Ver4.G[0].size());
-  Info += indent + fmt::format("├─T[{0}]: ", Ver4.T.size());
+  Info += indent + fmt::format("├─Tau[{0}]: ", Ver4.T.size());
   for (auto &t : Ver4.T)
     Info +=
         fmt::format("({0}, {1}, {2}, {3}), ", t[INL], t[OUTL], t[INR], t[OUTR]);
-
+  Info += "\n";
+  Info += indent + fmt::format("├─K : ");
+  auto &LegK = Ver4.LegK;
+  Info += fmt::format("({0}, {1}, {2}, {3}),  K0: {4}", fmt::ptr(LegK[INL]),
+                      fmt::ptr(LegK[OUTL]), fmt::ptr(LegK[INR]),
+                      fmt::ptr(LegK[OUTR]), fmt::ptr(&Ver4.K[0]));
   Info += "\n";
   // Info += indent + fmt::format("└─\n");
   for (int p = 0; p < Ver4.Bubble.size(); p++) {
@@ -404,6 +451,10 @@ string verDiag::ToString(const ver4 &Ver4, string indent) {
 
     // Info += indent + ". │\n";
     Info += ToString(pp.RVer, indent + ". ");
+
+    ASSERT_ALLWAYS(pp.LVer.LegK[INL] == Ver4.LegK[INL],
+                   "INL K address does not match! "
+                       << pp.LVer.LegK[INL] << " vs " << Ver4.LegK[INL]);
     // Info += indent + ".  \n";
     // Info += "\n";
     // Info += indent + "\n";

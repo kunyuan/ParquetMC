@@ -25,6 +25,7 @@ void weight::Initialization() {
                                      4, // loop index of the first internal K
                                      0, // tau index of the InTL leg
                                      Chan, ExtLegK, RIGHT, false);
+    VerDiag.ResetMomMap(Ver4Root[order], ExtLegK);
     if (order < 5)
       LOG_INFO(VerDiag.ToString(Ver4Root[order]));
   }
@@ -69,7 +70,16 @@ void weight::MeasureUST() {
 void weight::Ver0(ver4 &Ver4) {
   // only bare coupling
   Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox);
-  cout << "ver0: " << Ver4.Weight[0][DIR] << Ver4.Weight[0][EX] << endl;
+  // if (Ver4.Level == 1) {
+  //   cout << "ver0: " << Ver4.Weight[0][DIR] << Ver4.Weight[0][EX] << endl;
+  //   cout << "ver0 LegK0: " << (*Ver4.LegK[0]).norm() << endl;
+  //   cout << "ver0 LegK1: " << (*Ver4.LegK[1]).norm() << endl;
+  //   cout << "ver0 LegK2: " << (*Ver4.LegK[2]).norm() << endl;
+  //   cout << "ver0 LegK3: " << (*Ver4.LegK[3]).norm() << endl;
+  //   cout << Ver4.LegK[0] << ", " << Ver4.LegK[1] << ", " << Ver4.LegK[2] <<
+  //   ", "
+  //        << Ver4.LegK[3] << endl;
+  // }
   return;
 }
 void weight::Vertex4(ver4 &Ver4, bool IsFast) {
@@ -108,11 +118,6 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
   auto &G = Ver4.G;
   double Factor = 1.0 / pow(2.0 * PI, D * Ver4.LoopNum);
 
-  cout << "LegK0: " << (*Ver4.LegK[0]).norm() << endl;
-  cout << "LegK1: " << (*Ver4.LegK[1]).norm() << endl;
-  cout << "LegK2: " << (*Ver4.LegK[2]).norm() << endl;
-  cout << "LegK3: " << (*Ver4.LegK[3]).norm() << endl;
-
   // calculate K table
   Ver4.K[0] = Var.LoopMom[Ver4.Loopidx];
   EvaluateG(G[0], Ver4.K[0]);
@@ -136,6 +141,14 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
     if (chan != I)
       EvaluateG(G[chan], Ver4.K[chan]);
   }
+  // cout << "LegK0: " << (*Ver4.LegK[0]).norm() << endl;
+  // cout << "LegK1: " << (*Ver4.LegK[1]).norm() << endl;
+  // cout << "LegK2: " << (*Ver4.LegK[2]).norm() << endl;
+  // cout << "LegK3: " << (*Ver4.LegK[3]).norm() << endl;
+  // cout << Ver4.LegK[0] << ", " << Ver4.LegK[1] << ", " << Ver4.LegK[2] << ",
+  // "
+  //      << Ver4.LegK[3] << endl;
+  // cout << "K0: " << Ver4.K[0].norm() << ", " << &Ver4.K[0] << endl;
 
   ///////////// Check if the projected counter-terms exist or not ///////
 
@@ -179,8 +192,8 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
         break;
       }
 
-      cout << "DIR: " << Lw[DIR] << ", " << Rw[DIR] << endl;
-      cout << "EX:  " << Lw[EX] << ", " << Rw[EX] << endl;
+      // cout << "DIR: " << Lw[DIR] << ", " << Rw[DIR] << endl;
+      // cout << "EX:  " << Lw[EX] << ", " << Rw[EX] << endl;
 
       if (Ver4.Level > 0) {
         Ver4.Weight[map.Tidx][DIR] += DirW * Weight;
