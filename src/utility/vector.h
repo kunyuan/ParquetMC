@@ -97,23 +97,23 @@ public:
   // }
 
   // template <typename TT>
-  // friend std::ostream& operator<<(std::ostream& os, const Vec<TT, D>&){
-  //     for (int i = 0; i < D - 1; i++)
-  //         os << v[i] << " ";
-  //     os << v[D - 1];
-  //     return os;
+  // friend std::ostream &operator<<(std::ostream &os, const Vec<TT, D> &) {
+  //   for (int i = 0; i < D - 1; i++)
+  //     os << v[i] << " ";
+  //   os << v[D - 1];
+  //   return os;
   // }
 
   // template <typename TT>
-  // friend std::istream& operator>>(std::istream& is, Vec<TT, D>&){
-  //     is >> v[0];
-  //     char sep;
-  //     for (int i = 1; i < D; i++) {
-  //         is >> sep >> v[i];
-  //         if (sep != " ")
-  //             is.setstate(ios::failbit);
-  //     }
-  //     return is;
+  // friend std::istream &operator>>(std::istream &is, Vec<TT, D> &) {
+  //   is >> v[0];
+  //   char sep;
+  //   for (int i = 1; i < D; i++) {
+  //     is >> sep >> v[i];
+  //     if (sep != " ")
+  //       is.setstate(ios::failbit);
+  //   }
+  //   return is;
   // }
 
   // friend bool operator==(const Vec<int>&, const Vec<int>&);

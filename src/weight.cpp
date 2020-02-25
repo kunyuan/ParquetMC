@@ -19,8 +19,8 @@ void weight::Initialization() {
                                   &Var.LoopMom[2], &Var.LoopMom[3]};
 
   // vector<channel> Chan = {I, T, U, S, TC, UC};
-  // vector<channel> Chan = {T, TC};
-  vector<channel> Chan = {U, UC};
+  vector<channel> Chan = {T, TC};
+  // vector<channel> Chan = {U, UC};
   for (int order = 1; order <= Para.Order; order++) {
     LOG_INFO("Generating order " << order);
     Ver4Root[order] = VerDiag.Vertex(0,     // level
@@ -31,7 +31,7 @@ void weight::Initialization() {
     VerDiag.ResetMomMap(Ver4Root[order], ExtLegK);
     // the vertex LegK must be initialized after the memory allocaiton of the
     // vertex tree
-    if (order < 5)
+    if (order < 4)
       LOG_INFO(VerDiag.ToString(Ver4Root[order]));
   }
   for (int order = 1; order <= Para.Order; order++) {
@@ -54,6 +54,7 @@ double weight::Evaluate(int LoopNum, diagram Diagram) {
         // collapse all channel to I
         ChanWeight[0] += w;
       // cout << ChanWeight[0].Abs() << endl;
+
       return ChanWeight[0].Abs();
     } else
       return 0.0;
@@ -131,21 +132,32 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
     switch (chan) {
     case T:
       Ver4.K[T] = *LegK[OUTL] + Ver4.K[0] - *LegK[INL];
+      EvaluateG(G[chan], Ver4.K[chan]);
       break;
     case U:
       Ver4.K[U] = *LegK[OUTR] + Ver4.K[0] - *LegK[INL];
+      EvaluateG(G[chan], Ver4.K[chan]);
       break;
     case S:
       Ver4.K[S] = *LegK[INL] + *LegK[INR] - Ver4.K[0];
+      EvaluateG(G[chan], Ver4.K[chan]);
       break;
     case TC:
     case UC:
-      Ver4.K[chan] = Ver4.K[0];
+      EvaluateG(G[chan], Ver4.K[0]);
       break;
     }
-    if (chan != I)
-      EvaluateG(G[chan], Ver4.K[chan]);
   }
+  // cout << "InL=(" << (*LegK[INL])[0] << ", " << (*LegK[INL])[1] << ", "
+  //      << (*LegK[INL])[2] << ")" << endl;
+  // cout << "OutL=(" << (*LegK[OUTL])[0] << ", " << (*LegK[OUTL])[1] << ", "
+  //      << (*LegK[OUTL])[2] << ")" << endl;
+  // cout << "InR=(" << (*LegK[INR])[0] << ", " << (*LegK[INR])[1] << ", "
+  //      << (*LegK[INR])[2] << ")" << endl;
+  // cout << "OutR=(" << (*LegK[OUTR])[0] << ", " << (*LegK[OUTR])[1] << ", "
+  //      << (*LegK[OUTR])[2] << ")" << endl;
+  // cout << "KU=(" << (Ver4.K[U])[0] << ", " << (Ver4.K[U])[1] << ", "
+  //      << (Ver4.K[U])[2] << ")" << endl;
   // cout << Ver4.K[UC].norm() << ", " << Ver4.K[0].norm() << endl;
   // cout << "LegK0: " << (*Ver4.LegK[0]).norm() << endl;
   // cout << "LegK1: " << (*Ver4.LegK[1]).norm() << endl;

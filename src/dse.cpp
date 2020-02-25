@@ -224,17 +224,17 @@ void verDiag::ResetMomMap(ver4 &Ver4, const array<momentum *, 4> &LegK) {
     switch (chan) {
     case T:
     case TC:
-      LLegK = {LegK[INL], LegK[OUTL], &K[chan], &K[0]};
-      RLegK = {&K[0], &K[chan], LegK[INR], LegK[OUTR]};
+      LLegK = {LegK[INL], LegK[OUTL], &K[T], &K[0]};
+      RLegK = {&K[0], &K[T], LegK[INR], LegK[OUTR]};
       break;
     case U:
     case UC:
-      LLegK = {LegK[INL], LegK[OUTR], &K[chan], &K[0]};
-      RLegK = {&K[0], &K[chan], LegK[INR], LegK[OUTL]};
+      LLegK = {LegK[INL], LegK[OUTR], &K[U], &K[0]};
+      RLegK = {&K[0], &K[U], LegK[INR], LegK[OUTL]};
       break;
     case S:
-      LLegK = {LegK[INL], &K[chan], LegK[INR], &K[0]};
-      RLegK = {&K[0], LegK[OUTL], &K[chan], LegK[OUTR]};
+      LLegK = {LegK[INL], &K[S], LegK[INR], &K[0]};
+      RLegK = {&K[0], LegK[OUTL], &K[S], LegK[OUTR]};
       break;
     default:
       ABORT("Channel does not exist! " << chan);
