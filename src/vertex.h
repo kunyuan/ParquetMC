@@ -38,7 +38,8 @@ public:
     // for (auto &i : _Weight)
     //   sum += fabs(i);
     // sum = fabs(_Weight[DIR] + _Weight[EX] / 2.0) + fabs(_Weight[EX] / 2.0);
-    sum = fabs(_Weight[DIR] + _Weight[EX] / 2.0);
+    sum = fabs(_Weight[DIR] + _Weight[EX] / SPIN);
+    // sum = fabs(_Weight[DIR] + _Weight[EX]);
     return sum;
   }
   double &operator[](int dir) { return _Weight[dir]; }
@@ -46,6 +47,11 @@ public:
   weightMatrix &operator+=(const weightMatrix &a) {
     _Weight[DIR] += a[DIR];
     _Weight[EX] += a[EX];
+    return *this;
+  }
+  weightMatrix &operator*=(double Factor) {
+    _Weight[DIR] *= Factor;
+    _Weight[EX] *= Factor;
     return *this;
   }
 

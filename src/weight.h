@@ -49,6 +49,7 @@ public:
 
   // initialization, read diagrams, then initialize variables
   void Benchmark(int LoopNum, diagram Diagram, int Step);
+  void Test(int LoopNum, diagram Diagram);
 
 private:
   dse::verDiag VerDiag; // diagram factory
@@ -62,6 +63,8 @@ private:
   void ChanI(dse::ver4 &Ver4, bool IsFast);
   void ChanUST(dse::ver4 &Ver4, bool IsFast);
   void EvaluateG(vector<dse::green> &G, const momentum &K);
+
+  ver::weightMatrix _GetWeight(int LoopNum, vector<dse::channel> Channel);
 };
 
 }; // namespace diag
