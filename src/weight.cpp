@@ -235,7 +235,10 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
         // cout << fmt::format("RVer: {}, {}", Rw[DIR], Rw[EX]) << endl;
         // cout << fmt::format("Dir, Ex: {}, {}", DirW * Weight, ExW * Weight)
         //      << endl;
-        // cout << fmt::format("G {}", Weight) << endl;
+        // cout << fmt::format("G[{}] {}, G0: {}, G1: {}", b.Channel, Weight,
+        //                     G[0][map.G0idx].Weight,
+        //                     G[b.Channel][map.Gidx].Weight)
+        //      << endl;
         if (IsFast) {
           // calculate contributions from different channels for the root
           // vertex4
