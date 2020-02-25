@@ -68,7 +68,7 @@ void weight::MeasureUST() {
   }
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder] *
                          Para.ReWeightDiag[Var.CurrDiagram]);
-  VerQTheta.Measure(Var.LoopMom[1], Var.LoopMom[2], Var.CurrExtMomBin,
+  VerQTheta.Measure(Var.LoopMom[INL], Var.LoopMom[INR], Var.CurrExtMomBin,
                     Var.CurrOrder, ChanWeight, Factor);
 }
 
@@ -146,6 +146,7 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
     if (chan != I)
       EvaluateG(G[chan], Ver4.K[chan]);
   }
+  // cout << Ver4.K[UC].norm() << ", " << Ver4.K[0].norm() << endl;
   // cout << "LegK0: " << (*Ver4.LegK[0]).norm() << endl;
   // cout << "LegK1: " << (*Ver4.LegK[1]).norm() << endl;
   // cout << "LegK2: " << (*Ver4.LegK[2]).norm() << endl;
@@ -171,6 +172,14 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
     for (auto &map : b.Map) {
       Weight =
           ProjFactor * G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
+
+      // if (b.Channel == UC) {
+      //   cout << "compare" << endl;
+      //   cout << G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight <<
+      //   endl; cout << Fermi.Green(Para.Beta / 2.0, Ver4.K[0], UP, 0, 0) *
+      //               Fermi.Green(-Para.Beta / 2.0, Ver4.K[0], UP, 0, 0)
+      //        << endl;
+      // }
 
       auto &Lw = LVer.Weight[map.LVerTidx];
       auto &Rw = RVer.Weight[map.RVerTidx];

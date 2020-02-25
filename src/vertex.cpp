@@ -104,6 +104,9 @@ void verQTheta::Measure(const momentum &InL, const momentum &InR,
   } else {
     // double Factor = 1.0 / pow(2.0 * PI, 2 * Order);
     double CosAng = Angle3D(InL, InR);
+    // cout << InL.norm() << ", " << InR.norm() << endl;
+    // cout << "(" << InR[0] << ", " << InR[1] << ", " << InR[2] << ")" << endl;
+
     int AngleIndex = Angle2Index(CosAng, AngBinSize);
     for (int chan = 0; chan < 4; ++chan) {
       Chan[chan].Estimator(Order, AngleIndex, QIndex, DIR) +=
