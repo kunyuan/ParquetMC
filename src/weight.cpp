@@ -132,13 +132,18 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
     switch (chan) {
     case T:
       Ver4.K[T] = *LegK[OUTL] + Ver4.K[0] - *LegK[INL];
-      EvaluateG(G[chan], Ver4.K[chan]);
+      if (Ver4.InBox)
+        EvaluateG(G[chan], Ver4.K[0]);
+      else
+        EvaluateG(G[chan], Ver4.K[chan]);
       break;
     case U:
+      // ASSERT_ALLWAYS(Ver4.InBox == false, "fail test");
       Ver4.K[U] = *LegK[OUTR] + Ver4.K[0] - *LegK[INL];
       EvaluateG(G[chan], Ver4.K[chan]);
       break;
     case S:
+      // ASSERT_ALLWAYS(Ver4.InBox == false, "fail test");
       Ver4.K[S] = *LegK[INL] + *LegK[INR] - Ver4.K[0];
       EvaluateG(G[chan], Ver4.K[chan]);
       break;
@@ -178,14 +183,19 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
     Vertex4(RVer, IsFast);
 
     ProjFactor = SymFactor[b.Channel] * Factor;
-    if (b.Channel == TC || b.Channel == UC)
+    if (b.Channel == TC || b.Channel == UC || Ver4.InBox)
       ProjFactor *= Para.Lambda / (8.0 * PI * Para.Nf);
 
     for (auto &map : b.Map) {
+      // if (b.Channel == TC || b.Channel == UC || Ver4.InBox)
+      //   Weight = ProjFactor *
+      //            Fermi.Green(Para.Beta / 2.0, Ver4.K[0], UP, 0, 0) *
+      //            Fermi.Green(-Para.Beta / 2.0, Ver4.K[0], UP, 0, 0);
+      // else
       Weight =
           ProjFactor * G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
 
-      // if (b.Channel == UC) {
+      // if (b.Channel == UC || b.Channel == TC || Ver4.InBox) {
       //   cout << "compare" << endl;
       //   cout << G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight <<
       //   endl; cout << Fermi.Green(Para.Beta / 2.0, Ver4.K[0], UP, 0, 0) *
