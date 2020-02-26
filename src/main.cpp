@@ -158,8 +158,9 @@ void MonteCarlo() {
       // Markov.DynamicTest();
 
       if (i % 1000 == 0) {
-        if (i % 10000)
-          Markov.Weight.Test(1, GAMMA);
+        // if (i % 10000)
+        //   Markov.Weight.Test(1, GAMMA);
+
         // cout << Markov.Weight.Var.Tau[0] << " vs " <<
         // Markov.Weight.Var.Tau[1]
         //      << endl;
@@ -168,6 +169,7 @@ void MonteCarlo() {
 
         // Markov.PrintDeBugMCInfo();
         if (PrinterTimer.check(Para.PrinterTimer)) {
+          Markov.Weight.Test(1, GAMMA);
           Markov.DynamicTest();
           Markov.PrintDeBugMCInfo();
           Markov.PrintMCInfo();

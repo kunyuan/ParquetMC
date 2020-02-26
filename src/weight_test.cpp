@@ -29,7 +29,6 @@ void weight::_TestOneLoopGamma() {
   ver::weightMatrix TestWeight, Weight;
 
   // one loop T and TC diagram
-  LOG_INFO("Testing T channel one loop ... ");
   momentum K1 = OutL + K0 - InL;
   auto LVer = VerQTheta.Interaction({&InL, &OutL, &K1, &K0}, 0, false, false);
   auto RVer = VerQTheta.Interaction({&K0, &K1, &InR, &OutR}, 0, false, false);
@@ -61,13 +60,12 @@ void weight::_TestOneLoopGamma() {
          << endl;
     cout << fmt::format("LVer: {}, {}", LVer[DIR], LVer[EX]) << endl;
     cout << fmt::format("RVer: {}, {}", RVer[DIR], RVer[EX]) << endl;
-    ABORT(fmt::format("Weight Calculation has a bug! ({},{}) vs ({}, {})",
-                      Weight[DIR], Weight[EX], TestWeight[DIR],
-                      TestWeight[EX]));
+    ABORT(fmt::format(
+        "T channel one loop Weight Calculation has a bug! ({},{}) vs ({}, {})",
+        Weight[DIR], Weight[EX], TestWeight[DIR], TestWeight[EX]));
   }
 
   // one loop U and UC diagram
-  LOG_INFO("\nTesting U channel one loop ... ");
   momentum K2 = OutR + K0 - InL;
   LVer = VerQTheta.Interaction({&InL, &OutR, &K2, &K0}, 0, false, false);
   RVer = VerQTheta.Interaction({&K0, &K2, &InR, &OutL}, 0, false, false);
@@ -98,13 +96,12 @@ void weight::_TestOneLoopGamma() {
          << endl;
     cout << fmt::format("LVer: {}, {}", LVer[DIR], LVer[EX]) << endl;
     cout << fmt::format("RVer: {}, {}", RVer[DIR], RVer[EX]) << endl;
-    ABORT(fmt::format("Weight Calculation has a bug! ({},{}) vs ({}, {})",
-                      Weight[DIR], Weight[EX], TestWeight[DIR],
-                      TestWeight[EX]));
+    ABORT(fmt::format(
+        "U channel one loop Weight Calculation has a bug! ({},{}) vs ({}, {})",
+        Weight[DIR], Weight[EX], TestWeight[DIR], TestWeight[EX]));
   }
 
   // one loop S diagram
-  LOG_INFO("\nTesting S channel one loop ... ");
   momentum K3 = InR + InL - K0;
   LVer = VerQTheta.Interaction({&InL, &K3, &InR, &K0}, 0, false, false);
   RVer = VerQTheta.Interaction({&K0, &OutL, &K3, &OutR}, 0, false, false);
@@ -118,6 +115,7 @@ void weight::_TestOneLoopGamma() {
   TestWeight *= GWeight;
   TestWeight *= Factor * SymFactor[S];
 
+  //   cout << "Calculate S chanel" << endl;
   Weight = _GetWeight(1, {S});
   if (abs(Weight[DIR] - TestWeight[DIR]) > 1.0e-10 ||
       abs(Weight[EX] - TestWeight[EX]) > 1.0e-10) {
@@ -127,9 +125,9 @@ void weight::_TestOneLoopGamma() {
          << endl;
     cout << fmt::format("LVer: {}, {}", LVer[DIR], LVer[EX]) << endl;
     cout << fmt::format("RVer: {}, {}", RVer[DIR], RVer[EX]) << endl;
-    ABORT(fmt::format("Weight Calculation has a bug! ({},{}) vs ({}, {})",
-                      Weight[DIR], Weight[EX], TestWeight[DIR],
-                      TestWeight[EX]));
+    ABORT(fmt::format(
+        "S channel one loop Weight Calculation has a bug! ({},{}) vs ({}, {})",
+        Weight[DIR], Weight[EX], TestWeight[DIR], TestWeight[EX]));
   }
   return;
 }
@@ -143,7 +141,6 @@ void weight::_TestTwoLoopGamma() {
   double Factor = 1.0 / pow(2.0 * PI, D);
   double dTau, GWeight, GWeightInBox;
   ver::weightMatrix TestWeight, Weight;
-  LOG_INFO("\nTesting T channel two loop ... ");
 
   return;
 }

@@ -55,6 +55,21 @@ double weight::Evaluate(int LoopNum, diagram Diagram) {
         ChanWeight[0] += w;
       // cout << ChanWeight[0].Abs() << endl;
 
+      // if (LoopNum == 2) {
+      //   double Weight = pow(8.0 * PI / (Para.Mass2 + Para.Lambda), 3);
+      //   Weight *= (Fermi.Green(1.0, Var.LoopMom[4], UP, 0, 0.0) *
+      //                  Fermi.Green(-1.0, Var.LoopMom[4], UP, 0, 0.0) -
+      //              Fermi.Green(-1.0, Var.LoopMom[4], UP, 0, 0.0) *
+      //                  Fermi.Green(1.0, Var.LoopMom[4], UP, 0, 0.0) *
+      //                  Para.Lambda / (8.0 * PI * Para.Nf));
+      //   Weight *= (Fermi.Green(1.0, Var.LoopMom[5], UP, 0, 0.0) *
+      //                  Fermi.Green(-1.0, Var.LoopMom[5], UP, 0, 0.0) -
+      //              Fermi.Green(-1.0, Var.LoopMom[5], UP, 0, 0.0) *
+      //                  Fermi.Green(1.0, Var.LoopMom[5], UP, 0, 0.0) *
+      //                  Para.Lambda / (8.0 * PI * Para.Nf));
+      //   cout << Weight << " vs " << ChanWeight[0][DIR] << endl;
+      // }
+
       return ChanWeight[0].Abs();
     } else
       return 0.0;
@@ -76,6 +91,10 @@ void weight::MeasureUST() {
 void weight::Ver0(ver4 &Ver4) {
   // only bare coupling
   Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox);
+  // if (abs(Ver4.Weight[0][DIR] + 8.377) > 0.1) {
+  //   cout << "Ver0 " << Ver4.Weight[0][DIR] << endl;
+  //   ABORT("Err");
+  // }
   // if (Ver4.Level == 1) {
   //   cout << "ver0: " << Ver4.Weight[0][DIR] << Ver4.Weight[0][EX] << endl;
   //   cout << "ver0 LegK0: " << (*Ver4.LegK[0]).norm() << endl;
@@ -124,6 +143,9 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
   auto &G = Ver4.G;
   double Factor = 1.0 / pow(2.0 * PI, D);
 
+  // if (Ver4.Level == 0 && Ver4.LoopNum == 2)
+  //   cout << "\nNew Ver4" << endl;
+
   // calculate K table
   Ver4.K[0] = Var.LoopMom[Ver4.Loopidx];
   EvaluateG(G[0], Ver4.K[0]);
@@ -148,7 +170,13 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
       EvaluateG(G[chan], Ver4.K[chan]);
       break;
     case TC:
+      // Ver4.K[T] may have not yet been initialized before this step
+      Ver4.K[T] = *LegK[OUTL] + Ver4.K[0] - *LegK[INL];
+      EvaluateG(G[chan], Ver4.K[0]);
+      break;
     case UC:
+      // Ver4.K[U] may have not yet been initialized before this step
+      Ver4.K[U] = *LegK[OUTR] + Ver4.K[0] - *LegK[INL];
       EvaluateG(G[chan], Ver4.K[0]);
       break;
     }
@@ -185,26 +213,29 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
     ProjFactor = SymFactor[b.Channel] * Factor;
     if (b.Channel == TC || b.Channel == UC || Ver4.InBox)
       ProjFactor *= Para.Lambda / (8.0 * PI * Para.Nf);
+    // else
+    //   ProjFactor = 0.0;
 
     for (auto &map : b.Map) {
-      // if (b.Channel == TC || b.Channel == UC || Ver4.InBox)
-      //   Weight = ProjFactor *
-      //            Fermi.Green(Para.Beta / 2.0, Ver4.K[0], UP, 0, 0) *
-      //            Fermi.Green(-Para.Beta / 2.0, Ver4.K[0], UP, 0, 0);
-      // else
       Weight =
           ProjFactor * G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
 
       // if (b.Channel == UC || b.Channel == TC || Ver4.InBox) {
-      //   cout << "compare" << endl;
-      //   cout << G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight <<
-      //   endl; cout << Fermi.Green(Para.Beta / 2.0, Ver4.K[0], UP, 0, 0) *
-      //               Fermi.Green(-Para.Beta / 2.0, Ver4.K[0], UP, 0, 0)
-      //        << endl;
+      //   ASSERT_ALLWAYS(
+      //       abs(G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight -
+      //           Fermi.Green(Para.Beta / 2.0, Ver4.K[0], UP, 0, 0) *
+      //               Fermi.Green(-Para.Beta / 2.0, Ver4.K[0], UP, 0, 0)) <
+      //           1.0e-10,
+      //       "GG does not match!");
       // }
 
       auto &Lw = LVer.Weight[map.LVerTidx];
       auto &Rw = RVer.Weight[map.RVerTidx];
+
+      // if (b.Channel == UC || b.Channel == TC || Ver4.InBox) {
+      //   ASSERT_ALLWAYS(abs(Lw[EX]) < 1.0e-10, "LWrong! " << Lw[EX]);
+      //   ASSERT_ALLWAYS(abs(Rw[EX]) < 1.0e-10, "RWrong! " << Rw[EX]);
+      // }
 
       switch (b.Channel) {
       case T:
@@ -226,20 +257,48 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
 
       // cout << "DIR: " << Lw[DIR] << ", " << Rw[DIR] << endl;
       // cout << "EX:  " << Lw[EX] << ", " << Rw[EX] << endl;
+      // cout << b.Channel << ", "
+      //      << G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight << endl;
+
+      // if (Ver4.Level == 0) {
+      //   cout << ChanName[b.Channel] << endl;
+      //   cout << fmt::format("LVer: {}, {}", Lw[DIR], Lw[EX]) << endl;
+      //   cout << fmt::format("RVer: {}, {}", Rw[DIR], Rw[EX]) << endl;
+      //   cout << fmt::format("Dir, Ex: {}, {}", DirW * Weight, ExW * Weight)
+      //        << endl;
+      //   cout << fmt::format("G[{}] {}, G0: {}, G1: {}", b.Channel, Weight,
+      //                       G[0][map.G0idx].Weight,
+      //                       G[b.Channel][map.Gidx].Weight)
+      //        << endl;
+      // }
+      // if (Ver4.LoopNum == 1 && Ver4.Level == 1) {
+      //   cout << ChanName[b.Channel] << ", Side" << Ver4.Side << ", Level 1"
+      //        << endl;
+      //   cout << fmt::format("LVer: {}, {}", Lw[DIR], Lw[EX]) << endl;
+      //   cout << fmt::format("RVer: {}, {}", Rw[DIR], Rw[EX]) << endl;
+      //   cout << fmt::format("Dir, Ex: {}, {}", DirW * Weight, ExW * Weight)
+      //        << endl;
+      //   cout << fmt::format("G[{}] {}, G0: {}, G1: {}", b.Channel, Weight,
+      //                       G[0][map.G0idx].Weight,
+      //                       G[b.Channel][map.Gidx].Weight)
+      //        << endl;
+      //   cout << "pj=" << Para.Lambda / (8.0 * PI * Para.Nf) << endl;
+      // }
 
       if (Ver4.Level > 0) {
         Ver4.Weight[map.Tidx][DIR] += DirW * Weight;
         Ver4.Weight[map.Tidx][EX] += ExW * Weight;
       } else {
-        // cout << fmt::format("LVer: {}, {}", Lw[DIR], Lw[EX]) << endl;
-        // cout << fmt::format("RVer: {}, {}", Rw[DIR], Rw[EX]) << endl;
-        // cout << fmt::format("Dir, Ex: {}, {}", DirW * Weight, ExW * Weight)
-        //      << endl;
-        // cout << fmt::format("G[{}] {}, G0: {}, G1: {}", b.Channel, Weight,
-        //                     G[0][map.G0idx].Weight,
-        //                     G[b.Channel][map.Gidx].Weight)
-        //      << endl;
         if (IsFast) {
+          // cout << ChanName[b.Channel] << endl;
+          // cout << fmt::format("LVer: {}, {}", Lw[DIR], Lw[EX]) << endl;
+          // cout << fmt::format("RVer: {}, {}", Rw[DIR], Rw[EX]) << endl;
+          // cout << fmt::format("Dir, Ex: {}, {}", DirW * Weight, ExW * Weight)
+          //      << endl;
+          // cout << fmt::format("G[{}] {}, G0: {}, G1: {}", b.Channel, Weight,
+          //                     G[0][map.G0idx].Weight,
+          //                     G[b.Channel][map.Gidx].Weight)
+          //      << endl;
           // calculate contributions from different channels for the root
           // vertex4
           channel chan = ChanMap[b.Channel];

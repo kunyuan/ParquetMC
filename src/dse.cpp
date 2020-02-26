@@ -182,6 +182,7 @@ void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
         }
         break;
       case U:
+        // continue;
         ASSERT_ALLWAYS(
             Ver4.InBox == false,
             "Ver4 in a box can not have U diagram! Level: " << Level);

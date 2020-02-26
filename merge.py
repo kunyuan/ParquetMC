@@ -237,6 +237,9 @@ while True:
 
             qData += Data[(o, 1)]
             qDataErr += DataErr[(o, 1)]
+
+            # qData = Data[(o, 1)]
+            # qDataErr = DataErr[(o, 1)]
             # PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
             # PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
             # PrintInfo("U", Data[(o, 2)], DataErr[(o, 2)])

@@ -88,6 +88,7 @@ weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
   } else
     Weight[EX] = 0.0;
   // cout << Weight[EX] << endl;
+  Weight[EX] = 0.0;
 
   return Weight;
 }
