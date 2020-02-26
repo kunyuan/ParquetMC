@@ -7,7 +7,7 @@ import numpy as np
 from color import *
 
 SleepTime = 5
-SpinIndex = 1
+SpinIndex = 2
 
 order = None
 rs = None
@@ -98,10 +98,10 @@ def PrintInfo(Channel, Data, DataErr):
     Data = -np.copy(Data)
     DataErr = np.copy(DataErr)
 
-    # Data[:, 0] *= Nf
-    # Data[:, 1] *= Nf
-    # DataErr[:, 0] *= Nf
-    # DataErr[:, 1] *= Nf
+    Data[:, 0] *= Nf
+    Data[:, 1] *= Nf
+    DataErr[:, 0] *= Nf
+    DataErr[:, 1] *= Nf
 
     print "{0}     Q/kF,    Data,    Error".format(Channel)
     qData0 = Data[:, 0]
@@ -221,20 +221,20 @@ while True:
         AngHalf = np.arccos(AngleBin)/2.0
         Bare = np.zeros(2)
         Bare[0] -= 8.0*np.pi/(Mass2+Lambda)
-        # ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2+Lambda)
-        # Bare[1] += AngleIntegation(ExBare, 0)
+        ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2+Lambda)
+        Bare[1] += AngleIntegation(ExBare, 0)
         Bare = SpinMapping(Bare)
 
         qData = np.zeros_like(Data[(1, 0)])
-        # qData[0, :] += Bare[:]
+        qData[0, :] += Bare[:]
         qDataErr = np.zeros_like(DataErr[(1, 0)])
         for o in Order[1:]:
             print green("Order {0}".format(o))
-            # qData += sum([Data[(o, i)] for i in range(4)])
-            # qDataErr += sum([DataErr[(o, i)] for i in range(4)])
+            qData += sum([Data[(o, i)] for i in range(4)])
+            qDataErr += sum([DataErr[(o, i)] for i in range(4)])
 
-            qData += Data[(o, 1)]
-            qDataErr += DataErr[(o, 1)]
+            # qData += Data[(o, 1)]
+            # qDataErr += DataErr[(o, 1)]
             # PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
             # PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
             # PrintInfo("U", Data[(o, 2)], DataErr[(o, 2)])
@@ -242,9 +242,9 @@ while True:
             PrintInfo("Sum", qData, qDataErr)
             # print "\n"
 
-        qData = sum([Data[(0, i)] for i in range(2)])
+        qData = sum([Data[(0, i)] for i in range(4)])
         qData[0, :] += Bare[:]
-        qDataErr = sum([DataErr[(0, i)] for i in range(2)])
+        qDataErr = sum([DataErr[(0, i)] for i in range(4)])
         PrintInfo("\nTotal", qData, qDataErr)
 
     if Step >= TotalStep:
