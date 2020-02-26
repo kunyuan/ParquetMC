@@ -18,8 +18,8 @@ void weight::Initialization() {
   array<momentum *, 4> ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1],
                                   &Var.LoopMom[2], &Var.LoopMom[3]};
 
-  // vector<channel> Chan = {I, T, U, S, TC, UC};
-  vector<channel> Chan = {T, TC};
+  vector<channel> Chan = {I, T, U, S, TC, UC};
+  // vector<channel> Chan = {T, TC};
   // vector<channel> Chan = {U, UC};
   for (int order = 1; order <= Para.Order; order++) {
     LOG_INFO("Generating order " << order);

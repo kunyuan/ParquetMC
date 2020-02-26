@@ -7,7 +7,7 @@ import numpy as np
 from color import *
 
 SleepTime = 5
-SpinIndex = 1
+SpinIndex = 2
 
 order = None
 rs = None
@@ -98,10 +98,10 @@ def PrintInfo(Channel, Data, DataErr):
     Data = -np.copy(Data)
     DataErr = np.copy(DataErr)
 
-    # Data[:, 0] *= Nf
-    # Data[:, 1] *= Nf
-    # DataErr[:, 0] *= Nf
-    # DataErr[:, 1] *= Nf
+    Data[:, 0] *= Nf
+    Data[:, 1] *= Nf
+    DataErr[:, 0] *= Nf
+    DataErr[:, 1] *= Nf
 
     print "{0}     Q/kF,    Data,    Error".format(Channel)
     qData0 = Data[:, 0]
@@ -228,15 +228,15 @@ while True:
         Bare = SpinMapping(Bare)
 
         qData = np.zeros_like(Data[(1, 0)])
-        # qData[0, :] += Bare[:]
+        qData[0, :] += Bare[:]
         qDataErr = np.zeros_like(DataErr[(1, 0)])
         for o in Order[1:]:
             print green("Order {0}".format(o))
-            # qData += sum([Data[(o, i)] for i in range(4)])
-            # qDataErr += sum([DataErr[(o, i)] for i in range(4)])
+            qData += sum([Data[(o, i)] for i in range(4)])
+            qDataErr += sum([DataErr[(o, i)] for i in range(4)])
 
-            qData += Data[(o, 1)]
-            qDataErr += DataErr[(o, 1)]
+            # qData += Data[(o, 1)]
+            # qDataErr += DataErr[(o, 1)]
 
             # qData = Data[(o, 1)]
             # qDataErr = DataErr[(o, 1)]

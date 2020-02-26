@@ -9,8 +9,8 @@
 #include <vector>
 
 // turn off all assert
-const bool DEBUGMODE = true;
-// const bool DEBUGMODE = false;
+// const bool DEBUGMODE = true;
+const bool DEBUGMODE = false;
 //#define NDEBUG
 // define NDEBUG will turn off debug checking, including the boundary check in
 // array.h
@@ -27,7 +27,7 @@ const int TauBinSize = 128;
 const int SigmaMomBinSize = 128;
 const int SigmaTauBinSize = 128;
 const int TauBasisNum = 32;
-const int SPIN = 1;
+const int SPIN = 2;
 
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
 enum diagram { SIGMA, POLAR, GAMMA };
