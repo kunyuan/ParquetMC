@@ -44,8 +44,8 @@ void InitPara() {
   // Para.Type = BARE;
   Para.Type = VARIATIONAL;
 
-  Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
-  // Para.ReWeight = {40.0, 0.8, 0.4, 0.2, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
+  // Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
+  Para.ReWeight = {10.0, 0.8, 0.4, 0.2, 0.1, 0.05, 1.0, 1.0, 1.0, 1.0};
   Para.ReWeightDiag = {1.0, 1.0, 1.0, 1.0, 1.0};
 
   //// initialize the global parameter //////////////////////

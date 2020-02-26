@@ -261,9 +261,9 @@ elif(XType == "Angle"):
     AngHalf = np.arccos(AngleBin)/2.0
     if IsFullVer4:
         Bare = np.zeros_like(AngTotal[:, 0, :])
-        Bare[:, 0] += 8.0*np.pi/Mass2*Nf
+        Bare[:, 0] += 8.0*np.pi/(Mass2+Lambda)*Nf
         Bare[:, 1] += -8.0 * np.pi / \
-            ((2.0*kF*np.sin(AngHalf))**2+Mass2)*Nf
+            ((2.0*kF*np.sin(AngHalf))**2+Mass2+Lambda)*Nf
         AngTotal[:, 0, 0] += Bare[:, 0]
         AngTotal[:, 0, 1] += Bare[:, 1]
 
