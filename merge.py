@@ -242,9 +242,9 @@ while True:
             PrintInfo("Sum", qData, qDataErr)
             # print "\n"
 
-        qData = sum([Data[(0, i)] for i in range(4)])
+        qData = sum([Data[(0, i)] for i in range(2)])
         qData[0, :] += Bare[:]
-        qDataErr = sum([DataErr[(0, i)] for i in range(4)])
+        qDataErr = sum([DataErr[(0, i)] for i in range(2)])
         PrintInfo("\nTotal", qData, qDataErr)
 
     if Step >= TotalStep:
