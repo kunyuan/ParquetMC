@@ -221,8 +221,7 @@ while True:
         AngHalf = np.arccos(AngleBin)/2.0
         Bare = np.zeros(2)
         Bare[0] -= 8.0*np.pi/(Mass2+Lambda)
-        ExBare = +(8.0 * np.pi /
-                   ((2.0*kF*np.sin(AngHalf))**2+Mass2+Lambda))**2.0*Lambda/8.0/np.pi
+        ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2+Lambda)
         # print "ExBare: ", AngleIntegation(ExBare, 0)
         Bare[1] += AngleIntegation(ExBare, 0)
         Bare = SpinMapping(Bare)
