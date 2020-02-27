@@ -78,13 +78,19 @@ weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
   weightMatrix Weight;
 
   double kDiQ = (*LegK[INL] - *LegK[OUTL]).norm();
-  Weight[DIR] =
-      -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+  if (abs(kDiQ) < 1.0e-10)
+    Weight[DIR] = 0.0;
+  else
+    Weight[DIR] =
+        -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
 
   if (!Boxed) {
     double kExQ = (*LegK[INL] - *LegK[OUTR]).norm();
-    Weight[EX] =
-        8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+    if (abs(kExQ) < 1.0e-10)
+      Weight[EX] = 0.0;
+    else
+      Weight[EX] =
+          8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
   } else
     Weight[EX] = 0.0;
   // cout << Weight[EX] << endl;

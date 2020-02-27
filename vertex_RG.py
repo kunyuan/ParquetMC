@@ -22,6 +22,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 Order = [1, 2, 3]
 SpinIndex = 2
 IsFullVer4 = True
+IsIrreducible = True
 # IsFullVer4 = False
 
 MaxOrder = None
@@ -261,7 +262,8 @@ elif(XType == "Angle"):
     AngHalf = np.arccos(AngleBin)/2.0
     if IsFullVer4:
         Bare = np.zeros_like(AngTotal[:, 0, :])
-        Bare[:, 0] += 8.0*np.pi/(Mass2+Lambda)*Nf
+        if IsIrreducible == False:
+            Bare[:, 0] += 8.0*np.pi/(Mass2+Lambda)*Nf
         Bare[:, 1] += -8.0 * np.pi / \
             ((2.0*kF*np.sin(AngHalf))**2+Mass2+Lambda)*Nf
         AngTotal[:, 0, 0] += Bare[:, 0]
