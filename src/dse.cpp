@@ -10,7 +10,7 @@
 using namespace dse;
 using namespace std;
 
-int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> &T) {
+int dse::AddToTList(vector<array<int, 4>> &TList, const array<int, 4> &T) {
   // find the T array in the list, if failed, create a new array
   // cout << "AddTtoList" << endl;
   for (int i = 0; i < TList.size(); i++) {
@@ -30,7 +30,7 @@ int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> &T) {
   return TList.size() - 1;
 }
 
-int AddToGList(vector<green> &GList, const array<int, 2> &T) {
+int dse::AddToGList(vector<green> &GList, const array<int, 2> &T) {
   // find the T array in the list, if failed, create a new array
   for (int i = 0; i < GList.size(); i++) {
     auto t = GList[i].T;
@@ -92,8 +92,8 @@ void verDiag::Ver0(ver4 &Ver4) {
   AddToTList(Ver4.T, {InTL, InTL, InTL, InTL});
 }
 
-vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
-                                channel Chan) {
+vector<indexMap> dse::CreateIndexMap(ver4 &Ver4, const ver4 &LVer,
+                                     const ver4 &RVer, channel Chan) {
   ///////////   External and Internal Tau  ////////////////
   vector<indexMap> Map;
   int GT0, GT, Tidx;

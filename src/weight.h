@@ -1,6 +1,7 @@
 #ifndef weight_H
 #define weight_H
 
+#include "diagram.h"
 #include "dse.h"
 #include "utility/rng.h"
 #include "utility/utility.h"
@@ -55,6 +56,8 @@ private:
   dse::verDiag VerDiag; // diagram factory
   // diagram for different order and channel
   dse::ver4 Ver4Root[MaxOrder];
+  dse::sigma Sigma[MaxOrder];
+  dse::polar Polar[MaxOrder];
 
   void Vertex4(dse::ver4 &Ver4, bool IsFast);
 

@@ -128,11 +128,14 @@ private:
   void ChanUST(ver4 &Ver4, const vector<channel> &Channel);
 };
 
-class sigmaDiag {};
-
-class polarDiag {};
-
 bool verTest();
+
+int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> &T);
+
+int AddToGList(vector<green> &GList, const array<int, 2> &T);
+
+vector<indexMap> CreateIndexMap(ver4 &Ver4, const ver4 &LVer, const ver4 &RVer,
+                                channel Chan);
 
 } // namespace dse
 #endif

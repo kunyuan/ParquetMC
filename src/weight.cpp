@@ -1,4 +1,5 @@
 #include "weight.h"
+#include "diagram.h"
 #include "global.h"
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
@@ -37,6 +38,15 @@ void weight::Initialization() {
   for (int order = 1; order <= Para.Order; order++) {
     LOG_INFO(fmt::format(" Order {0}: ExtT Num {1}\n", order,
                          Ver4Root[order].T.size()));
+  }
+
+  /////////////////////////// Sigma /////////////////////////
+  for (int order = 1; order <= Para.Order; order++) {
+    Sigma[order] = BuildSigma(order + 1, &Var.LoopMom[0]);
+    if (order < 4) {
+      LOG_INFO(fmt::format(" Sigma, Order {0}\n", order));
+      LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
+    }
   }
 }
 

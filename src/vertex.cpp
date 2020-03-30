@@ -79,6 +79,7 @@ weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
 
   double kDiQ = (*LegK[INL] - *LegK[OUTL]).norm();
   if (abs(kDiQ) < 1.0e-10)
+    // check irreducibility
     Weight[DIR] = 0.0;
   else
     Weight[DIR] =
@@ -87,6 +88,7 @@ weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
   if (!Boxed) {
     double kExQ = (*LegK[INL] - *LegK[OUTR]).norm();
     if (abs(kExQ) < 1.0e-10)
+      // check irreducibility
       Weight[EX] = 0.0;
     else
       Weight[EX] =
