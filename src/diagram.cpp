@@ -72,8 +72,7 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK) {
       Ver4.Bubble.push_back(bub);
     }
   }
-  /// set K table ////////////////////
-
+  /////////////////// set K table ////////////////////
   auto &K = Ver4.K;
   auto &LegK = Ver4.LegK;
   Ver4.LegK[INL] = ExtK;
