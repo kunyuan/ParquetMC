@@ -10,8 +10,21 @@
 using namespace dse;
 using namespace std;
 
-dse::polar dse::BuildPolar(int LoopNum) {
+dse::polar dse::BuildPolar(int LoopNum, array<momentum *, 4> ExtLegK) {
   dse::polar Polar;
+  Polar.LoopNum = LoopNum;
+  Polar.TauNum = LoopNum + 1;
+
+  vector<channel> Chan = {I, T, U, S, TC, UC};
+  // vector<channel> Chan = {T, TC};
+  // vector<channel> Chan = {U, UC};
+  verDiag Factory;
+  Polar.Vertex = Factory.Vertex(0,           // level
+                                LoopNum - 2, // loopNum
+                                4, // loop index of the first internal K
+                                2, // tau index of the InTL leg
+                                Chan, RIGHT, false);
+  Factory.ResetMomMap(Polar.Vertex, ExtLegK);
   return Polar;
 };
 
@@ -35,9 +48,10 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK) {
 
   int InTL = Ver4.InTL;
   vector<channel> FULL = {I, T, U, S, TC, UC};
-  vector<channel> F = {I, TC, UC};
+  vector<channel> F = {TC, UC}; // the bare interaction is automatically
+                                // included
   vector<channel> FULL_CT = {I, T, TC};
-  vector<channel> F_CT = {I, TC};
+  vector<channel> F_CT = {TC}; // the bare interaction is automatically included
 
   for (auto &chan : Ver4.Channel) {
 
@@ -90,5 +104,18 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK) {
     Factory.ResetMomMap(bub.LVer, LLegK);
     Factory.ResetMomMap(bub.RVer, RLegK);
   }
+
+  // create the G List
+  for (auto &t : Ver4.T) {
+    // the G is from OUTL to INR
+    AddToGList(Sigma.G, {t[OUTL], t[INR]});
+    // the tau of Sigma is from 0 to OUTR
+    Sigma.T.push_back(t[OUTR]);
+  }
+
+  // for (auto &g : Sigma.G)
+  //   cout << g.T[IN] << "->" << g.T[OUT] << endl;
+
+  Sigma.Weight.resize(Sigma.T.size());
   return Sigma;
 }
