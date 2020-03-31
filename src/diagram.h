@@ -19,8 +19,8 @@ struct polar {
   int OutT;
   ver4 Vertex;
   array<vector<green>, 4> G;
-  vector<int> T;
-  vector<ver::weightMatrix> Weight;
+  // there is only one Tau: from 0 to 1
+  ver::weightMatrix Weight;
 };
 
 struct sigma {

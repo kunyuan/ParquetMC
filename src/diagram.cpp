@@ -25,6 +25,12 @@ dse::polar dse::BuildPolar(int LoopNum, array<momentum *, 4> ExtLegK) {
                                 2, // tau index of the InTL leg
                                 Chan, RIGHT, false);
   Factory.ResetMomMap(Polar.Vertex, ExtLegK);
+  for (auto &t : Polar.Vertex.T) {
+    AddToGList(Polar.G[INL], {0, t[INL]});
+    AddToGList(Polar.G[OUTL], {t[OUTL], 0});
+    AddToGList(Polar.G[INR], {1, t[INR]});
+    AddToGList(Polar.G[OUTR], {t[OUTR], 1});
+  }
   return Polar;
 };
 
