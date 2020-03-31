@@ -48,6 +48,17 @@ void weight::Initialization() {
       LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
     }
   }
+
+  /////////////////////////// Polar /////////////////////////
+  ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1], &Var.LoopMom[2],
+             &Var.LoopMom[3]};
+  for (int order = 0; order <= Para.Order; order++) {
+    Polar[order] = BuildPolar(order + 1, ExtLegK);
+    // if (order < 4) {
+    //   LOG_INFO(fmt::format(" Polar, Order {0}\n", order));
+    //   LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
+    // }
+  }
 }
 
 double weight::Evaluate(int LoopNum, diagram Diagram) {
