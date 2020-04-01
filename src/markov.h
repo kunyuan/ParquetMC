@@ -73,9 +73,9 @@ private:
     CHANGE_TAU,
     CHANGE_MOM,
     CHANGE_SCALE,
-    VER2VER,
-    VER2SIGMA,
-    SIGMA2VER,
+    VER,
+    SIGMA,
+    POLAR,
     END
   };
   std::string _DetailBalanceStr(Updates op);

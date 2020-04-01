@@ -153,6 +153,20 @@ void markov::ChangeMomentum() {
   }
 };
 
+void markov::ChangeChannel() {
+  double x = Random.urn();
+  double Num = 4;
+  Updates Name;
+  if (x < 1.0 / Num) {
+    Name = VER;
+  } else if (x < 2.0 / Num) {
+    Name = SIGMA;
+  } else if (x < 3.0 / Num) {
+    Name = POLAR;
+  }
+  return;
+}
+
 double markov::GetNewTau(double &NewTau) {
   double Step = 1.0;
   NewTau = Random.urn() * Para.Beta;
