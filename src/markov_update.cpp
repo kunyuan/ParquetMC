@@ -155,14 +155,17 @@ void markov::ChangeMomentum() {
 
 void markov::ChangeChannel() {
   double x = Random.urn();
-  double Num = 4;
+  double Num = 3;
   Updates Name;
   if (x < 1.0 / Num) {
-    Name = VER;
+    Name = Updates::VER;
+    Var.CurrDiagram = diagram::GAMMA;
   } else if (x < 2.0 / Num) {
-    Name = SIGMA;
+    Name = Updates::SIGMA;
+    Var.CurrDiagram = diagram::SIGMA;
   } else if (x < 3.0 / Num) {
-    Name = POLAR;
+    Name = Updates::POLAR;
+    Var.CurrDiagram = diagram::POLAR;
   }
   return;
 }

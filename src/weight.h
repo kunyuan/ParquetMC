@@ -59,6 +59,10 @@ private:
   dse::sigma Sigma[MaxOrder];
   dse::polar Polar[MaxOrder];
 
+  double EvaluateGamma(int LoopNum);
+  double EvaluateSigma(int LoopNum);
+  double EvaluatePolar(int LoopNum);
+
   void Vertex4(dse::ver4 &Ver4, bool IsFast);
 
   void Ver0(dse::ver4 &Ver4);
