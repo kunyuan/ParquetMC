@@ -26,10 +26,11 @@ dse::polar dse::BuildPolar(int LoopNum, array<momentum *, 4> ExtLegK) {
                                 Chan, RIGHT, false);
   Factory.ResetMomMap(Polar.Vertex, ExtLegK);
   for (auto &t : Polar.Vertex.T) {
-    AddToGList(Polar.G[INL], {0, t[INL]});
-    AddToGList(Polar.G[OUTL], {t[OUTL], 0});
-    AddToGList(Polar.G[INR], {1, t[INR]});
-    AddToGList(Polar.G[OUTR], {t[OUTR], 1});
+    int inL = AddToGList(Polar.G[INL], {0, t[INL]});
+    int outL = AddToGList(Polar.G[OUTL], {t[OUTL], 0});
+    int inR = AddToGList(Polar.G[INR], {1, t[INR]});
+    int outR = AddToGList(Polar.G[OUTR], {t[OUTR], 1});
+    Polar.Gidx.push_back(array<int, 4>({inL, outL, inR, outR}));
   }
   return Polar;
 };

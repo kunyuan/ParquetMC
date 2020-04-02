@@ -19,6 +19,7 @@ struct polar {
   int OutT;
   ver4 Vertex;
   array<vector<green>, 4> G;
+  vector<array<int, 4>> Gidx; // external T list
   // there is only one Tau: from 0 to 1
   ver::weightMatrix Weight;
 };

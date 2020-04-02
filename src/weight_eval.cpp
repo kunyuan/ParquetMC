@@ -57,14 +57,29 @@ double weight::EvaluatePolar(int LoopNum) {
   } else {
     // if (Channel != dse::T)
     //   return 0.0;
-    ver4 &Root = Ver4Root[LoopNum];
+    dse::polar &P = Polar[LoopNum];
+    ver4 &Root = P.Vertex;
     if (Root.Weight.size() != 0) {
       Vertex4(Root, true);
-      for (auto &w : ChanWeight)
-        // collapse all channel to I
-        ChanWeight[0] += w;
-      // cout << ChanWeight[0].Abs() << endl;
-      return ChanWeight[0].Abs();
+
+      // evaluate all possible G
+      for (int i = 0; i < 4; ++i)
+        EvaluateG(P.G[i], Var.LoopMom[i]);
+
+      int Size = Root.Weight.size();
+      P.Weight.SetZero();
+      for (int i = 0; i < Size; ++i) {
+        auto &Gidx = P.Gidx[i];
+        auto &Weight = Root.Weight[i];
+
+        // attach four G
+        for (int j = 0; j < 4; ++j)
+          Weight *= P.G[j][Gidx[j]].Weight;
+
+        P.Weight += Weight;
+      }
+
+      return P.Weight.Abs();
     } else
       return 0.0;
   }

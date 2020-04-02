@@ -39,10 +39,13 @@ public:
   ver::fermi Fermi;         // propagator factory
   ver::verQTheta VerQTheta; // vertex factory
 
+  dse::ver4 Ver4Root[MaxOrder];
+  dse::sigma Sigma[MaxOrder];
+  dse::polar Polar[MaxOrder];
+
   void Initialization();
 
   double Evaluate(int LoopNum, diagram Diagram);
-  double EvaluateUST(int LoopNum);
 
   void MeasureUST();
 
@@ -55,9 +58,6 @@ public:
 private:
   dse::verDiag VerDiag; // diagram factory
   // diagram for different order and channel
-  dse::ver4 Ver4Root[MaxOrder];
-  dse::sigma Sigma[MaxOrder];
-  dse::polar Polar[MaxOrder];
 
   double EvaluateGamma(int LoopNum);
   double EvaluateSigma(int LoopNum);
@@ -69,7 +69,9 @@ private:
 
   void ChanI(dse::ver4 &Ver4, bool IsFast);
   void ChanUST(dse::ver4 &Ver4, bool IsFast);
+
   void EvaluateG(vector<dse::green> &G, const momentum &K);
+  double EvaluateUST(int LoopNum);
 
   void _TestOneLoopGamma();
   void _TestTwoLoopGamma();
