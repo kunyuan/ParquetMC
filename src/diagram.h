@@ -29,14 +29,20 @@ struct sigma {
   int LoopNum;
   int OutT;
   ver4 Vertex;
+  momentum *K; // one internal K is needed
   vector<green> G;
-  momentum K; // one internal K is needed
+
   vector<int> T;
   vector<ver::weightMatrix> Weight;
+
+  // map Vertex Tidx and G idx to sigma Tidx
+  vector<int> Gidx;
+  vector<int> VerTidx;
+  vector<int> SigTidx;
 };
 
 polar BuildPolar(int LoopNum, array<momentum *, 4> ExtLegK);
-sigma BuildSigma(int LoopNum, momentum *ExtK);
+sigma BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK);
 
 } // namespace dse
 #endif

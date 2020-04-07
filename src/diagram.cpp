@@ -35,10 +35,28 @@ dse::polar dse::BuildPolar(int LoopNum, array<momentum *, 4> ExtLegK) {
   return Polar;
 };
 
-dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK) {
+int AddToTList(vector<int> &TList, int T) {
+  // find the T array in the list, if failed, create a new array
+  // cout << "AddTtoList" << endl;
+  for (int i = 0; i < TList.size(); i++) {
+    auto t = TList[i];
+    // cout << "List: " << t[0] << ", " << t[1] << ", " << t[2] << ", " << t[3]
+    //      << endl;
+
+    if (t == T)
+      return i;
+  }
+  // cout << "Added: " << T[0] << ", " << T[1] << ", " << T[2] << ", " << T[3]
+  //      << endl;
+  TList.push_back(T);
+  return TList.size() - 1;
+}
+
+dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK) {
   dse::sigma Sigma;
   Sigma.LoopNum = LoopNum;
   Sigma.TauNum = LoopNum;
+  Sigma.K = InterK;
 
   auto &Ver4 = Sigma.Vertex;
 
@@ -98,8 +116,8 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK) {
   auto &LegK = Ver4.LegK;
   Ver4.LegK[INL] = ExtK;
   Ver4.LegK[OUTR] = ExtK;
-  Ver4.LegK[OUTL] = &Sigma.K;
-  Ver4.LegK[INR] = &Sigma.K;
+  Ver4.LegK[OUTL] = InterK;
+  Ver4.LegK[INR] = InterK;
   array<momentum *, 4> LLegK, RLegK;
 
   for (auto &bub : Ver4.Bubble) {
@@ -113,15 +131,16 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK) {
   }
 
   // create the G List
-  for (auto &t : Ver4.T) {
+  for (int i = 0; i < Ver4.T.size(); ++i) {
+    auto &t = Ver4.T[i];
     // the G is from OUTL to INR
-    AddToGList(Sigma.G, {t[OUTL], t[INR]});
+    int Gidx = AddToGList(Sigma.G, {t[OUTL], t[INR]});
     // the tau of Sigma is from 0 to OUTR
     Sigma.T.push_back(t[OUTR]);
-  }
 
-  // for (auto &g : Sigma.G)
-  //   cout << g.T[IN] << "->" << g.T[OUT] << endl;
+    Sigma.Gidx.push_back(Gidx);
+    Sigma.VerTidx.push_back(i);
+  }
 
   Sigma.Weight.resize(Sigma.T.size());
   return Sigma;

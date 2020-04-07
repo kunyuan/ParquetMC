@@ -51,38 +51,31 @@ double weight::EvaluateGamma(int LoopNum) {
 }
 
 double weight::EvaluatePolar(int LoopNum) {
-  if (LoopNum == 0) {
-    // normalization
-    return 1.0;
-  } else {
-    // if (Channel != dse::T)
-    //   return 0.0;
-    dse::polar &P = Polar[LoopNum];
-    ver4 &Root = P.Vertex;
-    if (Root.Weight.size() != 0) {
-      Vertex4(Root, true);
+  dse::polar &P = Polar[LoopNum];
+  ver4 &Root = P.Vertex;
+  if (Root.Weight.size() != 0) {
+    Vertex4(Root, true);
 
-      // evaluate all possible G
-      for (int i = 0; i < 4; ++i)
-        EvaluateG(P.G[i], Var.LoopMom[i]);
+    // evaluate all possible G
+    for (int i = 0; i < 4; ++i)
+      EvaluateG(P.G[i], Var.LoopMom[i]);
 
-      int Size = Root.Weight.size();
-      P.Weight.SetZero();
-      for (int i = 0; i < Size; ++i) {
-        auto &Gidx = P.Gidx[i];
-        auto &Weight = Root.Weight[i];
+    int Size = Root.Weight.size();
+    P.Weight.SetZero();
+    for (int i = 0; i < Size; ++i) {
+      auto &Gidx = P.Gidx[i];
+      auto &Weight = Root.Weight[i];
 
-        // attach four G
-        for (int j = 0; j < 4; ++j)
-          Weight *= P.G[j][Gidx[j]].Weight;
+      // attach four G
+      for (int j = 0; j < 4; ++j)
+        Weight *= P.G[j][Gidx[j]].Weight;
 
-        P.Weight += Weight;
-      }
+      P.Weight += Weight;
+    }
 
-      return P.Weight.Abs();
-    } else
-      return 0.0;
-  }
+    return P.Weight.Abs();
+  } else
+    return 0.0;
 }
 
 double weight::EvaluateSigma(int LoopNum) {
