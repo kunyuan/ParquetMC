@@ -55,6 +55,13 @@ public:
     return *this;
   }
 
+  weightMatrix operator*(double Factor) {
+    weightMatrix Weight;
+    Weight[DIR] = _Weight[DIR] *= Factor;
+    Weight[EX] = _Weight[EX] *= Factor;
+    return Weight;
+  }
+
 private:
   array<double, 2> _Weight;
 };

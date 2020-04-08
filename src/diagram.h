@@ -33,7 +33,7 @@ struct sigma {
   vector<green> G;
 
   vector<int> T;
-  vector<ver::weightMatrix> Weight;
+  vector<double> Weight;
 
   // map Vertex Tidx and G idx to sigma Tidx
   vector<int> Gidx;

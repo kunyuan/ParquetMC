@@ -54,7 +54,7 @@ double weight::EvaluatePolar(int LoopNum) {
   dse::polar &P = Polar[LoopNum];
   ver4 &Root = P.Vertex;
   if (Root.Weight.size() != 0) {
-    Vertex4(Root, true);
+    Vertex4(Root, false);
 
     // evaluate all possible G
     for (int i = 0; i < 4; ++i)
@@ -78,24 +78,24 @@ double weight::EvaluatePolar(int LoopNum) {
     return 0.0;
 }
 
-double weight::EvaluateSigma(int LoopNum) {
-  if (LoopNum == 0) {
-    // normalization
-    return 1.0;
-  } else {
-    // if (Channel != dse::T)
-    //   return 0.0;
-    ver4 &Root = Ver4Root[LoopNum];
-    if (Root.Weight.size() != 0) {
-      Vertex4(Root, true);
-      for (auto &w : ChanWeight)
-        // collapse all channel to I
-        ChanWeight[0] += w;
-      // cout << ChanWeight[0].Abs() << endl;
-      return ChanWeight[0].Abs();
-    } else
-      return 0.0;
-  }
+double weight::EvaluateSigma(int LoopNum, bool IsFast) {
+  dse::sigma &Si = Sigma[LoopNum];
+  ver4 &Root = Si.Vertex;
+  if (Root.Weight.size() != 0) {
+    Vertex4(Root, false);
+    EvaluateG(Si.G, *Si.K);
+    int Size = Root.Weight.size();
+    for (int i = 0; i < Size; ++i) {
+      int Gidx = Si.Gidx[i];
+      auto &Weight = Root.Weight[i];
+      if (IsFast)
+        Si.Weight[0] += Weight.Sum() * Si.G[Gidx].Weight;
+      else
+        Si.Weight[Si.T[i]] += Weight.Sum() * Si.G[Gidx].Weight;
+    }
+    return Si.Weight[0];
+  } else
+    return 0.0;
 }
 
 void weight::Vertex4(ver4 &Ver4, bool IsFast) {
@@ -246,60 +246,15 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
         break;
       }
 
-      // cout << "DIR: " << Lw[DIR] << ", " << Rw[DIR] << endl;
-      // cout << "EX:  " << Lw[EX] << ", " << Rw[EX] << endl;
-      // cout << b.Channel << ", "
-      //      << G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight << endl;
-
-      // if (Ver4.Level == 0) {
-      //   cout << ChanName[b.Channel] << endl;
-      //   cout << fmt::format("LVer: {}, {}", Lw[DIR], Lw[EX]) << endl;
-      //   cout << fmt::format("RVer: {}, {}", Rw[DIR], Rw[EX]) << endl;
-      //   cout << fmt::format("Dir, Ex: {}, {}", DirW * Weight, ExW * Weight)
-      //        << endl;
-      //   cout << fmt::format("G[{}] {}, G0: {}, G1: {}", b.Channel, Weight,
-      //                       G[0][map.G0idx].Weight,
-      //                       G[b.Channel][map.Gidx].Weight)
-      //        << endl;
-      // }
-      // if (Ver4.LoopNum == 1 && Ver4.Level == 1) {
-      //   cout << ChanName[b.Channel] << ", Side" << Ver4.Side << ", Level 1"
-      //        << endl;
-      //   cout << fmt::format("LVer: {}, {}", Lw[DIR], Lw[EX]) << endl;
-      //   cout << fmt::format("RVer: {}, {}", Rw[DIR], Rw[EX]) << endl;
-      //   cout << fmt::format("Dir, Ex: {}, {}", DirW * Weight, ExW * Weight)
-      //        << endl;
-      //   cout << fmt::format("G[{}] {}, G0: {}, G1: {}", b.Channel, Weight,
-      //                       G[0][map.G0idx].Weight,
-      //                       G[b.Channel][map.Gidx].Weight)
-      //        << endl;
-      //   cout << "pj=" << Para.Lambda / (8.0 * PI * Para.Nf) << endl;
-      // }
-
-      if (Ver4.Level > 0) {
+      if (Ver4.Level > 0 || IsFast == false) {
         Ver4.Weight[map.Tidx][DIR] += DirW * Weight;
         Ver4.Weight[map.Tidx][EX] += ExW * Weight;
       } else {
-        if (IsFast) {
-          // cout << ChanName[b.Channel] << endl;
-          // cout << fmt::format("LVer: {}, {}", Lw[DIR], Lw[EX]) << endl;
-          // cout << fmt::format("RVer: {}, {}", Rw[DIR], Rw[EX]) << endl;
-          // cout << fmt::format("Dir, Ex: {}, {}", DirW * Weight, ExW * Weight)
-          //      << endl;
-          // cout << fmt::format("G[{}] {}, G0: {}, G1: {}", b.Channel, Weight,
-          //                     G[0][map.G0idx].Weight,
-          //                     G[b.Channel][map.Gidx].Weight)
-          //      << endl;
-          // calculate contributions from different channels for the root
-          // vertex4
-          channel chan = ChanMap[b.Channel];
-          ChanWeight[chan][DIR] += DirW * Weight;
-          ChanWeight[chan][EX] += ExW * Weight;
-          // cout << DirW << ", " << ExW << ", " << Weight << ", " << ProjFactor
-          //      << endl;
-        } else {
-          // TODO: add slow measure
-        }
+        channel chan = ChanMap[b.Channel];
+        ChanWeight[chan][DIR] += DirW * Weight;
+        ChanWeight[chan][EX] += ExW * Weight;
+        // cout << DirW << ", " << ExW << ", " << Weight << ", " << ProjFactor
+        //      << endl;
       }
     }
   }

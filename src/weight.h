@@ -60,7 +60,7 @@ private:
   // diagram for different order and channel
 
   double EvaluateGamma(int LoopNum);
-  double EvaluateSigma(int LoopNum);
+  double EvaluateSigma(int LoopNum, bool IsFast = true);
   double EvaluatePolar(int LoopNum);
 
   void Vertex4(dse::ver4 &Ver4, bool IsFast);

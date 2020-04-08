@@ -42,7 +42,7 @@ void weight::Initialization() {
 
   /////////////////////////// Sigma /////////////////////////
   for (int order = 1; order <= Para.Order; order++) {
-    Sigma[order] = BuildSigma(order + 1, &Var.LoopMom[0]);
+    Sigma[order] = BuildSigma(order + 1, &Var.LoopMom[0], &Var.LoopMom[1]);
     if (order < 4) {
       LOG_INFO(fmt::format(" Sigma, Order {0}\n", order));
       LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
