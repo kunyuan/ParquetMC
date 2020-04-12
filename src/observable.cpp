@@ -15,6 +15,7 @@ sigData::sigData(array<double, MaxTauNum> &TauTable) : Tau(TauTable) {
   _Estimator = new double[MaxOrder * TauNum * KNum];
   OrderIndex = TauNum * KNum;
   KIndex = TauNum;
+  PhyWeight = 1.0;
   Initialization();
   return;
 }
@@ -56,7 +57,7 @@ void sigData::Save() {
       for (int qindex = 0; qindex < KNum; ++qindex)
         for (int tindex = 0; tindex < TauNum; ++tindex)
           VerFile << _Estimator[order * OrderIndex + qindex * KIndex + tindex] *
-                         PhyWeightT
+                         PhyWeight
                   << "  ";
       VerFile.close();
     } else {
