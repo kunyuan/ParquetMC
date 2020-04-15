@@ -51,6 +51,7 @@ struct parameter {
   // MC inputs
   int Order;
   type Type;
+  diagram DiagType;
   bool UseVer4;                       // use vertex4 to calculate weight or not
   int TotalStep;                      // total steps of the Monte Carlo
   int Seed;                           // rng seed

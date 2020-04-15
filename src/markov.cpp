@@ -87,9 +87,6 @@ markov::markov() : Var(Weight.Var) {
   UpdatesName[CHANGE_MOM] = NAME(CHANGE_MOM);
   UpdatesName[CHANGE_TAU] = NAME(CHANGE_TAU);
   UpdatesName[CHANGE_SCALE] = NAME(CHANGE_SCALE);
-  UpdatesName[VER] = NAME(VER);
-  UpdatesName[SIGMA] = NAME(SIGMA);
-  UpdatesName[POLAR] = NAME(POLAR);
 
   // for(int i=0;i<MCUpdates;i++)
   // UpdatesName[(Updates)i]=NAME((Updates))

@@ -43,6 +43,7 @@ void InitPara() {
 
   // Para.Type = BARE;
   Para.Type = VARIATIONAL;
+  Para.DiagType = SIGMA;
 
   // Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
   Para.ReWeight = {20.0, 0.8, 0.4, 0.2, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
@@ -128,16 +129,14 @@ void MonteCarlo() {
       // }
 
       double x = Random.urn();
-      if (x < 1.0 / 5.0) {
+      if (x < 1.0 / 3.0) {
         Markov.ChangeOrder();
         // ;
-      } else if (x < 2.0 / 5.0) {
+      } else if (x < 2.0 / 3.0) {
         Markov.ChangeMomentum();
         // ;
-      } else if (x < 3.0 / 5.0) {
+      } else if (x < 3.0 / 3.0) {
         Markov.ChangeTau();
-      } else if (x < 4.0 / 5.0) {
-        Markov.ChangeChannel();
         // else if (x < 5.0 / 5.0) {
         //   Markov.ChangeScale();
         // ;

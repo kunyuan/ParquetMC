@@ -15,49 +15,54 @@ using namespace std;
 using namespace dse;
 
 void weight::Initialization() {
+  array<momentum *, 4> ExtLegK;
 
-  array<momentum *, 4> ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1],
-                                  &Var.LoopMom[2], &Var.LoopMom[3]};
+  if (Para.DiagType == GAMMA) {
+    ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1], &Var.LoopMom[2],
+               &Var.LoopMom[3]};
 
-  vector<channel> Chan = {I, T, U, S, TC, UC};
-  // vector<channel> Chan = {T, TC};
-  // vector<channel> Chan = {U, UC};
-  for (int order = 1; order <= Para.Order; order++) {
-    LOG_INFO("Generating order " << order);
-    Ver4Root[order] = VerDiag.Vertex(0,     // level
-                                     order, // loopNum
-                                     4, // loop index of the first internal K
-                                     0, // tau index of the InTL leg
-                                     Chan, RIGHT, false);
-    VerDiag.ResetMomMap(Ver4Root[order], ExtLegK);
-    // the vertex LegK must be initialized after the memory allocaiton of the
-    // vertex tree
-    if (order < 4)
-      LOG_INFO(VerDiag.ToString(Ver4Root[order]));
-  }
-  for (int order = 1; order <= Para.Order; order++) {
-    LOG_INFO(fmt::format(" Order {0}: ExtT Num {1}\n", order,
-                         Ver4Root[order].T.size()));
-  }
-
-  /////////////////////////// Sigma /////////////////////////
-  for (int order = 1; order <= Para.Order; order++) {
-    Sigma[order] = BuildSigma(order + 1, &Var.LoopMom[0], &Var.LoopMom[1]);
-    if (order < 4) {
-      LOG_INFO(fmt::format(" Sigma, Order {0}\n", order));
-      LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
+    vector<channel> Chan = {I, T, U, S, TC, UC};
+    // vector<channel> Chan = {T, TC};
+    // vector<channel> Chan = {U, UC};
+    for (int order = 1; order <= Para.Order; order++) {
+      LOG_INFO("Generating order " << order);
+      Ver4Root[order] = VerDiag.Vertex(0,     // level
+                                       order, // loopNum
+                                       4, // loop index of the first internal K
+                                       0, // tau index of the InTL leg
+                                       Chan, RIGHT, false);
+      VerDiag.ResetMomMap(Ver4Root[order], ExtLegK);
+      // the vertex LegK must be initialized after the memory allocaiton of the
+      // vertex tree
+      if (order < 4)
+        LOG_INFO(VerDiag.ToString(Ver4Root[order]));
     }
-  }
+    for (int order = 1; order <= Para.Order; order++) {
+      LOG_INFO(fmt::format(" Order {0}: ExtT Num {1}\n", order,
+                           Ver4Root[order].T.size()));
+    }
 
-  /////////////////////////// Polar /////////////////////////
-  ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1], &Var.LoopMom[2],
-             &Var.LoopMom[3]};
-  for (int order = 0; order <= Para.Order; order++) {
-    Polar[order] = BuildPolar(order + 1, ExtLegK);
-    // if (order < 4) {
-    //   LOG_INFO(fmt::format(" Polar, Order {0}\n", order));
-    //   LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
-    // }
+  } else if (Para.DiagType == SIGMA) {
+    /////////////////////////// Sigma /////////////////////////
+    for (int order = 1; order <= Para.Order; order++) {
+      Sigma[order] = BuildSigma(order + 1, &Var.LoopMom[0], &Var.LoopMom[1]);
+      if (order < 4) {
+        LOG_INFO(fmt::format(" Sigma, Order {0}\n", order));
+        LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
+      }
+    }
+  } else if (Para.DiagType == POLAR) {
+
+    /////////////////////////// Polar /////////////////////////
+    ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1], &Var.LoopMom[2],
+               &Var.LoopMom[3]};
+    for (int order = 0; order <= Para.Order; order++) {
+      Polar[order] = BuildPolar(order + 1, ExtLegK);
+      // if (order < 4) {
+      //   LOG_INFO(fmt::format(" Polar, Order {0}\n", order));
+      //   LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
+      // }
+    }
   }
 }
 

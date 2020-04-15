@@ -118,26 +118,31 @@ void markov::ChangeTau() {
 };
 
 void markov::ChangeMomentum() {
-  int LoopIndex = Random.irn(2, GetLoopNum(Var.CurrOrder) - 1);
-  // the INL, OUTL, OUTR momentum are fixed
-  if (LoopIndex == OUTL || LoopIndex == OUTR)
-    return;
-
-  Proposed[CHANGE_MOM][Var.CurrOrder]++;
-
+  int LoopIndex = Random.irn(0, GetLoopNum(Var.CurrOrder) - 1);
   double Prop;
   int NewExtMomBin;
   static momentum CurrMom;
 
-  CurrMom = Var.LoopMom[LoopIndex];
+  if (Var.CurrDiagram == GAMMA) {
+    // the INL, OUTL, OUTR momentum are fixed
+    if (LoopIndex == INL || LoopIndex == OUTL || LoopIndex == OUTR)
+      return;
 
-  if (LoopIndex == INR) {
-    // InR momentum
-    Prop = ShiftExtLegK(CurrMom, Var.LoopMom[INR]);
-    Var.LoopMom[OUTR] = Var.LoopMom[INR];
-  } else {
-    Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
+    CurrMom = Var.LoopMom[LoopIndex];
+
+    if (LoopIndex == INR) {
+      // InR momentum
+      Prop = ShiftExtLegK(CurrMom, Var.LoopMom[INR]);
+      Var.LoopMom[OUTR] = Var.LoopMom[INR];
+    } else {
+      Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
+    }
+  } else if (Var.CurrDiagram == SIGMA) {
+    if (LoopIndex == INR || LoopIndex == OUTL || LoopIndex == OUTR)
+      return;
   }
+
+  Proposed[CHANGE_MOM][Var.CurrOrder]++;
 
   NewAbsWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrDiagram);
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
@@ -152,23 +157,6 @@ void markov::ChangeMomentum() {
       Var.LoopMom[OUTR] = CurrMom;
   }
 };
-
-void markov::ChangeChannel() {
-  double x = Random.urn();
-  double Num = 3;
-  Updates Name;
-  if (x < 1.0 / Num) {
-    Name = Updates::VER;
-    Var.CurrDiagram = diagram::GAMMA;
-  } else if (x < 2.0 / Num) {
-    Name = Updates::SIGMA;
-    Var.CurrDiagram = diagram::SIGMA;
-  } else if (x < 3.0 / Num) {
-    Name = Updates::POLAR;
-    Var.CurrDiagram = diagram::POLAR;
-  }
-  return;
-}
 
 double markov::GetNewTau(double &NewTau) {
   double Step = 1.0;
