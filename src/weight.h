@@ -18,7 +18,6 @@ using namespace std;
 struct variable {
   int CurrOrder;
   long int CurrVersion;
-  diagram CurrDiagram;
 
   int CurrExtMomBin; // current bin of the external momentum
   double CurrTau;    // current external tau
@@ -45,7 +44,7 @@ public:
 
   void Initialization();
 
-  double Evaluate(int LoopNum, diagram Diagram);
+  double Evaluate(int LoopNum);
 
   void MeasureUST();
 

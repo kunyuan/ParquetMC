@@ -8,6 +8,10 @@
 #include <string>
 #include <vector>
 
+enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
+enum diagram { SIGMA, POLAR, GAMMA };
+enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
+
 // turn off all assert
 // const bool DEBUGMODE = true;
 const bool DEBUGMODE = false;
@@ -17,8 +21,10 @@ const bool DEBUGMODE = false;
 ///////////  Global Constants ////////////////////
 // D=2 or D=3
 const int D = 3;
+// type of diagram
+const diagram DiagType = SIGMA;
 // number of q bins of the external momentum
-const int ExtMomBinSize = 1;
+const int ExtMomBinSize = 64;
 // number of bins for the angle between InL and InR legs
 const int AngBinSize = 64;
 // number of energy scales, only useful in RG approach
@@ -28,10 +34,6 @@ const int SigmaMomBinSize = 128;
 const int SigmaTauBinSize = 128;
 const int TauBasisNum = 32;
 const int SPIN = 2;
-
-enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
-enum diagram { SIGMA, POLAR, GAMMA };
-enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 
 typedef Vec<double, D> momentum;
 // typedef std::array<double, D> momentum;
@@ -51,7 +53,6 @@ struct parameter {
   // MC inputs
   int Order;
   type Type;
-  diagram DiagType;
   bool UseVer4;                       // use vertex4 to calculate weight or not
   int TotalStep;                      // total steps of the Monte Carlo
   int Seed;                           // rng seed

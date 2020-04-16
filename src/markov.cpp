@@ -68,14 +68,12 @@ markov::markov() : Var(Weight.Var) {
   // Var.CurrGroup = &Groups[0];
   Var.CurrOrder = 0;
 
-  Var.CurrDiagram = GAMMA;
-
   // initialize RG staff
   // Var.CurrScale = ScaleBinSize - 1;
 
   LOG_INFO("Calculating the weights of all objects...")
 
-  Var.CurrAbsWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrDiagram);
+  Var.CurrAbsWeight = Weight.Evaluate(Var.CurrOrder);
 
   LOG_INFO("Initializating variables done.")
 

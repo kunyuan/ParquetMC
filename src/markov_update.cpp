@@ -16,14 +16,21 @@ using namespace mc;
 using namespace diag;
 using namespace std;
 
-int markov::GetTauNum(int Order, diagram Diag) {
-  // if (Channel == dse::SIGMA)
-  //   return Order + 2;
-  // else
-  return Order + 1;
+int markov::GetTauNum(int Order) {
+  if (DiagType == GAMMA)
+    return Order + 1;
+  else if (DiagType == SIGMA)
+    return Order + 1;
 }
 
-int markov::GetLoopNum(int Order) { return Order + 4; }
+int markov::GetLoopNum(int Order) {
+  if (DiagType == GAMMA)
+    return Order + 4;
+  else if (DiagType == SIGMA)
+    return Order + 2;
+  // else if (DiagType == POLAR)
+  //   return Order + 2;
+}
 
 void markov::ChangeOrder() {
   Updates Name;
@@ -40,15 +47,11 @@ void markov::ChangeOrder() {
     double NewTau;
     // Generate New Tau
     Prop = GetNewTau(NewTau);
-    int NewTauIndex = GetTauNum(Var.CurrOrder, Var.CurrDiagram);
+    int NewTauIndex = GetTauNum(Var.CurrOrder);
     Var.Tau[NewTauIndex] = NewTau;
     // Generate New Mom
     Prop *= GetNewK(NewMom);
     Var.LoopMom[GetLoopNum(Var.CurrOrder)] = NewMom;
-
-    // if the current order is zero, then set channel of order 1 at T
-    if (Var.CurrOrder == 0)
-      Var.CurrDiagram = GAMMA;
 
   } else {
     // decrese order
@@ -56,14 +59,14 @@ void markov::ChangeOrder() {
       return;
 
     // if the current order is one, then decrease order is possible only for T
-    if (Var.CurrOrder == 1 && Var.CurrDiagram != GAMMA)
+    if (Var.CurrOrder == 1 && DiagType != GAMMA)
       return;
 
     Name = DECREASE_ORDER;
     NewOrder = Var.CurrOrder - 1;
 
     // Remove OldTau
-    int TauToRemove = GetTauNum(Var.CurrOrder, Var.CurrDiagram) - 1;
+    int TauToRemove = GetTauNum(Var.CurrOrder) - 1;
     Prop = RemoveOldTau(Var.Tau[TauToRemove]);
     // Remove OldMom
     int LoopToRemove = GetLoopNum(Var.CurrOrder) - 1;
@@ -72,7 +75,7 @@ void markov::ChangeOrder() {
   Proposed[Name][Var.CurrOrder] += 1;
 
   // Weight.ChangeGroup(NewGroup);
-  NewAbsWeight = Weight.Evaluate(NewOrder, Var.CurrDiagram);
+  NewAbsWeight = Weight.Evaluate(NewOrder);
   double R = Prop * NewAbsWeight * Para.ReWeight[NewOrder] / Var.CurrAbsWeight /
              Para.ReWeight[Var.CurrOrder];
 
@@ -93,7 +96,7 @@ void markov::ChangeOrder() {
 };
 
 void markov::ChangeTau() {
-  int TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder, Var.CurrDiagram) - 1);
+  int TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder) - 1);
 
   Proposed[CHANGE_TAU][Var.CurrOrder]++;
 
@@ -103,7 +106,7 @@ void markov::ChangeTau() {
 
   Var.Tau[TauIndex] = NewTau;
 
-  NewAbsWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrDiagram);
+  NewAbsWeight = Weight.Evaluate(Var.CurrOrder);
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
@@ -120,10 +123,11 @@ void markov::ChangeTau() {
 void markov::ChangeMomentum() {
   int LoopIndex = Random.irn(0, GetLoopNum(Var.CurrOrder) - 1);
   double Prop;
-  int NewExtMomBin;
+  int CurrExtMomBin;
   static momentum CurrMom;
 
-  if (Var.CurrDiagram == GAMMA) {
+  switch (DiagType) {
+  case GAMMA:
     // the INL, OUTL, OUTR momentum are fixed
     if (LoopIndex == INL || LoopIndex == OUTL || LoopIndex == OUTR)
       return;
@@ -137,14 +141,27 @@ void markov::ChangeMomentum() {
     } else {
       Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
     }
-  } else if (Var.CurrDiagram == SIGMA) {
-    if (LoopIndex == INR || LoopIndex == OUTL || LoopIndex == OUTR)
-      return;
+    break;
+  case SIGMA:
+    CurrMom = Var.LoopMom[LoopIndex];
+
+    if (LoopIndex == 0) {
+      // In Momentum
+      CurrExtMomBin = Var.CurrExtMomBin;
+      Prop = ShiftExtTransferK(CurrExtMomBin, Var.CurrExtMomBin);
+      Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
+    } else {
+      Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
+    }
+    break;
+
+  case POLAR:
+    break;
   }
 
   Proposed[CHANGE_MOM][Var.CurrOrder]++;
 
-  NewAbsWeight = Weight.Evaluate(Var.CurrOrder, Var.CurrDiagram);
+  NewAbsWeight = Weight.Evaluate(Var.CurrOrder);
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {

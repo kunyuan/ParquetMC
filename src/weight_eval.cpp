@@ -14,8 +14,8 @@ using namespace diag;
 using namespace std;
 using namespace dse;
 
-double weight::Evaluate(int LoopNum, diagram Diagram) {
-  switch (Diagram) {
+double weight::Evaluate(int LoopNum) {
+  switch (DiagType) {
   case diagram::GAMMA:
     return EvaluateGamma(LoopNum);
     break;

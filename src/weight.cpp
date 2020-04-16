@@ -17,7 +17,7 @@ using namespace dse;
 void weight::Initialization() {
   array<momentum *, 4> ExtLegK;
 
-  if (Para.DiagType == GAMMA) {
+  if (DiagType == GAMMA) {
     ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1], &Var.LoopMom[2],
                &Var.LoopMom[3]};
 
@@ -42,7 +42,7 @@ void weight::Initialization() {
                            Ver4Root[order].T.size()));
     }
 
-  } else if (Para.DiagType == SIGMA) {
+  } else if (DiagType == SIGMA) {
     /////////////////////////// Sigma /////////////////////////
     for (int order = 1; order <= Para.Order; order++) {
       Sigma[order] = BuildSigma(order + 1, &Var.LoopMom[0], &Var.LoopMom[1]);
@@ -51,7 +51,7 @@ void weight::Initialization() {
         LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
       }
     }
-  } else if (Para.DiagType == POLAR) {
+  } else if (DiagType == POLAR) {
 
     /////////////////////////// Polar /////////////////////////
     ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1], &Var.LoopMom[2],
@@ -72,8 +72,7 @@ void weight::MeasureUST() {
     // if (Root.Weight.size() != 0) {
     Vertex4(Root, true);
   }
-  double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder] *
-                         Para.ReWeightDiag[Var.CurrDiagram]);
+  double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
   VerQTheta.Measure(Var.LoopMom[INL], Var.LoopMom[INR], Var.CurrExtMomBin,
                     Var.CurrOrder, ChanWeight, Factor);
 }
@@ -102,7 +101,7 @@ void weight::Benchmark(int LoopNum, diagram Diagram, int Step) {
   timer Timer;
   Timer.start();
   for (int i = 0; i < Step; i++)
-    Evaluate(LoopNum, Diagram);
+    Evaluate(LoopNum);
   LOG_INFO(Timer << "s per " << Step << " step for LoopNum " << LoopNum
                  << " Diagram " << Diagram);
   return;

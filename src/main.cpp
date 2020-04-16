@@ -43,7 +43,6 @@ void InitPara() {
 
   // Para.Type = BARE;
   Para.Type = VARIATIONAL;
-  Para.DiagType = SIGMA;
 
   // Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
   Para.ReWeight = {20.0, 0.8, 0.4, 0.2, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
@@ -76,12 +75,12 @@ void InitPara() {
   // initialize external momentum
   for (int i = 0; i < ExtMomBinSize; i++) {
     // the external momentum only has x component
-    // Para.ExtMomTable[i][0] = i * Para.MaxExtMom / ExtMomBinSize;
+    Para.ExtMomTable[i][0] = i * Para.MaxExtMom / ExtMomBinSize;
     for (int j = 0; j < D; j++)
       Para.ExtMomTable[i][j] = 0.0;
   }
-  Para.ExtMomTable[0][0] = 0.0;
-  Para.ExtMomTable[1][0] = 2. * Para.Kf;
+  // Para.ExtMomTable[0][0] = 0.0;
+  // Para.ExtMomTable[1][0] = 2. * Para.Kf;
 
   LOG_INFO("Inverse Temperature: " << Para.Beta << "\n"
                                    << "r_s: " << Para.Rs << "\n"
