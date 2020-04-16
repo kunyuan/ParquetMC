@@ -26,10 +26,9 @@ public:
   // MC updates
   void ChangeTau();
   void ChangeMomentum();
+  void ChangeExtMomentum();
   void ChangeOrder();
-  void ChangeVerOrder();
   void ChangeScale();
-  void ChangeChannel();
 
   void Measure();
   void ClearStatis();
@@ -48,6 +47,7 @@ private:
 
   int GetTauNum(int Order);
   int GetLoopNum(int Order);
+  int GetInterLoopIdx(int Order);
 
   // MC updates
 
