@@ -24,10 +24,11 @@ int markov::GetTauNum(int Order) {
 }
 
 int markov::GetLoopNum(int Order) {
-  if (DiagType == GAMMA)
-    return Order + 4;
-  else if (DiagType == SIGMA)
-    return Order + 2;
+  return Order + GetInterLoopIdx();
+  // if (DiagType == GAMMA)
+  //   return Order + 4;
+  // else if (DiagType == SIGMA)
+  //   return Order + 2;
   // else if (DiagType == POLAR)
   //   return Order + 2;
 }
@@ -67,9 +68,8 @@ void markov::ChangeOrder() {
     if (Var.CurrOrder == 0)
       return;
 
-    // if the current order is one, then decrease order is possible only for T
-    if (Var.CurrOrder == 1 && DiagType != GAMMA)
-      return;
+    // if (Var.CurrOrder == 1 && DiagType != GAMMA)
+    //   return;
 
     Name = DECREASE_ORDER;
     NewOrder = Var.CurrOrder - 1;
@@ -130,7 +130,7 @@ void markov::ChangeTau() {
 };
 
 void markov::ChangeMomentum() {
-  int LoopIndex = Random.irn(GetInterLoopIdx(), Var.CurrOrder - 1);
+  int LoopIndex = Random.irn(GetInterLoopIdx(), GetLoopNum(Var.CurrOrder) - 1);
   double Prop;
   int CurrExtMomBin;
   static momentum CurrMom;
