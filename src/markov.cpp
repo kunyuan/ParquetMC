@@ -83,6 +83,7 @@ markov::markov() : Var(Weight.Var) {
   UpdatesName[DECREASE_ORDER] = NAME(DECREASE_ORDER);
   UpdatesName[CHANGE_GROUP] = NAME(CHANGE_GROUP);
   UpdatesName[CHANGE_MOM] = NAME(CHANGE_MOM);
+  UpdatesName[CHANGE_EXTMOM] = NAME(CHANGE_EXTMOM);
   UpdatesName[CHANGE_TAU] = NAME(CHANGE_TAU);
   UpdatesName[CHANGE_SCALE] = NAME(CHANGE_SCALE);
 

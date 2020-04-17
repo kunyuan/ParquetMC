@@ -10,7 +10,7 @@
 
 namespace mc {
 using namespace std;
-const int MCUpdates = 6;
+const int MCUpdates = 7;
 
 typedef array<double, ExtMomBinSize> polar;
 
@@ -47,7 +47,7 @@ private:
 
   int GetTauNum(int Order);
   int GetLoopNum(int Order);
-  int GetInterLoopIdx(int Order);
+  int GetInterLoopIdx();
 
   // MC updates
 
@@ -72,6 +72,7 @@ private:
     CHANGE_GROUP,
     CHANGE_TAU,
     CHANGE_MOM,
+    CHANGE_EXTMOM,
     CHANGE_SCALE,
     END
   };

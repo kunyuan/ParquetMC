@@ -32,7 +32,7 @@ int markov::GetLoopNum(int Order) {
   //   return Order + 2;
 }
 
-int markov::GetInterLoopIdx(int Order) {
+int markov::GetInterLoopIdx() {
   if (DiagType == GAMMA)
     return 4;
   else if (DiagType == SIGMA)
@@ -130,43 +130,12 @@ void markov::ChangeTau() {
 };
 
 void markov::ChangeMomentum() {
-  int LoopIndex = Random.irn(0, GetLoopNum(Var.CurrOrder) - 1);
+  int LoopIndex = Random.irn(GetInterLoopIdx(), Var.CurrOrder - 1);
   double Prop;
   int CurrExtMomBin;
   static momentum CurrMom;
 
-  switch (DiagType) {
-  case GAMMA:
-    // the INL, OUTL, OUTR momentum are fixed
-    if (LoopIndex == INL || LoopIndex == OUTL || LoopIndex == OUTR)
-      return;
-
-    CurrMom = Var.LoopMom[LoopIndex];
-
-    if (LoopIndex == INR) {
-      // InR momentum
-      Prop = ShiftExtLegK(CurrMom, Var.LoopMom[INR]);
-      Var.LoopMom[OUTR] = Var.LoopMom[INR];
-    } else {
-      Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
-    }
-    break;
-  case SIGMA:
-    CurrMom = Var.LoopMom[LoopIndex];
-
-    if (LoopIndex == 0) {
-      // In Momentum
-      CurrExtMomBin = Var.CurrExtMomBin;
-      Prop = ShiftExtTransferK(CurrExtMomBin, Var.CurrExtMomBin);
-      Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
-    } else {
-      Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
-    }
-    break;
-
-  case POLAR:
-    break;
-  }
+  Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
 
   Proposed[CHANGE_MOM][Var.CurrOrder]++;
 
@@ -179,63 +148,45 @@ void markov::ChangeMomentum() {
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.LoopMom[LoopIndex] = CurrMom;
-    if (LoopIndex == INR)
-      Var.LoopMom[OUTR] = CurrMom;
   }
 };
 
 void markov::ChangeExtMomentum() {
-  int LoopIndex = Random.irn(0, GetLoopNum(Var.CurrOrder) - 1);
   double Prop;
   int CurrExtMomBin;
   static momentum CurrMom;
 
-  switch (DiagType) {
-  case GAMMA:
+  if (DiagType == GAMMA) {
     // the INL, OUTL, OUTR momentum are fixed
-    if (LoopIndex == INL || LoopIndex == OUTL || LoopIndex == OUTR)
-      return;
-
-    CurrMom = Var.LoopMom[LoopIndex];
-
-    if (LoopIndex == INR) {
-      // InR momentum
-      Prop = ShiftExtLegK(CurrMom, Var.LoopMom[INR]);
-      Var.LoopMom[OUTR] = Var.LoopMom[INR];
-    } else {
-      Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
-    }
-    break;
-  case SIGMA:
-    CurrMom = Var.LoopMom[LoopIndex];
-
-    if (LoopIndex == 0) {
-      // In Momentum
-      CurrExtMomBin = Var.CurrExtMomBin;
-      Prop = ShiftExtTransferK(CurrExtMomBin, Var.CurrExtMomBin);
-      Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
-    } else {
-      Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
-    }
-    break;
-
-  case POLAR:
-    break;
+    CurrMom = Var.LoopMom[INR];
+    Prop = ShiftExtLegK(CurrMom, Var.LoopMom[INR]);
+    Var.LoopMom[OUTR] = Var.LoopMom[INR];
+  } else if (DiagType == SIGMA) {
+    // LoopIndex must be 0
+    CurrMom = Var.LoopMom[0];
+    // In Momentum
+    CurrExtMomBin = Var.CurrExtMomBin;
+    Prop = ShiftExtTransferK(CurrExtMomBin, Var.CurrExtMomBin);
+    Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
   }
 
-  Proposed[CHANGE_MOM][Var.CurrOrder]++;
+  Proposed[CHANGE_EXTMOM][Var.CurrOrder]++;
 
   NewAbsWeight = Weight.Evaluate(Var.CurrOrder);
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
-    Accepted[CHANGE_MOM][Var.CurrOrder]++;
+    Accepted[CHANGE_EXTMOM][Var.CurrOrder]++;
     Var.CurrVersion++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
-    Var.LoopMom[LoopIndex] = CurrMom;
-    if (LoopIndex == INR)
+    if (DiagType == GAMMA) {
+      Var.LoopMom[INR] = CurrMom;
       Var.LoopMom[OUTR] = CurrMom;
+    } else if (DiagType == SIGMA) {
+      Var.CurrExtMomBin = CurrExtMomBin;
+      Var.LoopMom[0] = CurrMom;
+    }
   }
 };
 
