@@ -38,6 +38,8 @@ int markov::GetInterLoopIdx() {
     return 4;
   else if (DiagType == SIGMA)
     return 1;
+  else if (DiagType == POLAR)
+    return 1;
   // else if (DiagType == POLAR)
   //   return Order + 2;
 }
@@ -161,7 +163,7 @@ void markov::ChangeExtMomentum() {
     CurrMom = Var.LoopMom[INR];
     Prop = ShiftExtLegK(CurrMom, Var.LoopMom[INR]);
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
-  } else if (DiagType == SIGMA) {
+  } else if (DiagType == SIGMA || DiagType == POLAR) {
     // LoopIndex must be 0
     CurrMom = Var.LoopMom[0];
     // In Momentum
