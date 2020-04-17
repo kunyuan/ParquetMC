@@ -29,6 +29,11 @@ sigData::~sigData() { delete[] _Estimator; }
 
 void sigData::Measure(int Order, const momentum &K, const vector<int> Tidx,
                       const vector<double> Weight, double Factor) {
+
+  if (Order == 0) {
+    Normalization += 1.0 * Factor;
+    return;
+  }
   int Size = Weight.size();
   ASSERT_ALLWAYS(Order == 0 && Size == 1, "Order 0 only has Size=1");
   int KIdx = int(K.norm() / Para.MaxExtMom * KNum);
