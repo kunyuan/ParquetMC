@@ -10,7 +10,7 @@
 using namespace dse;
 using namespace std;
 
-dse::polar dse::BuildPolar(int LoopNum, array<momentum *, 4> ExtLegK) {
+dse::polar dse::BuildPolar(int LoopNum, momentum *KInL, momentum *KInR) {
   dse::polar Polar;
   Polar.LoopNum = LoopNum;
   Polar.TauNum = LoopNum + 1;
@@ -19,11 +19,13 @@ dse::polar dse::BuildPolar(int LoopNum, array<momentum *, 4> ExtLegK) {
   // vector<channel> Chan = {T, TC};
   // vector<channel> Chan = {U, UC};
   verDiag Factory;
-  Polar.Vertex = Factory.Vertex(0,           // level
-                                LoopNum - 2, // loopNum
-                                4, // loop index of the first internal K
-                                2, // tau index of the InTL leg
-                                Chan, RIGHT, false);
+  Polar.Vertex =
+      Factory.Vertex(0,           // level
+                     LoopNum - 2, // loopNum
+                     3, // loop index of the first internal K of the vertex
+                     2, // tau index of the InTL leg
+                     Chan, RIGHT, false);
+  array<momentum *, 4> ExtLegK = {KInL, &Polar.KOutL, KInR, &Polar.KOutR};
   Factory.ResetMomMap(Polar.Vertex, ExtLegK);
   for (auto &t : Polar.Vertex.T) {
     int inL = AddToGList(Polar.G[INL], {0, t[INL]});

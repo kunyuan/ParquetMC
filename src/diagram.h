@@ -18,6 +18,7 @@ struct polar {
   int LoopNum;
   int OutT;
   ver4 Vertex;
+  momentum KOutL, KOutR;
   array<vector<green>, 4> G;
   vector<array<int, 4>> Gidx; // external T list
   // there is only one Tau: from 0 to 1
@@ -41,7 +42,7 @@ struct sigma {
   vector<int> SigTidx;
 };
 
-polar BuildPolar(int LoopNum, array<momentum *, 4> ExtLegK);
+polar BuildPolar(int LoopNum, momentum *InL, momentum *InR);
 sigma BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK);
 
 } // namespace dse

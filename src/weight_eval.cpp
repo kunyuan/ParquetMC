@@ -51,14 +51,23 @@ double weight::EvaluateGamma(int LoopNum) {
 }
 
 double weight::EvaluatePolar(int LoopNum) {
+
+  // normalization
+  if (LoopNum == 0)
+    return 1.0;
+
   dse::polar &P = Polar[LoopNum];
   ver4 &Root = P.Vertex;
   if (Root.Weight.size() != 0) {
+    P.KOutL = Var.LoopMom[1] + Var.LoopMom[0];
+    P.KOutR = Var.LoopMom[2] - Var.LoopMom[0];
     Vertex4(Root, false);
 
     // evaluate all possible G
-    for (int i = 0; i < 4; ++i)
-      EvaluateG(P.G[i], Var.LoopMom[i]);
+    EvaluateG(P.G[INL], Var.LoopMom[1]);
+    EvaluateG(P.G[OUTL], P.KOutL);
+    EvaluateG(P.G[INR], Var.LoopMom[2]);
+    EvaluateG(P.G[OUTR], P.KOutR);
 
     int Size = Root.Weight.size();
     P.Weight.SetZero();
@@ -79,6 +88,10 @@ double weight::EvaluatePolar(int LoopNum) {
 }
 
 double weight::EvaluateSigma(int LoopNum, bool IsFast) {
+  // normalization
+  if (LoopNum == 0)
+    return 1.0;
+
   dse::sigma &Si = Sigma[LoopNum];
   ver4 &Root = Si.Vertex;
   if (Root.Weight.size() != 0) {
@@ -187,7 +200,8 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
   // cout << "LegK1: " << (*Ver4.LegK[1]).norm() << endl;
   // cout << "LegK2: " << (*Ver4.LegK[2]).norm() << endl;
   // cout << "LegK3: " << (*Ver4.LegK[3]).norm() << endl;
-  // cout << Ver4.LegK[0] << ", " << Ver4.LegK[1] << ", " << Ver4.LegK[2] << ",
+  // cout << Ver4.LegK[0] << ", " << Ver4.LegK[1] << ", " << Ver4.LegK[2] <<
+  // ",
   // "
   //      << Ver4.LegK[3] << endl;
   // cout << "K0: " << Ver4.K[0].norm() << ", " << &Ver4.K[0] << endl;
