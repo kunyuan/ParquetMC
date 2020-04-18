@@ -122,6 +122,7 @@ public:
   verQTheta();
   weightMatrix Interaction(const array<momentum *, 4> &LegK, double Tau,
                            bool IsRenorm, bool Boxed);
+  double Interaction(const momentum &TranQ);
 
   void Measure(const momentum &InL, const momentum &InR, const int QIndex,
                int Order, const array<ver::weightMatrix, 4> &Weight,

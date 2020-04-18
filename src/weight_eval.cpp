@@ -89,9 +89,16 @@ double weight::EvaluatePolar(int LoopNum) {
 
 double weight::EvaluateSigma(int LoopNum, bool IsFast) {
   // normalization
-  if (LoopNum == 0)
+  if (LoopNum == 0) {
     return 1.0;
+  } else if (LoopNum == 1) {
+    double GWeight =
+        Fermi.Green(-EPS, Var.LoopMom[0] + Var.LoopMom[1], UP, 0, 0);
+    double VerWeight = -VerQTheta.Interaction(Var.LoopMom[1]);
+    return GWeight * VerWeight;
+  }
 
+  // Sigma with LoopNum>=2
   dse::sigma &Si = Sigma[LoopNum];
   ver4 &Root = Si.Vertex;
   if (Root.Weight.size() != 0) {

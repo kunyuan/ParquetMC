@@ -9,13 +9,13 @@ public:
   sigData(array<double, MaxTauNum> &TauTable);
   ~sigData();
   void Initialization();
-  void Measure(int Order, const momentum &K, const vector<int> Tidx,
+  void Measure0(double Factor);                          // all tau variables
+  void Measure1(int Kidx, double Weight, double Factor); // all tau variables
+  void Measure(int Order, int Kidx, const vector<int> Tidx,
                const vector<double> Weight, double Factor); // all tau variables
   void Save();
 
 private:
-  const int TauNum = 128;
-  const int KNum = 128;
   array<double, MaxTauNum> &Tau;
   double Normalization;
   double *_Estimator;

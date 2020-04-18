@@ -44,7 +44,7 @@ void weight::Initialization() {
 
   } else if (DiagType == SIGMA) {
     /////////////////////////// Sigma /////////////////////////
-    for (int order = 1; order <= Para.Order; order++) {
+    for (int order = 2; order <= Para.Order; order++) {
       Sigma[order] = BuildSigma(order + 1, &Var.LoopMom[0], &Var.LoopMom[1]);
       if (order < 4) {
         LOG_INFO(fmt::format(" Sigma, Order {0}\n", order));
@@ -53,7 +53,7 @@ void weight::Initialization() {
     }
   } else if (DiagType == POLAR) {
     /////////////////////////// Polar /////////////////////////
-    for (int order = 1; order <= Para.Order; order++) {
+    for (int order = 2; order <= Para.Order; order++) {
       Polar[order] = BuildPolar(order, &Var.LoopMom[1], &Var.LoopMom[2]);
       // if (order < 4) {
       //   LOG_INFO(fmt::format(" Polar, Order {0}\n", order));
@@ -73,6 +73,22 @@ void weight::MeasureUST() {
   VerQTheta.Measure(Var.LoopMom[INL], Var.LoopMom[INR], Var.CurrExtMomBin,
                     Var.CurrOrder, ChanWeight, Factor);
 }
+
+void weight::MeasureSigma() {
+  double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
+  if (Var.CurrOrder == 0)
+    SigData.Measure0(Factor);
+  else if (Var.CurrOrder == 1) {
+    double Weight = EvaluateSigma(1, false);
+    SigData.Measure1(Var.CurrExtMomBin, Weight, Factor);
+  } else {
+    EvaluateSigma(Var.CurrOrder, false);
+    sigma &Root = Sigma[Var.CurrOrder];
+    SigData.Measure(Var.CurrOrder, Var.CurrExtMomBin, Root.T, Root.Weight,
+                    Factor);
+  }
+}
+void weight::MeasurePolar() {}
 
 void weight::Ver0(ver4 &Ver4) {
   // only bare coupling

@@ -121,9 +121,9 @@ public:
   void ResetMomMap(ver4 &Ver4, const array<momentum *, 4> &LegK);
   // the LegK pointers of Ver4 must be reset after all memory allocation is
   // done.
+  void Ver0(ver4 &Ver4);
 
 private:
-  void Ver0(ver4 &Ver4);
   void ChanI(ver4 &Ver4, const vector<channel> &Channel);
   void ChanUST(ver4 &Ver4, const vector<channel> &Channel);
 };

@@ -99,7 +99,14 @@ markov::markov() : Var(Weight.Var) {
   AdjustGroupReWeight();
 };
 
-void markov::Measure() { Weight.MeasureUST(); };
+void markov::Measure() {
+  if (DiagType == GAMMA)
+    Weight.MeasureUST();
+  else if (DiagType == SIGMA)
+    Weight.MeasureSigma();
+  else if (DiagType == POLAR)
+    Weight.MeasurePolar();
+};
 
 void markov::AdjustGroupReWeight(){};
 

@@ -101,6 +101,11 @@ weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
   return Weight;
 }
 
+double verQTheta::Interaction(const momentum &TranQ) {
+  double kQ = TranQ.norm();
+  return -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+}
+
 void verQTheta::Measure(const momentum &InL, const momentum &InR,
                         const int QIndex, int Order,
                         const array<ver::weightMatrix, 4> &Weight,

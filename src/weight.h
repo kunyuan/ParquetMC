@@ -3,6 +3,7 @@
 
 #include "diagram.h"
 #include "dse.h"
+#include "observable.h"
 #include "utility/rng.h"
 #include "utility/utility.h"
 #include "vertex.h"
@@ -32,11 +33,13 @@ struct variable {
 
 class weight {
 public:
+  weight() : SigData(Var.Tau) {}
   variable Var; // The variable of the integral
   array<ver::weightMatrix, 4> ChanWeight;
 
   ver::fermi Fermi;         // propagator factory
   ver::verQTheta VerQTheta; // vertex factory
+  ver::sigData SigData;
 
   dse::ver4 Ver4Root[MaxOrder];
   dse::sigma Sigma[MaxOrder];
@@ -47,6 +50,8 @@ public:
   double Evaluate(int LoopNum);
 
   void MeasureUST();
+  void MeasureSigma();
+  void MeasurePolar();
 
   // void EvaluateChanVer4(int LoopNum, array<ver::weightMatrix, 4> ChanWeight);
 
