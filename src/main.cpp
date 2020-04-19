@@ -122,6 +122,7 @@ void MonteCarlo() {
 
     for (int i = 0; i < 1000000; i++) {
       Para.Counter++;
+      // cout << Para.Counter << endl;
       // if (Para.Counter == 140737351830544) {
       //   cout << "Before: " << Para.Counter << endl;
       //   Markov.PrintDeBugMCInfo();

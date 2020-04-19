@@ -72,3 +72,5 @@ void sigData::Save() {
     }
   }
 }
+
+void sigData::LoadWeight() {}

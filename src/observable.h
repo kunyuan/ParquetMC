@@ -14,6 +14,7 @@ public:
   void Measure(int Order, int Kidx, const vector<int> Tidx,
                const vector<double> Weight, double Factor); // all tau variables
   void Save();
+  void LoadWeight();
 
 private:
   array<double, MaxTauNum> &Tau;

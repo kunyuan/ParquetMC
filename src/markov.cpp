@@ -110,9 +110,21 @@ void markov::Measure() {
 
 void markov::AdjustGroupReWeight(){};
 
-void markov::LoadFile() { Weight.VerQTheta.LoadWeight(); };
+void markov::LoadFile() {
+  if (DiagType == GAMMA)
+    Weight.VerQTheta.LoadWeight();
+  else if (DiagType == SIGMA)
+    Weight.SigData.LoadWeight();
+};
 
-void markov::SaveToFile(bool Simple) { Weight.VerQTheta.Save(Simple); };
+void markov::SaveToFile(bool Simple) {
+  if (DiagType == GAMMA)
+    Weight.VerQTheta.Save(Simple);
+  else if (DiagType == SIGMA)
+    Weight.SigData.Save();
+  // else if(DiagType==POLAR)
+  //   Weight.Polar
+};
 
 void markov::ClearStatis() { Weight.VerQTheta.ClearStatis(); }
 

@@ -87,6 +87,7 @@ void markov::ChangeOrder() {
 
   // Weight.ChangeGroup(NewGroup);
   NewAbsWeight = Weight.Evaluate(NewOrder);
+  // cout << NewAbsWeight << endl;
   double R = Prop * NewAbsWeight * Para.ReWeight[NewOrder] / Var.CurrAbsWeight /
              Para.ReWeight[Var.CurrOrder];
 
@@ -132,6 +133,8 @@ void markov::ChangeTau() {
 };
 
 void markov::ChangeMomentum() {
+  if (Var.CurrOrder == 0)
+    return;
   int LoopIndex = Random.irn(GetInterLoopIdx(), GetLoopNum(Var.CurrOrder) - 1);
   double Prop;
   int CurrExtMomBin;
