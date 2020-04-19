@@ -58,37 +58,35 @@ double weight::EvaluatePolar(int LoopNum) {
 
   dse::polar &P = Polar[LoopNum];
   ver4 &Root = P.Vertex;
-  if (Root.Weight.size() != 0) {
-    P.KOutL = Var.LoopMom[1] + Var.LoopMom[0];
-    P.KOutR = Var.LoopMom[2] - Var.LoopMom[0];
-    Vertex4(Root, false);
+  P.KOutL = Var.LoopMom[1] + Var.LoopMom[0];
+  P.KOutR = Var.LoopMom[2] - Var.LoopMom[0];
+  Vertex4(Root, false);
 
-    // evaluate all possible G
-    EvaluateG(P.G[INL], Var.LoopMom[1]);
-    EvaluateG(P.G[OUTL], P.KOutL);
-    EvaluateG(P.G[INR], Var.LoopMom[2]);
-    EvaluateG(P.G[OUTR], P.KOutR);
+  // evaluate all possible G
+  EvaluateG(P.G[INL], Var.LoopMom[1]);
+  EvaluateG(P.G[OUTL], P.KOutL);
+  EvaluateG(P.G[INR], Var.LoopMom[2]);
+  EvaluateG(P.G[OUTR], P.KOutR);
 
-    int Size = Root.Weight.size();
-    P.Weight.SetZero();
-    for (int i = 0; i < Size; ++i) {
-      auto &Gidx = P.Gidx[i];
-      auto &Weight = Root.Weight[i];
+  int Size = Root.Weight.size();
+  P.Weight.SetZero();
+  for (int i = 0; i < Size; ++i) {
+    auto &Gidx = P.Gidx[i];
+    auto &Weight = Root.Weight[i];
 
-      // attach four G
-      for (int j = 0; j < 4; ++j)
-        Weight *= P.G[j][Gidx[j]].Weight;
+    // attach four G
+    for (int j = 0; j < 4; ++j)
+      Weight *= P.G[j][Gidx[j]].Weight;
 
-      P.Weight += Weight;
-    }
+    P.Weight += Weight;
+  }
 
-    return P.Weight.Abs();
-  } else
-    return 0.0;
+  return P.Weight.Abs();
 }
 
 double weight::EvaluateSigma(int LoopNum, bool IsFast) {
   // normalization
+  double Factor = 1.0 / pow(2.0 * PI, D);
   if (LoopNum == 0) {
     return 1.0;
   } else if (LoopNum == 1) {
@@ -96,27 +94,39 @@ double weight::EvaluateSigma(int LoopNum, bool IsFast) {
         Fermi.Green(-EPS, Var.LoopMom[0] + Var.LoopMom[1], UP, 0, 0);
     double VerWeight = VerQTheta.Interaction(Var.LoopMom[1]);
     // cout << GWeight << ", " << VerWeight << endl;
-    return GWeight * VerWeight;
-  }
-
-  // Sigma with LoopNum>=2
-  dse::sigma &Si = Sigma[LoopNum];
-  ver4 &Root = Si.Vertex;
-  if (Root.Weight.size() != 0) {
+    return GWeight * VerWeight * Factor;
+  } else {
+    // Sigma with LoopNum>=2
+    dse::sigma &Si = Sigma[LoopNum];
+    ver4 &Root = Si.Vertex;
     Vertex4(Root, false);
     EvaluateG(Si.G, *Si.K);
     int Size = Root.Weight.size();
     for (int i = 0; i < Size; ++i) {
       int Gidx = Si.Gidx[i];
       auto &Weight = Root.Weight[i];
+      // cout << "G=" << Si.G[Gidx].Weight << endl;
+      // cout << "Root=" << Root.Weight[i][0] << endl;
+      // cout << "Root=" << Root.Weight[i][1] << endl;
+      double w = (Weight[DIR] + Weight[EX] * SPIN) * Si.G[Gidx].Weight * 0.5;
+
       if (IsFast)
-        Si.Weight[0] += Weight.Sum() * Si.G[Gidx].Weight;
+        Si.Weight[0] += w * Factor;
       else
-        Si.Weight[Si.T[i]] += Weight.Sum() * Si.G[Gidx].Weight;
+        Si.Weight[Si.T[i]] += w * Factor;
+      if (i == 0) {
+        cout << "G=" << Si.G[Gidx].Weight << endl;
+        cout << "T=" << Si.T[i] << ", "
+             << (Weight[DIR]) * Si.G[Gidx].Weight * Factor * 0.5 << ","
+             << (Weight[EX] * SPIN) * Si.G[Gidx].Weight * Factor * 0.5 << endl;
+        _TestTwoLoopSigma();
+        // if (Para.Counter > 1000)
+        exit(0);
+      }
     }
+    cout << Si.Weight[0] << endl;
     return Si.Weight[0];
-  } else
-    return 0.0;
+  }
 }
 
 void weight::Vertex4(ver4 &Ver4, bool IsFast) {

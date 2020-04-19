@@ -45,7 +45,7 @@ void weight::Initialization() {
   } else if (DiagType == SIGMA) {
     /////////////////////////// Sigma /////////////////////////
     for (int order = 2; order <= Para.Order; order++) {
-      Sigma[order] = BuildSigma(order + 1, &Var.LoopMom[0], &Var.LoopMom[1]);
+      Sigma[order] = BuildSigma(order, &Var.LoopMom[0], &Var.LoopMom[1]);
       if (order < 4) {
         LOG_INFO(fmt::format(" Sigma, Order {0}\n", order));
         LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
@@ -110,12 +110,12 @@ void weight::Ver0(ver4 &Ver4) {
   return;
 }
 
-void weight::Benchmark(int LoopNum, diagram Diagram, int Step) {
+void weight::Benchmark(int LoopNum, int Step) {
   timer Timer;
   Timer.start();
   for (int i = 0; i < Step; i++)
     Evaluate(LoopNum);
   LOG_INFO(Timer << "s per " << Step << " step for LoopNum " << LoopNum
-                 << " Diagram " << Diagram);
+                 << " Diagram " << DiagType);
   return;
 }

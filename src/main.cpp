@@ -171,7 +171,7 @@ void MonteCarlo() {
 
         // Markov.PrintDeBugMCInfo();
         if (PrinterTimer.check(Para.PrinterTimer)) {
-          Markov.Weight.Test(1, GAMMA);
+          // Markov.Weight.Test(1);
           Markov.DynamicTest();
           Markov.PrintDeBugMCInfo();
           Markov.PrintMCInfo();
@@ -216,9 +216,9 @@ void MonteCarlo() {
   Markov.SaveToFile(false);
   Interrupt.Resume(); // after this point, the process can be killed
 
-  for (int order = 1; order < Para.Order; ++order) {
-    Markov.Weight.Benchmark(order, GAMMA, 1000);
-  }
+  // for (int order = 1; order < Para.Order; ++order) {
+  //   Markov.Weight.Benchmark(order, 1000);
+  // }
 
   LOG_INFO("Quit Markov.");
 }

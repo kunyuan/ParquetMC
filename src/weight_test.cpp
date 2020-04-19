@@ -13,9 +13,11 @@ using namespace diag;
 using namespace std;
 using namespace dse;
 
-void weight::Test(int LoopNum, diagram Diagram) {
-  if (LoopNum == 1 && Diagram == GAMMA)
+void weight::Test(int LoopNum) {
+  if (DiagType == GAMMA && LoopNum == 1)
     _TestOneLoopGamma();
+  else if (DiagType == SIGMA && LoopNum == 2)
+    _TestTwoLoopSigma();
 }
 
 void weight::_TestOneLoopGamma() {
@@ -133,16 +135,35 @@ void weight::_TestOneLoopGamma() {
 }
 
 void weight::_TestTwoLoopGamma() {
-  momentum InL = Var.LoopMom[INL];
-  momentum OutL = Var.LoopMom[OUTL];
-  momentum InR = Var.LoopMom[INR];
-  momentum OutR = Var.LoopMom[OUTR];
-  momentum K0 = Var.LoopMom[4];
-  double Factor = 1.0 / pow(2.0 * PI, D);
-  double dTau, GWeight, GWeightInBox;
-  ver::weightMatrix TestWeight, Weight;
+  // momentum InL = Var.LoopMom[INL];
+  // momentum OutL = Var.LoopMom[OUTL];
+  // momentum InR = Var.LoopMom[INR];
+  // momentum OutR = Var.LoopMom[OUTR];
+  // momentum K0 = Var.LoopMom[4];
+  // double Factor = 1.0 / pow(2.0 * PI, D);
+  // double dTau, GWeight, GWeightInBox;
+  // ver::weightMatrix TestWeight, Weight;
 
-  return;
+  // return;
+}
+
+void weight::_TestTwoLoopSigma() {
+  double Factor = 1.0 / pow(2.0 * PI, D);
+  momentum &ExtK = Var.LoopMom[0];
+  momentum &K1 = Var.LoopMom[1];
+  momentum &K2 = Var.LoopMom[2];
+  double G1 = Fermi.Green(Var.Tau[1] - Var.Tau[0], K1, UP, 0);
+  double G2 = Fermi.Green(Var.Tau[1] - Var.Tau[0], K2, UP, 0);
+  double G3 = Fermi.Green(Var.Tau[0] - Var.Tau[1], K1 + K2 - ExtK, UP, 0);
+  double VerWeightDir = VerQTheta.Interaction(K1 - ExtK);
+  double VerWeightExLeft = VerQTheta.Interaction(K2 - ExtK);
+
+  double Weight1 =
+      -VerWeightDir * VerWeightDir * G1 * G2 * G3 * SPIN * Factor * Factor;
+  double Weight2 =
+      VerWeightDir * VerWeightExLeft * G1 * G2 * G3 * SPIN * Factor * Factor;
+  cout << "G_test=" << G1 << ", " << G2 << ", " << G3 << endl;
+  cout << "bubble=" << Weight1 << ", cross=" << Weight2 << endl;
 }
 
 ver::weightMatrix weight::_GetWeight(int LoopNum, vector<channel> Channel) {

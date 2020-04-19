@@ -56,8 +56,8 @@ public:
   // void EvaluateChanVer4(int LoopNum, array<ver::weightMatrix, 4> ChanWeight);
 
   // initialization, read diagrams, then initialize variables
-  void Benchmark(int LoopNum, diagram Diagram, int Step);
-  void Test(int LoopNum, diagram Diagram);
+  void Benchmark(int LoopNum, int Step);
+  void Test(int LoopNum);
 
 private:
   dse::verDiag VerDiag; // diagram factory
@@ -79,6 +79,7 @@ private:
 
   void _TestOneLoopGamma();
   void _TestTwoLoopGamma();
+  void _TestTwoLoopSigma();
   ver::weightMatrix _GetWeight(int LoopNum, vector<dse::channel> Channel);
 };
 
