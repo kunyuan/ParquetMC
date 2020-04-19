@@ -61,6 +61,16 @@ void sigData::Save() {
 
       VerFile << "# Norm: " << Normalization << endl;
 
+      VerFile << "# TauTable: ";
+      for (int t = 0; t < TauBinSize; ++t)
+        VerFile << Para.Beta * t / TauBinSize << " ";
+
+      VerFile << endl;
+      VerFile << "# ExtMomBinTable: ";
+      for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
+        VerFile << Para.ExtMomTable[qindex][0] << " ";
+      VerFile << endl;
+
       for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
         for (int tindex = 0; tindex < TauBinSize; ++tindex)
           VerFile << _Estimator[order * OrderIndex + qindex * KIndex + tindex] *

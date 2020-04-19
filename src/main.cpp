@@ -76,7 +76,7 @@ void InitPara() {
   for (int i = 0; i < ExtMomBinSize; i++) {
     // the external momentum only has x component
     Para.ExtMomTable[i][0] = i * Para.MaxExtMom / ExtMomBinSize;
-    for (int j = 0; j < D; j++)
+    for (int j = 1; j < D; j++)
       Para.ExtMomTable[i][j] = 0.0;
   }
   // Para.ExtMomTable[0][0] = 0.0;

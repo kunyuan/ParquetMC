@@ -20,7 +20,7 @@ double weight::Evaluate(int LoopNum) {
     return EvaluateGamma(LoopNum);
     break;
   case diagram::SIGMA:
-    return EvaluateSigma(LoopNum);
+    return fabs(EvaluateSigma(LoopNum));
     break;
   case diagram::POLAR:
     return EvaluatePolar(LoopNum);
@@ -94,7 +94,8 @@ double weight::EvaluateSigma(int LoopNum, bool IsFast) {
   } else if (LoopNum == 1) {
     double GWeight =
         Fermi.Green(-EPS, Var.LoopMom[0] + Var.LoopMom[1], UP, 0, 0);
-    double VerWeight = -VerQTheta.Interaction(Var.LoopMom[1]);
+    double VerWeight = VerQTheta.Interaction(Var.LoopMom[1]);
+    // cout << GWeight << ", " << VerWeight << endl;
     return GWeight * VerWeight;
   }
 

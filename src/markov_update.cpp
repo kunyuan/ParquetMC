@@ -20,7 +20,7 @@ int markov::GetTauNum(int Order) {
   if (DiagType == GAMMA)
     return Order + 1;
   else if (DiagType == SIGMA)
-    return Order + 1;
+    return Order;
 }
 
 int markov::GetLoopNum(int Order) {
@@ -81,16 +81,21 @@ void markov::ChangeOrder() {
     Prop = RemoveOldTau(Var.Tau[TauToRemove]);
     // Remove OldMom
     int LoopToRemove = GetLoopNum(Var.CurrOrder) - 1;
+    // cout << "LoopNum=" << LoopToRemove << endl;
+    // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << endl;
+    // cout << "norm= " << Var.LoopMom[1].norm() << endl;
+
     Prop *= RemoveOldK(Var.LoopMom[LoopToRemove]);
   }
   Proposed[Name][Var.CurrOrder] += 1;
 
   // Weight.ChangeGroup(NewGroup);
   NewAbsWeight = Weight.Evaluate(NewOrder);
-  // cout << NewAbsWeight << endl;
   double R = Prop * NewAbsWeight * Para.ReWeight[NewOrder] / Var.CurrAbsWeight /
              Para.ReWeight[Var.CurrOrder];
 
+  // cout << NewAbsWeight << ", R=" << R << ", Order=" << Var.CurrOrder << endl;
+  // cout << Prop << ", reweight=" << Para.ReWeight[NewOrder] << endl;
   // if (Name == INCREASE_ORDER) {
   //   cout << "time:" << Var.Tau[2] << ", " << Var.Tau[3] << endl;
   // cout << NewWeight << endl;
@@ -108,6 +113,10 @@ void markov::ChangeOrder() {
 };
 
 void markov::ChangeTau() {
+
+  if (GetTauNum(Var.CurrOrder) == 0)
+    return;
+
   int TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder) - 1);
 
   Proposed[CHANGE_TAU][Var.CurrOrder]++;
@@ -119,6 +128,7 @@ void markov::ChangeTau() {
   Var.Tau[TauIndex] = NewTau;
 
   NewAbsWeight = Weight.Evaluate(Var.CurrOrder);
+
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
@@ -135,11 +145,12 @@ void markov::ChangeTau() {
 void markov::ChangeMomentum() {
   if (Var.CurrOrder == 0)
     return;
-  int LoopIndex = Random.irn(GetInterLoopIdx(), GetLoopNum(Var.CurrOrder) - 1);
   double Prop;
   int CurrExtMomBin;
   static momentum CurrMom;
 
+  int LoopIndex = Random.irn(GetInterLoopIdx(), GetLoopNum(Var.CurrOrder) - 1);
+  CurrMom = Var.LoopMom[INR];
   Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
 
   Proposed[CHANGE_MOM][Var.CurrOrder]++;

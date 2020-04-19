@@ -48,16 +48,20 @@ markov::markov() : Var(Weight.Var) {
   // Var.LoopMom[0].fill(0.0);
   // Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
 
-  for (int i = 1; i < D; i++) {
-    Var.LoopMom[INL][i] = 0.0;
-    Var.LoopMom[OUTL][i] = 0.0;
-    Var.LoopMom[INR][i] = 0.0;
-    Var.LoopMom[OUTR][i] = 0.0;
+  if (DiagType == GAMMA) {
+    for (int i = 1; i < D; i++) {
+      Var.LoopMom[INL][i] = 0.0;
+      Var.LoopMom[OUTL][i] = 0.0;
+      Var.LoopMom[INR][i] = 0.0;
+      Var.LoopMom[OUTR][i] = 0.0;
+    }
+    Var.LoopMom[INL][0] = Para.Kf;
+    Var.LoopMom[OUTL][0] = Para.Kf;
+    Var.LoopMom[INR][0] = Para.Kf;
+    Var.LoopMom[OUTR][0] = Para.Kf;
+  } else if (DiagType == SIGMA) {
+    Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
   }
-  Var.LoopMom[INL][0] = Para.Kf;
-  Var.LoopMom[OUTL][0] = Para.Kf;
-  Var.LoopMom[INR][0] = Para.Kf;
-  Var.LoopMom[OUTR][0] = Para.Kf;
 
   Var.CurrTau = Var.Tau[1] - Var.Tau[0];
 
