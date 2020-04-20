@@ -161,7 +161,7 @@ void markov::ChangeMomentum() {
   static momentum CurrMom;
 
   int LoopIndex = Random.irn(GetInterLoopIdx(), GetLoopNum(Var.CurrOrder) - 1);
-  CurrMom = Var.LoopMom[INR];
+  CurrMom = Var.LoopMom[LoopIndex];
   Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
 
   Proposed[CHANGE_MOM][Var.CurrOrder]++;

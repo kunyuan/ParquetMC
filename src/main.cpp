@@ -133,10 +133,10 @@ void MonteCarlo() {
         Markov.ChangeOrder();
         // ;
       } else if (x < 2.0 / 4.0) {
-        // Markov.ChangeMomentum();
+        Markov.ChangeMomentum();
         // ;
       } else if (x < 3.0 / 4.0) {
-        // Markov.ChangeExtMomentum();
+        Markov.ChangeExtMomentum();
         // ;
       } else if (x < 4.0 / 4.0) {
         Markov.ChangeTau();
@@ -145,9 +145,15 @@ void MonteCarlo() {
         // ;
       }
 
-      // cout << "Order=" << Markov.Var.CurrOrder
-      //      << ", weight=" << Markov.Var.CurrAbsWeight
-      //      << ", extK=" << Markov.Var.LoopMom[0].norm() << endl;
+      if (Markov.Var.CurrOrder == 2 &&
+          Markov.Var.LoopMom[2].norm() > 100.0 * Para.Kf) {
+        cout << "Counter=" << Para.Counter << endl;
+        cout << "Order=" << Markov.Var.CurrOrder
+             << ", weight=" << Markov.Var.CurrAbsWeight
+             << ", extK=" << Markov.Var.LoopMom[2].norm() << endl;
+        Markov.Weight.Test(Markov.Var.CurrOrder);
+        // exit(0);
+      }
 
       // if (Markov.Weight.Var.CurrScale > Para.UVScale) {
       //   cout << "Scale wrong!" << Markov.Weight.Var.CurrScale << endl;
