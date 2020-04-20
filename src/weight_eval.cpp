@@ -114,17 +114,18 @@ double weight::EvaluateSigma(int LoopNum, bool IsFast) {
         Si.Weight[0] += w * Factor;
       else
         Si.Weight[Si.T[i]] += w * Factor;
-      if (i == 0) {
-        cout << "G=" << Si.G[Gidx].Weight << endl;
-        cout << "T=" << Si.T[i] << ", "
-             << (Weight[DIR]) * Si.G[Gidx].Weight * Factor * 0.5 << ","
-             << (Weight[EX] * SPIN) * Si.G[Gidx].Weight * Factor * 0.5 << endl;
-        _TestTwoLoopSigma();
-        // if (Para.Counter > 1000)
-        exit(0);
-      }
+      // if (i == 0) {
+      // cout << "G=" << Si.G[Gidx].Weight << endl;
+      // cout << "W= " << Weight[DIR] << ", " << Weight[EX] << endl;
+      // cout << "T=" << Si.T[i] << ", "
+      //      << (Weight[DIR]) * Si.G[Gidx].Weight * Factor << ","
+      //      << (Weight[EX] * SPIN) * Si.G[Gidx].Weight * Factor << endl;
+      // _TestTwoLoopSigma();
+      // if (Para.Counter > 1000)
+      // exit(0);
+      // }
     }
-    cout << Si.Weight[0] << endl;
+    // cout << Si.Weight[0] << endl;
     return Si.Weight[0];
   }
 }
@@ -243,6 +244,8 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
       Weight =
           ProjFactor * G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
 
+      // cout << " G :: " << G[0][map.G0idx].Weight << ", "
+      //      << G[b.Channel][map.Gidx].Weight << endl;
       // if (b.Channel == UC || b.Channel == TC || Ver4.InBox) {
       //   ASSERT_ALLWAYS(
       //       abs(G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight -
@@ -254,6 +257,9 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
 
       auto &Lw = LVer.Weight[map.LVerTidx];
       auto &Rw = RVer.Weight[map.RVerTidx];
+
+      // cout << "Lver :: " << Lw[DIR] << ", " << Lw[EX] << endl;
+      // cout << "Rver :: " << Rw[DIR] << ", " << Rw[EX] << endl;
 
       // if (b.Channel == UC || b.Channel == TC || Ver4.InBox) {
       //   ASSERT_ALLWAYS(abs(Lw[EX]) < 1.0e-10, "LWrong! " << Lw[EX]);

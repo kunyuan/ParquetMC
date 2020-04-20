@@ -75,14 +75,6 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK) {
   Ver4.Channel = {dse::T, dse::TC};
   int InTL = Ver4.InTL;
 
-  /////////////////// set K table ////////////////////
-  auto &K = Ver4.K;
-  auto &LegK = Ver4.LegK;
-  Ver4.LegK[INL] = ExtK;
-  Ver4.LegK[OUTR] = ExtK;
-  Ver4.LegK[OUTL] = InterK;
-  Ver4.LegK[INR] = InterK;
-
   vector<channel> FULL = {I, T, U, S, TC, UC};
   vector<channel> F = {TC, UC}; // the bare interaction is automatically
                                 // included
@@ -123,18 +115,6 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK) {
     }
   }
 
-  array<momentum *, 4> LLegK, RLegK;
-
-  for (auto &bub : Ver4.Bubble) {
-    auto chan = bub.Channel;
-    ASSERT_ALLWAYS(chan == T || chan == TC, "Should be T or TC channel!");
-
-    LLegK = {LegK[INL], LegK[OUTL], &K[T], &K[0]};
-    RLegK = {&K[0], &K[T], LegK[INR], LegK[OUTR]};
-    Factory.ResetMomMap(bub.LVer, LLegK);
-    Factory.ResetMomMap(bub.RVer, RLegK);
-  }
-
   // create the G List
   for (int i = 0; i < Ver4.T.size(); ++i) {
     auto &t = Ver4.T[i];
@@ -150,4 +130,30 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK) {
   Ver4.Weight.resize(Ver4.T.size());
   Sigma.Weight.resize(Sigma.T.size());
   return Sigma;
+}
+
+void dse::SetSigmaMom(sigma &Sigma, momentum *ExtK, momentum *InterK) {
+
+  verDiag Factory;
+
+  /////////////////// set K table ////////////////////
+  auto &Ver4 = Sigma.Vertex;
+  auto &K = Ver4.K;
+  auto &LegK = Ver4.LegK;
+  Ver4.LegK[INL] = ExtK;
+  Ver4.LegK[OUTR] = ExtK;
+  Ver4.LegK[OUTL] = InterK;
+  Ver4.LegK[INR] = InterK;
+
+  array<momentum *, 4> LLegK, RLegK;
+
+  for (auto &bub : Sigma.Vertex.Bubble) {
+    auto chan = bub.Channel;
+    ASSERT_ALLWAYS(chan == T || chan == TC, "Should be T or TC channel!");
+
+    LLegK = {LegK[INL], LegK[OUTL], &K[T], &K[0]};
+    RLegK = {&K[0], &K[T], LegK[INR], LegK[OUTR]};
+    Factory.ResetMomMap(bub.LVer, LLegK);
+    Factory.ResetMomMap(bub.RVer, RLegK);
+  }
 }

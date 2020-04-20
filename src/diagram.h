@@ -45,5 +45,7 @@ struct sigma {
 polar BuildPolar(int LoopNum, momentum *InL, momentum *InR);
 sigma BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK);
 
+void SetSigmaMom(sigma &Sigma, momentum *ExtK, momentum *InterK);
+
 } // namespace dse
 #endif

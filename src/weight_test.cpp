@@ -161,9 +161,12 @@ void weight::_TestTwoLoopSigma() {
   double Weight1 =
       -VerWeightDir * VerWeightDir * G1 * G2 * G3 * SPIN * Factor * Factor;
   double Weight2 =
-      VerWeightDir * VerWeightExLeft * G1 * G2 * G3 * SPIN * Factor * Factor;
-  cout << "G_test=" << G1 << ", " << G2 << ", " << G3 << endl;
-  cout << "bubble=" << Weight1 << ", cross=" << Weight2 << endl;
+      VerWeightDir * VerWeightExLeft * G1 * G2 * G3 * Factor * Factor;
+  double Weight3 =
+      VerWeightExLeft * VerWeightExLeft * G1 * G2 * G3 * SPIN * Factor * Factor;
+  // cout << "G_test=" << G1 << ", " << G2 << ", " << G3 << endl;
+  // cout << "Ver_test=" << VerWeightDir << ", " << VerWeightExLeft << endl;
+  cout << "DIR=" << Weight1 + 2 * Weight2 << ", EX=" << -Weight3 << endl;
 }
 
 ver::weightMatrix weight::_GetWeight(int LoopNum, vector<channel> Channel) {
