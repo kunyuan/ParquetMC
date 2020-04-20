@@ -79,7 +79,7 @@ private:
 
   void _TestOneLoopGamma();
   void _TestTwoLoopGamma();
-  void _TestTwoLoopSigma();
+  double _TestTwoLoopSigma();
   ver::weightMatrix _GetWeight(int LoopNum, vector<dse::channel> Channel);
 };
 

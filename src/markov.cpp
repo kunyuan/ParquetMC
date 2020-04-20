@@ -43,7 +43,7 @@ markov::markov() : Var(Weight.Var) {
   // for (auto &sp : Var.LoopSpin)
   //   sp = (spin)(Random.irn(0, 1));
 
-  Var.CurrExtMomBin = 0;
+  Var.CurrExtMomBin = ExtMomBinSize / 2;
 
   // Var.LoopMom[0].fill(0.0);
   // Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];

@@ -82,8 +82,13 @@ void markov::ChangeOrder() {
     // Remove OldMom
     int LoopToRemove = GetLoopNum(Var.CurrOrder) - 1;
     // cout << "LoopNum=" << LoopToRemove << endl;
-    // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << endl;
-    // cout << "norm= " << Var.LoopMom[1].norm() << endl;
+    // if (Var.CurrOrder == 2) {
+    //   cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << endl;
+    //   cout << "norm= " << Var.LoopMom[1].norm() << endl;
+    // }
+    // cout << Var.LoopMom[LoopToRemove][0] << ", " <<
+    // Var.LoopMom[LoopToRemove][1]
+    //      << ", " << Var.LoopMom[LoopToRemove][2] << endl;
 
     Prop *= RemoveOldK(Var.LoopMom[LoopToRemove]);
   }
@@ -94,8 +99,14 @@ void markov::ChangeOrder() {
   double R = Prop * NewAbsWeight * Para.ReWeight[NewOrder] / Var.CurrAbsWeight /
              Para.ReWeight[Var.CurrOrder];
 
-  // cout << NewAbsWeight << ", R=" << R << ", Order=" << Var.CurrOrder << endl;
-  // cout << Prop << ", reweight=" << Para.ReWeight[NewOrder] << endl;
+  // if (Name == DECREASE_ORDER && Var.CurrOrder == 2) {
+  //   cout << "newweight: " << NewAbsWeight << ", R=" << R
+  //        << ", Order=" << Var.CurrOrder << endl;
+  //   cout << Prop << ", reweight=" << Para.ReWeight[NewOrder] << endl;
+  //   cout << "old weight: " << Var.CurrAbsWeight << endl;
+  //   // if (Para.Counter > 3000)
+  //   // exit(0);
+  // }
   // if (Name == INCREASE_ORDER) {
   //   cout << "time:" << Var.Tau[2] << ", " << Var.Tau[3] << endl;
   // cout << NewWeight << endl;

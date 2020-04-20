@@ -75,7 +75,7 @@ void InitPara() {
   // initialize external momentum
   for (int i = 0; i < ExtMomBinSize; i++) {
     // the external momentum only has x component
-    Para.ExtMomTable[i][0] = i * Para.MaxExtMom / ExtMomBinSize;
+    Para.ExtMomTable[i][0] = (i + 0.5) * Para.MaxExtMom / ExtMomBinSize;
     for (int j = 1; j < D; j++)
       Para.ExtMomTable[i][j] = 0.0;
   }
@@ -133,10 +133,10 @@ void MonteCarlo() {
         Markov.ChangeOrder();
         // ;
       } else if (x < 2.0 / 4.0) {
-        Markov.ChangeMomentum();
+        // Markov.ChangeMomentum();
         // ;
       } else if (x < 3.0 / 4.0) {
-        Markov.ChangeExtMomentum();
+        // Markov.ChangeExtMomentum();
         // ;
       } else if (x < 4.0 / 4.0) {
         Markov.ChangeTau();
@@ -144,6 +144,10 @@ void MonteCarlo() {
         //   Markov.ChangeScale();
         // ;
       }
+
+      // cout << "Order=" << Markov.Var.CurrOrder
+      //      << ", weight=" << Markov.Var.CurrAbsWeight
+      //      << ", extK=" << Markov.Var.LoopMom[0].norm() << endl;
 
       // if (Markov.Weight.Var.CurrScale > Para.UVScale) {
       //   cout << "Scale wrong!" << Markov.Weight.Var.CurrScale << endl;

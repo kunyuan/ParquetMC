@@ -147,7 +147,7 @@ void weight::_TestTwoLoopGamma() {
   // return;
 }
 
-void weight::_TestTwoLoopSigma() {
+double weight::_TestTwoLoopSigma() {
   double Factor = 1.0 / pow(2.0 * PI, D);
   momentum &ExtK = Var.LoopMom[0];
   momentum &K1 = Var.LoopMom[1];
@@ -166,7 +166,9 @@ void weight::_TestTwoLoopSigma() {
       VerWeightExLeft * VerWeightExLeft * G1 * G2 * G3 * SPIN * Factor * Factor;
   // cout << "G_test=" << G1 << ", " << G2 << ", " << G3 << endl;
   // cout << "Ver_test=" << VerWeightDir << ", " << VerWeightExLeft << endl;
+
   cout << "DIR=" << Weight1 + 2 * Weight2 << ", EX=" << -Weight3 << endl;
+  return Weight1 + 2 * Weight2;
 }
 
 ver::weightMatrix weight::_GetWeight(int LoopNum, vector<channel> Channel) {
