@@ -63,11 +63,11 @@ kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
 Nf = kF/2.0/np.pi**2
 Bubble = 0.0971916  # 3D, Beta=10, rs=1
 
-Data = {}  # key: (order, channel)
-DataWithAngle = {}  # key: (order, channel)
-AngleBin = None
+Data = {}  # key: (order)
+DataEqT = {}  # key: (order)
+TauBin = None
 ExtMomBin = None
-AngleBinSize = None
+TauBinSize = None
 ExtMomBinSize = None
 
 
@@ -102,8 +102,8 @@ for order in Order:
                     Norm += float(line1.split(":")[-1])
                     line3 = file.readline()
                     if AngleBin is None:
-                        AngleBin = np.fromstring(line3.split(":")[1], sep=' ')
-                        AngleBinSize = len(AngleBin)
+                        TauBin = np.fromstring(line3.split(":")[1], sep=' ')
+                        TauBinSize = len(TauBin)
                     line4 = file.readline()
                     if ExtMomBin is None:
                         ExtMomBin = np.fromstring(line4.split(":")[1], sep=' ')
@@ -116,12 +116,12 @@ for order in Order:
                 else:
                     Data0 += d
         Data0 /= Norm
-        Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize, 2))
+        Data0 = Data0.reshape((ExtMomBinSize, TauBinSize+1))
 
-        DataWithAngle[(order, chan)] = Data0
+        DataEqT[(order)] = Data0[:, 0]
 
         # average the angle distribution
-        Data[(order, chan)] = AngleIntegation(Data0, 0)
+        Data[(order)] = Data0[:, 1:]
 
 
 def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):

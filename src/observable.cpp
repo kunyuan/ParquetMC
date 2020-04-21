@@ -82,7 +82,6 @@ void sigData::Save() {
       for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
         VerFile << _EstimatorEqT[order * ExtMomBinSize + qindex] * PhyWeight
                 << "  ";
-      VerFile << endl;
 
       for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
         for (int tindex = 0; tindex < TauBinSize; ++tindex)
