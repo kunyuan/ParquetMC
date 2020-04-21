@@ -20,6 +20,7 @@ private:
   array<double, MaxTauNum> &Tau;
   double Normalization;
   double *_Estimator;
+  double *_EstimatorEqT;
   double PhyWeight;
 
   int KIndex;

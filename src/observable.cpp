@@ -13,6 +13,7 @@ extern parameter Para;
 
 sigData::sigData(array<double, MaxTauNum> &TauTable) : Tau(TauTable) {
   _Estimator = new double[MaxOrder * TauBinSize * ExtMomBinSize];
+  _EstimatorEqT = new double[MaxOrder * ExtMomBinSize];
   OrderIndex = TauBinSize * ExtMomBinSize;
   KIndex = TauBinSize;
   PhyWeight = 1.0;
@@ -23,14 +24,16 @@ sigData::sigData(array<double, MaxTauNum> &TauTable) : Tau(TauTable) {
 void sigData::Initialization() {
   for (int i = 0; i < MaxOrder * TauBinSize * ExtMomBinSize; ++i)
     _Estimator[i] = 0.0;
+  for (int i = 0; i < MaxOrder * ExtMomBinSize; ++i)
+    _EstimatorEqT[i] = 0.0;
 }
 
 sigData::~sigData() { delete[] _Estimator; }
 
 void sigData::Measure0(double Factor) { Normalization += 1.0 * Factor; }
 void sigData::Measure1(int Kidx, double Weight, double Factor) {
-  _Estimator[1 * OrderIndex + Kidx * KIndex + 0] += Weight * Factor;
-  _Estimator[0 * OrderIndex + Kidx * KIndex + 0] += Weight * Factor;
+  _EstimatorEqT[1 * OrderIndex + Kidx * KIndex + 0] += Weight * Factor;
+  _EstimatorEqT[0 * OrderIndex + Kidx * KIndex + 0] += Weight * Factor;
 }
 
 void sigData::Measure(int Order, int Kidx, const vector<int> Tidx,
@@ -40,10 +43,15 @@ void sigData::Measure(int Order, int Kidx, const vector<int> Tidx,
   int Size = Weight.size();
 
   for (int i = 0; i < Size; ++i) {
-    int TauIdx = int((Tau[Tidx[i]] / Para.Beta) * TauBinSize);
-    _Estimator[Order * OrderIndex + Kidx * KIndex + TauIdx] +=
-        Weight[i] * Factor;
-    _Estimator[0 * OrderIndex + Kidx * KIndex + TauIdx] += Weight[i] * Factor;
+    if (Tidx[i] == 0) {
+      _EstimatorEqT[Order * ExtMomBinSize + KIndex] += Weight[i] * Factor;
+      _EstimatorEqT[0 * ExtMomBinSize + KIndex] += Weight[i] * Factor;
+    } else {
+      int TauIdx = int((Tau[Tidx[i]] / Para.Beta) * TauBinSize);
+      _Estimator[Order * OrderIndex + Kidx * KIndex + TauIdx] +=
+          Weight[i] * Factor;
+      _Estimator[0 * OrderIndex + Kidx * KIndex + TauIdx] += Weight[i] * Factor;
+    }
   }
 }
 
@@ -69,6 +77,11 @@ void sigData::Save() {
       VerFile << "# ExtMomBinTable: ";
       for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
         VerFile << Para.ExtMomTable[qindex][0] << " ";
+      VerFile << endl;
+
+      for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
+        VerFile << _EstimatorEqT[order * ExtMomBinSize + qindex] * PhyWeight
+                << "  ";
       VerFile << endl;
 
       for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
