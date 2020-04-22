@@ -16,7 +16,7 @@ sigData::sigData(array<double, MaxTauNum> &TauTable) : Tau(TauTable) {
   _EstimatorEqT = new double[MaxOrder * ExtMomBinSize];
   OrderIndex = TauBinSize * ExtMomBinSize;
   KIndex = TauBinSize;
-  PhyWeight = 1.0;
+  PhyWeight = ExtMomBinSize / Para.Beta;
   Initialization();
   return;
 }

@@ -147,6 +147,12 @@ if(XType == "Mom"):
     ax.set_xlim([ExtMomBin[0], ExtMomBin[-1]])
     ax.set_xlabel("$Ext K$", size=size)
 
+    x = ExtMomBin*kF
+    l = Mass2+Lambda
+    y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
+                      (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
+    ErrorPlot(ax, ExtMomBin, y, "k", ".", "Analytic")
+
 # ax.set_xticks([0.0,0.04,0.08,0.12])
 # ax.set_yticks([0.35,0.4,0.45,0.5])
 # ax.set_ylim([-0.02, 0.125])
