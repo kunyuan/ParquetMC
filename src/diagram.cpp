@@ -37,19 +37,13 @@ dse::polar dse::BuildPolar(int LoopNum, momentum *KInL, momentum *KInR) {
   return Polar;
 };
 
-int AddToTList(vector<int> &TList, int T) {
+int AddToSingleTList(vector<int> &TList, int T) {
   // find the T array in the list, if failed, create a new array
-  // cout << "AddTtoList" << endl;
   for (int i = 0; i < TList.size(); i++) {
     auto t = TList[i];
-    // cout << "List: " << t[0] << ", " << t[1] << ", " << t[2] << ", " << t[3]
-    //      << endl;
-
     if (t == T)
       return i;
   }
-  // cout << "Added: " << T[0] << ", " << T[1] << ", " << T[2] << ", " << T[3]
-  //      << endl;
   TList.push_back(T);
   return TList.size() - 1;
 }
@@ -121,10 +115,10 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK) {
     // the G is from OUTL to INR
     int Gidx = AddToGList(Sigma.G, {t[OUTL], t[INR]});
     // the tau of Sigma is from 0 to OUTR
-    Sigma.T.push_back(t[OUTR]);
+    int SigmaTidx = AddToSingleTList(Sigma.T, t[OUTR]);
 
     Sigma.Gidx.push_back(Gidx);
-    Sigma.VerTidx.push_back(i);
+    Sigma.SigTidx.push_back(SigmaTidx);
   }
 
   Ver4.Weight.resize(Ver4.T.size());

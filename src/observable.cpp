@@ -45,16 +45,17 @@ void sigData::Measure(int Order, int Kidx, const vector<int> Tidx,
 
   for (int i = 0; i < Size; ++i) {
     // cout << Tidx[i] << endl;
+    cout << "i=" << i << ", " << Tidx[i] << ", " << Tau[Tidx[i]] << ", "
+         << Weight[i] << endl;
     if (Tidx[i] == 0) {
-      // cout << "i=" << i << ", " << Tidx[i] << ", " << Tau[Tidx[i]] << ", "
-      //      << Weight[i] << endl;
       _EstimatorEqT[Order * ExtMomBinSize + Kidx] += Weight[i] * Factor;
       _EstimatorEqT[0 * ExtMomBinSize + Kidx] += Weight[i] * Factor;
     } else {
       int TauIdx = int((Tau[Tidx[i]] / Para.Beta) * TauBinSize);
       _Estimator[Order * OrderIndex + Kidx * KIndex + TauIdx] +=
-          Weight[i] * Factor;
-      _Estimator[0 * OrderIndex + Kidx * KIndex + TauIdx] += Weight[i] * Factor;
+          Weight[i] * Factor * TauBinSize / Para.Beta;
+      _Estimator[0 * OrderIndex + Kidx * KIndex + TauIdx] +=
+          Weight[i] * Factor * TauBinSize / Para.Beta;
     }
   }
 }

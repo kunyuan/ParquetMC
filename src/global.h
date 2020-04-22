@@ -24,14 +24,12 @@ const int D = 3;
 // type of diagram
 const diagram DiagType = SIGMA;
 // number of q bins of the external momentum
-const int ExtMomBinSize = 32;
+const int ExtMomBinSize = 4;
 // number of bins for the angle between InL and InR legs
 const int AngBinSize = 64;
 // number of energy scales, only useful in RG approach
 const int ScaleBinSize = 64;
-const int TauBinSize = 128;
-const int SigmaMomBinSize = 128;
-const int SigmaTauBinSize = 128;
+const int TauBinSize = 16;
 const int TauBasisNum = 32;
 const int SPIN = 2;
 

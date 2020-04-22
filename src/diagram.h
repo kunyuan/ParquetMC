@@ -28,7 +28,6 @@ struct polar {
 struct sigma {
   int TauNum;
   int LoopNum;
-  int OutT;
   ver4 Vertex;
   momentum *K; // one internal K is needed
   vector<green> G;
@@ -36,9 +35,8 @@ struct sigma {
   vector<int> T;
   vector<double> Weight;
 
-  // map Vertex Tidx and G idx to sigma Tidx
+  // map Vertex weight idx to G idx and sigma idx
   vector<int> Gidx;
-  vector<int> VerTidx;
   vector<int> SigTidx;
 };
 
