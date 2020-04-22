@@ -32,8 +32,9 @@ sigData::~sigData() { delete[] _Estimator; }
 
 void sigData::Measure0(double Factor) { Normalization += 1.0 * Factor; }
 void sigData::Measure1(int Kidx, double Weight, double Factor) {
-  _EstimatorEqT[1 * OrderIndex + Kidx * KIndex + 0] += Weight * Factor;
-  _EstimatorEqT[0 * OrderIndex + Kidx * KIndex + 0] += Weight * Factor;
+  // cout << Kidx << endl;
+  _EstimatorEqT[1 * ExtMomBinSize + Kidx] += Weight * Factor;
+  _EstimatorEqT[0 * ExtMomBinSize + Kidx] += Weight * Factor;
 }
 
 void sigData::Measure(int Order, int Kidx, const vector<int> Tidx,
@@ -83,8 +84,8 @@ void sigData::Save() {
         VerFile << _EstimatorEqT[order * ExtMomBinSize + qindex] * PhyWeight
                 << "  ";
 
-      for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
-        for (int tindex = 0; tindex < TauBinSize; ++tindex)
+      for (int tindex = 0; tindex < TauBinSize; ++tindex)
+        for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
           VerFile << _Estimator[order * OrderIndex + qindex * KIndex + tindex] *
                          PhyWeight
                   << "  ";

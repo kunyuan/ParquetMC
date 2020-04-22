@@ -108,7 +108,7 @@ double weight::EvaluateSigma(int LoopNum, bool IsFast) {
         w = 0.0;
     }
     int Size = Root.Weight.size();
-    Size = 1;
+    // Size = 1;
     for (int i = 0; i < Size; ++i) {
       int Gidx = Si.Gidx[i];
       auto &Weight = Root.Weight[i];

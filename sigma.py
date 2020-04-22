@@ -114,12 +114,14 @@ for order in Order:
             else:
                 Data0 += d
     Data0 /= Norm
-    Data0 = Data0.reshape((ExtMomBinSize, TauBinSize+1))
+    Data0 = Data0.reshape((TauBinSize+1, ExtMomBinSize))
 
-    DataEqT[(order)] = Data0[:, 0]
+    DataEqT[(order)] = Data0[0, :]
 
     # average the angle distribution
-    Data[(order)] = Data0[:, 1:]
+    Data[(order)] = Data0[1:, :]
+
+# print DataEqT[(1)]
 
 
 def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
@@ -141,7 +143,7 @@ ColorList = ColorList*40
 if(XType == "Mom"):
     for o in Order:
         ErrorPlot(ax, ExtMomBin, DataEqT[o],
-                    ColorList[o], 's', "Order {0}".format(o))
+                  ColorList[o], 's', "Order {0}".format(o))
     ax.set_xlim([ExtMomBin[0], ExtMomBin[-1]])
     ax.set_xlabel("$Ext K$", size=size)
 
