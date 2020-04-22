@@ -86,6 +86,8 @@ void weight::MeasureSigma() {
   } else {
     sigma &Root = Sigma[Var.CurrOrder];
     EvaluateSigma(Var.CurrOrder, false);
+    // cout << Root.T[0] << "=" << Root.Weight[0] << ", " << Root.T[1] << "="
+    //      << Root.Weight[1] << endl;
     SigData.Measure(Var.CurrOrder, Var.CurrExtMomBin, Root.T, Root.Weight,
                     Factor);
   }

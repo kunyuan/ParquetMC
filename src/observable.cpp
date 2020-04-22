@@ -41,12 +41,15 @@ void sigData::Measure(int Order, int Kidx, const vector<int> Tidx,
                       const vector<double> Weight, double Factor) {
 
   // only for Order >=2
-  int Size = Weight.size();
+  int Size = Tidx.size();
 
   for (int i = 0; i < Size; ++i) {
+    // cout << Tidx[i] << endl;
     if (Tidx[i] == 0) {
-      _EstimatorEqT[Order * ExtMomBinSize + KIndex] += Weight[i] * Factor;
-      _EstimatorEqT[0 * ExtMomBinSize + KIndex] += Weight[i] * Factor;
+      // cout << "i=" << i << ", " << Tidx[i] << ", " << Tau[Tidx[i]] << ", "
+      //      << Weight[i] << endl;
+      _EstimatorEqT[Order * ExtMomBinSize + Kidx] += Weight[i] * Factor;
+      _EstimatorEqT[0 * ExtMomBinSize + Kidx] += Weight[i] * Factor;
     } else {
       int TauIdx = int((Tau[Tidx[i]] / Para.Beta) * TauBinSize);
       _Estimator[Order * OrderIndex + Kidx * KIndex + TauIdx] +=
@@ -89,6 +92,7 @@ void sigData::Save() {
           VerFile << _Estimator[order * OrderIndex + qindex * KIndex + tindex] *
                          PhyWeight
                   << "  ";
+      // VerFile << 0.0 << "  ";
       VerFile.close();
     } else {
       LOG_WARNING("Sigma for PID " << Para.PID << " fails to save!");
