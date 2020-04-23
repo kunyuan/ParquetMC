@@ -11,10 +11,11 @@ mat.rcParams["font.family"] = "Times New Roman"
 size = 12
 
 # XType = "Tau"
-XType = "Mom"
+# XType = "Mom"
+XType = "Z"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
-Order = [0, 1, 2, ]
+Order = [0, 1, 2, 3]
 SpinIndex = 2
 
 MaxOrder = None
@@ -67,15 +68,12 @@ Beta /= EF
 
 Data = {}  # key: (order)
 DataEqT = {}  # key: (order)
+DataW1 = {}
+DataW2 = {}
 TauBin = None
 ExtMomBin = None
 TauBinSize = None
 ExtMomBinSize = None
-
-
-# def TauIntegration(Data):
-#     return np.sum(Data, axis=-1) * \
-#         Beta/kF**2/TauBinSize
 
 
 for order in Order:
@@ -116,14 +114,19 @@ for order in Order:
             else:
                 Data0 += d
     Data0 /= Norm
-    Data0 = Data0.reshape((TauBinSize+1, ExtMomBinSize))
+    Data0 = Data0.reshape((TauBinSize+3, ExtMomBinSize))
 
     DataEqT[(order)] = Data0[0, :]
+    DataW1[(order)] = Data0[1, :]
+    DataW2[(order)] = Data0[2, :]
 
     # average the angle distribution
-    Data[(order)] = Data0[1:, :]
+    Data[(order)] = Data0[3:, :]
 
 # print DataEqT[(1)]
+
+
+# def Fourier(f, t):
 
 
 def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
@@ -154,6 +157,13 @@ if(XType == "Mom"):
     y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
                       (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
     ErrorPlot(ax, ExtMomBin, y, "k", ".", "Analytic")
+elif(XType == "Z"):
+    for o in Order:
+        ErrorPlot(ax, ExtMomBin, (DataW1[o]-DataW2[o])/(2.0*np.pi/Beta),
+                  ColorList[o], 's', "Order {0}".format(o))
+    ax.set_xlim([ExtMomBin[0], ExtMomBin[-1]])
+    ax.set_xlabel("$Ext K$", size=size)
+
 elif(XType == "Tau"):
     N = 8
     o = 2

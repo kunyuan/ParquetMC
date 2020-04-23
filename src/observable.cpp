@@ -14,6 +14,8 @@ extern parameter Para;
 sigData::sigData(array<double, MaxTauNum> &TauTable) : Tau(TauTable) {
   _Estimator = new double[MaxOrder * TauBinSize * ExtMomBinSize];
   _EstimatorEqT = new double[MaxOrder * ExtMomBinSize];
+  _EstimatorW1 = new double[MaxOrder * ExtMomBinSize];
+  _EstimatorW2 = new double[MaxOrder * ExtMomBinSize];
   OrderIndex = TauBinSize * ExtMomBinSize;
   KIndex = TauBinSize;
   PhyWeight = ExtMomBinSize / Para.Beta;
@@ -24,11 +26,19 @@ sigData::sigData(array<double, MaxTauNum> &TauTable) : Tau(TauTable) {
 void sigData::Initialization() {
   for (int i = 0; i < MaxOrder * TauBinSize * ExtMomBinSize; ++i)
     _Estimator[i] = 0.0;
-  for (int i = 0; i < MaxOrder * ExtMomBinSize; ++i)
+  for (int i = 0; i < MaxOrder * ExtMomBinSize; ++i) {
     _EstimatorEqT[i] = 0.0;
+    _EstimatorW1[i] = 0.0;
+    _EstimatorW2[i] = 0.0;
+  }
 }
 
-sigData::~sigData() { delete[] _Estimator; }
+sigData::~sigData() {
+  delete[] _Estimator;
+  delete[] _EstimatorEqT;
+  delete[] _EstimatorW1;
+  delete[] _EstimatorW2;
+}
 
 void sigData::Measure0(double Factor) { Normalization += 1.0 * Factor; }
 void sigData::Measure1(int Kidx, double Weight, double Factor) {
@@ -57,6 +67,11 @@ void sigData::Measure(int Order, int Kidx, const vector<int> T,
           Weight[i] * Factor * TauBinSize / Para.Beta;
       _Estimator[0 * OrderIndex + Kidx * KIndex + TauIdx] +=
           Weight[i] * Factor * TauBinSize / Para.Beta;
+
+      _EstimatorW1[Order * ExtMomBinSize + Kidx] +=
+          Weight[i] * Factor * sin(PI * (Tau[T[i]] - Tau[0]) / Para.Beta);
+      _EstimatorW2[Order * ExtMomBinSize + Kidx] +=
+          Weight[i] * Factor * sin(-PI * (Tau[T[i]] - Tau[0]) / Para.Beta);
     }
   }
 }
@@ -87,6 +102,14 @@ void sigData::Save() {
 
       for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
         VerFile << _EstimatorEqT[order * ExtMomBinSize + qindex] * PhyWeight
+                << "  ";
+
+      for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
+        VerFile << _EstimatorW1[order * ExtMomBinSize + qindex] * PhyWeight
+                << "  ";
+
+      for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
+        VerFile << _EstimatorW2[order * ExtMomBinSize + qindex] * PhyWeight
                 << "  ";
 
       for (int tindex = 0; tindex < TauBinSize; ++tindex)

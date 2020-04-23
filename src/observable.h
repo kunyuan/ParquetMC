@@ -21,6 +21,8 @@ private:
   double Normalization;
   double *_Estimator;
   double *_EstimatorEqT;
+  double *_EstimatorW1;
+  double *_EstimatorW2;
   double PhyWeight;
 
   int KIndex;
