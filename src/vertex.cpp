@@ -106,6 +106,9 @@ weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
 double verQTheta::Interaction(const momentum &TranQ) {
   double kQ = TranQ.norm();
   return -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+  // return pow(-8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda),
+  //            2) *
+  //        Para.Lambda / 8.0 / PI;
 }
 
 void verQTheta::Measure(const momentum &InL, const momentum &InR,
@@ -229,7 +232,8 @@ double fermi::PhyGreen(double Tau, const momentum &Mom, int GType,
   // if tau is exactly zero, set tau=0^-
   double green, Ek, kk, k;
   if (Tau == 0.0) {
-    return EPS;
+    Tau = -1.0e-10;
+    // return EPS;
   }
   // equal time green's function
   if (GType == 1)

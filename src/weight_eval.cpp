@@ -110,12 +110,19 @@ double weight::EvaluateSigma(int LoopNum, bool IsFast) {
     int Size = Ver4.Weight.size();
     // Size = 1;
     for (int i = 0; i < Size; ++i) {
+
+      // if (Si.SigTidx[i] != 0)
+      //   continue;
+
       auto &Weight = Ver4.Weight[i];
       int Gidx = Si.Gidx[i];
       // cout << "G=" << Si.G[Gidx].Weight << endl;
       // cout << "Root=" << Root.Weight[i][0] << endl;
       // cout << "Root=" << Root.Weight[i][1] << endl;
-      double w = (Weight[DIR] + Weight[EX] * SPIN) * Si.G[Gidx].Weight * 0.5;
+      double w = (Weight[DIR] + Weight[EX] * SPIN) * Si.G[Gidx].Weight;
+
+      if (Si.T[i] != 0)
+        w *= 0.5;
 
       // cout << "tot0: " << Si.Weight[0] << endl;
       // cout << w << ", " << Factor << endl;
@@ -125,11 +132,13 @@ double weight::EvaluateSigma(int LoopNum, bool IsFast) {
         Si.Weight[Si.SigTidx[i]] += w * Factor;
 
       // if (i == 0) {
-      //   cout << "i=" << i << ", G=" << Si.G[Gidx].Weight << endl;
-      //   cout << "W= " << Weight[DIR] << ", " << Weight[EX] << endl;
-      cout << "T=" << Si.T[i] << ", SigTidx=" << Si.SigTidx[i] << ", "
-           << (Weight[DIR]) * Si.G[Gidx].Weight * Factor << ","
-           << (Weight[EX] * SPIN) * Si.G[Gidx].Weight * Factor << endl;
+      // cout << "i=" << i << ", G=" << Si.G[Gidx].Weight << endl;
+      // cout << "W= " << Weight[DIR] << ", " << Weight[EX] << endl;
+      // // cout << Ver4.T[i][INL] << ", " << Ver4.T[i][INR] << endl;
+      // cout << "T=" << Si.T[i] << ", SigTidx=" << Si.SigTidx[i] << ", "
+      //      << (Weight[DIR]) * Si.G[Gidx].Weight * Factor << ","
+      //      << (Weight[EX] * SPIN) * Si.G[Gidx].Weight * Factor << endl;
+      // cout << endl;
       //   cout << (Weight[DIR] + Weight[EX] * SPIN) * Si.G[Gidx].Weight * 0.5
       //   *
       //               Factor

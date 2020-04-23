@@ -10,8 +10,8 @@ mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
 
-XType = "Tau"
-# XType = "Mom"
+# XType = "Tau"
+XType = "Mom"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 Order = [0, 1, 2, ]
@@ -62,6 +62,8 @@ folder = "./Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Mass2)
 kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
 Nf = kF/2.0/np.pi**2
 Bubble = 0.0971916  # 3D, Beta=10, rs=1
+EF = kF**2
+Beta /= EF
 
 Data = {}  # key: (order)
 DataEqT = {}  # key: (order)
@@ -153,12 +155,13 @@ if(XType == "Mom"):
                       (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
     ErrorPlot(ax, ExtMomBin, y, "k", ".", "Analytic")
 elif(XType == "Tau"):
-    N = 4
+    N = 8
     o = 2
     for i in range(N):
         q = i*ExtMomBinSize/N
-        ErrorPlot(ax, TauBin, Data[o][:, q], ColorList[i],
+        ErrorPlot(ax, TauBin/Beta, Data[o][:, q], ColorList[i],
                   's', "k={0}".format(ExtMomBin[q]))
+        ax.set_xlim([TauBin[0]/Beta, TauBin[-1]/Beta])
 
     # ax.set_xticks([0.0,0.04,0.08,0.12])
     # ax.set_yticks([0.35,0.4,0.45,0.5])
