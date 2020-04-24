@@ -84,8 +84,8 @@ private:
   double Fock(double k);
   // warning: this function only works for T=0 and 3D!!!!
   double GetSigma(double k);
-  // double Sigma[MAXSIGMABIN];
-  // double Sigma2[MAXSIGMABIN];
+  double Sigma[MAXSIGMABIN];
+  double Sigma2[MAXSIGMABIN];
 
   // MatrixXd Sigma(SigmaMomBinSize, SigmaTauBinSize);
 };

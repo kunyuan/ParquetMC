@@ -15,7 +15,7 @@ size = 12
 XType = "Z"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
-Order = [0, 1, 2, 3]
+Order = [0, 1, 2, 3, 4, 5]
 SpinIndex = 2
 
 MaxOrder = None
