@@ -1,0 +1,90 @@
+Order, Beta, Rs, Mass2, Lambda, Charge2, MaxExtMom(*kF), TotalStep(*1e6), Seed, PID
+[MC][INFO][20/3/28 13:7:46]@[main.cpp:88]
+Inverse Temperature: 173.763
+r_s: 4
+Fermi Mom: 0.47979
+Fermi Energy: 0.230198
+
+
+-0.875
+[MC][INFO][20/3/28 13:7:46]@[weight.cpp:25]
+Generating order 1
+
+[MC][INFO][20/3/28 13:7:46]@[weight.cpp:35]
+├Level: 0, RIGHT, LoopNum: 1, Boxed: false, G0:1
+├─Tau[4]: (0, 0, 1, 1), (0, 1, 1, 0), (0, 1, 0, 1), (0, 0, 0, 0), 
+├─K : (0x7fff5e37f300, 0x7fff5e37f318, 0x7fff5e37f330, 0x7fff5e37f348)
+. │
+. ├PAIR - Channel: T, LVerLoopNum: 0, G: 1
+. ├─G[T, 1]:(1,0), 
+. ├─Map:(0,0):0, 
+. ├Level: 1, LEFT, LoopNum: 0, Boxed: false, G0:0
+. ├─Tau[1]: (0, 0, 0, 0), 
+. ├─K : (0x7fff5e37f300, 0x7fff5e37f318, 0x7fff5e37f7b0, 0x7fff5e37f798)
+. ├Level: 1, RIGHT, LoopNum: 0, Boxed: false, G0:0
+. ├─Tau[1]: (1, 1, 1, 1), 
+. ├─K : (0x7fff5e37f798, 0x7fff5e37f7b0, 0x7fff5e37f330, 0x7fff5e37f348)
+. │
+. ├PAIR - Channel: U, LVerLoopNum: 0, G: 1
+. ├─G[U, 1]:(1,0), 
+. ├─Map:(0,0):1, 
+. ├Level: 1, LEFT, LoopNum: 0, Boxed: false, G0:0
+. ├─Tau[1]: (0, 0, 0, 0), 
+. ├─K : (0x7fff5e37f300, 0x7fff5e37f348, 0x7fff5e37f7c8, 0x7fff5e37f798)
+. ├Level: 1, RIGHT, LoopNum: 0, Boxed: false, G0:0
+. ├─Tau[1]: (1, 1, 1, 1), 
+. ├─K : (0x7fff5e37f798, 0x7fff5e37f7c8, 0x7fff5e37f330, 0x7fff5e37f318)
+. │
+. ├PAIR - Channel: S, LVerLoopNum: 0, G: 1
+. ├─G[S, 1]:(0,1), 
+. ├─Map:(0,0):2, 
+. ├Level: 1, LEFT, LoopNum: 0, Boxed: false, G0:0
+. ├─Tau[1]: (0, 0, 0, 0), 
+. ├─K : (0x7fff5e37f300, 0x7fff5e37f7e0, 0x7fff5e37f330, 0x7fff5e37f798)
+. ├Level: 1, RIGHT, LoopNum: 0, Boxed: false, G0:0
+. ├─Tau[1]: (1, 1, 1, 1), 
+. ├─K : (0x7fff5e37f798, 0x7fff5e37f318, 0x7fff5e37f7e0, 0x7fff5e37f348)
+. │
+. ├PAIR - Channel: TC, LVerLoopNum: 0, G: 1
+. ├─G[TC, 1]:(1,0), 
+. ├─Map:(0,0):3, 
+. ├Level: 1, LEFT, LoopNum: 0, Boxed: true, G0:0
+. ├─Tau[1]: (0, 0, 0, 0), 
+. ├─K : (0x7fff5e37f300, 0x7fff5e37f318, 0x7fff5e37f7b0, 0x7fff5e37f798)
+. ├Level: 1, RIGHT, LoopNum: 0, Boxed: true, G0:0
+. ├─Tau[1]: (1, 1, 1, 1), 
+. ├─K : (0x7fff5e37f798, 0x7fff5e37f7b0, 0x7fff5e37f330, 0x7fff5e37f348)
+. │
+. ├PAIR - Channel: UC, LVerLoopNum: 0, G: 1
+. ├─G[UC, 1]:(1,0), 
+. ├─Map:(0,0):3, 
+. ├Level: 1, LEFT, LoopNum: 0, Boxed: true, G0:0
+. ├─Tau[1]: (0, 0, 0, 0), 
+. ├─K : (0x7fff5e37f300, 0x7fff5e37f348, 0x7fff5e37f7c8, 0x7fff5e37f798)
+. ├Level: 1, RIGHT, LoopNum: 0, Boxed: true, G0:0
+. ├─Tau[1]: (1, 1, 1, 1), 
+. ├─K : (0x7fff5e37f798, 0x7fff5e37f7c8, 0x7fff5e37f330, 0x7fff5e37f318)
+
+
+[MC][INFO][20/3/28 13:7:46]@[weight.cpp:39]
+ Order 1: ExtT Num 4
+
+
+[MC][INFO][20/3/28 13:7:46]@[markov.cpp:32]
+Initializating MC variables ...
+
+[MC][INFO][20/3/28 13:7:46]@[markov.cpp:76]
+Calculating the weights of all objects...
+
+[MC][INFO][20/3/28 13:7:46]@[markov.cpp:80]
+Initializating variables done.
+
+[MC][INFO][20/3/28 13:7:46]@[main.cpp:110]
+Start simulation ...
+
+[MC][INFO][20/3/28 13:7:46]@[main.cpp:115]
+Loading Weight...
+
+[MC][INFO][20/3/28 13:7:47]@[abort.cpp:16]
+Signal 2 received. Interrupting program...
+

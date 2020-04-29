@@ -4,9 +4,10 @@ import os
 import sys
 
 ##### Modify parameters here  ###############
+Cluster="Rutgers"
 # Cluster="PBS"
 # Cluster = "local"
-Cluster="condor"
+# Cluster="condor"
 
 ############################################
 
@@ -36,15 +37,19 @@ for index, eachline in enumerate(inlist):
 
     os.system("cp {0} {1}".format(execute, homedir))
 
-    infilepath = homedir+"/infile"
-    if(os.path.exists(infilepath) != True):
-        os.system("mkdir "+infilepath)
-    outfilepath = homedir+"/outfile"
-    if(os.path.exists(outfilepath) != True):
-        os.system("mkdir "+outfilepath)
-    jobfilepath = homedir+"/jobfile"
-    if(os.path.exists(jobfilepath) != True):
-        os.system("mkdir "+jobfilepath)
+
+    if Cluster!="Rutgers":
+        infilepath = homedir+"/infile"
+        if(os.path.exists(infilepath) != True):
+            os.system("mkdir "+infilepath)
+        outfilepath = homedir+"/outfile"
+        if(os.path.exists(outfilepath) != True):
+            os.system("mkdir "+outfilepath)
+        jobfilepath = homedir+"/jobfile"
+        if(os.path.exists(jobfilepath) != True):
+            os.system("mkdir "+jobfilepath)
+    else:
+        infilepath = homedir
 
     for pid in range(int(para[-1])):
 
@@ -97,7 +102,6 @@ for index, eachline in enumerate(inlist):
             os.system("rm "+jobfilepath + "/"+jobfile)
             os.chdir("..")
         else:
-            print("I don't know what is {0}".format(Cluster))
-            break
+            print("{0} means no submission.".format(Cluster))
 print("Jobs manage daemon is ended")
 sys.exit(0)

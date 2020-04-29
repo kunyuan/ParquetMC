@@ -51,8 +51,8 @@ double &verTensor::Estimator(int Order, int Angle, int ExtQ, int Dir) {
 // double norm2(const momentum &Mom) { return sqrt(sum2(Mom)); }
 verQTheta::verQTheta() {
 
-  _TestAngle2D();
-  _TestAngleIndex();
+  //_TestAngle2D();
+  //_TestAngleIndex();
 
   Normalization = 1.0e-10;
   // PhyWeight = Para.Kf * (1.0 - exp(-Para.MaxExtMom / Para.Kf)) * 4.0 * PI *
@@ -78,17 +78,17 @@ weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
   weightMatrix Weight;
 
   double kDiQ = (*LegK[INL] - *LegK[OUTL]).norm();
-  if (abs(kDiQ) < 1.0e-10)
-    Weight[DIR] = 0.0;
-  else
+  //if (abs(kDiQ) < 1.0e-10)
+    //Weight[DIR] = 0.0;
+  //else
     Weight[DIR] =
         -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
 
   if (!Boxed) {
     double kExQ = (*LegK[INL] - *LegK[OUTR]).norm();
-    if (abs(kExQ) < 1.0e-10)
-      Weight[EX] = 0.0;
-    else
+    //if (abs(kExQ) < 1.0e-10)
+      //Weight[EX] = 0.0;
+    //else
       Weight[EX] =
           8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
   } else
