@@ -73,32 +73,36 @@ verQTheta::verQTheta() {
 }
 
 weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
-                                    double Tau, bool IsRenorm, bool Boxed) {
+                                    double Tau, bool IsRenorm, bool Boxed,
+                                    double ExtQ) {
 
   weightMatrix Weight;
 
   double kDiQ = (*LegK[INL] - *LegK[OUTL]).norm();
-  if (abs(kDiQ) < 1.0e-10)
-    // check irreducibility
+  Weight[DIR] =
+      -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+
+  if (DiagType == SIGMA && abs(kDiQ) < 1.0e-10)
     Weight[DIR] = 0.0;
-  else
-    Weight[DIR] =
-        -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+
+  // check irreducibility
+  if (DiagType == POLAR && abs(kDiQ - ExtQ) < 1.0e-10)
+    Weight[DIR] = 0.0;
 
   if (!Boxed) {
     double kExQ = (*LegK[INL] - *LegK[OUTR]).norm();
-    if (abs(kExQ) < 1.0e-10)
-      // check irreducibility
+    Weight[EX] =
+        8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+
+    if (DiagType == SIGMA && abs(kExQ) < 1.0e-10)
       Weight[EX] = 0.0;
-    else
-      Weight[EX] =
-          8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+
+    // check irreducibility
+    if (DiagType == POLAR && abs(kExQ - ExtQ) < 1.0e-10)
+      Weight[EX] = 0.0;
+
   } else
     Weight[EX] = 0.0;
-  // cout << Weight[EX] << endl;
-  // Weight[EX] = 0.0;
-
-  // cout << Weight[DIR] << " and " << Weight[EX] << endl;
 
   return Weight;
 }

@@ -21,6 +21,8 @@ int markov::GetTauNum(int Order) {
     return Order + 1;
   else if (DiagType == SIGMA)
     return Order;
+  else if (DiagType == POLAR)
+    return Order + 1;
 }
 
 int markov::GetLoopNum(int Order) {

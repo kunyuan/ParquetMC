@@ -40,6 +40,7 @@ public:
   ver::fermi Fermi;         // propagator factory
   ver::verQTheta VerQTheta; // vertex factory
   ver::sigData SigData;
+  ver::polarData PolarData;
 
   dse::ver4 Ver4Root[MaxOrder];
   dse::sigma Sigma[MaxOrder];

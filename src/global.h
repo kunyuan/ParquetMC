@@ -22,7 +22,7 @@ const bool DEBUGMODE = false;
 // D=2 or D=3
 const int D = 3;
 // type of diagram
-const diagram DiagType = SIGMA;
+const diagram DiagType = POLAR;
 // number of q bins of the external momentum
 const int ExtMomBinSize = 32;
 // number of bins for the angle between InL and InR legs

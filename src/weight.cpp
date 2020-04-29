@@ -92,11 +92,25 @@ void weight::MeasureSigma() {
                     Factor);
   }
 }
-void weight::MeasurePolar() {}
+void weight::MeasurePolar() {
+  double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
+  double Weight = 1.0;
+  if (Var.CurrOrder > 0) {
+    auto &Root = Polar[Var.CurrOrder];
+    EvaluatePolar(Var.CurrOrder);
+    Weight = Root.Weight;
+  }
+  PolarData.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.Tau[1] - Var.Tau[0],
+                    Weight, Factor);
+}
 
 void weight::Ver0(ver4 &Ver4) {
   // only bare coupling
-  Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox);
+  if (DiagType == POLAR)
+    Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox,
+                                           Var.LoopMom[0].norm());
+  else
+    Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox);
   // if (abs(Ver4.Weight[0][DIR] + 8.377) > 0.1) {
   //   cout << "Ver0 " << Ver4.Weight[0][DIR] << endl;
   //   ABORT("Err");

@@ -23,7 +23,7 @@ double weight::Evaluate(int LoopNum) {
     return fabs(EvaluateSigma(LoopNum));
     break;
   case diagram::POLAR:
-    return EvaluatePolar(LoopNum);
+    return fabs(EvaluatePolar(LoopNum));
     break;
   default:
     break;
@@ -55,12 +55,19 @@ double weight::EvaluatePolar(int LoopNum) {
   // normalization
   if (LoopNum == 0)
     return 1.0;
+  else if (LoopNum == 1) {
+    double Tau = Var.Tau[1] - Var.Tau[0];
+    double Weight = Fermi.Green(Tau, Var.LoopMom[1], UP, 0, 0);
+    Weight *= Fermi.Green(-Tau, Var.LoopMom[1] - Var.LoopMom[0], UP, 0, 0);
+    return -SPIN * Weight;
+  }
 
+  // loop order >=2
   dse::polar &P = Polar[LoopNum];
-  ver4 &Root = P.Vertex;
-  P.KOutL = Var.LoopMom[1] + Var.LoopMom[0];
-  P.KOutR = Var.LoopMom[2] - Var.LoopMom[0];
-  Vertex4(Root, false);
+  ver4 &Ver4 = P.Vertex;
+  P.KOutL = Var.LoopMom[1] - Var.LoopMom[0];
+  P.KOutR = Var.LoopMom[2] + Var.LoopMom[0];
+  Vertex4(Ver4, false);
 
   // evaluate all possible G
   EvaluateG(P.G[INL], Var.LoopMom[1]);
@@ -68,20 +75,21 @@ double weight::EvaluatePolar(int LoopNum) {
   EvaluateG(P.G[INR], Var.LoopMom[2]);
   EvaluateG(P.G[OUTR], P.KOutR);
 
-  int Size = Root.Weight.size();
-  P.Weight.SetZero();
+  int Size = Ver4.T.size();
   for (int i = 0; i < Size; ++i) {
     auto &Gidx = P.Gidx[i];
-    auto &Weight = Root.Weight[i];
+    double GWeight = 1.0;
 
     // attach four G
     for (int j = 0; j < 4; ++j)
-      Weight *= P.G[j][Gidx[j]].Weight;
+      GWeight *= P.G[j][Gidx[i]].Weight;
 
-    P.Weight += Weight;
+    P.Weight +=
+        (SPIN * SPIN * Ver4.Weight[i][DIR] + SPIN * Ver4.Weight[i][EX]) *
+        GWeight;
   }
 
-  return P.Weight.Abs();
+  return P.Weight;
 }
 
 double weight::EvaluateSigma(int LoopNum, bool IsFast) {

@@ -29,6 +29,25 @@ private:
   int OrderIndex;
 };
 
+class polarData {
+public:
+  polarData();
+  ~polarData();
+  void Initialization();
+  void Measure(int Order, int Kidx, double Tau, double Weight,
+               double Factor); // all tau variables
+  void Save();
+  void LoadWeight();
+
+private:
+  double Normalization;
+  double *_Estimator;
+  double PhyWeight;
+
+  int KIndex;
+  int OrderIndex;
+};
+
 }; // namespace ver
 
 #endif
