@@ -22,7 +22,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 Order = [1, 2, 3]
 SpinIndex = 2
 IsFullVer4 = True
-IsIrreducible = True
+IsIrreducible = False
 # IsFullVer4 = False
 
 MaxOrder = None

@@ -51,8 +51,8 @@ double &verTensor::Estimator(int Order, int Angle, int ExtQ, int Dir) {
 // double norm2(const momentum &Mom) { return sqrt(sum2(Mom)); }
 verQTheta::verQTheta() {
 
-  _TestAngle2D();
-  _TestAngleIndex();
+  //_TestAngle2D();
+  //_TestAngleIndex();
 
   Normalization = 1.0e-10;
   // PhyWeight = Para.Kf * (1.0 - exp(-Para.MaxExtMom / Para.Kf)) * 4.0 * PI *

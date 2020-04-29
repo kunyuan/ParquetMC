@@ -5,10 +5,11 @@ import glob
 import time
 import numpy as np
 from color import *
+from utility import *
 
 SleepTime = 5
 SpinIndex = 2
-IsIrreducible = True
+IsIrreducible = False
 
 order = None
 rs = None
@@ -122,10 +123,9 @@ while True:
 
     time.sleep(SleepTime)
 
+    files=getListOfFiles(folder)
     for order in Order:
         for chan in Channel:
-
-            files = os.listdir(folder)
             Num = 0
             Norm = 0
             Data0 = None
@@ -133,12 +133,12 @@ while True:
             FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
 
             for f in files:
-                if re.match(FileName, f):
+                if re.search(FileName, f):
                     print "Loading ", f
                     Norm0 = -1
                     d = None
                     try:
-                        with open(folder+f, "r") as file:
+                        with open(f, "r") as file:
                             line0 = file.readline()
                             Step = int(line0.split(":")[-1])/1000000
                             # print "Step:", Step
@@ -153,6 +153,7 @@ while True:
                                 AngleBinSize = len(AngleBin)
                                 print AngleBinSize
                             line4 = file.readline()
+
                             if ExtMomBin is None:
                                 ExtMomBin = np.fromstring(
                                     line4.split(":")[1], sep=' ')
@@ -160,7 +161,7 @@ while True:
                                 ExtMomBin /= kF
                         # Num += 1
                         # print "Load data..."
-                        d = np.loadtxt(folder+f)
+                        d = np.loadtxt(f)
 
                         if d is not None and Norm0 > 0:
                             if Data0 is None:
@@ -171,15 +172,14 @@ while True:
 
                             Norm += Norm0
 
-                            dd = d.reshape(
-                                (AngleBinSize, ExtMomBinSize, 2))/Norm0
+                            dd = d.reshape((AngleBinSize, ExtMomBinSize, 2))/Norm0
                             dd = AngleIntegation(dd, 0)
                             DataList.append(SpinMapping(dd))
 
                     # print "Norm", Norm
 
                     except:
-                        print "fail to load ", folder+f
+                        print "fail to load ", f
 
             if Norm > 0 and Data0 is not None:
                 print "Total Weight: ", Data0[0]
