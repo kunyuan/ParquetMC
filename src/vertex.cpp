@@ -72,13 +72,14 @@ verQTheta::verQTheta() {
     c.Initialize();
 }
 
-weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
+weightMatrix verQTheta::Interaction(const momentum &KInL, const momentum &KOutL,
+                                    const momentum &KInR, const momentum &KOutR,
                                     double Tau, bool IsRenorm, bool Boxed,
                                     double ExtQ) {
 
   weightMatrix Weight;
 
-  double kDiQ = (*LegK[INL] - *LegK[OUTL]).norm();
+  double kDiQ = (KInL - KOutL).norm();
   Weight[DIR] =
       -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
 
@@ -90,7 +91,7 @@ weightMatrix verQTheta::Interaction(const array<momentum *, 4> &LegK,
     Weight[DIR] = 0.0;
 
   if (!Boxed) {
-    double kExQ = (*LegK[INL] - *LegK[OUTR]).norm();
+    double kExQ = (KInL - KOutR).norm();
     Weight[EX] =
         8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
 

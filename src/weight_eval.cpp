@@ -39,7 +39,12 @@ double weight::EvaluateGamma(int LoopNum) {
     //   return 0.0;
     ver4 &Root = Ver4Root[LoopNum];
     if (Root.Weight.size() != 0) {
-      Vertex4(Root, true);
+      Vertex4(Root,
+              Var.LoopMom[INL],  // KInL
+              Var.LoopMom[OUTL], // KOutL
+              Var.LoopMom[INR],  // KInR
+              Var.LoopMom[OUTR], // KOutR
+              true);
       for (auto &w : ChanWeight)
         // collapse all channel to I
         ChanWeight[0] += w;
@@ -59,14 +64,6 @@ double weight::EvaluatePolar(int LoopNum) {
     double Tau = Var.Tau[1] - Var.Tau[0];
     double Weight = Fermi.Green(Tau, Var.LoopMom[1], UP, 0, 0);
     Weight *= Fermi.Green(-Tau, Var.LoopMom[1] - Var.LoopMom[0], UP, 0, 0);
-    // cout << Var.LoopMom[1].norm() << endl;
-    // cout << Var.LoopMom[0].norm() << endl;
-    // cout << endl;
-
-    // double w = Fermi.Green(0.1, Var.LoopMom[1], UP, 0, 0);
-    // w *= Fermi.Green(-0.1, Var.LoopMom[1] - Var.LoopMom[0], UP, 0, 0);
-    // cout << Var.Tau[0] << "-->" << Var.Tau[1] << endl;
-    // cout << "MC: " << Weight << " vs " << w << endl;
 
     return -SPIN * Weight * Factor;
   }
@@ -74,15 +71,21 @@ double weight::EvaluatePolar(int LoopNum) {
   // loop order >=2
   dse::polar &P = Polar[LoopNum];
   ver4 &Ver4 = P.Vertex;
-  P.KOutL = Var.LoopMom[1] - Var.LoopMom[0];
-  P.KOutR = Var.LoopMom[2] + Var.LoopMom[0];
-  Vertex4(Ver4, false);
+  momentum KOutL = Var.LoopMom[1] - Var.LoopMom[0];
+  momentum KOutR = Var.LoopMom[2] + Var.LoopMom[0];
+
+  Vertex4(Ver4,
+          Var.LoopMom[1], // KInL
+          KOutL,          // KOutL
+          Var.LoopMom[2], // KInR
+          KOutR,          // KOutR
+          false);
 
   // evaluate all possible G
   EvaluateG(P.G[INL], Var.LoopMom[1]);
-  EvaluateG(P.G[OUTL], P.KOutL);
+  EvaluateG(P.G[OUTL], KOutL);
   EvaluateG(P.G[INR], Var.LoopMom[2]);
-  EvaluateG(P.G[OUTR], P.KOutR);
+  EvaluateG(P.G[OUTR], KOutR);
 
   int Size = Ver4.T.size();
   for (int i = 0; i < Size; ++i) {
@@ -116,8 +119,14 @@ double weight::EvaluateSigma(int LoopNum, bool IsFast) {
     // Sigma with LoopNum>=2
     dse::sigma &Si = Sigma[LoopNum];
     ver4 &Ver4 = Si.Vertex;
-    Vertex4(Ver4, false);
-    EvaluateG(Si.G, *Si.K);
+
+    Vertex4(Ver4, Var.LoopMom[0], // KInL
+            Var.LoopMom[1],       // KOutL
+            Var.LoopMom[1],       // KInR
+            Var.LoopMom[0],       // KOutR
+            false);
+
+    EvaluateG(Si.G, Var.LoopMom[1]);
     if (IsFast)
       Si.Weight[0] = 0.0;
     else {
@@ -128,53 +137,26 @@ double weight::EvaluateSigma(int LoopNum, bool IsFast) {
     // Size = 1;
     for (int i = 0; i < Size; ++i) {
 
-      // if (Si.SigTidx[i] != 0)
-      //   continue;
-
       auto &Weight = Ver4.Weight[i];
       int Gidx = Si.Gidx[i];
-      // cout << "G=" << Si.G[Gidx].Weight << endl;
-      // cout << "Root=" << Root.Weight[i][0] << endl;
-      // cout << "Root=" << Root.Weight[i][1] << endl;
       double w = (Weight[DIR] + Weight[EX] * SPIN) * Si.G[Gidx].Weight;
 
       if (Si.T[i] != 0)
         w *= 0.5;
 
-      // cout << "tot0: " << Si.Weight[0] << endl;
-      // cout << w << ", " << Factor << endl;
       if (IsFast)
         Si.Weight[0] += w * Factor;
       else
         Si.Weight[Si.SigTidx[i]] += w * Factor;
-
-      // if (i == 0) {
-      // cout << "i=" << i << ", G=" << Si.G[Gidx].Weight << endl;
-      // cout << "W= " << Weight[DIR] << ", " << Weight[EX] << endl;
-      // // cout << Ver4.T[i][INL] << ", " << Ver4.T[i][INR] << endl;
-      // cout << "T=" << Si.T[i] << ", SigTidx=" << Si.SigTidx[i] << ", "
-      //      << (Weight[DIR]) * Si.G[Gidx].Weight * Factor << ","
-      //      << (Weight[EX] * SPIN) * Si.G[Gidx].Weight * Factor << endl;
-      // cout << endl;
-      //   cout << (Weight[DIR] + Weight[EX] * SPIN) * Si.G[Gidx].Weight * 0.5
-      //   *
-      //               Factor
-      //        << endl;
-      //   cout << "tot1: " << Si.Weight[0] << endl;
-      //   _TestTwoLoopSigma();
-      //   // if (Para.Counter > 1000)
-      //   // exit(0);
-      // }
     }
-    // cout << "total: " << Si.Weight[0] << endl;
     return Si.Weight[0];
   }
 }
 
-void weight::Vertex4(ver4 &Ver4, bool IsFast) {
-  // cout << Ver4.LoopNum << endl;
+void weight::Vertex4(ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
+                     const momentum &KInR, const momentum &KOutR, bool IsFast) {
   if (Ver4.LoopNum == 0) {
-    Ver0(Ver4);
+    Ver0(Ver4, KInL, KOutL, KInR, KOutR);
   } else {
     if (Ver4.Level > 0 || IsFast == false) {
       for (auto &w : Ver4.Weight)
@@ -184,10 +166,36 @@ void weight::Vertex4(ver4 &Ver4, bool IsFast) {
         w.SetZero();
     }
 
-    ChanUST(Ver4, IsFast);
+    ChanUST(Ver4, KInL, KOutL, KInR, KOutR, IsFast);
     if (Ver4.LoopNum >= 3)
-      ChanI(Ver4, IsFast);
+      ChanI(Ver4, KInL, KOutL, KInR, KOutR, IsFast);
   }
+  return;
+}
+
+void weight::Ver0(ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
+                  const momentum &KInR, const momentum &KOutR) {
+  // only bare coupling
+  if (DiagType == POLAR)
+    Ver4.Weight[0] = VerQTheta.Interaction(KInL, KOutL, KInR, KOutR, 0.0, false,
+                                           Ver4.InBox, Var.LoopMom[0].norm());
+  else
+    Ver4.Weight[0] =
+        VerQTheta.Interaction(KInL, KOutL, KInR, KOutR, 0.0, false, Ver4.InBox);
+  // if (abs(Ver4.Weight[0][DIR] + 8.377) > 0.1) {
+  //   cout << "Ver0 " << Ver4.Weight[0][DIR] << endl;
+  //   ABORT("Err");
+  // }
+  // if (Ver4.Level == 1) {
+  //   cout << "ver0: " << Ver4.Weight[0][DIR] << Ver4.Weight[0][EX] << endl;
+  //   cout << "ver0 LegK0: " << (*Ver4.LegK[0]).norm() << endl;
+  //   cout << "ver0 LegK1: " << (*Ver4.LegK[1]).norm() << endl;
+  //   cout << "ver0 LegK2: " << (*Ver4.LegK[2]).norm() << endl;
+  //   cout << "ver0 LegK3: " << (*Ver4.LegK[3]).norm() << endl;
+  //   cout << Ver4.LegK[0] << ", " << Ver4.LegK[1] << ", " << Ver4.LegK[2] <<
+  //   ", "
+  //        << Ver4.LegK[3] << endl;
+  // }
   return;
 }
 
@@ -199,81 +207,64 @@ void weight::EvaluateG(vector<green> &G, const momentum &K) {
   }
 }
 
-void weight::ChanUST(ver4 &Ver4, bool IsFast) {
+void weight::ChanUST(ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
+                     const momentum &KInR, const momentum &KOutR, bool IsFast) {
   double Weight = 0.0;
   double Ratio, dTau, ProjFactor;
   double DirW, ExW;
-  const auto &LegK = Ver4.LegK;
+  // const auto &LegK = Ver4.LegK;
   auto &G = Ver4.G;
+  auto &K = Ver4.K;
   double Factor = 1.0 / pow(2.0 * PI, D);
 
-  // if (Ver4.Level == 0 && Ver4.LoopNum == 2)
-  //   cout << "\nNew Ver4" << endl;
-
   // calculate K table
-  Ver4.K[0] = Var.LoopMom[Ver4.Loopidx];
-  EvaluateG(G[0], Ver4.K[0]);
+  auto &K0 = Var.LoopMom[Ver4.Loopidx];
+  EvaluateG(G[0], K0);
   for (auto chan : Ver4.Channel) {
-    // cout << "chan: " << chan << endl;
     switch (chan) {
     case T:
-      Ver4.K[T] = *LegK[OUTL] + Ver4.K[0] - *LegK[INL];
+      K[T] = KOutL + K0 - KInL;
       if (Ver4.InBox)
-        EvaluateG(G[chan], Ver4.K[0]);
+        EvaluateG(G[chan], K0);
       else
         EvaluateG(G[chan], Ver4.K[chan]);
       break;
     case U:
-      // ASSERT_ALLWAYS(Ver4.InBox == false, "fail test");
-      Ver4.K[U] = *LegK[OUTR] + Ver4.K[0] - *LegK[INL];
+      K[U] = KOutR + K0 - KInL;
       EvaluateG(G[chan], Ver4.K[chan]);
       break;
     case S:
-      // ASSERT_ALLWAYS(Ver4.InBox == false, "fail test");
-      Ver4.K[S] = *LegK[INL] + *LegK[INR] - Ver4.K[0];
+      K[S] = KInL + KInR - K0;
       EvaluateG(G[chan], Ver4.K[chan]);
       break;
     case TC:
       // Ver4.K[T] may have not yet been initialized before this step
-      Ver4.K[T] = *LegK[OUTL] + Ver4.K[0] - *LegK[INL];
-      EvaluateG(G[chan], Ver4.K[0]);
+      K[T] = KOutL + K0 - KInL;
+      EvaluateG(G[chan], K0);
       break;
     case UC:
       // Ver4.K[U] may have not yet been initialized before this step
-      Ver4.K[U] = *LegK[OUTR] + Ver4.K[0] - *LegK[INL];
-      EvaluateG(G[chan], Ver4.K[0]);
+      K[U] = KOutR + K0 - KInL;
+      EvaluateG(G[chan], K0);
       break;
     }
   }
-  // cout << "InL=(" << (*LegK[INL])[0] << ", " << (*LegK[INL])[1] << ", "
-  //      << (*LegK[INL])[2] << ")" << endl;
-  // cout << "OutL=(" << (*LegK[OUTL])[0] << ", " << (*LegK[OUTL])[1] << ", "
-  //      << (*LegK[OUTL])[2] << ")" << endl;
-  // cout << "InR=(" << (*LegK[INR])[0] << ", " << (*LegK[INR])[1] << ", "
-  //      << (*LegK[INR])[2] << ")" << endl;
-  // cout << "OutR=(" << (*LegK[OUTR])[0] << ", " << (*LegK[OUTR])[1] << ", "
-  //      << (*LegK[OUTR])[2] << ")" << endl;
-  // cout << "KU=(" << (Ver4.K[U])[0] << ", " << (Ver4.K[U])[1] << ", "
-  //      << (Ver4.K[U])[2] << ")" << endl;
-  // cout << Ver4.K[UC].norm() << ", " << Ver4.K[0].norm() << endl;
-  // cout << "LegK0: " << (*Ver4.LegK[0]).norm() << endl;
-  // cout << "LegK1: " << (*Ver4.LegK[1]).norm() << endl;
-  // cout << "LegK2: " << (*Ver4.LegK[2]).norm() << endl;
-  // cout << "LegK3: " << (*Ver4.LegK[3]).norm() << endl;
-  // cout << Ver4.LegK[0] << ", " << Ver4.LegK[1] << ", " << Ver4.LegK[2] <<
-  // ",
-  // "
-  //      << Ver4.LegK[3] << endl;
-  // cout << "K0: " << Ver4.K[0].norm() << ", " << &Ver4.K[0] << endl;
-
   ///////////// Check if the projected counter-terms exist or not ///////
-
   // for vertex4 with one or more loops
   for (auto &b : Ver4.Bubble) {
     ver4 &LVer = b.LVer;
     ver4 &RVer = b.RVer;
-    Vertex4(LVer, IsFast);
-    Vertex4(RVer, IsFast);
+
+    if (b.Channel == T || b.Channel == TC) {
+      Vertex4(LVer, KInL, KOutL, K[T], K0, IsFast);
+      Vertex4(RVer, K0, K[T], KInR, KOutR, IsFast);
+    } else if (b.Channel == U || b.Channel == UC) {
+      Vertex4(LVer, KInL, KOutR, K[U], K0, IsFast);
+      Vertex4(RVer, K0, K[U], KInR, KOutL, IsFast);
+    } else if (b.Channel == S) {
+      Vertex4(LVer, KInL, K[S], KInR, K0, IsFast);
+      Vertex4(RVer, K0, KOutL, K[S], KOutR, IsFast);
+    }
 
     ProjFactor = SymFactor[b.Channel] * Factor;
     if (b.Channel == TC || b.Channel == UC || Ver4.InBox)
@@ -285,44 +276,19 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
       Weight =
           ProjFactor * G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight;
 
-      // cout << " G :: " << G[0][map.G0idx].Weight << ", "
-      //      << G[b.Channel][map.Gidx].Weight << endl;
-      // if (b.Channel == UC || b.Channel == TC || Ver4.InBox) {
-      //   ASSERT_ALLWAYS(
-      //       abs(G[0][map.G0idx].Weight * G[b.Channel][map.Gidx].Weight -
-      //           Fermi.Green(Para.Beta / 2.0, Ver4.K[0], UP, 0, 0) *
-      //               Fermi.Green(-Para.Beta / 2.0, Ver4.K[0], UP, 0, 0)) <
-      //           1.0e-10,
-      //       "GG does not match!");
-      // }
-
       auto &Lw = LVer.Weight[map.LVerTidx];
       auto &Rw = RVer.Weight[map.RVerTidx];
 
-      // cout << "Lver :: " << Lw[DIR] << ", " << Lw[EX] << endl;
-      // cout << "Rver :: " << Rw[DIR] << ", " << Rw[EX] << endl;
-
-      // if (b.Channel == UC || b.Channel == TC || Ver4.InBox) {
-      //   ASSERT_ALLWAYS(abs(Lw[EX]) < 1.0e-10, "LWrong! " << Lw[EX]);
-      //   ASSERT_ALLWAYS(abs(Rw[EX]) < 1.0e-10, "RWrong! " << Rw[EX]);
-      // }
-
-      switch (b.Channel) {
-      case T:
-      case TC:
+      if (b.Channel == T || b.Channel == TC) {
         DirW = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         ExW = Lw[EX] * Rw[EX];
-        break;
-      case U:
-      case UC:
-        ExW = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
-        DirW = Lw[EX] * Rw[EX];
-        break;
-      case S:
+      } else if (b.Channel == U || b.Channel == UC) {
+        DirW = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
+        ExW = Lw[EX] * Rw[EX];
+      } else if (b.Channel == S) {
         // see the note "code convention"
         DirW = Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         ExW = Lw[DIR] * Rw[DIR] + Lw[EX] * Rw[EX];
-        break;
       }
 
       if (Ver4.Level > 0 || IsFast == false) {
@@ -339,7 +305,8 @@ void weight::ChanUST(ver4 &Ver4, bool IsFast) {
   }
 }
 
-void weight::ChanI(dse::ver4 &Ver4, bool IsFast) {
+void weight::ChanI(dse::ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
+                   const momentum &KInR, const momentum &KOutR, bool IsFast) {
   if (Ver4.LoopNum != 3)
     return;
   // for (auto &Env : Ver4.Envelope) {

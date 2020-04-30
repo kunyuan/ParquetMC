@@ -18,8 +18,8 @@ void weight::Initialization() {
   array<momentum *, 4> ExtLegK;
 
   if (DiagType == GAMMA) {
-    ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1], &Var.LoopMom[2],
-               &Var.LoopMom[3]};
+    // ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1], &Var.LoopMom[2],
+    //            &Var.LoopMom[3]};
 
     vector<channel> Chan = {I, T, U, S, TC, UC};
     // vector<channel> Chan = {T, TC};
@@ -31,7 +31,7 @@ void weight::Initialization() {
                                        4, // loop index of the first internal K
                                        0, // tau index of the InTL leg
                                        Chan, RIGHT, false);
-      VerDiag.ResetMomMap(Ver4Root[order], ExtLegK);
+      // VerDiag.ResetMomMap(Ver4Root[order], ExtLegK);
       // the vertex LegK must be initialized after the memory allocaiton of the
       // vertex tree
       if (order < 4)
@@ -45,8 +45,8 @@ void weight::Initialization() {
   } else if (DiagType == SIGMA) {
     /////////////////////////// Sigma /////////////////////////
     for (int order = 2; order <= Para.Order; order++) {
-      Sigma[order] = BuildSigma(order, &Var.LoopMom[0], &Var.LoopMom[1]);
-      SetSigmaMom(Sigma[order], &Var.LoopMom[0], &Var.LoopMom[1]);
+      Sigma[order] = BuildSigma(order);
+      // SetSigmaMom(Sigma[order], &Var.LoopMom[0], &Var.LoopMom[1]);
 
       if (order < 4) {
         LOG_INFO(fmt::format(" Sigma, Order {0}\n", order));
@@ -56,7 +56,7 @@ void weight::Initialization() {
   } else if (DiagType == POLAR) {
     /////////////////////////// Polar /////////////////////////
     for (int order = 2; order <= Para.Order; order++) {
-      Polar[order] = BuildPolar(order, &Var.LoopMom[1], &Var.LoopMom[2]);
+      Polar[order] = BuildPolar(order);
       // if (order < 4) {
       //   LOG_INFO(fmt::format(" Polar, Order {0}\n", order));
       //   LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
@@ -69,7 +69,8 @@ void weight::MeasureUST() {
   if (Var.CurrOrder != 0) {
     ver4 &Root = Ver4Root[Var.CurrOrder];
     // if (Root.Weight.size() != 0) {
-    Vertex4(Root, true);
+    Vertex4(Root, Var.LoopMom[INL], Var.LoopMom[OUTL], Var.LoopMom[INR],
+            Var.LoopMom[OUTR], true);
   }
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
   VerQTheta.Measure(Var.LoopMom[INL], Var.LoopMom[INR], Var.CurrExtMomBin,
@@ -105,30 +106,6 @@ void weight::MeasurePolar() {
   // }
   PolarData.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.Tau[1] - Var.Tau[0],
                     Weight, Factor);
-}
-
-void weight::Ver0(ver4 &Ver4) {
-  // only bare coupling
-  if (DiagType == POLAR)
-    Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox,
-                                           Var.LoopMom[0].norm());
-  else
-    Ver4.Weight[0] = VerQTheta.Interaction(Ver4.LegK, 0.0, false, Ver4.InBox);
-  // if (abs(Ver4.Weight[0][DIR] + 8.377) > 0.1) {
-  //   cout << "Ver0 " << Ver4.Weight[0][DIR] << endl;
-  //   ABORT("Err");
-  // }
-  // if (Ver4.Level == 1) {
-  //   cout << "ver0: " << Ver4.Weight[0][DIR] << Ver4.Weight[0][EX] << endl;
-  //   cout << "ver0 LegK0: " << (*Ver4.LegK[0]).norm() << endl;
-  //   cout << "ver0 LegK1: " << (*Ver4.LegK[1]).norm() << endl;
-  //   cout << "ver0 LegK2: " << (*Ver4.LegK[2]).norm() << endl;
-  //   cout << "ver0 LegK3: " << (*Ver4.LegK[3]).norm() << endl;
-  //   cout << Ver4.LegK[0] << ", " << Ver4.LegK[1] << ", " << Ver4.LegK[2] <<
-  //   ", "
-  //        << Ver4.LegK[3] << endl;
-  // }
-  return;
 }
 
 void weight::Benchmark(int LoopNum, int Step) {

@@ -10,7 +10,7 @@
 using namespace dse;
 using namespace std;
 
-dse::polar dse::BuildPolar(int LoopNum, momentum *KInL, momentum *KInR) {
+dse::polar dse::BuildPolar(int LoopNum) {
   dse::polar Polar;
   Polar.LoopNum = LoopNum;
   Polar.TauNum = LoopNum + 1;
@@ -25,8 +25,8 @@ dse::polar dse::BuildPolar(int LoopNum, momentum *KInL, momentum *KInR) {
                      3, // loop index of the first internal K of the vertex
                      2, // tau index of the InTL leg
                      Chan, RIGHT, false);
-  array<momentum *, 4> ExtLegK = {KInL, &Polar.KOutL, KInR, &Polar.KOutR};
-  Factory.ResetMomMap(Polar.Vertex, ExtLegK);
+  // array<momentum *, 4> ExtLegK = {KInL, &Polar.KOutL, KInR, &Polar.KOutR};
+  // Factory.ResetMomMap(Polar.Vertex, ExtLegK);
   for (auto &t : Polar.Vertex.T) {
     int inL = AddToGList(Polar.G[INL], {0, t[INL]});
     int outL = AddToGList(Polar.G[OUTL], {t[OUTL], 0});
@@ -48,12 +48,11 @@ int AddToSingleTList(vector<int> &TList, int T) {
   return TList.size() - 1;
 }
 
-dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK) {
+dse::sigma dse::BuildSigma(int LoopNum) {
   ASSERT_ALLWAYS(LoopNum >= 2, "Sigma LoopNum must be larger than 2!");
   dse::sigma Sigma;
   Sigma.LoopNum = LoopNum;
   Sigma.TauNum = LoopNum;
-  Sigma.K = InterK;
 
   auto &Ver4 = Sigma.Vertex;
 
@@ -126,28 +125,28 @@ dse::sigma dse::BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK) {
   return Sigma;
 }
 
-void dse::SetSigmaMom(sigma &Sigma, momentum *ExtK, momentum *InterK) {
+// void dse::SetSigmaMom(sigma &Sigma, momentum *ExtK, momentum *InterK) {
 
-  verDiag Factory;
+//   verDiag Factory;
 
-  /////////////////// set K table ////////////////////
-  auto &Ver4 = Sigma.Vertex;
-  auto &K = Ver4.K;
-  auto &LegK = Ver4.LegK;
-  Ver4.LegK[INL] = ExtK;
-  Ver4.LegK[OUTR] = ExtK;
-  Ver4.LegK[OUTL] = InterK;
-  Ver4.LegK[INR] = InterK;
+//   /////////////////// set K table ////////////////////
+//   auto &Ver4 = Sigma.Vertex;
+//   auto &K = Ver4.K;
+//   auto &LegK = Ver4.LegK;
+//   Ver4.LegK[INL] = ExtK;
+//   Ver4.LegK[OUTR] = ExtK;
+//   Ver4.LegK[OUTL] = InterK;
+//   Ver4.LegK[INR] = InterK;
 
-  array<momentum *, 4> LLegK, RLegK;
+//   array<momentum *, 4> LLegK, RLegK;
 
-  for (auto &bub : Sigma.Vertex.Bubble) {
-    auto chan = bub.Channel;
-    ASSERT_ALLWAYS(chan == T || chan == TC, "Should be T or TC channel!");
+//   for (auto &bub : Sigma.Vertex.Bubble) {
+//     auto chan = bub.Channel;
+//     ASSERT_ALLWAYS(chan == T || chan == TC, "Should be T or TC channel!");
 
-    LLegK = {LegK[INL], LegK[OUTL], &K[T], &K[0]};
-    RLegK = {&K[0], &K[T], LegK[INR], LegK[OUTR]};
-    Factory.ResetMomMap(bub.LVer, LLegK);
-    Factory.ResetMomMap(bub.RVer, RLegK);
-  }
-}
+//     LLegK = {LegK[INL], LegK[OUTL], &K[T], &K[0]};
+//     RLegK = {&K[0], &K[T], LegK[INR], LegK[OUTR]};
+//     Factory.ResetMomMap(bub.LVer, LLegK);
+//     Factory.ResetMomMap(bub.RVer, RLegK);
+//   }
+// }

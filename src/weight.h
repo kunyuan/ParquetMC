@@ -68,12 +68,17 @@ private:
   double EvaluateSigma(int LoopNum, bool IsFast = true);
   double EvaluatePolar(int LoopNum);
 
-  void Vertex4(dse::ver4 &Ver4, bool IsFast);
+  void Vertex4(dse::ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
+               const momentum &KInR, const momentum &KOutR, bool IsFast);
 
-  void Ver0(dse::ver4 &Ver4);
+  void Ver0(dse::ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
+            const momentum &KInR, const momentum &KOutR);
 
-  void ChanI(dse::ver4 &Ver4, bool IsFast);
-  void ChanUST(dse::ver4 &Ver4, bool IsFast);
+  void ChanI(dse::ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
+             const momentum &KInR, const momentum &KOutR, bool IsFast);
+
+  void ChanUST(dse::ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
+               const momentum &KInR, const momentum &KOutR, bool IsFast);
 
   void EvaluateG(vector<dse::green> &G, const momentum &K);
   double EvaluateUST(int LoopNum);

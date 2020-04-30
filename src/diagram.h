@@ -28,7 +28,6 @@ struct sigma {
   int TauNum;
   int LoopNum;
   ver4 Vertex;
-  momentum *K; // one internal K is needed
   vector<green> G;
 
   vector<int> T;
@@ -39,10 +38,8 @@ struct sigma {
   vector<int> SigTidx;
 };
 
-polar BuildPolar(int LoopNum, momentum *InL, momentum *InR);
-sigma BuildSigma(int LoopNum, momentum *ExtK, momentum *InterK);
-
-void SetSigmaMom(sigma &Sigma, momentum *ExtK, momentum *InterK);
+polar BuildPolar(int LoopNum);
+sigma BuildSigma(int LoopNum);
 
 } // namespace dse
 #endif

@@ -32,8 +32,8 @@ void weight::_TestOneLoopGamma() {
 
   // one loop T and TC diagram
   momentum K1 = OutL + K0 - InL;
-  auto LVer = VerQTheta.Interaction({&InL, &OutL, &K1, &K0}, 0, false, false);
-  auto RVer = VerQTheta.Interaction({&K0, &K1, &InR, &OutR}, 0, false, false);
+  auto LVer = VerQTheta.Interaction(InL, OutL, K1, K0, 0, false, false);
+  auto RVer = VerQTheta.Interaction(K0, K1, InR, OutR, 0, false, false);
   dTau = Var.Tau[1] - Var.Tau[0];
   GWeight =
       Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(-dTau, K1, UP, 0, 0.0);
@@ -69,8 +69,8 @@ void weight::_TestOneLoopGamma() {
 
   // one loop U and UC diagram
   momentum K2 = OutR + K0 - InL;
-  LVer = VerQTheta.Interaction({&InL, &OutR, &K2, &K0}, 0, false, false);
-  RVer = VerQTheta.Interaction({&K0, &K2, &InR, &OutL}, 0, false, false);
+  LVer = VerQTheta.Interaction(InL, OutR, K2, K0, 0, false, false);
+  RVer = VerQTheta.Interaction(K0, K2, InR, OutL, 0, false, false);
   dTau = Var.Tau[1] - Var.Tau[0];
   GWeight =
       Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(-dTau, K2, UP, 0, 0.0);
@@ -105,8 +105,8 @@ void weight::_TestOneLoopGamma() {
 
   // one loop S diagram
   momentum K3 = InR + InL - K0;
-  LVer = VerQTheta.Interaction({&InL, &K3, &InR, &K0}, 0, false, false);
-  RVer = VerQTheta.Interaction({&K0, &OutL, &K3, &OutR}, 0, false, false);
+  LVer = VerQTheta.Interaction(InL, K3, InR, K0, 0, false, false);
+  RVer = VerQTheta.Interaction(K0, OutL, K3, OutR, 0, false, false);
   dTau = Var.Tau[1] - Var.Tau[0];
   GWeight =
       Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(dTau, K3, UP, 0, 0.0);
@@ -173,15 +173,16 @@ double weight::_TestTwoLoopSigma() {
 
 ver::weightMatrix weight::_GetWeight(int LoopNum, vector<channel> Channel) {
   ver::weightMatrix Weight;
-  array<momentum *, 4> ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1],
-                                  &Var.LoopMom[2], &Var.LoopMom[3]};
+  // array<momentum *, 4> ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1],
+  //                                 &Var.LoopMom[2], &Var.LoopMom[3]};
   ver4 Ver4 = VerDiag.Vertex(0, // level
                              1, // loopNum
                              4, // loop index of the first internal K
                              0, // tau index of the InTL leg
                              Channel, RIGHT, false);
-  VerDiag.ResetMomMap(Ver4, ExtLegK);
-  Vertex4(Ver4, true);
+  // VerDiag.ResetMomMap(Ver4, ExtLegK);
+  Vertex4(Ver4, Var.LoopMom[INL], Var.LoopMom[OUTL], Var.LoopMom[INR],
+          Var.LoopMom[OUTR], true);
   for (auto &w : ChanWeight)
     // collapse all channel to I
     ChanWeight[0] += w;

@@ -160,6 +160,7 @@ void MonteCarlo() {
       // Markov.Weight.Test(Markov.Var.CurrOrder);
       // exit(0);
       // }
+      Markov.Weight.Test(1);
 
       if (i % 8 == 0)
         Markov.Measure();
