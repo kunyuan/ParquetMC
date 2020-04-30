@@ -43,12 +43,11 @@ markov::markov() : Var(Weight.Var) {
   // for (auto &sp : Var.LoopSpin)
   //   sp = (spin)(Random.irn(0, 1));
 
-  Var.CurrExtMomBin = ExtMomBinSize / 2;
-
   // Var.LoopMom[0].fill(0.0);
   // Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
 
   if (DiagType == GAMMA) {
+    Var.CurrExtMomBin = 0;
     for (int i = 1; i < D; i++) {
       Var.LoopMom[INL][i] = 0.0;
       Var.LoopMom[OUTL][i] = 0.0;
@@ -60,6 +59,7 @@ markov::markov() : Var(Weight.Var) {
     Var.LoopMom[INR][0] = Para.Kf;
     Var.LoopMom[OUTR][0] = Para.Kf;
   } else if (DiagType == SIGMA || DiagType == POLAR) {
+    Var.CurrExtMomBin = ExtMomBinSize / 2;
     Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
   }
 

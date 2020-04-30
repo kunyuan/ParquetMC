@@ -22,16 +22,15 @@ const bool DEBUGMODE = false;
 // D=2 or D=3
 const int D = 3;
 // type of diagram
-const diagram DiagType = POLAR;
+const diagram DiagType = GAMMA;
+// spin index
+const int SPIN = 2;
 // number of q bins of the external momentum
 const int ExtMomBinSize = 32;
 // number of bins for the angle between InL and InR legs
 const int AngBinSize = 64;
-// number of energy scales, only useful in RG approach
-const int ScaleBinSize = 64;
+// number of tau bin
 const int TauBinSize = 32;
-const int TauBasisNum = 32;
-const int SPIN = 2;
 
 typedef Vec<double, D> momentum;
 // typedef std::array<double, D> momentum;

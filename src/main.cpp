@@ -45,7 +45,7 @@ void InitPara() {
   Para.Type = VARIATIONAL;
 
   // Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
-  Para.ReWeight = {1.0, 1.0, 1.0, 0.2, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
+  Para.ReWeight = {20.0, 1.0, 1.0, 0.2, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
   Para.ReWeightDiag = {1.0, 1.0, 1.0, 1.0, 1.0};
 
   //// initialize the global parameter //////////////////////
@@ -75,7 +75,8 @@ void InitPara() {
   // initialize external momentum
   for (int i = 0; i < ExtMomBinSize; i++) {
     // the external momentum only has x component
-    Para.ExtMomTable[i][0] = (i + 0.5) * Para.MaxExtMom / ExtMomBinSize;
+    // Para.ExtMomTable[i][0] = (i + 0.5) * Para.MaxExtMom / ExtMomBinSize;
+    Para.ExtMomTable[i][0] = i * Para.MaxExtMom / ExtMomBinSize;
     for (int j = 1; j < D; j++)
       Para.ExtMomTable[i][j] = 0.0;
   }
@@ -181,7 +182,7 @@ void MonteCarlo() {
 
         // Markov.PrintDeBugMCInfo();
         if (PrinterTimer.check(Para.PrinterTimer)) {
-          // Markov.Weight.Test(1);
+          Markov.Weight.Test(1);
           Markov.DynamicTest();
           Markov.PrintDeBugMCInfo();
           Markov.PrintMCInfo();

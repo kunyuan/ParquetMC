@@ -72,9 +72,6 @@ void markov::ChangeOrder() {
     if (Var.CurrOrder == 0)
       return;
 
-    // if (Var.CurrOrder == 1 && DiagType != GAMMA)
-    //   return;
-
     Name = DECREASE_ORDER;
     NewOrder = Var.CurrOrder - 1;
 

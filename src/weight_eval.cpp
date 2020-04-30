@@ -51,7 +51,6 @@ double weight::EvaluateGamma(int LoopNum) {
 }
 
 double weight::EvaluatePolar(int LoopNum) {
-
   double Factor = 1.0 / pow(2.0 * PI, D);
   // normalization
   if (LoopNum == 0)
