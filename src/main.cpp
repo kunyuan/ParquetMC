@@ -146,24 +146,19 @@ void MonteCarlo() {
         // ;
       }
 
-      // if (Markov.Var.CurrOrder == 2 &&
-      //     Markov.Var.LoopMom[2].norm() > 100.0 * Para.Kf) {
+      // if (Markov.Var.CurrOrder == 1) {
       //   cout << "Counter=" << Para.Counter << endl;
-      //   cout << "Order=" << Markov.Var.CurrOrder
-      //        << ", weight=" << Markov.Var.CurrAbsWeight
-      //        << ", extK=" << Markov.Var.LoopMom[2].norm() << endl;
-      //   Markov.Weight.Test(Markov.Var.CurrOrder);
-      //   // exit(0);
-      // }
-
-      // if (Markov.Weight.Var.CurrScale > Para.UVScale) {
-      //   cout << "Scale wrong!" << Markov.Weight.Var.CurrScale << endl;
-      //   ABORT("wrong");
-      // }
-
-      // if (Para.Counter == 140737351830544) {
-      //   cout << "After: " << Para.Counter << endl;
-      //   Markov.PrintDeBugMCInfo();
+      // cout << Markov.Var.LoopMom[OUTR][0] << ", "
+      //      << Markov.Var.LoopMom[OUTR][1] << endl;
+      // cout << Markov.Var.LoopMom[INR][0] << ", " <<
+      // Markov.Var.LoopMom[INR][1]
+      //      << endl;
+      // cout << Markov.Var.Tau[0] << ", " << Markov.Var.Tau[1] << endl;
+      // cout << "Order=" << Markov.Var.CurrOrder
+      //      << ", weight=" << Markov.Var.CurrAbsWeight
+      //      << ", extK=" << Markov.Var.LoopMom[2].norm() << endl;
+      // Markov.Weight.Test(Markov.Var.CurrOrder);
+      // exit(0);
       // }
 
       if (i % 8 == 0)

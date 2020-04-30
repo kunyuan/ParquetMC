@@ -63,8 +63,8 @@ verQTheta::verQTheta() {
   // PhyWeight =
   //     1.0 / Para.Beta / Para.Beta * ExtMomBinSize * 2.0 * PI * Para.Kf * 4.0;
 
-  PhyWeightT = ExtMomBinSize * AngBinSize;
-  PhyWeightI = ExtMomBinSize * AngBinSize;
+  PhyWeightT = AngBinSize;
+  PhyWeightI = AngBinSize;
   // PhyWeight = 2.0 * PI / TauBinSize * 64;
   // PhyWeight = 1.0;
 
