@@ -126,8 +126,8 @@ void markov::SaveToFile(bool Simple) {
     Weight.VerQTheta.Save(Simple);
   else if (DiagType == SIGMA)
     Weight.SigData.Save();
-  // else if(DiagType==POLAR)
-  //   Weight.Polar
+  else if (DiagType == POLAR)
+    Weight.PolarData.Save();
 };
 
 void markov::ClearStatis() { Weight.VerQTheta.ClearStatis(); }
