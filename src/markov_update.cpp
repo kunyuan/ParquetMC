@@ -97,7 +97,7 @@ void markov::ChangeOrder() {
   Proposed[Name][Var.CurrOrder] += 1;
 
   // Weight.ChangeGroup(NewGroup);
-  NewAbsWeight = Weight.Evaluate(NewOrder);
+  NewAbsWeight = fabs(Weight.Evaluate(NewOrder));
   double R = Prop * NewAbsWeight * Para.ReWeight[NewOrder] / Var.CurrAbsWeight /
              Para.ReWeight[Var.CurrOrder];
 
@@ -140,7 +140,7 @@ void markov::ChangeTau() {
 
   Var.Tau[TauIndex] = NewTau;
 
-  NewAbsWeight = Weight.Evaluate(Var.CurrOrder);
+  NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
 
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
@@ -168,7 +168,7 @@ void markov::ChangeMomentum() {
 
   Proposed[CHANGE_MOM][Var.CurrOrder]++;
 
-  NewAbsWeight = Weight.Evaluate(Var.CurrOrder);
+  NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
@@ -201,7 +201,7 @@ void markov::ChangeExtMomentum() {
 
   Proposed[CHANGE_EXTMOM][Var.CurrOrder]++;
 
-  NewAbsWeight = Weight.Evaluate(Var.CurrOrder);
+  NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
@@ -212,7 +212,7 @@ void markov::ChangeExtMomentum() {
     if (DiagType == GAMMA) {
       Var.LoopMom[INR] = CurrMom;
       Var.LoopMom[OUTR] = CurrMom;
-    } else if (DiagType == SIGMA) {
+    } else if (DiagType == SIGMA || DiagType == POLAR) {
       Var.CurrExtMomBin = CurrExtMomBin;
       Var.LoopMom[0] = CurrMom;
     }

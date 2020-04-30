@@ -94,12 +94,15 @@ void weight::MeasureSigma() {
 }
 void weight::MeasurePolar() {
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
-  double Weight = 1.0;
-  if (Var.CurrOrder > 0) {
-    auto &Root = Polar[Var.CurrOrder];
-    EvaluatePolar(Var.CurrOrder);
-    Weight = Root.Weight;
-  }
+  double Weight = EvaluatePolar(Var.CurrOrder);
+
+  // if (Var.CurrOrder == 1) {
+  //   double w = Fermi.Green(Para.Beta / 2.0, Var.LoopMom[1], UP, 0, 0);
+  //   w *= Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[1] - Var.LoopMom[0], UP,
+  //   0,
+  //                    0);
+  //   cout << Weight << " vs " << w << endl;
+  // }
   PolarData.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.Tau[1] - Var.Tau[0],
                     Weight, Factor);
 }

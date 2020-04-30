@@ -59,7 +59,7 @@ markov::markov() : Var(Weight.Var) {
     Var.LoopMom[OUTL][0] = Para.Kf;
     Var.LoopMom[INR][0] = Para.Kf;
     Var.LoopMom[OUTR][0] = Para.Kf;
-  } else if (DiagType == SIGMA) {
+  } else if (DiagType == SIGMA || DiagType == POLAR) {
     Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
   }
 
@@ -77,7 +77,7 @@ markov::markov() : Var(Weight.Var) {
 
   LOG_INFO("Calculating the weights of all objects...")
 
-  Var.CurrAbsWeight = Weight.Evaluate(Var.CurrOrder);
+  Var.CurrAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
 
   LOG_INFO("Initializating variables done.")
 
@@ -115,10 +115,14 @@ void markov::Measure() {
 void markov::AdjustGroupReWeight(){};
 
 void markov::LoadFile() {
-  if (DiagType == GAMMA)
-    Weight.VerQTheta.LoadWeight();
-  else if (DiagType == SIGMA)
-    Weight.SigData.LoadWeight();
+  Weight.SigData.LoadWeight();
+  // if (DiagType == GAMMA){
+  //   Weight.VerQTheta.LoadWeight();
+  // }
+  // else if (DiagType == SIGMA)
+  //   Weight.SigData.LoadWeight();
+  // else if (DiagType == POLAR)
+  //   Weight.SigData.LoadWeight();
 };
 
 void markov::SaveToFile(bool Simple) {

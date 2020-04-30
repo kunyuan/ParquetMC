@@ -151,7 +151,10 @@ void polarData::Measure(int Order, int Kidx, double Tau, double Weight,
     Normalization += 1.0 * Factor;
   // only for Order >=1
   else {
-    int TauIdx = int(fabs(Tau) / Para.Beta * TauBinSize);
+    if (Tau < 0.0)
+      Tau = Tau + Para.Beta;
+
+    int TauIdx = int(Tau / Para.Beta * TauBinSize);
 
     _Estimator[Order * OrderIndex + Kidx * KIndex + TauIdx] +=
         Weight * Factor * TauBinSize / Para.Beta;

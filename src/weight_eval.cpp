@@ -20,10 +20,10 @@ double weight::Evaluate(int LoopNum) {
     return EvaluateGamma(LoopNum);
     break;
   case diagram::SIGMA:
-    return fabs(EvaluateSigma(LoopNum));
+    return EvaluateSigma(LoopNum);
     break;
   case diagram::POLAR:
-    return fabs(EvaluatePolar(LoopNum));
+    return EvaluatePolar(LoopNum);
     break;
   default:
     break;
@@ -52,6 +52,7 @@ double weight::EvaluateGamma(int LoopNum) {
 
 double weight::EvaluatePolar(int LoopNum) {
 
+  double Factor = 1.0 / pow(2.0 * PI, D);
   // normalization
   if (LoopNum == 0)
     return 1.0;
@@ -59,7 +60,16 @@ double weight::EvaluatePolar(int LoopNum) {
     double Tau = Var.Tau[1] - Var.Tau[0];
     double Weight = Fermi.Green(Tau, Var.LoopMom[1], UP, 0, 0);
     Weight *= Fermi.Green(-Tau, Var.LoopMom[1] - Var.LoopMom[0], UP, 0, 0);
-    return -SPIN * Weight;
+    // cout << Var.LoopMom[1].norm() << endl;
+    // cout << Var.LoopMom[0].norm() << endl;
+    // cout << endl;
+
+    // double w = Fermi.Green(0.1, Var.LoopMom[1], UP, 0, 0);
+    // w *= Fermi.Green(-0.1, Var.LoopMom[1] - Var.LoopMom[0], UP, 0, 0);
+    // cout << Var.Tau[0] << "-->" << Var.Tau[1] << endl;
+    // cout << "MC: " << Weight << " vs " << w << endl;
+
+    return -SPIN * Weight * Factor;
   }
 
   // loop order >=2
@@ -89,7 +99,7 @@ double weight::EvaluatePolar(int LoopNum) {
         GWeight;
   }
 
-  return P.Weight;
+  return P.Weight * Factor * Factor;
 }
 
 double weight::EvaluateSigma(int LoopNum, bool IsFast) {

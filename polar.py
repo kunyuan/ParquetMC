@@ -139,7 +139,8 @@ ColorList = ColorList*40
 
 if(XType == "Mom"):
     for o in Order:
-        ErrorPlot(ax, ExtMomBin, sum(Data[o])*Beta/TauBinSize,
+        print Data[o].shape
+        ErrorPlot(ax, ExtMomBin, np.sum(Data[o][:, :], axis=0)*Beta/TauBinSize,
                   ColorList[o], 's', "Order {0}".format(o))
     ax.set_xlim([ExtMomBin[0], ExtMomBin[-1]])
     ax.set_xlabel("$Ext K$", size=size)
