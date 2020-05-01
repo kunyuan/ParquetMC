@@ -215,37 +215,6 @@ void verDiag::ChanUST(ver4 &Ver4, const vector<channel> &Channel) {
   }
 }
 
-void verDiag::ResetMomMap(ver4 &Ver4, const array<momentum *, 4> &LegK) {
-  Ver4.LegK = LegK;
-  auto &K = Ver4.K;
-  array<momentum *, 4> LLegK, RLegK;
-
-  for (auto &bub : Ver4.Bubble) {
-    auto chan = bub.Channel;
-    switch (chan) {
-    case T:
-    case TC:
-      LLegK = {LegK[INL], LegK[OUTL], &K[T], &K[0]};
-      RLegK = {&K[0], &K[T], LegK[INR], LegK[OUTR]};
-      break;
-    case U:
-    case UC:
-      LLegK = {LegK[INL], LegK[OUTR], &K[U], &K[0]};
-      RLegK = {&K[0], &K[U], LegK[INR], LegK[OUTL]};
-      break;
-    case S:
-      LLegK = {LegK[INL], &K[S], LegK[INR], &K[0]};
-      RLegK = {&K[0], LegK[OUTL], &K[S], LegK[OUTR]};
-      break;
-    default:
-      ABORT("Channel does not exist! " << chan);
-      break;
-    }
-    ResetMomMap(bub.LVer, LLegK);
-    ResetMomMap(bub.RVer, RLegK);
-  }
-}
-
 vector<mapT4> CreateMapT4(ver4 &Ver4, ver4 LDVer, ver4 LUVer, ver4 RDVer,
                           ver4 RUVer) {
   vector<mapT4> Map;

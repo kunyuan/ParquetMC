@@ -16,8 +16,6 @@ dse::polar dse::BuildPolar(int LoopNum) {
   Polar.TauNum = LoopNum + 1;
 
   vector<channel> Chan = {I, T, U, S, TC, UC};
-  // vector<channel> Chan = {T, TC};
-  // vector<channel> Chan = {U, UC};
   verDiag Factory;
   Polar.Vertex =
       Factory.Vertex(0,           // level
@@ -25,8 +23,6 @@ dse::polar dse::BuildPolar(int LoopNum) {
                      3, // loop index of the first internal K of the vertex
                      2, // tau index of the InTL leg
                      Chan, RIGHT, false);
-  // array<momentum *, 4> ExtLegK = {KInL, &Polar.KOutL, KInR, &Polar.KOutR};
-  // Factory.ResetMomMap(Polar.Vertex, ExtLegK);
   for (auto &t : Polar.Vertex.T) {
     int inL = AddToGList(Polar.G[INL], {0, t[INL]});
     int outL = AddToGList(Polar.G[OUTL], {t[OUTL], 0});
@@ -124,29 +120,3 @@ dse::sigma dse::BuildSigma(int LoopNum) {
   Sigma.Weight.resize(Sigma.T.size());
   return Sigma;
 }
-
-// void dse::SetSigmaMom(sigma &Sigma, momentum *ExtK, momentum *InterK) {
-
-//   verDiag Factory;
-
-//   /////////////////// set K table ////////////////////
-//   auto &Ver4 = Sigma.Vertex;
-//   auto &K = Ver4.K;
-//   auto &LegK = Ver4.LegK;
-//   Ver4.LegK[INL] = ExtK;
-//   Ver4.LegK[OUTR] = ExtK;
-//   Ver4.LegK[OUTL] = InterK;
-//   Ver4.LegK[INR] = InterK;
-
-//   array<momentum *, 4> LLegK, RLegK;
-
-//   for (auto &bub : Sigma.Vertex.Bubble) {
-//     auto chan = bub.Channel;
-//     ASSERT_ALLWAYS(chan == T || chan == TC, "Should be T or TC channel!");
-
-//     LLegK = {LegK[INL], LegK[OUTL], &K[T], &K[0]};
-//     RLegK = {&K[0], &K[T], LegK[INR], LegK[OUTR]};
-//     Factory.ResetMomMap(bub.LVer, LLegK);
-//     Factory.ResetMomMap(bub.RVer, RLegK);
-//   }
-// }

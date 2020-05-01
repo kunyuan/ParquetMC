@@ -283,8 +283,8 @@ void weight::ChanUST(ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
         DirW = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         ExW = Lw[EX] * Rw[EX];
       } else if (b.Channel == U || b.Channel == UC) {
-        DirW = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
-        ExW = Lw[EX] * Rw[EX];
+        ExW = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
+        DirW = Lw[EX] * Rw[EX];
       } else if (b.Channel == S) {
         // see the note "code convention"
         DirW = Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];

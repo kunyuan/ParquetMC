@@ -116,6 +116,10 @@ void MonteCarlo() {
   LOG_INFO("Loading Weight...")
   Markov.LoadFile();
 
+  for (int order = 1; order <= Para.Order; ++order) {
+    Markov.Weight.Benchmark(order, 1000);
+  }
+
   while (true) {
     Block++;
     if (Block > Para.TotalStep)
@@ -160,23 +164,13 @@ void MonteCarlo() {
       // Markov.Weight.Test(Markov.Var.CurrOrder);
       // exit(0);
       // }
-      Markov.Weight.Test(1);
+      // Markov.Weight.Test(1);
 
       if (i % 8 == 0)
         Markov.Measure();
       // Markov.DynamicTest();
 
       if (i % 1000 == 0) {
-        // if (i % 10000)
-        //   Markov.Weight.Test(1, GAMMA);
-
-        // cout << Markov.Weight.Var.Tau[0] << " vs " <<
-        // Markov.Weight.Var.Tau[1]
-        //      << endl;
-        // cout << Markov.Weight.Var.Tau[2] << " , " << Markov.Weight.Var.Tau[3]
-        //      << endl;
-
-        // Markov.PrintDeBugMCInfo();
         if (PrinterTimer.check(Para.PrinterTimer)) {
           Markov.Weight.Test(1);
           Markov.DynamicTest();
@@ -222,10 +216,6 @@ void MonteCarlo() {
   Interrupt.Delay(); // the process can not be killed in saving
   Markov.SaveToFile(false);
   Interrupt.Resume(); // after this point, the process can be killed
-
-  // for (int order = 1; order < Para.Order; ++order) {
-  //   Markov.Weight.Benchmark(order, 1000);
-  // }
 
   LOG_INFO("Quit Markov.");
 }
