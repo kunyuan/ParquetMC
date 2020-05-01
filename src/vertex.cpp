@@ -105,6 +105,8 @@ weightMatrix verQTheta::Interaction(const momentum &KInL, const momentum &KOutL,
   } else
     Weight[EX] = 0.0;
 
+  // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
+  // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
   return Weight;
 }
 

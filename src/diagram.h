@@ -18,6 +18,7 @@ struct polar {
   int LoopNum;
   ver4 Vertex;
   momentum KOutL, KOutR;
+  // vector<green> GInL, GOutL, GInR, GOutR;
   array<vector<green>, 4> G;
   vector<array<int, 4>> Gidx; // external T list
   // there is only one Tau: from 0 to 1

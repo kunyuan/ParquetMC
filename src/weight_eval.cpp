@@ -81,6 +81,10 @@ double weight::EvaluatePolar(int LoopNum) {
           KOutR,          // KOutR
           false);
 
+  // cout << Ver4.Weight[0][DIR] << ", " << Ver4.Weight[0][EX] << endl;
+  // cout << Var.LoopMom[0][0] << ", Mom1=" << Var.LoopMom[1].norm() << endl;
+  // cout << "DirQ: " << (Var.LoopMom[1] - KOutL).norm() << endl;
+
   // evaluate all possible G
   EvaluateG(P.G[INL], Var.LoopMom[1]);
   EvaluateG(P.G[OUTL], KOutL);
@@ -88,18 +92,21 @@ double weight::EvaluatePolar(int LoopNum) {
   EvaluateG(P.G[OUTR], KOutR);
 
   int Size = Ver4.T.size();
+  P.Weight = 0.0;
   for (int i = 0; i < Size; ++i) {
     auto &Gidx = P.Gidx[i];
-    double GWeight = 1.0;
+    double Weight =
+        (SPIN * SPIN * Ver4.Weight[i][DIR] + SPIN * Ver4.Weight[i][EX]);
 
     // attach four G
-    for (int j = 0; j < 4; ++j)
-      GWeight *= P.G[j][Gidx[i]].Weight;
+    for (int j = 0; j < 4; ++j) {
+      Weight *= P.G[j][Gidx[j]].Weight;
+      // cout << j << "=" << P.G[j][Gidx[j]].Weight << endl;
+    }
 
-    P.Weight +=
-        (SPIN * SPIN * Ver4.Weight[i][DIR] + SPIN * Ver4.Weight[i][EX]) *
-        GWeight;
+    P.Weight += Weight;
   }
+  // cout << P.Weight << endl;
 
   return P.Weight * Factor * Factor;
 }

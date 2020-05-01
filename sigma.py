@@ -10,9 +10,9 @@ mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
 
-XType = "Tau"
+# XType = "Tau"
 # XType = "Mom"
-# XType = "Z"
+XType = "Z"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 Order = [0, 1, 2, 3, 4, 5]
