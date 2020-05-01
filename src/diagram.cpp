@@ -120,3 +120,21 @@ dse::sigma dse::BuildSigma(int LoopNum) {
   Sigma.Weight.resize(Sigma.T.size());
   return Sigma;
 }
+
+dse::delta dse::BuildDelta(int LoopNum) {
+  dse::delta Delta;
+
+  vector<channel> Chan = {I, T, U, TC, UC};
+  verDiag Factory;
+  Delta.Vertex =
+      Factory.Vertex(0,           // level
+                     LoopNum - 1, // loopNum
+                     2, // loop index of the first internal K of the vertex
+                     0, // tau index of the InTL leg
+                     Chan, RIGHT, false);
+  for (auto &t : Delta.Vertex.T) {
+    int Fidx = AddToGList(Delta.F, {t[OUTL], t[OUTR]});
+    Delta.Fidx.push_back(Fidx);
+  }
+  return Delta;
+};
