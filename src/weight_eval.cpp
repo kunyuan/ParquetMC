@@ -15,19 +15,14 @@ using namespace std;
 using namespace dse;
 
 double weight::Evaluate(int LoopNum) {
-  switch (DiagType) {
-  case diagram::GAMMA:
+  if (DiagType == diagram::GAMMA)
     return EvaluateGamma(LoopNum);
-    break;
-  case diagram::SIGMA:
+  else if (DiagType == diagram::SIGMA)
     return EvaluateSigma(LoopNum);
-    break;
-  case diagram::POLAR:
+  else if (DiagType == diagram::POLAR)
     return EvaluatePolar(LoopNum);
-    break;
-  default:
-    break;
-  }
+  else if (DiagType == diagram::DELTA)
+    return EvaluateDelta(LoopNum);
 }
 
 double weight::EvaluateGamma(int LoopNum) {

@@ -9,7 +9,7 @@
 #include <vector>
 
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
-enum diagram { SIGMA, POLAR, GAMMA };
+enum diagram { SIGMA, POLAR, GAMMA, DELTA };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 
 // turn off all assert
@@ -22,7 +22,7 @@ const bool DEBUGMODE = false;
 // D=2 or D=3
 const int D = 3;
 // type of diagram
-const diagram DiagType = POLAR;
+const diagram DiagType = DELTA;
 // spin index
 const int SPIN = 2;
 // number of q bins of the external momentum

@@ -200,4 +200,78 @@ void polarData::Save() {
   }
 }
 
-void polarData::LoadWeight() {}
+deltaData::deltaData() {
+  _Estimator = new double[MaxOrder * TauBinSize * ExtMomBinSize];
+  OrderIndex = TauBinSize * ExtMomBinSize;
+  KIndex = TauBinSize;
+  PhyWeight = ExtMomBinSize / Para.Beta;
+  Initialization();
+  return;
+}
+
+void deltaData::Initialization() {
+  for (int i = 0; i < MaxOrder * TauBinSize * ExtMomBinSize; ++i)
+    _Estimator[i] = 0.0;
+}
+
+deltaData::~deltaData() { delete[] _Estimator; }
+
+void deltaData::Measure(int Order, int Kidx, double Tau, double Weight,
+                        double Factor) {
+
+  if (Order == 0)
+    Normalization += 1.0 * Factor;
+  // only for Order >=1
+  else {
+    int TauIdx = 0;
+    // if Order==1, then F must a delta function of tau
+
+    if (Order >= 2) {
+      if (Tau < 0.0)
+        Tau = Tau + Para.Beta;
+      TauIdx = int(Tau / Para.Beta * TauBinSize);
+    }
+
+    _Estimator[Order * OrderIndex + Kidx * KIndex + TauIdx] +=
+        Weight * Factor * TauBinSize / Para.Beta;
+    _Estimator[0 * OrderIndex + Kidx * KIndex + TauIdx] +=
+        Weight * Factor * TauBinSize / Para.Beta;
+  }
+}
+
+void deltaData::Save() {
+
+  for (int order = 0; order <= Para.Order; order++) {
+    string FileName = fmt::format("delta{0}_pid{1}.dat", order, Para.PID);
+    ofstream VerFile;
+    VerFile.open(FileName, ios::out | ios::trunc);
+
+    if (VerFile.is_open()) {
+
+      VerFile << fmt::sprintf("#PID:%d, rs:%.3f, Beta: %.3f, Step: %d\n",
+                              Para.PID, Para.Rs, Para.Beta, Para.Counter);
+
+      VerFile << "# Norm: " << Normalization << endl;
+
+      VerFile << "# TauTable: ";
+      for (int t = 0; t < TauBinSize; ++t)
+        VerFile << Para.Beta * t / TauBinSize << " ";
+
+      VerFile << endl;
+      VerFile << "# ExtMomBinTable: ";
+      for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
+        VerFile << Para.ExtMomTable[qindex][0] << " ";
+      VerFile << endl;
+
+      for (int tindex = 0; tindex < TauBinSize; ++tindex)
+        for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
+          VerFile << _Estimator[order * OrderIndex + qindex * KIndex + tindex] *
+                         PhyWeight
+                  << "  ";
+      // VerFile << 0.0 << "  ";
+      VerFile.close();
+    } else {
+      LOG_WARNING("Delta for PID " << Para.PID << " fails to save!");
+    }
+  }
+}

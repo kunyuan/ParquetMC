@@ -62,6 +62,14 @@ void weight::Initialization() {
       //   LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
       // }
     }
+  } else if (DiagType == DELTA) {
+    for (int order = 1; order <= Para.Order; order++) {
+      Delta[order] = BuildDelta(order);
+      // if (order < 4) {
+      //   LOG_INFO(fmt::format(" Polar, Order {0}\n", order));
+      //   LOG_INFO(VerDiag.ToString(Sigma[order].Vertex));
+      // }
+    }
   }
 }
 
@@ -96,16 +104,16 @@ void weight::MeasureSigma() {
 void weight::MeasurePolar() {
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
   double Weight = EvaluatePolar(Var.CurrOrder);
-
-  // if (Var.CurrOrder == 1) {
-  //   double w = Fermi.Green(Para.Beta / 2.0, Var.LoopMom[1], UP, 0, 0);
-  //   w *= Fermi.Green(-Para.Beta / 2.0, Var.LoopMom[1] - Var.LoopMom[0], UP,
-  //   0,
-  //                    0);
-  //   cout << Weight << " vs " << w << endl;
-  // }
   PolarData.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.Tau[1] - Var.Tau[0],
                     Weight, Factor);
+}
+
+void weight::MeasureDelta() {
+  double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
+  double Weight = EvaluateDelta(Var.CurrOrder);
+  DeltaData.Measure(Var.CurrOrder, Var.CurrExtMomBin,
+                    Var.Tau[Var.CurrOrder - 1] - Var.Tau[0], Weight, Factor);
+  // Tau variable= the last Tau - the first tau
 }
 
 void weight::Benchmark(int LoopNum, int Step) {

@@ -41,10 +41,12 @@ public:
   ver::verQTheta VerQTheta; // vertex factory
   ver::sigData SigData;
   ver::polarData PolarData;
+  ver::deltaData DeltaData;
 
   dse::ver4 Ver4Root[MaxOrder];
   dse::sigma Sigma[MaxOrder];
   dse::polar Polar[MaxOrder];
+  dse::delta Delta[MaxOrder];
 
   void Initialization();
 
@@ -53,6 +55,7 @@ public:
   void MeasureUST();
   void MeasureSigma();
   void MeasurePolar();
+  void MeasureDelta();
 
   // void EvaluateChanVer4(int LoopNum, array<ver::weightMatrix, 4> ChanWeight);
 
@@ -67,6 +70,7 @@ private:
   double EvaluateGamma(int LoopNum);
   double EvaluateSigma(int LoopNum, bool IsFast = true);
   double EvaluatePolar(int LoopNum);
+  double EvaluateDelta(int LoopNum);
 
   void Vertex4(dse::ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
                const momentum &KInR, const momentum &KOutR, bool IsFast);
