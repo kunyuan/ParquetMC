@@ -421,23 +421,32 @@ double ver::Index2Tau(const int &Index) {
 
 void ver::_TestAngle2D() {
   // Test Angle functions
-  momentum K1 = {1.0, 0.0};
-  momentum K2 = {1.0, 0.0};
+  momentum K1, K2;
+  K1.setZero();
+  K2.setZero();
+  K1[0] = 1.0;
+  K2[0] = 1.0;
 
   ASSERT_ALLWAYS(
       abs(Angle3D(K1, K2) - 1.0) < 1.e-7,
       fmt::format("Angle between K1 and K2 are not zero! It is {:.13f}",
                   Angle3D(K1, K2)));
 
-  K1 = {1.0, 0.0};
-  K2 = {-1.0, 0.0};
+  K1.setZero();
+  K2.setZero();
+  K1[0] = 1.0;
+  K2[0] = -1.0;
   ASSERT_ALLWAYS(
       abs(Angle3D(K1, K2) - (-1.0)) < 1.e-7,
       fmt::format("Angle between K1 and K2 are not Pi! Instead, it is {:.13f}",
                   Angle3D(K1, K2)));
 
-  K1 = {1.0, 0.0};
-  K2 = {1.0, -EPS};
+  K1.setZero();
+  K2.setZero();
+  K1[0] = 1.0;
+  K2[0] = -1.0;
+  K1[1] = 0.0;
+  K2[1] = -EPS;
   ASSERT_ALLWAYS(
       abs(Angle3D(K1, K2) - 1.0) < 1.e-7,
       fmt::format("Angle between K1 and K2 are not 2.0*Pi! It is {:.13f}",

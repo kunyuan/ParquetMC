@@ -40,9 +40,9 @@ const int MaxOrder = 9; // Max diagram order
 const int MaxMomNum = MaxOrder + 3;
 const int MaxTauNum = MaxOrder + 1; // Max tau number in one group
 
-typedef Vec<double, D> momentum;
+// typedef Vec<double, D> momentum;
 // typedef std::array<double, D> momentum;
-// typedef Eigen::Matrix<double, D, 1> momentum;
+typedef Eigen::Matrix<double, D, 1> momentum;
 
 /////////// Global Parameter ////////////////////
 struct parameter {
