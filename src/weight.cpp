@@ -4,7 +4,6 @@
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
 #include "utility/timer.h"
-#include "utility/vector.h"
 #include <array>
 #include <iostream>
 #include <stack>

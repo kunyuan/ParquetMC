@@ -73,12 +73,12 @@ verQTheta::verQTheta() {
     c.Initialize();
 }
 
-weightMatrix verQTheta::Interaction(const momentum &KInL, const momentum &KOutL,
-                                    const momentum &KInR, const momentum &KOutR,
-                                    double Tau, bool IsRenorm, bool Boxed,
-                                    double ExtQ) {
+verWeight verQTheta::Interaction(const momentum &KInL, const momentum &KOutL,
+                                 const momentum &KInR, const momentum &KOutR,
+                                 double Tau, bool IsRenorm, bool Boxed,
+                                 double ExtQ) {
 
-  weightMatrix Weight;
+  verWeight Weight;
 
   double kDiQ = (KInL - KOutL).norm();
   Weight[DIR] =
@@ -121,8 +121,7 @@ double verQTheta::Interaction(const momentum &TranQ) {
 
 void verQTheta::Measure(const momentum &InL, const momentum &InR,
                         const int QIndex, int Order,
-                        const array<ver::weightMatrix, 4> &Weight,
-                        double Factor) {
+                        const array<verWeight, 4> &Weight, double Factor) {
   // cout << Order << ", " << DiagNum << endl;
   if (Order == 0) {
     Normalization += 1.0 * Factor;

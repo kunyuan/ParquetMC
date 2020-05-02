@@ -2,7 +2,6 @@
 #define FeynCalc_global_h
 
 #include "utility/utility.h"
-#include "utility/vector.h"
 #include <Eigen/Dense>
 #include <array>
 #include <math.h>
@@ -33,16 +32,14 @@ const int ExtMomBinSize = 32;
 const int AngBinSize = 64;
 // number of tau bin
 const int TauBinSize = 32;
-
-//////////   Diagram  ////////////////////////////
-const int MaxOrder = 9; // Max diagram order
-// const int MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
+// Max diagram order
+const int MaxOrder = 9;
+const int MaxTauNum = MaxOrder + 1;
+// MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
 const int MaxMomNum = MaxOrder + 3;
-const int MaxTauNum = MaxOrder + 1; // Max tau number in one group
 
-// typedef Vec<double, D> momentum;
-// typedef std::array<double, D> momentum;
 typedef Eigen::Matrix<double, D, 1> momentum;
+typedef Eigen::Vector2d verWeight;
 
 /////////// Global Parameter ////////////////////
 struct parameter {
@@ -68,11 +65,11 @@ struct parameter {
   int ReweightTimer; // how many secondes between two reweighting
 
   // external variable tables
-  std::array<momentum, ExtMomBinSize>
-      ExtMomTable; // external bosonic Momentum (transfer momentum)
-  std::array<momentum, AngBinSize>
-      ExtLegKTable; // external fermionic Momentum (LegK momentum)
-  std::array<double, AngBinSize> AngleTable;
+  // external bosonic Momentum (transfer momentum)
+  momentum ExtMomTable[ExtMomBinSize];
+  // external fermionic Momentum (LegK momentum)
+  momentum ExtLegKTable[AngBinSize];
+  double AngleTable[AngBinSize];
 };
 
 struct variable {
@@ -84,8 +81,8 @@ struct variable {
   double CurrAbsWeight; // current abs weight
 
   // interval variables
-  array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
-  array<double, MaxTauNum> Tau;       // all tau variables
+  momentum LoopMom[MaxMomNum]; // all momentum loop variables
+  double Tau[MaxTauNum];       // all tau variables
 };
 
 //////////   Generic Global Constants  /////////////////

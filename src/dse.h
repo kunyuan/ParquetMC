@@ -50,8 +50,8 @@ struct ver4 {
 
   // vector<envelope> Envelope; // envelop diagrams and its counter diagram
 
-  vector<array<int, 4>> T;          // external T list
-  vector<ver::weightMatrix> Weight; // size: equal to T.size()
+  vector<array<int, 4>> T;  // external T list
+  vector<verWeight> Weight; // size: equal to T.size()
 };
 
 struct indexMap {

@@ -2,7 +2,6 @@
 #include "global.h"
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
-#include "utility/vector.h"
 #include <array>
 #include <iostream>
 #include <string>

@@ -19,7 +19,7 @@ using namespace std;
 class weight {
 public:
   weight() {}
-  array<ver::weightMatrix, 4> ChanWeight;
+  array<verWeight, 4> ChanWeight;
 
   ver::fermi Fermi;         // propagator factory
   ver::verQTheta VerQTheta; // vertex factory
@@ -74,7 +74,7 @@ private:
   void _TestOneLoopGamma();
   void _TestTwoLoopGamma();
   double _TestTwoLoopSigma();
-  ver::weightMatrix _GetWeight(int LoopNum, vector<dse::channel> Channel);
+  verWeight _GetWeight(int LoopNum, vector<dse::channel> Channel);
 };
 
 }; // namespace diag

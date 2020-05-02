@@ -3,7 +3,6 @@
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
 #include "utility/timer.h"
-#include "utility/vector.h"
 #include "weight.h"
 #include <array>
 #include <iostream>
@@ -23,10 +22,10 @@ void weight::Vertex4(ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
   } else {
     if (Ver4.Level > 0 || IsFast == false) {
       for (auto &w : Ver4.Weight)
-        w.SetZero();
+        w.setZero();
     } else {
       for (auto &w : ChanWeight)
-        w.SetZero();
+        w.setZero();
     }
 
     ChanUST(Ver4, KInL, KOutL, KInR, KOutR, IsFast);

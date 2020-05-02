@@ -41,7 +41,6 @@ public:
   diag::weight Weight;
 
 private:
-  ver::weightMatrix NewWeight;
   double NewAbsWeight;
 
   int GetTauNum(int Order);

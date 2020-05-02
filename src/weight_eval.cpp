@@ -3,7 +3,6 @@
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
 #include "utility/timer.h"
-#include "utility/vector.h"
 #include "weight.h"
 #include <array>
 #include <iostream>
@@ -46,7 +45,7 @@ double weight::EvaluateGamma(int LoopNum) {
         // collapse all channel to I
         ChanWeight[0] += w;
       // cout << ChanWeight[0].Abs() << endl;
-      return ChanWeight[0].Abs();
+      return abs(ChanWeight[0][DIR] + ChanWeight[0][EX] / SPIN);
     } else
       return 0.0;
   }

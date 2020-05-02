@@ -11,8 +11,9 @@ public:
   void Initialization();
   void Measure0(double Factor);                          // all tau variables
   void Measure1(int Kidx, double Weight, double Factor); // all tau variables
-  void Measure(int Order, int Kidx, const vector<int> Tidx,
-               const vector<double> Weight, double Factor); // all tau variables
+  void Measure(int Order, int Kidx, const std::vector<int> Tidx,
+               const std::vector<double> Weight,
+               double Factor); // all tau variables
   void Save();
   void LoadWeight();
 

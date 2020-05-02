@@ -2,7 +2,6 @@
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
 #include "utility/timer.h"
-#include "utility/vector.h"
 #include "weight.h"
 #include <array>
 #include <iostream>
@@ -30,7 +29,7 @@ void weight::_TestOneLoopGamma() {
   momentum K0 = Var.LoopMom[4];
   double Factor = 1.0 / pow(2.0 * PI, D);
   double dTau, GWeight, GWeightInBox;
-  ver::weightMatrix TestWeight, Weight;
+  verWeight TestWeight, Weight;
 
   // one loop T and TC diagram
   momentum K1 = OutL + K0 - InL;
@@ -42,7 +41,7 @@ void weight::_TestOneLoopGamma() {
   GWeightInBox =
       Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(-dTau, K0, UP, 0, 0.0);
 
-  TestWeight.SetZero();
+  TestWeight.setZero();
   TestWeight[DIR] = LVer[DIR] * RVer[DIR] * SPIN + LVer[EX] * RVer[DIR] +
                     LVer[DIR] * RVer[EX];
   TestWeight[EX] = LVer[EX] * RVer[EX];
@@ -79,7 +78,7 @@ void weight::_TestOneLoopGamma() {
   GWeightInBox =
       Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(-dTau, K0, UP, 0, 0.0);
 
-  TestWeight.SetZero();
+  TestWeight.setZero();
   TestWeight[DIR] = LVer[EX] * RVer[EX];
   TestWeight[EX] = LVer[DIR] * RVer[DIR] * SPIN + LVer[EX] * RVer[DIR] +
                    LVer[DIR] * RVer[EX];
@@ -113,7 +112,7 @@ void weight::_TestOneLoopGamma() {
   GWeight =
       Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(dTau, K3, UP, 0, 0.0);
 
-  TestWeight.SetZero();
+  TestWeight.setZero();
   TestWeight[DIR] = LVer[EX] * RVer[DIR] + LVer[DIR] * RVer[EX];
   TestWeight[EX] = LVer[DIR] * RVer[DIR] + LVer[EX] * RVer[EX];
   TestWeight *= GWeight;
@@ -173,8 +172,8 @@ double weight::_TestTwoLoopSigma() {
   return Weight1 + 2 * Weight2;
 }
 
-ver::weightMatrix weight::_GetWeight(int LoopNum, vector<channel> Channel) {
-  ver::weightMatrix Weight;
+verWeight weight::_GetWeight(int LoopNum, vector<channel> Channel) {
+  verWeight Weight;
   // array<momentum *, 4> ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1],
   //                                 &Var.LoopMom[2], &Var.LoopMom[3]};
   ver4 Ver4 = VerDiag.Vertex(0, // level

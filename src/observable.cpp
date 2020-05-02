@@ -8,6 +8,7 @@
 #include <iostream>
 
 using namespace ver;
+using namespace std;
 
 extern parameter Para;
 extern variable Var;
