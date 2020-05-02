@@ -11,6 +11,7 @@
 
 extern parameter Para;
 extern RandomFactory Random;
+extern variable Var;
 
 using namespace mc;
 using namespace diag;
@@ -25,7 +26,7 @@ using namespace std;
 // x=2*i+1, then PAIR(x)=2*i
 #define PAIR(x) (int(x / 2) * 4 + 1 - x)
 
-markov::markov() : Var(Weight.Var) {
+markov::markov() {
   ///==== initialize Weight ============================//
   Weight.Initialization();
 
@@ -67,7 +68,7 @@ markov::markov() : Var(Weight.Var) {
 
   // initialize group
 
-  Var.CurrVersion = 0;
+  Var.Counter = 0;
 
   // Var.CurrGroup = &Groups[0];
   Var.CurrOrder = 0;
@@ -163,7 +164,7 @@ std::string markov::_DetailBalanceStr(Updates op) {
 void markov::PrintMCInfo() {
   string Output = "";
   Output = string(80, '=') + "\n";
-  Output += "MC Counter: " + to_string(Para.Counter) + "\n";
+  Output += "MC Counter: " + to_string(Var.Counter) + "\n";
   for (int i = 0; i < MCUpdates; i++)
     Output += _DetailBalanceStr((Updates)i);
   Output += string(80, '=') + "\n";
@@ -175,7 +176,7 @@ int markov::DynamicTest() {}
 void markov::PrintDeBugMCInfo() {
   string msg;
   msg = string(80, '=') + "\n";
-  msg += "\nMC Counter: " + to_string(Para.Counter) + ":\n";
+  msg += "\nMC Counter: " + to_string(Var.Counter) + ":\n";
 
   // msg += string(80, '=') + "\n";
   // msg += "GWeight: \n";

@@ -16,25 +16,9 @@ using namespace std;
 
 #define MAXMOMNUM get_power<2, MaxOrder + 1>::value * 4
 
-struct variable {
-  int CurrOrder;
-  long int CurrVersion;
-
-  int CurrExtMomBin; // current bin of the external momentum
-  double CurrTau;    // current external tau
-  ver::weightMatrix CurrWeight;
-  double CurrAbsWeight;
-
-  array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
-  array<double, MaxTauNum> Tau;       // all tau variables
-
-  // variational approach, interactions with counterterms
-};
-
 class weight {
 public:
-  weight() : SigData(Var.Tau) {}
-  variable Var; // The variable of the integral
+  weight() {}
   array<ver::weightMatrix, 4> ChanWeight;
 
   ver::fermi Fermi;         // propagator factory

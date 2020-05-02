@@ -13,6 +13,8 @@ using namespace diag;
 using namespace std;
 using namespace dse;
 
+extern variable Var;
+
 void weight::Test(int LoopNum) {
   if (DiagType == GAMMA && LoopNum == 1)
     _TestOneLoopGamma();

@@ -60,7 +60,7 @@ ver4 verDiag::Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
     vector<channel> UST;
     vector<channel> II;
     for (auto &chan : Channel) {
-      if (Para.Type == BARE && chan >= 4)
+      if (CalcType == BARE && chan >= 4)
         // if one wants bare diagrams, filter all counter diagrams!
         continue;
 
@@ -72,7 +72,7 @@ ver4 verDiag::Vertex(int Level, int LoopNum, int LoopIndex, int InTL,
 
     // check if there is any counter-term or not
     Ver4.HasCT = false;
-    if (Para.Type != BARE) {
+    if (CalcType != BARE) {
       for (auto &chan : Channel)
         if (chan >= 4)
           Ver4.HasCT = true;

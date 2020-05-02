@@ -3,14 +3,12 @@
 
 // #include "utility/vector.h"
 #include "global.h"
-#include <Eigen/Dense>
 #include <array>
 
 double sum2(const momentum &);
 double norm2(const momentum &);
 
 namespace ver {
-using Eigen::MatrixXd;
 
 enum channel { I = 0, T, U, S };
 

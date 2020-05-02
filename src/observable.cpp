@@ -10,8 +10,9 @@
 using namespace ver;
 
 extern parameter Para;
+extern variable Var;
 
-sigData::sigData(array<double, MaxTauNum> &TauTable) : Tau(TauTable) {
+sigData::sigData() {
   _Estimator = new double[MaxOrder * TauBinSize * ExtMomBinSize];
   _EstimatorEqT = new double[MaxOrder * ExtMomBinSize];
   _EstimatorW1 = new double[MaxOrder * ExtMomBinSize];
@@ -63,16 +64,19 @@ void sigData::Measure(int Order, int Kidx, const vector<int> T,
       _EstimatorEqT[Order * ExtMomBinSize + Kidx] += Weight[i] * Factor;
       _EstimatorEqT[0 * ExtMomBinSize + Kidx] += Weight[i] * Factor;
     } else {
-      int TauIdx = int((Tau[T[i]] / Para.Beta) * TauBinSize);
+      int TauIdx =
+          int(((Var.Tau[T[i]] - Var.Tau[T[0]]) / Para.Beta) * TauBinSize);
       _Estimator[Order * OrderIndex + Kidx * KIndex + TauIdx] +=
           Weight[i] * Factor * TauBinSize / Para.Beta;
       _Estimator[0 * OrderIndex + Kidx * KIndex + TauIdx] +=
           Weight[i] * Factor * TauBinSize / Para.Beta;
 
       _EstimatorW1[Order * ExtMomBinSize + Kidx] +=
-          Weight[i] * Factor * sin(PI * (Tau[T[i]] - Tau[0]) / Para.Beta);
+          Weight[i] * Factor *
+          sin(PI * (Var.Tau[T[i]] - Var.Tau[0]) / Para.Beta);
       _EstimatorW2[Order * ExtMomBinSize + Kidx] +=
-          Weight[i] * Factor * sin(-PI * (Tau[T[i]] - Tau[0]) / Para.Beta);
+          Weight[i] * Factor *
+          sin(-PI * (Var.Tau[T[i]] - Var.Tau[0]) / Para.Beta);
     }
   }
 }
@@ -87,7 +91,7 @@ void sigData::Save() {
     if (VerFile.is_open()) {
 
       VerFile << fmt::sprintf("#PID:%d, rs:%.3f, Beta: %.3f, Step: %d\n",
-                              Para.PID, Para.Rs, Para.Beta, Para.Counter);
+                              Para.PID, Para.Rs, Para.Beta, Var.Counter);
 
       VerFile << "# Norm: " << Normalization << endl;
 
@@ -173,7 +177,7 @@ void polarData::Save() {
     if (VerFile.is_open()) {
 
       VerFile << fmt::sprintf("#PID:%d, rs:%.3f, Beta: %.3f, Step: %d\n",
-                              Para.PID, Para.Rs, Para.Beta, Para.Counter);
+                              Para.PID, Para.Rs, Para.Beta, Var.Counter);
 
       VerFile << "# Norm: " << Normalization << endl;
 
@@ -249,7 +253,7 @@ void deltaData::Save() {
     if (VerFile.is_open()) {
 
       VerFile << fmt::sprintf("#PID:%d, rs:%.3f, Beta: %.3f, Step: %d\n",
-                              Para.PID, Para.Rs, Para.Beta, Para.Counter);
+                              Para.PID, Para.Rs, Para.Beta, Var.Counter);
 
       VerFile << "# Norm: " << Normalization << endl;
 

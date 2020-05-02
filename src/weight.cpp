@@ -14,6 +14,8 @@ using namespace diag;
 using namespace std;
 using namespace dse;
 
+extern variable Var;
+
 void weight::Initialization() {
   array<momentum *, 4> ExtLegK;
 

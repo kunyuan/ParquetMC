@@ -39,7 +39,6 @@ public:
 
   // MC variables
   diag::weight Weight;
-  diag::variable &Var;
 
 private:
   ver::weightMatrix NewWeight;

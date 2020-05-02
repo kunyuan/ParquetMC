@@ -6,7 +6,7 @@
 namespace ver {
 class sigData {
 public:
-  sigData(array<double, MaxTauNum> &TauTable);
+  sigData();
   ~sigData();
   void Initialization();
   void Measure0(double Factor);                          // all tau variables
@@ -17,7 +17,6 @@ public:
   void LoadWeight();
 
 private:
-  array<double, MaxTauNum> &Tau;
   double Normalization;
   double *_Estimator;
   double *_EstimatorEqT;

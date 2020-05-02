@@ -41,7 +41,6 @@ struct ver4 {
   bool HasCT; // contain projected counter-term or not
   vector<channel> Channel; // list of channels except I
   // array<momentum, 4> ProjLegK; // projected external K derived from LegK
-  array<momentum *, 4> LegK; // external K
 
   /////////// bubble diagrams ////////////////////
   vector<bubble> Bubble; // different arrangement of LVer and RVer

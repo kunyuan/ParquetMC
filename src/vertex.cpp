@@ -11,6 +11,7 @@ using namespace ver;
 using namespace std;
 
 extern parameter Para;
+extern variable Var;
 
 verTensor::verTensor() {
 
@@ -163,7 +164,7 @@ void verQTheta::Save(bool Simple) {
       if (VerFile.is_open()) {
 
         VerFile << fmt::sprintf("#PID:%d, rs:%.3f, Beta: %.3f, Step: %d\n",
-                                Para.PID, Para.Rs, Para.Beta, Para.Counter);
+                                Para.PID, Para.Rs, Para.Beta, Var.Counter);
 
         VerFile << "# Norm: " << Normalization << endl;
 

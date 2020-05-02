@@ -23,6 +23,7 @@ void MonteCarlo();
 
 parameter Para; // parameters as a global variable
 RandomFactory Random;
+variable Var;
 
 int main(int argc, const char *argv[]) {
   cout << "Order, Beta, Rs, Mass2, Lambda, Charge2, MaxExtMom(*kF), "
@@ -41,12 +42,8 @@ void InitPara() {
   string LogFile = "_" + to_string(Para.PID) + ".log";
   LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
 
-  // Para.Type = BARE;
-  Para.Type = VARIATIONAL;
-
   // Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
   Para.ReWeight = {1.0, 1.0, 1.0, 0.2, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
-  Para.ReWeightDiag = {1.0, 1.0, 1.0, 1.0, 1.0};
 
   //// initialize the global parameter //////////////////////
   double Kf;
@@ -62,14 +59,12 @@ void InitPara() {
   Para.Mu = Para.Ef;
   Para.Nf = Kf / (4.0 * PI * PI) * SPIN;
   Para.MaxExtMom *= Kf;
-  Para.Delta = 1.0;
 
   // scale all energy with E_F
   Para.Beta /= Para.Ef;
 
   for (int i = 0; i < AngBinSize; i++) {
     Para.AngleTable[i] = ver::Index2Angle(i, AngBinSize);
-    Para.dAngleTable[i] = 2.0 / AngBinSize;
   }
 
   // initialize external momentum
@@ -103,7 +98,7 @@ void MonteCarlo() {
   InterruptHandler Interrupt;
 
   Random.Reset(Para.Seed);
-  Para.Counter = 0;
+  Var.Counter = 0;
 
   timer ReweightTimer, PrinterTimer, SaveFileTimer, MessageTimer;
   PrinterTimer.start();
@@ -129,7 +124,7 @@ void MonteCarlo() {
       break;
 
     for (int i = 0; i < 1000000; i++) {
-      Para.Counter++;
+      Var.Counter++;
       // cout << Para.Counter << endl;
       // if (Para.Counter == 140737351830544) {
       //   cout << "Before: " << Para.Counter << endl;
@@ -152,22 +147,6 @@ void MonteCarlo() {
         //   Markov.ChangeScale();
         // ;
       }
-
-      // if (Markov.Var.CurrOrder == 1) {
-      //   cout << "Counter=" << Para.Counter << endl;
-      // cout << Markov.Var.LoopMom[OUTR][0] << ", "
-      //      << Markov.Var.LoopMom[OUTR][1] << endl;
-      // cout << Markov.Var.LoopMom[INR][0] << ", " <<
-      // Markov.Var.LoopMom[INR][1]
-      //      << endl;
-      // cout << Markov.Var.Tau[0] << ", " << Markov.Var.Tau[1] << endl;
-      // cout << "Order=" << Markov.Var.CurrOrder
-      //      << ", weight=" << Markov.Var.CurrAbsWeight
-      //      << ", extK=" << Markov.Var.LoopMom[2].norm() << endl;
-      // Markov.Weight.Test(Markov.Var.CurrOrder);
-      // exit(0);
-      // }
-      // Markov.Weight.Test(1);
 
       if (i % 8 == 0)
         Markov.Measure();

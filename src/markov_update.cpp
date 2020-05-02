@@ -11,6 +11,7 @@
 
 extern parameter Para;
 extern RandomFactory Random;
+extern variable Var;
 
 using namespace mc;
 using namespace diag;
@@ -115,7 +116,6 @@ void markov::ChangeOrder() {
 
   if (Random.urn() < R) {
     Accepted[Name][Var.CurrOrder]++;
-    Var.CurrVersion++;
     Var.CurrOrder = NewOrder;
     Var.CurrAbsWeight = NewAbsWeight;
   }
@@ -143,7 +143,6 @@ void markov::ChangeTau() {
 
   if (Random.urn() < R) {
     Accepted[CHANGE_TAU][Var.CurrOrder]++;
-    Var.CurrVersion++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     // retore the old Tau if the update is rejected
@@ -170,7 +169,6 @@ void markov::ChangeMomentum() {
 
   if (Random.urn() < R) {
     Accepted[CHANGE_MOM][Var.CurrOrder]++;
-    Var.CurrVersion++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.LoopMom[LoopIndex] = CurrMom;
@@ -203,7 +201,6 @@ void markov::ChangeExtMomentum() {
 
   if (Random.urn() < R) {
     Accepted[CHANGE_EXTMOM][Var.CurrOrder]++;
-    Var.CurrVersion++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     if (DiagType == GAMMA) {

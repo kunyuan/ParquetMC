@@ -14,6 +14,8 @@ using namespace diag;
 using namespace std;
 using namespace dse;
 
+extern variable Var;
+
 void weight::Vertex4(ver4 &Ver4, const momentum &KInL, const momentum &KOutL,
                      const momentum &KInR, const momentum &KOutR, bool IsFast) {
   if (Ver4.LoopNum == 0) {

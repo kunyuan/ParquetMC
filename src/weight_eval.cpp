@@ -14,6 +14,8 @@ using namespace diag;
 using namespace std;
 using namespace dse;
 
+extern variable Var;
+
 double weight::Evaluate(int LoopNum) {
   if (DiagType == diagram::GAMMA)
     return EvaluateGamma(LoopNum);
