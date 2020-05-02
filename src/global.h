@@ -22,7 +22,7 @@ const bool DEBUGMODE = false;
 // D=2 or D=3
 const int D = 3;
 // type of diagram
-const diagram DiagType = DELTA;
+const diagram DiagType = POLAR;
 // spin index
 const int SPIN = 2;
 // number of q bins of the external momentum
