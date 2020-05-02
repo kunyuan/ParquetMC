@@ -260,7 +260,7 @@ double fermi::BuildFockSigma() {
     Sigma[i] = Fock(k);
     if (i > 0 && k <= LowerBound2 && k >= UpperBound2) {
       ASSERT_ALLWAYS(
-          Equal(Sigma[i - 1], Sigma[i], 5.0e-5),
+          IsEqual(Sigma[i - 1], Sigma[i], 5.0e-5),
           fmt::format("Fock are not accurate enough! At k={0}: {1} vs {2}\n", k,
                       Sigma[i - 1], Sigma[i]));
     }
@@ -274,7 +274,7 @@ double fermi::BuildFockSigma() {
     k = (i + 0.5) * DeltaK2 + LowerBound2;
     Sigma2[i] = Fock(k);
     if (i > 0) {
-      ASSERT_ALLWAYS(Equal(Sigma2[i - 1], Sigma2[i], 5.0e-5),
+      ASSERT_ALLWAYS(IsEqual(Sigma2[i - 1], Sigma2[i], 5.0e-5),
                      fmt::format("The 2rd level Fock are not accurate enough!"
                                  "level! At k={0}: {1} vs {2}\n",
                                  k, Sigma2[i - 1], Sigma2[i]));

@@ -142,7 +142,7 @@ std::string markov::_DetailBalanceStr(Updates op) {
   Output += UpdatesName[op] + ":\n";
   double TotalProposed = 0.0, TotalAccepted = 0.0;
   for (int i = 0; i <= Para.Order; i++) {
-    if (!Equal(Proposed[op][i], 0.0)) {
+    if (!IsEqual(Proposed[op][i], 0.0)) {
       TotalAccepted += Accepted[op][i];
       TotalProposed += Proposed[op][i];
       Output +=
@@ -153,7 +153,7 @@ std::string markov::_DetailBalanceStr(Updates op) {
       //             Accepted[op][i] / Proposed[op][i]);
     }
   }
-  if (!Equal(TotalProposed, 0.0)) {
+  if (!IsEqual(TotalProposed, 0.0)) {
     Output += fmt::sprintf("\t%10s:%15g%15g%15g\n", "Summation", TotalProposed,
                            TotalAccepted, TotalAccepted / TotalProposed);
   } else

@@ -3,29 +3,28 @@
 
 #include "utility/utility.h"
 #include <Eigen/Dense>
-#include <array>
+#include <cassert>
 #include <math.h>
-#include <string>
 #include <vector>
+
+using namespace Eigen;
+using namespace std;
 
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
 enum diagram { SIGMA, POLAR, GAMMA, DELTA };
 
-// turn off all assert
-// const bool DEBUGMODE = true;
-const bool DEBUGMODE = false;
+// turn on all assert
 //#define NDEBUG
-// define NDEBUG will turn off debug checking, including the boundary check in
-// array.h
+
 ///////////  Global Constants ////////////////////
 // D=2 or D=3
 const int D = 3;
+// spin index
+const int SPIN = 2;
 // type of diagram
 const diagram DiagType = POLAR;
 // type of calculation
 const type CalcType = VARIATIONAL;
-// spin index
-const int SPIN = 2;
 // number of q bins of the external momentum
 const int ExtMomBinSize = 32;
 // number of bins for the angle between InL and InR legs
@@ -35,11 +34,14 @@ const int TauBinSize = 32;
 // Max diagram order
 const int MaxOrder = 9;
 const int MaxTauNum = MaxOrder + 1;
-// MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
 const int MaxMomNum = MaxOrder + 3;
+// MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
 
-typedef Eigen::Matrix<double, D, 1> momentum;
-typedef Eigen::Vector2d verWeight;
+// momentum vector
+typedef Matrix<double, D, 1> momentum;
+
+// vertex4 weight, has Direct and Exchange components
+typedef Vector2d verWeight;
 
 /////////// Global Parameter ////////////////////
 struct parameter {

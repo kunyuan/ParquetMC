@@ -13,17 +13,17 @@ using namespace std;
 
 //---------------------------------------------------------------------------
 
-bool Equal(double x1, double x2, double eps) { return (fabs(x1 - x2) < eps); }
-bool Equal(uint x1, uint x2, double eps) { return x1 == x2; }
-bool Equal(int x1, int x2, double eps) { return x1 == x2; }
+bool IsEqual(double x1, double x2, double eps) { return (fabs(x1 - x2) < eps); }
+bool IsEqual(uint x1, uint x2, double eps) { return x1 == x2; }
+bool IsEqual(int x1, int x2, double eps) { return x1 == x2; }
 // FORTRAN abs
-double fabs(double x) { return ((x >= 0.0) ? x : -x); }
+// double fabs(double x) { return ((x >= 0.0) ? x : -x); }
 
 // FORTRAN iabs
-int iabs(int x) { return ((x >= 0.0) ? x : -x); }
+// int iabs(int x) { return ((x >= 0.0) ? x : -x); }
 // more functions ...
 
-bool Zero(double x, double eps) { return (fabs(x) < eps); }
+bool IsZero(double x, double eps) { return (fabs(x) < eps); }
 
 bool CleanFile(const string &FileName) {
   ofstream ofs(FileName, std::ofstream::out | std::ofstream::trunc);

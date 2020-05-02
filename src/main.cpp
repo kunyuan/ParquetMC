@@ -11,6 +11,7 @@
 #include "utility/abort.h"
 #include "utility/logger.h"
 #include "utility/timer.h"
+#include "vertex4.h"
 #include "weight.h"
 #include <iostream>
 #include <math.h>
@@ -21,9 +22,11 @@ using namespace mc;
 void InitPara();
 void MonteCarlo();
 
-parameter Para; // parameters as a global variable
+// Global variable
 RandomFactory Random;
-variable Var;
+parameter Para;        // global parameters
+variable Var;          // global MC variables
+diag::propagator Prop; // global progator
 
 int main(int argc, const char *argv[]) {
   cout << "Order, Beta, Rs, Mass2, Lambda, Charge2, MaxExtMom(*kF), "
