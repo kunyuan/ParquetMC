@@ -15,6 +15,8 @@ public:
   // get the Direct part of the interaction
   double Interaction(const momentum &TranQ, int VerOrder = 0);
 
+  double CounterBubble(const momentum &K);
+
 private:
   double _BareGreen(double Tau, const momentum &K, spin Spin, int GType = 0);
 };

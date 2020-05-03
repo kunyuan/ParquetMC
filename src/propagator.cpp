@@ -97,3 +97,10 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder) {
 
   return Weight;
 }
+
+double propagator::CounterBubble(const momentum &K) {
+  double Factor = Para.Lambda / (8.0 * PI * Para.Nf);
+  Factor *=
+      Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
+  return Factor;
+}

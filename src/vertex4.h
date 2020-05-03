@@ -5,9 +5,7 @@
 #include "propagator.h"
 #include "utility/utility.h"
 #include <array>
-#include <map>
 #include <string>
-#include <tuple>
 #include <vector>
 
 namespace diag {
@@ -26,13 +24,13 @@ struct envelope;
 class green {
 public:
   momentum K;
-  int AddTidxPair(const Vector2i &Tpair);                // Add T pair
+  int AddTidxPair(const array<int, 2> &Tpair);           // Add T pair
   double operator[](int Tidx) { return _Weight[Tidx]; }; // get _Weight[Tidx]
   // evaluate all weight with different T pairs and a given K
   void Evaluate();
+  int Size() { return _Tpair.size(); };
 
-private:
-  vector<Vector2i> _Tidx;
+  vector<array<int, 2>> _Tpair;
   vector<double> _Weight;
 };
 
@@ -40,27 +38,51 @@ struct bubble;
 
 class vertex4 {
 public:
-  int Level;
-  int Side; // right side vertex is always a full gamma4
-  int Order;
-  int InTidx;
-  int Loopidx;
-  bool InBox;              // boxed vertex or not
-  vector<channel> Channel; // list of channels except I
+  void Build(int Level, int Order, int LoopIdx, int InTIdx,
+             const vector<channel> &Channel, int Side, bool InBox);
 
-  array<vector<green>, 6> G; // G for 0, T, U, S, TC and UC
+  vector<channel> Channel;      // list of channels except I
+  vector<verWeight> ChanWeight; // the weight of each channel
 
-  vector<array<int, 4>> T;  // external T list
-  vector<verWeight> Weight; // size: equal to T.size()
+  array<green, 6> G;           // G for 0, T, U, S, TC and UC
+  vector<array<int, 4>> Tpair; // external T list
+  vector<verWeight> Weight;    // size: equal to T.size()
 
   int TauNum() { return Order + 1; }
   int LoopNum() { return Order; }
-  void Build(int Level, int LoopNum, int LoopIndex, int InTL,
-             const vector<channel> &Channel, int Side, bool InBox);
+  bool InBox() { return _InBox; }
+  void
+  Evaluate(const momentum &KInL, const momentum &KOutL, const momentum &KInR,
+           const momentum &KOutR,
+           bool IsFast = false); // evaluate the weights with different Tidx
+  string ToString(string indent = "");
 
 private:
+  int Level;
+  int Side; // right side vertex is always a full gamma4
+  int Order;
+  int Tidx;
+  int LoopIdx;
+  bool _InBox; // this Ver4 is a SUB-diagram within a box
+
   vector<bubble> _UST; // bubble diagrams
   // vector<envelope> Envelope; // envelop diagrams
+
+  void _BuildBare();
+  void _BuildI(channel chan);
+  // create UST bubble with a given channel and left vertex order
+  bubble _BuildBubble(channel chan, int ol);
+
+  // utility functions
+  int _AddTidxPair(const array<int, 4> &T);
+
+  void _EvalBare(const momentum &KInL, const momentum &KOutL,
+                 const momentum &KInR, const momentum &KOutR);
+  void _EvalUST(const momentum &KInL, const momentum &KOutL,
+                const momentum &KInR, const momentum &KOutR,
+                bool IsFast = false);
+  void _EvalI(const momentum &KInL, const momentum &KOutL, const momentum &KInR,
+              const momentum &KOutR, bool IsFast = false);
 };
 
 struct bubble {
@@ -72,7 +94,7 @@ struct bubble {
   vector<array<int, 5>> Map;
 };
 
-enum index { LVER, RVER, G0, GX, VER };
+enum index { LVERT, RVERT, G0T, GXT, VERT };
 
 } // namespace diag
 
