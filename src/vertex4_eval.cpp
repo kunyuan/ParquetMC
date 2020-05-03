@@ -111,7 +111,7 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
       if (Level > 0 || IsFast == false)
         Weight[map[VERT]] += W * GWeight;
       else
-        ChanWeight[chan] += W * GWeight;
+        ChanWeight[ChanMap[chan]] += W * GWeight;
     }
   }
 }

@@ -14,8 +14,6 @@ extern RandomFactory Random;
 namespace diag {
 using namespace std;
 
-#define MAXMOMNUM get_power<2, MaxOrder + 1>::value * 4
-
 class weight {
 public:
   weight() {}

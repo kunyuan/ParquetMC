@@ -44,7 +44,7 @@ public:
   vector<channel> Channel;      // list of channels except I
   vector<verWeight> ChanWeight; // the weight of each channel
 
-  array<green, 6> G;           // G for 0, T, U, S, TC and UC
+  array<green, 4> G;           // G for 0, T, U, S, TC and UC
   vector<array<int, 4>> Tpair; // external T list
   vector<verWeight> Weight;    // size: equal to T.size()
 

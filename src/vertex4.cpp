@@ -58,7 +58,7 @@ void vertex4::Build(int level, int order, int loopIdx, int inTL,
 
   Weight.resize(Tpair.size());
   if (Level == 0 && Order >= 1)
-    ChanWeight.resize(Channel.size());
+    ChanWeight.resize(4);
 }
 
 int vertex4::_AddTidxPair(const array<int, 4> &T) {

@@ -1,4 +1,6 @@
 #include "propagator.h"
+#include "utility/fmt/format.h"
+#include "utility/fmt/printf.h"
 
 using namespace diag;
 extern parameter Para;
@@ -103,4 +105,104 @@ double propagator::CounterBubble(const momentum &K) {
   Factor *=
       Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
   return Factor;
+}
+
+double diag::Index2Mom(const int &Index) {
+  return (Index + 0.5) / ExtMomBinSize * Para.MaxExtMom;
+};
+
+int diag::Mom2Index(const double &K) {
+  return int(K / Para.MaxExtMom * ExtMomBinSize);
+};
+
+double diag::Angle3D(const momentum &K1, const momentum &K2) {
+  // Returns the angle in radians between vectors 'K1' and 'K2'
+  double dotp = K1.dot(K2);
+  double Angle2D = dotp / K1.norm() / K2.norm();
+  return Angle2D;
+}
+
+double diag::Index2Angle(const int &Index, const int &AngleNum) {
+  // Map index [0...AngleNum-1] to the theta range [0.0, 2*pi)
+  return (Index + 0.5) * 2.0 / AngleNum - 1.0;
+}
+
+int diag::Angle2Index(const double &Angle, const int &AngleNum) {
+  // Map theta range  [0.0, 2*pi) to index [0...AngleNum-1]
+  // double dAngle = 2.0 * PI / AngleNum;
+  // if (Angle >= 2.0 * PI - dAngle / 2.0 || Angle < dAngle / 2.0)
+  //   return 0;
+  // else
+  //   return int(Angle / dAngle + 0.5);
+  // if (Angle > 1.0 - EPS)
+  //   return AngleNum - 1;
+  // else {
+  double dAngle = 2.0 / AngleNum;
+  return int((Angle + 1.0) / dAngle);
+  // }
+}
+
+int diag::Tau2Index(const double &Tau) {
+  return int((Tau / Para.Beta) * TauBinSize);
+}
+
+double diag::Index2Tau(const int &Index) {
+  return (Index + 0.5) * Para.Beta / TauBinSize;
+}
+
+void diag::_TestAngle2D() {
+  // Test Angle functions
+  momentum K1, K2;
+  K1.setZero();
+  K2.setZero();
+  K1[0] = 1.0;
+  K2[0] = 1.0;
+
+  ASSERT_ALLWAYS(
+      abs(Angle3D(K1, K2) - 1.0) < 1.e-7,
+      fmt::format("Angle between K1 and K2 are not zero! It is {:.13f}",
+                  Angle3D(K1, K2)));
+
+  K1.setZero();
+  K2.setZero();
+  K1[0] = 1.0;
+  K2[0] = -1.0;
+  ASSERT_ALLWAYS(
+      abs(Angle3D(K1, K2) - (-1.0)) < 1.e-7,
+      fmt::format("Angle between K1 and K2 are not Pi! Instead, it is {:.13f}",
+                  Angle3D(K1, K2)));
+
+  K1.setZero();
+  K2.setZero();
+  K1[0] = 1.0;
+  K2[0] = -1.0;
+  K1[1] = 0.0;
+  K2[1] = -EPS;
+  ASSERT_ALLWAYS(
+      abs(Angle3D(K1, K2) - 1.0) < 1.e-7,
+      fmt::format("Angle between K1 and K2 are not 2.0*Pi! It is {:.13f}",
+                  Angle3D(K1, K2)));
+}
+
+void diag::_TestAngleIndex() {
+  // Test Angle functions
+  int AngleNum = 8;
+  //   cout << Index2Angle(0, AngleNum) << endl;
+  ASSERT_ALLWAYS(abs(Index2Angle(0, AngleNum) - (-1.0 + 1.0 / AngleNum)) <
+                     1.0e-10,
+                 "Angle for index 0 should be -1^+!");
+
+  ASSERT_ALLWAYS(abs(Index2Angle(AngleNum - 1, AngleNum) -
+                     (1.0 - 1.0 / AngleNum)) < 1.0e-10,
+                 "Angle for index AngleNum should be 1.0^-!");
+
+  ASSERT_ALLWAYS(Angle2Index(1.0 - EPS, AngleNum) == AngleNum - 1,
+                 "cos(angle)=-1 should should be last element!");
+  // ASSERT_ALLWAYS(
+  //     Angle2Index(2.0 * PI * (1.0 - 0.5 / AngleNum) + EPS, AngleNum) == 0,
+  //     "Angle 2*pi-pi/AngleNum should have index 1!");
+
+  // ASSERT_ALLWAYS(Angle2Index(2.0 * PI * (1.0 - 0.5 / AngleNum) - EPS,
+  //                            AngleNum) == AngleNum - 1,
+  //                "Angle 2*pi-pi/AngleNum-0^+ should have index AngleNum!");
 }

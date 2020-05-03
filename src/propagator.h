@@ -21,6 +21,21 @@ private:
   double _BareGreen(double Tau, const momentum &K, spin Spin, int GType = 0);
 };
 
+double Angle3D(const momentum &K1, const momentum &K2);
+double Index2Angle(const int &Index, const int &AngleNum);
+int Angle2Index(const double &Angle, const int &AngleNum);
+void _TestAngleIndex();
+void _TestAngle2D();
+
+double Index2Mom(const int &Index);
+int Mom2Index(const double &K);
+
+double Index2Scale(const int &Index);
+int Scale2Index(const double &Scale);
+
+double Index2Tau(const int &Index);
+int Tau2Index(const double &Tau);
+
 } // namespace diag
 
 #endif
