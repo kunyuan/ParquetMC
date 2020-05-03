@@ -57,11 +57,11 @@ struct ver4 {
 struct indexMap {
   int LVerTidx; // LVer T index
   int RVerTidx; // RVer T index
-  // map LVer T index and RVer T index to merged T index
-  int Tidx;
   // LVer T and RVer T to Internal G0 and G
   int G0idx;
   int Gidx;
+  // map LVer T index and RVer T index to merged T index
+  int Tidx;
 };
 
 struct bubble {
