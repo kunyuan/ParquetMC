@@ -117,9 +117,9 @@ void MonteCarlo() {
   LOG_INFO("Loading Weight...")
   Markov.Weight.LoadFile();
 
-  for (int order = 1; order <= Para.Order; ++order) {
-    Markov.Weight.Benchmark(order, 1000);
-  }
+  // for (int order = 1; order <= Para.Order; ++order) {
+  //   Markov.Weight.Benchmark(order, 1000);
+  // }
 
   while (true) {
     Block++;
@@ -150,7 +150,8 @@ void MonteCarlo() {
         //   Markov.ChangeScale();
         // ;
       }
-      // Markov.Weight.Test(1);
+      // cout << "Testing ..." << endl;
+      Markov.Weight.Test(1);
 
       if (i % 8 == 0)
         Markov.Weight.Measure();

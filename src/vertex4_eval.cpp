@@ -27,6 +27,7 @@ void vertex4::Evaluate(const momentum &KInL, const momentum &KOutL,
   _EvalUST(KInL, KOutL, KInR, KOutR, IsFast);
   // if (Ver4.LoopNum >= 3)
   //   _EvalI(KInL, KOutL, KInR, KOutR, IsFast);
+  return;
 }
 
 void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
@@ -60,7 +61,7 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
     } else if (chan == S) {
       ASSERT(!_InBox, "S diagram can't be in box!");
       G[S].K = KInL + KInR - G[0].K;
-      G[U].Evaluate();
+      G[S].Evaluate();
     }
   }
 
@@ -69,9 +70,12 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
   double GWeight, ProjFactor;
   double Factor = 1.0 / pow(2.0 * PI, D);
   for (auto &b : _UST) {
+    // cout << "before, " << b.Channel << ", " << b.Map.size() << endl;
     channel chan = b.Channel;
     ProjFactor = SymFactor[chan] * Factor;
 
+    // cout << _UST.size() << endl;
+    // cout << "before: " << b.Channel << ", " << b.Map.size() << endl;
     if (chan == T || chan == TC) {
       b.LVer.Evaluate(KInL, KOutL, G[T].K, G[0].K);
       b.RVer.Evaluate(G[0].K, G[T].K, KInR, KOutR);
@@ -82,10 +86,12 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
       b.LVer.Evaluate(KInL, G[S].K, KInR, G[0].K);
       b.RVer.Evaluate(G[0].K, KOutL, G[S].K, KOutR);
     }
+    // cout << "middle: " << b.Channel << ", " << b.Map.size() << endl;
 
     auto &LVerW = b.LVer.Weight;
     auto &RVerW = b.RVer.Weight;
-    // cout << b.Channel << ", " << b.Map.size() << endl;
+    // cout << "after1: " << b.Channel << endl;
+    // cout << "after2: " << b.Channel << ", " << b.Map.size() << endl << endl;
 
     for (auto &map : b.Map) {
       if (chan == TC || chan == UC || _InBox)

@@ -67,7 +67,6 @@ markov::markov() {
   Var.CurrTau = Var.Tau[1] - Var.Tau[0];
 
   // initialize group
-
   Var.Counter = 0;
 
   // Var.CurrGroup = &Groups[0];

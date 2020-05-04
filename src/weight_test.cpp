@@ -17,6 +17,7 @@ extern variable Var;
 extern propagator Prop;
 
 void weight::Test(int LoopNum) {
+  // cout << "start testing ..." << endl;
   if (DiagType == GAMMA && LoopNum == 1)
     _TestOneLoopGamma();
   else if (DiagType == SIGMA && LoopNum == 2)
@@ -127,6 +128,8 @@ void weight::_TestOneLoopGamma() {
         "S channel one loop Weight Calculation has a bug! ({},{}) vs ({}, {})",
         Weight[DIR], Weight[EX], TestWeight[DIR], TestWeight[EX]));
   }
+
+  // cout << "Test End" << endl;
   return;
 }
 
