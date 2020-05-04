@@ -10,7 +10,7 @@ extern variable Var;
 extern propagator Prop;
 
 void polar::Build(int order) {
-  ASSERT_ALLWAYS(Order >= 0, "Polar order must be larger than 0!");
+  ASSERT_ALLWAYS(order >= 0, "Polar order must be larger than 0!");
   Order = order;
 
   // vertex is only needed for order>=2
@@ -46,20 +46,15 @@ double polar::Evaluate() {
 
   // loop order >=2
   vertex4 &Ver4 = Vertex;
-  //   G[INL].K = Var.LoopMom[1];
-  //   G[INR].K = Var.LoopMom[2];
+  G[INL].K = Var.LoopMom[1];
+  G[INR].K = Var.LoopMom[2];
   G[OUTL].K = Var.LoopMom[1] - Var.LoopMom[0];
   G[OUTR].K = Var.LoopMom[2] + Var.LoopMom[0];
 
-  //   for (auto &g : G)
-  //     g.Evaluate();
-  G[INL].Evaluate(Var.LoopMom[1]);
-  G[INR].Evaluate(Var.LoopMom[2]);
-  G[OUTL].Evaluate();
-  G[OUTR].Evaluate();
+  for (auto &g : G)
+    g.Evaluate();
 
-  Vertex.Evaluate(Var.LoopMom[1], G[OUTL].K, Var.LoopMom[2], G[OUTR].K, false);
-  //   Vertex.Evaluate(G[INL].K, G[OUTL].K, G[INR].K, G[OUTR].K, false);
+  Vertex.Evaluate(G[INL].K, G[OUTL].K, G[INR].K, G[OUTR].K, false);
 
   int Size = Vertex.Tpair.size();
   double Weight = 0.0;
