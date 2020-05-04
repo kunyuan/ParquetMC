@@ -115,7 +115,7 @@ void MonteCarlo() {
   int Block = 0;
 
   LOG_INFO("Loading Weight...")
-  Markov.LoadFile();
+  Markov.Weight.LoadFile();
 
   for (int order = 1; order <= Para.Order; ++order) {
     Markov.Weight.Benchmark(order, 1000);
@@ -150,9 +150,10 @@ void MonteCarlo() {
         //   Markov.ChangeScale();
         // ;
       }
+      // Markov.Weight.Test(1);
 
       if (i % 8 == 0)
-        Markov.Measure();
+        Markov.Weight.Measure();
       // Markov.DynamicTest();
 
       if (i % 1000 == 0) {
@@ -161,15 +162,12 @@ void MonteCarlo() {
           Markov.DynamicTest();
           Markov.PrintDeBugMCInfo();
           Markov.PrintMCInfo();
-          Interrupt.Delay(); // the process can not be killed in saving
-          Markov.SaveToFile(true);
-          Interrupt.Resume(); // after this point, the process can be killed
           LOG_INFO(ProgressBar((double)Block / Para.TotalStep));
         }
 
         if (SaveFileTimer.check(Para.SaveFileTimer)) {
           Interrupt.Delay(); // the process can not be killed in saving
-          Markov.SaveToFile(false);
+          Markov.Weight.SaveToFile();
           Interrupt.Resume(); // after this point, the process can be killed
         }
 
@@ -180,7 +178,7 @@ void MonteCarlo() {
 
         if (MessageTimer.check(Para.MessageTimer)) {
           LOG_INFO("Loading Weight...")
-          Markov.LoadFile();
+          Markov.Weight.LoadFile();
         }
       }
     }
@@ -199,7 +197,7 @@ void MonteCarlo() {
   LOG_INFO("Simulation is ended!");
   Markov.PrintMCInfo();
   Interrupt.Delay(); // the process can not be killed in saving
-  Markov.SaveToFile(false);
+  Markov.Weight.SaveToFile();
   Interrupt.Resume(); // after this point, the process can be killed
 
   LOG_INFO("Quit Markov.");

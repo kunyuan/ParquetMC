@@ -22,7 +22,7 @@ const int D = 3;
 // spin index
 const int SPIN = 2;
 // type of diagram
-const diagram DiagType = POLAR;
+const diagram DiagType = GAMMA;
 // type of calculation
 const type CalcType = VARIATIONAL;
 // number of q bins of the external momentum

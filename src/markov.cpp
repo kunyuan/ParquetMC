@@ -104,38 +104,7 @@ markov::markov() {
   AdjustGroupReWeight();
 };
 
-void markov::Measure() {
-  if (DiagType == GAMMA)
-    Weight.MeasureUST();
-  else if (DiagType == SIGMA)
-    Weight.MeasureSigma();
-  else if (DiagType == POLAR)
-    Weight.MeasurePolar();
-};
-
 void markov::AdjustGroupReWeight(){};
-
-void markov::LoadFile() {
-  Weight.SigData.LoadWeight();
-  // if (DiagType == GAMMA){
-  //   Weight.VerQTheta.LoadWeight();
-  // }
-  // else if (DiagType == SIGMA)
-  //   Weight.SigData.LoadWeight();
-  // else if (DiagType == POLAR)
-  //   Weight.SigData.LoadWeight();
-};
-
-void markov::SaveToFile(bool Simple) {
-  if (DiagType == GAMMA)
-    Weight.VerQTheta.Save(Simple);
-  else if (DiagType == SIGMA)
-    Weight.SigData.Save();
-  else if (DiagType == POLAR)
-    Weight.PolarData.Save();
-};
-
-void markov::ClearStatis() { Weight.VerQTheta.ClearStatis(); }
 
 std::string markov::_DetailBalanceStr(Updates op) {
   string Output = string(80, '-') + "\n";

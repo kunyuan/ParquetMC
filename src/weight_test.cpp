@@ -5,14 +5,16 @@
 #include "weight.h"
 #include <array>
 #include <iostream>
-#include <stack>
 #include <string>
+#include <vector>
 
 using namespace diag;
 using namespace std;
 using namespace dse;
 
+extern parameter Para;
 extern variable Var;
+extern propagator Prop;
 
 void weight::Test(int LoopNum) {
   if (DiagType == GAMMA && LoopNum == 1)
@@ -33,13 +35,11 @@ void weight::_TestOneLoopGamma() {
 
   // one loop T and TC diagram
   momentum K1 = OutL + K0 - InL;
-  auto LVer = VerQTheta.Interaction(InL, OutL, K1, K0, 0, false, false);
-  auto RVer = VerQTheta.Interaction(K0, K1, InR, OutR, 0, false, false);
+  auto LVer = Prop.Interaction(InL, OutL, K1, K0, false);
+  auto RVer = Prop.Interaction(K0, K1, InR, OutR, false);
   dTau = Var.Tau[1] - Var.Tau[0];
-  GWeight =
-      Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(-dTau, K1, UP, 0, 0.0);
-  GWeightInBox =
-      Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(-dTau, K0, UP, 0, 0.0);
+  GWeight = Prop.Green(dTau, K0, UP, 0) * Prop.Green(-dTau, K1, UP, 0);
+  GWeightInBox = Prop.Green(dTau, K0, UP, 0) * Prop.Green(-dTau, K0, UP, 0);
 
   TestWeight.setZero();
   TestWeight[DIR] = LVer[DIR] * RVer[DIR] * SPIN + LVer[EX] * RVer[DIR] +
@@ -55,11 +55,10 @@ void weight::_TestOneLoopGamma() {
   if (abs(Weight[DIR] - TestWeight[DIR]) > 1.0e-10 ||
       abs(Weight[EX] - TestWeight[EX]) > 1.0e-10) {
     cout << fmt::format("G: {}", GWeight * Factor) << endl;
-    cout << fmt::format("GInBox: {}, sep: {}, {}",
-                        GWeightInBox * Factor * Para.Lambda / (8.0 * PI) /
-                            Para.Nf,
-                        Fermi.Green(dTau, K0, UP, 0, 0.0),
-                        Fermi.Green(-dTau, K0, UP, 0, 0.0))
+    cout << fmt::format(
+                "GInBox: {}, sep: {}, {}",
+                GWeightInBox * Factor * Para.Lambda / (8.0 * PI) / Para.Nf,
+                Prop.Green(dTau, K0, UP, 0), Prop.Green(-dTau, K0, UP, 0))
          << endl;
     cout << fmt::format("LVer: {}, {}", LVer[DIR], LVer[EX]) << endl;
     cout << fmt::format("RVer: {}, {}", RVer[DIR], RVer[EX]) << endl;
@@ -70,13 +69,11 @@ void weight::_TestOneLoopGamma() {
 
   // one loop U and UC diagram
   momentum K2 = OutR + K0 - InL;
-  LVer = VerQTheta.Interaction(InL, OutR, K2, K0, 0, false, false);
-  RVer = VerQTheta.Interaction(K0, K2, InR, OutL, 0, false, false);
+  LVer = Prop.Interaction(InL, OutR, K2, K0, false);
+  RVer = Prop.Interaction(K0, K2, InR, OutL, false);
   dTau = Var.Tau[1] - Var.Tau[0];
-  GWeight =
-      Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(-dTau, K2, UP, 0, 0.0);
-  GWeightInBox =
-      Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(-dTau, K0, UP, 0, 0.0);
+  GWeight = Prop.Green(dTau, K0, UP, 0) * Prop.Green(-dTau, K2, UP, 0);
+  GWeightInBox = Prop.Green(dTau, K0, UP, 0) * Prop.Green(-dTau, K0, UP, 0);
 
   TestWeight.setZero();
   TestWeight[DIR] = LVer[EX] * RVer[EX];
@@ -91,11 +88,10 @@ void weight::_TestOneLoopGamma() {
   if (abs(Weight[DIR] - TestWeight[DIR]) > 1.0e-10 ||
       abs(Weight[EX] - TestWeight[EX]) > 1.0e-10) {
     cout << fmt::format("G: {}", GWeight * Factor) << endl;
-    cout << fmt::format("GInBox: {}, sep: {}, {}",
-                        GWeightInBox * Factor * Para.Lambda / (8.0 * PI) /
-                            Para.Nf,
-                        Fermi.Green(dTau, K0, UP, 0, 0.0),
-                        Fermi.Green(-dTau, K0, UP, 0, 0.0))
+    cout << fmt::format(
+                "GInBox: {}, sep: {}, {}",
+                GWeightInBox * Factor * Para.Lambda / (8.0 * PI) / Para.Nf,
+                Prop.Green(dTau, K0, UP, 0), Prop.Green(-dTau, K0, UP, 0))
          << endl;
     cout << fmt::format("LVer: {}, {}", LVer[DIR], LVer[EX]) << endl;
     cout << fmt::format("RVer: {}, {}", RVer[DIR], RVer[EX]) << endl;
@@ -106,11 +102,10 @@ void weight::_TestOneLoopGamma() {
 
   // one loop S diagram
   momentum K3 = InR + InL - K0;
-  LVer = VerQTheta.Interaction(InL, K3, InR, K0, 0, false, false);
-  RVer = VerQTheta.Interaction(K0, OutL, K3, OutR, 0, false, false);
+  LVer = Prop.Interaction(InL, K3, InR, K0, false);
+  RVer = Prop.Interaction(K0, OutL, K3, OutR, false);
   dTau = Var.Tau[1] - Var.Tau[0];
-  GWeight =
-      Fermi.Green(dTau, K0, UP, 0, 0.0) * Fermi.Green(dTau, K3, UP, 0, 0.0);
+  GWeight = Prop.Green(dTau, K0, UP, 0) * Prop.Green(dTau, K3, UP, 0);
 
   TestWeight.setZero();
   TestWeight[DIR] = LVer[EX] * RVer[DIR] + LVer[DIR] * RVer[EX];
@@ -123,8 +118,8 @@ void weight::_TestOneLoopGamma() {
   if (abs(Weight[DIR] - TestWeight[DIR]) > 1.0e-10 ||
       abs(Weight[EX] - TestWeight[EX]) > 1.0e-10) {
     cout << fmt::format("G: {} G0 {} G3 {}", GWeight * Factor * SymFactor[S],
-                        Fermi.Green(dTau, K0, UP, 0, 0.0),
-                        Fermi.Green(dTau, K3, UP, 0, 0.0))
+                        Prop.Green(dTau, K0, UP, 0),
+                        Prop.Green(dTau, K3, UP, 0))
          << endl;
     cout << fmt::format("LVer: {}, {}", LVer[DIR], LVer[EX]) << endl;
     cout << fmt::format("RVer: {}, {}", RVer[DIR], RVer[EX]) << endl;
@@ -153,11 +148,11 @@ double weight::_TestTwoLoopSigma() {
   momentum &ExtK = Var.LoopMom[0];
   momentum &K1 = Var.LoopMom[1];
   momentum &K2 = Var.LoopMom[2];
-  double G1 = Fermi.Green(Var.Tau[1] - Var.Tau[0], K1, UP, 0);
-  double G2 = Fermi.Green(Var.Tau[1] - Var.Tau[0], K2, UP, 0);
-  double G3 = Fermi.Green(Var.Tau[0] - Var.Tau[1], K1 + K2 - ExtK, UP, 0);
-  double VerWeightDir = VerQTheta.Interaction(K1 - ExtK);
-  double VerWeightExLeft = VerQTheta.Interaction(K2 - ExtK);
+  double G1 = Prop.Green(Var.Tau[1] - Var.Tau[0], K1, UP, 0);
+  double G2 = Prop.Green(Var.Tau[1] - Var.Tau[0], K2, UP, 0);
+  double G3 = Prop.Green(Var.Tau[0] - Var.Tau[1], K1 + K2 - ExtK, UP, 0);
+  double VerWeightDir = Prop.Interaction(K1 - ExtK);
+  double VerWeightExLeft = Prop.Interaction(K2 - ExtK);
 
   double Weight1 =
       -VerWeightDir * VerWeightDir * G1 * G2 * G3 * SPIN * Factor * Factor;
@@ -172,18 +167,20 @@ double weight::_TestTwoLoopSigma() {
   return Weight1 + 2 * Weight2;
 }
 
-verWeight weight::_GetWeight(int LoopNum, vector<channel> Channel) {
+verWeight weight::_GetWeight(int LoopNum, std::vector<channel> Channel) {
   verWeight Weight;
   // array<momentum *, 4> ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1],
   //                                 &Var.LoopMom[2], &Var.LoopMom[3]};
-  ver4 Ver4 = VerDiag.Vertex(0, // level
-                             1, // loopNum
-                             4, // loop index of the first internal K
-                             0, // tau index of the InTL leg
-                             Channel, RIGHT, false);
-  // VerDiag.ResetMomMap(Ver4, ExtLegK);
-  Vertex4(Ver4, Var.LoopMom[INL], Var.LoopMom[OUTL], Var.LoopMom[INR],
-          Var.LoopMom[OUTR], true);
+  vertex4 Ver4;
+  Ver4.Build(0, // level
+             1, // loopNum
+             4, // loop index of the first internal K
+             0, // tau index of the InTL leg
+             Channel, RIGHT, false);
+
+  Ver4.Evaluate(Var.LoopMom[INL], Var.LoopMom[OUTL], Var.LoopMom[INR],
+                Var.LoopMom[OUTR], true);
+  auto &ChanWeight = Ver4.ChanWeight;
   for (auto &w : ChanWeight)
     // collapse all channel to I
     ChanWeight[0] += w;

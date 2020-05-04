@@ -1,4 +1,5 @@
 #include "vertex4.h"
+#include <iostream>
 
 using namespace std;
 using namespace diag;
@@ -84,6 +85,7 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
 
     auto &LVerW = b.LVer.Weight;
     auto &RVerW = b.RVer.Weight;
+    // cout << b.Channel << ", " << b.Map.size() << endl;
 
     for (auto &map : b.Map) {
       if (chan == TC || chan == UC || _InBox)

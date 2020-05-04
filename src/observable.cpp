@@ -290,20 +290,20 @@ ver4Obs::ver4Obs() {
     estimator.Initialize({Para.Order, AngBinSize, ExtMomBinSize});
 };
 
+void ver4Obs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
+
 void ver4Obs::Measure(const momentum &InL, const momentum &InR,
                       const int QIndex, int Order,
                       const std::vector<verWeight> &Weight, double Factor) {
 
-  if (Order == 0) {
-    Normalization += 1.0 * Factor;
-  } else {
-    double CosAng = diag::Angle3D(InL, InR);
-    int AngleIndex = diag::Angle2Index(CosAng, AngBinSize);
+  ASSERT(Order != 0, "Order must be >=1!");
 
-    for (int chan = 0; chan < 4; ++chan) {
-      _Estimator[chan](Order, AngleIndex, QIndex) = Weight[chan] * Factor;
-      _Estimator[chan](0, AngleIndex, QIndex) = Weight[chan] * Factor;
-    }
+  double CosAng = diag::Angle3D(InL, InR);
+  int AngleIndex = diag::Angle2Index(CosAng, AngBinSize);
+
+  for (int chan = 0; chan < 4; ++chan) {
+    _Estimator[chan](Order, AngleIndex, QIndex) = Weight[chan] * Factor;
+    _Estimator[chan](0, AngleIndex, QIndex) = Weight[chan] * Factor;
   }
   return;
 }

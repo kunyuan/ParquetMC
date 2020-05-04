@@ -30,11 +30,6 @@ public:
   void ChangeOrder();
   void ChangeScale();
 
-  void Measure();
-  void ClearStatis();
-  void SaveToFile(bool Simple);
-  void LoadFile();
-
   int DynamicTest();
 
   // MC variables

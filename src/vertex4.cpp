@@ -1,5 +1,6 @@
 #include "vertex4.h"
 #include "utility/fmt/format.h"
+#include <iostream>
 
 using namespace diag;
 using namespace std;
@@ -16,6 +17,7 @@ int green::AddTidxPair(const array<int, 2> &T) {
       return i;
   }
   _Tpair.push_back(T);
+  //   cout << _Weight.size() << endl;
   _Weight.push_back(0.0);
   return _Tpair.size() - 1;
 }
@@ -36,6 +38,7 @@ void vertex4::Build(int level, int order, int loopIdx, int inTL,
   LoopIdx = loopIdx;
   _InBox = inBox;
   Channel = chan;
+  Order = order;
 
   if (LoopNum() == 0) {
     // the same for left and right vertex with loopnum=0
@@ -220,6 +223,8 @@ string vertex4::ToString(string indent) {
 
     Info += "\n";
     Info += indent + fmt::format(". ├─Map:");
+    ASSERT_ALLWAYS(pp.Map.size() == pp.LVer.Tpair.size() * pp.RVer.Tpair.size(),
+                   "Map size != LVer.Tpair size *RVer.Tpair size!");
     for (auto &m : pp.Map)
       Info += fmt::format("({0},{1}):{2}, ", m[LVERT], m[RVERT], m[VERT]);
 

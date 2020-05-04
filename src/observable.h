@@ -35,6 +35,7 @@ private:
 class ver4Obs {
 public:
   ver4Obs();
+  void Measure0(double Factor);
   void Measure(const momentum &InL, const momentum &InR, const int QIndex,
                int Order, const std::vector<verWeight> &Weight, double Factor);
   void Save();
