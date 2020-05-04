@@ -47,6 +47,21 @@ private:
   std::array<tensor3<verWeight>, 4> _Estimator;
   double PhyWeight;
 };
+
+class polarObs {
+public:
+  polarObs();
+  void Measure0(double Factor);
+  void Measure(int Order, int Kidx, double Tau, double Weight,
+               double Factor); // all tau variables
+  void Save();
+
+private:
+  double Normalization;
+  tensor3<double> _Estimator;
+  double PhyWeight;
+};
+
 } // namespace obs
 
 namespace ver {
@@ -69,24 +84,6 @@ private:
   double *_EstimatorEqT;
   double *_EstimatorW1;
   double *_EstimatorW2;
-  double PhyWeight;
-
-  int KIndex;
-  int OrderIndex;
-};
-
-class polarData {
-public:
-  polarData();
-  ~polarData();
-  void Initialization();
-  void Measure(int Order, int Kidx, double Tau, double Weight,
-               double Factor); // all tau variables
-  void Save();
-
-private:
-  double Normalization;
-  double *_Estimator;
   double PhyWeight;
 
   int KIndex;

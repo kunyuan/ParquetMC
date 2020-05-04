@@ -9,7 +9,6 @@
 using namespace diag;
 using namespace std;
 
-extern RandomFactory Random;
 extern parameter Para;        // global parameters
 extern variable Var;          // global MC variables
 extern diag::propagator Prop; // global progator
@@ -37,35 +36,51 @@ void weight::Initialization() {
     /////////////////////////// Sigma /////////////////////////
   } else if (DiagType == POLAR) {
     /////////////////////////// Polar /////////////////////////
+    for (int order = 1; order <= Para.Order; order++) {
+      LOG_INFO("Generating order " << order);
+      Polar[order].Build(order);
+      if (order < 4)
+        LOG_INFO(Polar[order].Vertex.ToString());
+    }
   } else if (DiagType == DELTA) {
     ////////////////////////// Delta /////////////////////////
   }
 }
 
-double weight::Evaluate(int LoopNum) {
-  if (LoopNum == 0)
+double weight::Evaluate(int Order) {
+  if (Order == 0)
     return 1.0;
 
   // higher order
   if (DiagType == diagram::GAMMA) {
-    Gamma[LoopNum].Evaluate(Var.LoopMom[INL],  // KInL
-                            Var.LoopMom[OUTL], // KOutL
-                            Var.LoopMom[INR],  // KInR
-                            Var.LoopMom[OUTR], // KOutR
-                            true);
-    auto &ChanWeight = Gamma[LoopNum].ChanWeight;
+    Gamma[Order].Evaluate(Var.LoopMom[INL],  // KInL
+                          Var.LoopMom[OUTL], // KOutL
+                          Var.LoopMom[INR],  // KInR
+                          Var.LoopMom[OUTR], // KOutR
+                          true);
+    auto &ChanWeight = Gamma[Order].ChanWeight;
     for (auto &w : ChanWeight)
       // collapse all channel to I
       ChanWeight[0] += w;
     return ChanWeight[0][DIR] + ChanWeight[0][EX] / SPIN;
+
+  } else if (DiagType == diagram::POLAR) {
+    // polarization diagram
+    double Weight = Polar[Order].Evaluate();
+    // cout << Order << ", " << Weight << endl;
+    return Weight;
   }
 }
 
 void weight::Measure() {
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
 
-  if (DiagType == GAMMA) {
-    if (Var.CurrOrder >= 1) {
+  if (DiagType == diagram::GAMMA) {
+    // measure Gamma
+    if (Var.CurrOrder == 0) {
+      // order zero
+      GammaObs.Measure0(Factor);
+    } else {
       Gamma[Var.CurrOrder].Evaluate(Var.LoopMom[INL], Var.LoopMom[OUTL],
                                     Var.LoopMom[INR], Var.LoopMom[OUTR], true);
 
@@ -73,49 +88,25 @@ void weight::Measure() {
 
       GammaObs.Measure(Var.LoopMom[INL], Var.LoopMom[INR], Var.CurrExtMomBin,
                        Var.CurrOrder, ChanWeight, Factor);
-    } else {
-      // order zero
-      GammaObs.Measure0(Factor);
     }
+
+  } else if (DiagType == diagram::POLAR) {
+    // measure polarization
+    if (Var.CurrOrder == 0)
+      PolarObs.Measure0(Factor);
+    else
+      PolarObs.Measure(Var.CurrOrder, Var.CurrExtMomBin,
+                       Var.Tau[1] - Var.Tau[0], Polar[Var.CurrOrder].Evaluate(),
+                       Factor);
   }
 }
 
 void weight::SaveToFile() {
   if (DiagType == GAMMA)
     GammaObs.Save();
+  else if (DiagType == POLAR)
+    PolarObs.Save();
 }
-
-// void weight::MeasureSigma() {
-//   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
-//   if (Var.CurrOrder == 0)
-//     SigData.Measure0(Factor);
-//   else if (Var.CurrOrder == 1) {
-//     double Weight = EvaluateSigma(1, false);
-//     SigData.Measure1(Var.CurrExtMomBin, Weight, Factor);
-//   } else {
-//     sigma &Root = Sigma[Var.CurrOrder];
-//     EvaluateSigma(Var.CurrOrder, false);
-//     // cout << Root.T[0] << "=" << Root.Weight[0] << ", " << Root.T[1] << "="
-//     //      << Root.Weight[1] << endl;
-//     SigData.Measure(Var.CurrOrder, Var.CurrExtMomBin, Root.T, Root.Weight,
-//                     Factor);
-//   }
-// }
-// void weight::MeasurePolar() {
-//   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
-//   double Weight = EvaluatePolar(Var.CurrOrder);
-//   PolarData.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.Tau[1] -
-//   Var.Tau[0],
-//                     Weight, Factor);
-// }
-
-// void weight::MeasureDelta() {
-//   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
-//   double Weight = EvaluateDelta(Var.CurrOrder);
-//   DeltaData.Measure(Var.CurrOrder, Var.CurrExtMomBin,
-//                     Var.Tau[Var.CurrOrder - 1] - Var.Tau[0], Weight, Factor);
-//   // Tau variable= the last Tau - the first tau
-// }
 
 void weight::Benchmark(int LoopNum, int Step) {
   timer Timer;

@@ -135,24 +135,15 @@ void sigData::Save() {
 
 void sigData::LoadWeight() {}
 
-polarData::polarData() {
-  _Estimator = new double[MaxOrder * TauBinSize * ExtMomBinSize];
-  OrderIndex = TauBinSize * ExtMomBinSize;
-  KIndex = TauBinSize;
-  PhyWeight = ExtMomBinSize;
-  Initialization();
-  return;
+polarObs::polarObs() {
+  Normalization = 1.0e-10;
+  PhyWeight = TauBinSize;
+  _Estimator.Initialize({Para.Order + 1, TauBinSize, ExtMomBinSize});
 }
 
-void polarData::Initialization() {
-  for (int i = 0; i < MaxOrder * TauBinSize * ExtMomBinSize; ++i)
-    _Estimator[i] = 0.0;
-}
-
-polarData::~polarData() { delete[] _Estimator; }
-
-void polarData::Measure(int Order, int Kidx, double Tau, double Weight,
-                        double Factor) {
+void polarObs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
+void polarObs::Measure(int Order, int Kidx, double Tau, double Weight,
+                       double Factor) {
 
   if (Order == 0)
     Normalization += 1.0 * Factor;
@@ -163,14 +154,15 @@ void polarData::Measure(int Order, int Kidx, double Tau, double Weight,
 
     int TauIdx = int(Tau / Para.Beta * TauBinSize);
 
-    _Estimator[Order * OrderIndex + Kidx * KIndex + TauIdx] +=
-        Weight * Factor * TauBinSize / Para.Beta;
-    _Estimator[0 * OrderIndex + Kidx * KIndex + TauIdx] +=
-        Weight * Factor * TauBinSize / Para.Beta;
+    ASSERT(Kidx >= 0 && Kidx < ExtMomBinSize, "Kidx is out of range!");
+    ASSERT(TauIdx >= 0 && TauIdx < TauBinSize, "TauIdx is out of range!");
+
+    _Estimator(Order, Kidx, TauIdx) += Weight * Factor * TauBinSize / Para.Beta;
+    _Estimator(0, Kidx, TauIdx) += Weight * Factor * TauBinSize / Para.Beta;
   }
 }
 
-void polarData::Save() {
+void polarObs::Save() {
 
   for (int order = 0; order <= Para.Order; order++) {
     string FileName = fmt::format("polar{0}_pid{1}.dat", order, Para.PID);
@@ -196,10 +188,7 @@ void polarData::Save() {
 
       for (int tindex = 0; tindex < TauBinSize; ++tindex)
         for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
-          VerFile << _Estimator[order * OrderIndex + qindex * KIndex + tindex] *
-                         PhyWeight
-                  << "  ";
-      // VerFile << 0.0 << "  ";
+          VerFile << _Estimator(order, qindex, tindex) * PhyWeight << "  ";
       VerFile.close();
     } else {
       LOG_WARNING("Polar for PID " << Para.PID << " fails to save!");

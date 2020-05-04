@@ -70,7 +70,7 @@ markov::markov() {
   Var.Counter = 0;
 
   // Var.CurrGroup = &Groups[0];
-  Var.CurrOrder = 1;
+  Var.CurrOrder = 0;
 
   // initialize RG staff
   // Var.CurrScale = ScaleBinSize - 1;

@@ -2,7 +2,7 @@
 #define weight_H
 
 #include "observable.h"
-#include "utility/rng.h"
+#include "polar.h"
 #include "utility/utility.h"
 #include "vertex4.h"
 #include <vector>
@@ -27,6 +27,9 @@ public:
 
   diag::vertex4 Gamma[MaxOrder];
   obs::ver4Obs GammaObs;
+
+  diag::polar Polar[MaxOrder];
+  obs::polarObs PolarObs;
 
 private:
   void _TestOneLoopGamma();
