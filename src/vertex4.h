@@ -28,6 +28,7 @@ public:
   double operator[](int Tidx) { return _Weight[Tidx]; }; // get _Weight[Tidx]
   // evaluate all weight with different T pairs and a given K
   void Evaluate();
+  void Evaluate(const momentum &K);
   int Size() { return _Tpair.size(); };
 
   vector<array<int, 2>> _Tpair;

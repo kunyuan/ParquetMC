@@ -125,7 +125,7 @@ void MonteCarlo() {
 
   for (int order = 1; order <= Para.Order; ++order) {
     // Markov.Weight.Test(1);
-    Markov.Weight.Benchmark(order, 1000);
+    Markov.Weight.Benchmark(order, 50000);
   }
 
   while (true) {

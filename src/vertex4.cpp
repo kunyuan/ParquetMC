@@ -30,6 +30,14 @@ void green::Evaluate() {
   }
 }
 
+void green::Evaluate(const momentum &_K) {
+  int Size = _Tpair.size();
+  for (int i = 0; i < Size; ++i) {
+    auto &T = _Tpair[i];
+    _Weight[i] = Prop.Green(Var.Tau[T[OUT]] - Var.Tau[T[IN]], _K, UP);
+  }
+}
+
 void vertex4::Build(int level, int order, int loopIdx, int inTL,
                     const vector<channel> &chan, int side, bool inBox) {
   Level = level;
