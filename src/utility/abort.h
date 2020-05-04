@@ -50,9 +50,9 @@
       ABORT(#condition " does not hold! " << msg);                             \
   } while (0)
 
-// ASSERT will turn off without NDEBUG
+// ASSERT will turn off when NDEBUG is on
 #ifdef NDEBUG
-#define ASSERT(condition) ((void)0)
+#define ASSERT(condition, msg) ((void)0)
 #else
 #define ASSERT(condition, msg) ASSERT_ALLWAYS(condition, msg);
 #endif

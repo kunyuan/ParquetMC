@@ -305,8 +305,10 @@ void ver4Obs::Measure(const momentum &InL, const momentum &InR,
          "AngleIndex out of range!");
 
   for (int chan = 0; chan < 4; ++chan) {
-    _Estimator[chan](Order, AngleIndex, QIndex) = Weight[chan] * Factor;
-    _Estimator[chan](0, AngleIndex, QIndex) = Weight[chan] * Factor;
+    // cout << "chan=" << chan << ", " << AngleIndex << ", " << QIndex << endl;
+    // cout << Weight[chan] << endl;
+    _Estimator[chan](Order, AngleIndex, QIndex) += Weight[chan] * Factor;
+    _Estimator[chan](0, AngleIndex, QIndex) += Weight[chan] * Factor;
   }
   return;
 }

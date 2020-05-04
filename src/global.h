@@ -13,8 +13,8 @@ using namespace std;
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
 enum diagram { SIGMA, POLAR, GAMMA, DELTA };
 
-// turn on all assert
-#define NDEBUG
+// turn off all assert
+// #define NDEBUG
 
 ///////////  Global Constants ////////////////////
 // D=2 or D=3

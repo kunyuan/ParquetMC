@@ -123,7 +123,7 @@ while True:
 
     time.sleep(SleepTime)
 
-    files=getListOfFiles(folder)
+    files = getListOfFiles(folder)
     for order in Order:
         for chan in Channel:
             Num = 0
@@ -172,7 +172,8 @@ while True:
 
                             Norm += Norm0
 
-                            dd = d.reshape((AngleBinSize, ExtMomBinSize, 2))/Norm0
+                            dd = d.reshape(
+                                (AngleBinSize, ExtMomBinSize, 2))/Norm0
                             dd = AngleIntegation(dd, 0)
                             DataList.append(SpinMapping(dd))
 
