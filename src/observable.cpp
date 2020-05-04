@@ -1,5 +1,4 @@
 #include "observable.h"
-#include "global.h"
 #include "propagator.h"
 #include "utility/abort.h"
 #include "utility/fmt/format.h"

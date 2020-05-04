@@ -1,8 +1,8 @@
 #ifndef weight_H
 #define weight_H
 
+#include "diagram.h"
 #include "observable.h"
-#include "polar.h"
 #include "utility/utility.h"
 #include "vertex4.h"
 #include <vector>

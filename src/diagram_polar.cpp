@@ -1,4 +1,4 @@
-#include "polar.h"
+#include "diagram.h"
 #include "utility/fmt/format.h"
 #include <iostream>
 

@@ -18,5 +18,23 @@ public:
   double Evaluate();
 };
 
+struct sigma {
+  int Order;
+  vertex4 Vertex;
+  vector<green> G;
+
+  vector<int> T;
+  vector<double> Weight;
+
+  // map Vertex weight idx to G idx and sigma idx
+  vector<int> Gidx;
+  vector<int> SigTidx;
+
+  int TauNum() { return Order; }
+  int LoopNum() { return Order; }
+  void Build(int Order);
+  double Evaluate();
+};
+
 } // namespace diag
 #endif
