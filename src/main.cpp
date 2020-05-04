@@ -46,7 +46,7 @@ void InitPara() {
   LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
 
   // Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
-  Para.ReWeight = {1.0, 1.0, 1.0, 0.2, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
+  Para.ReWeight = {20.0, 1.0, 1.0, 0.2, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
 
   //// initialize the global parameter //////////////////////
   double Kf;
@@ -153,10 +153,11 @@ void MonteCarlo() {
       }
       // cout << "Testing ..." << endl;
       // cout << Var.Counter << endl;
-      Markov.Weight.Test(1);
+      // Markov.Weight.Test(1);
 
       if (i % 8 == 0)
         Markov.Weight.Measure();
+
       // Markov.DynamicTest();
       // Markov.Weight.Test(1);
 

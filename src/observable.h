@@ -24,6 +24,8 @@ public:
       _Estimator[i] *= 0.0; // set all elements to zero
   };
   T &operator()(int X, int Y, int Z) {
+    ASSERT(X * Index0 + Y * Index1 + Z < Size,
+           "Estimator out of range! " << X << "x" << Y << "x" << Z);
     return _Estimator[X * Index0 + Y * Index1 + Z];
   };
 

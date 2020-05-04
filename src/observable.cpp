@@ -287,7 +287,7 @@ ver4Obs::ver4Obs() {
   Normalization = 1.0e-10;
   PhyWeight = AngBinSize;
   for (auto &estimator : _Estimator)
-    estimator.Initialize({Para.Order, AngBinSize, ExtMomBinSize});
+    estimator.Initialize({Para.Order + 1, AngBinSize, ExtMomBinSize});
 };
 
 void ver4Obs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
@@ -301,7 +301,8 @@ void ver4Obs::Measure(const momentum &InL, const momentum &InR,
   double CosAng = diag::Angle3D(InL, InR);
   int AngleIndex = diag::Angle2Index(CosAng, AngBinSize);
 
-  ASSERT(AngleIndex > 0 && AngleIndex < AngBinSize, "AngleIndex out of range!");
+  ASSERT(AngleIndex >= 0 && AngleIndex < AngBinSize,
+         "AngleIndex out of range!");
 
   for (int chan = 0; chan < 4; ++chan) {
     _Estimator[chan](Order, AngleIndex, QIndex) = Weight[chan] * Factor;
@@ -337,7 +338,7 @@ void ver4Obs::Save() {
         for (int angle = 0; angle < AngBinSize; ++angle)
           for (int qindex = 0; qindex < ExtMomBinSize; ++qindex)
             for (int dir = 0; dir < 2; ++dir)
-              VerFile << _Estimator[chan](order, angle, qindex) * PhyWeight
+              VerFile << _Estimator[chan](order, angle, qindex)[dir] * PhyWeight
                       << "  ";
         VerFile.close();
       } else {
