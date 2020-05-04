@@ -18,17 +18,14 @@ public:
   double Evaluate();
 };
 
-struct sigma {
+class sigma {
   int Order;
-  vertex4 Vertex;
-  vector<green> G;
+  green G1, G2, G3;
+  double Weight;
+  vector<bubble> Bubble;
 
-  vector<int> T;
-  vector<double> Weight;
-
-  // map Vertex weight idx to G idx and sigma idx
-  vector<int> Gidx;
-  vector<int> SigTidx;
+  // Ver4, G0, G1, G2 index
+  vector<array<int, 4>> Tpair;
 
   int TauNum() { return Order; }
   int LoopNum() { return Order; }
