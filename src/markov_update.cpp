@@ -382,7 +382,7 @@ double markov::ShiftExtLegK(const momentum &OldExtMom, momentum &NewExtMom) {
 
   int NewKBin = Random.irn(0, AngBinSize - 1);
 
-  double AngCos = ver::Index2Angle(NewKBin, AngBinSize);
+  double AngCos = diag::Index2Angle(NewKBin, AngBinSize);
   double theta = acos(AngCos);
   NewExtMom[0] = Para.Kf * cos(theta);
   NewExtMom[1] = Para.Kf * sin(theta);

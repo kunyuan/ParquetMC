@@ -10,7 +10,6 @@
 
 using namespace diag;
 using namespace std;
-using namespace dse;
 
 extern parameter Para;
 extern variable Var;

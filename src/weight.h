@@ -1,7 +1,6 @@
 #ifndef weight_H
 #define weight_H
 
-#include "diagram.h"
 #include "observable.h"
 #include "utility/rng.h"
 #include "utility/utility.h"

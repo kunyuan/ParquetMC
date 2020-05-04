@@ -67,7 +67,7 @@ void InitPara() {
   Para.Beta /= Para.Ef;
 
   for (int i = 0; i < AngBinSize; i++) {
-    Para.AngleTable[i] = ver::Index2Angle(i, AngBinSize);
+    Para.AngleTable[i] = diag::Index2Angle(i, AngBinSize);
   }
 
   // initialize external momentum
@@ -135,6 +135,9 @@ void MonteCarlo() {
       // }
 
       double x = Random.urn();
+      if (Var.Counter == 130) {
+        cout << "error" << Var.Counter << endl;
+      }
       if (x < 1.0 / 4.0) {
         Markov.ChangeOrder();
         // ;
@@ -152,6 +155,7 @@ void MonteCarlo() {
       }
       // cout << "Testing ..." << endl;
       Markov.Weight.Test(1);
+      cout << Var.Counter << endl;
 
       if (i % 8 == 0)
         Markov.Weight.Measure();

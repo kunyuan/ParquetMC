@@ -1,5 +1,4 @@
 #include "weight.h"
-#include "diagram.h"
 #include "global.h"
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
