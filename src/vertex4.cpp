@@ -45,18 +45,18 @@ void vertex4::Build(int level, int order, int loopIdx, int inTL,
     _AddTidxPair({Tidx, Tidx, Tidx, Tidx});
   } else {
     vector<channel> UST, II;
-    for (auto &chan : Channel) {
-      if (chan == I)
-        II.push_back(chan);
+    for (auto &c : Channel) {
+      if (c == I)
+        II.push_back(c);
       else
-        UST.push_back(chan);
+        UST.push_back(c);
     }
     // normal diagram
     // _BuildI(II);
     // UST channel
-    for (auto &chan : UST)
+    for (auto &c : UST)
       for (int ol = 0; ol < LoopNum(); ol++)
-        _UST.push_back(_BuildBubble(chan, ol));
+        _UST.push_back(_BuildBubble(c, ol));
   }
 
   Weight.resize(Tpair.size());
@@ -192,6 +192,9 @@ string vertex4::ToString(string indent) {
     Info +=
         fmt::format("({0}, {1}, {2}, {3}), ", t[INL], t[OUTL], t[INR], t[OUTR]);
   Info += "\n";
+
+  ASSERT_ALLWAYS(Tpair.size() == Weight.size(),
+                 "Tpair size must be equal to Weight size!");
   // Info += indent + fmt::format("├─LegK : ");
   // auto &LegK = Ver4.LegK;
   // Info +=
@@ -223,8 +226,10 @@ string vertex4::ToString(string indent) {
 
     Info += "\n";
     Info += indent + fmt::format(". ├─Map:");
+
     ASSERT_ALLWAYS(pp.Map.size() == pp.LVer.Tpair.size() * pp.RVer.Tpair.size(),
                    "Map size != LVer.Tpair size *RVer.Tpair size!");
+
     for (auto &m : pp.Map)
       Info += fmt::format("({0},{1}):{2}, ", m[LVERT], m[RVERT], m[VERT]);
 

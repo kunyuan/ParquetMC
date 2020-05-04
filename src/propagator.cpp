@@ -138,7 +138,10 @@ int diag::Angle2Index(const double &Angle, const int &AngleNum) {
   //   return AngleNum - 1;
   // else {
   double dAngle = 2.0 / AngleNum;
-  return int((Angle + 1.0) / dAngle);
+  if (Angle > 1.0 - EPS)
+    return AngleNum - 1;
+  else
+    return int((Angle + 1.0) / dAngle);
   // }
 }
 

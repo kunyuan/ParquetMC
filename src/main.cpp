@@ -118,6 +118,7 @@ void MonteCarlo() {
   Markov.Weight.LoadFile();
 
   // for (int order = 1; order <= Para.Order; ++order) {
+  //   Markov.Weight.Test(1);
   //   Markov.Weight.Benchmark(order, 1000);
   // }
 
@@ -135,9 +136,6 @@ void MonteCarlo() {
       // }
 
       double x = Random.urn();
-      if (Var.Counter == 130) {
-        cout << "error" << Var.Counter << endl;
-      }
       if (x < 1.0 / 4.0) {
         Markov.ChangeOrder();
         // ;
@@ -154,12 +152,13 @@ void MonteCarlo() {
         // ;
       }
       // cout << "Testing ..." << endl;
+      // cout << Var.Counter << endl;
       Markov.Weight.Test(1);
-      cout << Var.Counter << endl;
 
       if (i % 8 == 0)
         Markov.Weight.Measure();
       // Markov.DynamicTest();
+      // Markov.Weight.Test(1);
 
       if (i % 1000 == 0) {
         if (PrinterTimer.check(Para.PrinterTimer)) {

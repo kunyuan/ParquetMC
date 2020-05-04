@@ -20,7 +20,7 @@ void weight::Initialization() {
   if (DiagType == GAMMA) {
 
     vector<channel> Chan = {I, T, U, S, TC, UC};
-    // vector<channel> Chan = {T, TC};
+    // vector<channel> Chan = {T};
     // vector<channel> Chan = {U, UC};
     for (int order = 1; order <= Para.Order; order++) {
       LOG_INFO("Generating order " << order);
@@ -65,7 +65,7 @@ void weight::Measure() {
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
 
   if (DiagType == GAMMA) {
-    if (Var.CurrOrder != 0) {
+    if (Var.CurrOrder >= 1) {
       Gamma[Var.CurrOrder].Evaluate(Var.LoopMom[INL], Var.LoopMom[OUTL],
                                     Var.LoopMom[INR], Var.LoopMom[OUTR], true);
 
@@ -73,6 +73,9 @@ void weight::Measure() {
 
       GammaObs.Measure(Var.LoopMom[INL], Var.LoopMom[INR], Var.CurrExtMomBin,
                        Var.CurrOrder, ChanWeight, Factor);
+    } else {
+      // order zero
+      GammaObs.Measure0(Factor);
     }
   }
 }

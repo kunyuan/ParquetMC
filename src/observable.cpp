@@ -301,6 +301,8 @@ void ver4Obs::Measure(const momentum &InL, const momentum &InR,
   double CosAng = diag::Angle3D(InL, InR);
   int AngleIndex = diag::Angle2Index(CosAng, AngBinSize);
 
+  ASSERT(AngleIndex > 0 && AngleIndex < AngBinSize, "AngleIndex out of range!");
+
   for (int chan = 0; chan < 4; ++chan) {
     _Estimator[chan](Order, AngleIndex, QIndex) = Weight[chan] * Factor;
     _Estimator[chan](0, AngleIndex, QIndex) = Weight[chan] * Factor;
