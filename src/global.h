@@ -30,7 +30,7 @@ const int ExtMomBinSize = 32;
 // number of bins for the angle between InL and InR legs
 const int AngBinSize = 64;
 // number of tau bin
-const int TauBinSize = 128;
+const int TauBinSize = 256;
 // Max diagram order
 const int MaxOrder = 9;
 const int MaxTauNum = MaxOrder + 1;

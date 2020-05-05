@@ -159,7 +159,7 @@ void MonteCarlo() {
       }
       // cout << "Testing ..." << endl;
       // cout << Var.Counter << endl;
-      Markov.Weight.Test();
+      // Markov.Weight.Test();
 
       if (i % 8 == 0)
         Markov.Weight.Measure();

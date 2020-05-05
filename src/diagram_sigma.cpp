@@ -95,6 +95,11 @@ double sigma::Evaluate() {
       Weight += w;
     }
   }
+
+  //   Weight =
+  //       1.0 / pow((G1.K.squaredNorm() + 1), 2) / pow((G2.K.squaredNorm() +
+  //       1), 2);
+
   return Weight * Factor * Factor;
 }
 
@@ -139,6 +144,7 @@ string sigma::ToString() {
 }
 
 bool sigma::Test() {
+  //   return false;
   // Two-loop sigma
   if (Order != 2)
     return false;

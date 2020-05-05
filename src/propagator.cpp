@@ -54,7 +54,6 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
 verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
                                   const momentum &KInR, const momentum &KOutR,
                                   bool Boxed, double ExtQ) {
-
   verWeight Weight;
 
   double kDiQ = (KInL - KOutL).norm();

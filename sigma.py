@@ -54,8 +54,8 @@ fig, ax = plt.subplots()
 
 if(XType == "Mom"):
     # Order 1 sigma is a delta function of tau
-    ErrorPlot(ax, ExtMomBin, Data[1][0, :]*Para.Beta/TauBinSize,
-              ColorList[1], 's', "Order {0}".format(1))
+    ErrorPlot(ax, ExtMomBin, Data[o][0, :]*Para.Beta/TauBinSize,
+              ColorList[o], 's', "Order {0}".format(o))
     ax.set_xlim([ExtMomBin[0], ExtMomBin[-1]])
     ax.set_xlabel("$Ext K$", size=size)
 
