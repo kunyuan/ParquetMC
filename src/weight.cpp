@@ -34,6 +34,12 @@ void weight::Initialization() {
 
   } else if (DiagType == SIGMA) {
     /////////////////////////// Sigma /////////////////////////
+    for (int order = 1; order <= Para.Order; order++) {
+      LOG_INFO("Generating order " << order);
+      Sigma[order].Build(order);
+      if (order < 4)
+        LOG_INFO(Sigma[order].ToString());
+    }
   } else if (DiagType == POLAR) {
     /////////////////////////// Polar /////////////////////////
     for (int order = 1; order <= Para.Order; order++) {
@@ -67,7 +73,10 @@ double weight::Evaluate(int Order) {
   } else if (DiagType == diagram::POLAR) {
     // polarization diagram
     double Weight = Polar[Order].Evaluate();
-    // cout << Order << ", " << Weight << endl;
+    return Weight;
+  } else if (DiagType == diagram::SIGMA) {
+    // self-energy diagram
+    double Weight = Sigma[Order].Evaluate();
     return Weight;
   }
 }
@@ -76,7 +85,6 @@ void weight::Measure() {
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
 
   if (DiagType == diagram::GAMMA) {
-    // measure Gamma
     if (Var.CurrOrder == 0) {
       // order zero
       GammaObs.Measure0(Factor);
@@ -89,23 +97,34 @@ void weight::Measure() {
       GammaObs.Measure(Var.LoopMom[INL], Var.LoopMom[INR], Var.CurrExtMomBin,
                        Var.CurrOrder, ChanWeight, Factor);
     }
-
-  } else if (DiagType == diagram::POLAR) {
-    // measure polarization
+  } else {
+    // Polar, Sigma, Delta can be handled together
     if (Var.CurrOrder == 0)
-      PolarObs.Measure0(Factor);
-    else
-      PolarObs.Measure(Var.CurrOrder, Var.CurrExtMomBin,
-                       Var.Tau[1] - Var.Tau[0], Polar[Var.CurrOrder].Evaluate(),
-                       Factor);
+      OneBodyObs.Measure0(Factor);
+    else {
+      double Weight, Tau;
+      if (DiagType == POLAR) {
+        Weight = Polar[Var.CurrOrder].Evaluate();
+        Tau = Var.Tau[1] - Var.Tau[0];
+
+      } else if (DiagType == SIGMA) {
+        Weight = Sigma[Var.CurrOrder].Evaluate();
+        Tau = Var.Tau[Var.CurrOrder - 1] - Var.Tau[0];
+
+      } else if (DiagType == DELTA) {
+        // Weight = Sigma[Var.CurrOrder].Evaluate();
+        // Tau = Var.Tau[Var.CurrOrder - 1] - Var.Tau[0];
+      }
+      OneBodyObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Tau, Weight, Factor);
+    }
   }
 }
 
 void weight::SaveToFile() {
   if (DiagType == GAMMA)
     GammaObs.Save();
-  else if (DiagType == POLAR)
-    PolarObs.Save();
+  else
+    OneBodyObs.Save();
 }
 
 void weight::Benchmark(int LoopNum, int Step) {

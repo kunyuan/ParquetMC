@@ -111,6 +111,7 @@ for order in Order:
                 Data0 += d
     Data0 /= Norm
     Data0 = Data0.reshape((TauBinSize, ExtMomBinSize))
+    print TauBinSize, ExtMomBinSize
 
     # average the angle distribution
     Data[order] = Data0

@@ -19,18 +19,19 @@ public:
 };
 
 class sigma {
+public:
   int Order;
   green G1, G2, G3;
-  double Weight;
   vector<bubble> Bubble;
 
   // Ver4, G0, G1, G2 index
-  vector<array<int, 4>> Tpair;
+  vector<array<int, 4>> Map;
 
   int TauNum() { return Order; }
   int LoopNum() { return Order; }
   void Build(int Order);
   double Evaluate();
+  string ToString();
 };
 
 } // namespace diag

@@ -139,7 +139,7 @@ void markov::PrintMCInfo() {
   LOG_INFO(Output);
 }
 
-int markov::DynamicTest() {}
+int markov::DynamicTest() { return 0; }
 
 void markov::PrintDeBugMCInfo() {
   string msg;

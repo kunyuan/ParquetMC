@@ -24,6 +24,10 @@ int markov::GetTauNum(int Order) {
     return Order;
   else if (DiagType == POLAR)
     return Order + 1;
+  else if (DiagType == DELTA)
+    return Order;
+  else
+    ASSERT(false, "Not Implemented!");
 }
 
 int markov::GetLoopNum(int Order) {
@@ -43,6 +47,10 @@ int markov::GetInterLoopIdx() {
     return 1;
   else if (DiagType == POLAR)
     return 1;
+  else if (DiagType == DELTA)
+    return 1;
+  else
+    ASSERT(false, "Not Implemented!");
   // else if (DiagType == POLAR)
   //   return Order + 2;
 }
@@ -185,7 +193,7 @@ void markov::ChangeExtMomentum() {
     CurrMom = Var.LoopMom[INR];
     Prop = ShiftExtLegK(CurrMom, Var.LoopMom[INR]);
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
-  } else if (DiagType == SIGMA || DiagType == POLAR) {
+  } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
     // LoopIndex must be 0
     CurrMom = Var.LoopMom[0];
     // In Momentum
@@ -206,7 +214,7 @@ void markov::ChangeExtMomentum() {
     if (DiagType == GAMMA) {
       Var.LoopMom[INR] = CurrMom;
       Var.LoopMom[OUTR] = CurrMom;
-    } else if (DiagType == SIGMA || DiagType == POLAR) {
+    } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
       Var.CurrExtMomBin = CurrExtMomBin;
       Var.LoopMom[0] = CurrMom;
     }

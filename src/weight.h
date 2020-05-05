@@ -29,7 +29,9 @@ public:
   obs::ver4Obs GammaObs;
 
   diag::polar Polar[MaxOrder];
-  obs::polarObs PolarObs;
+  diag::sigma Sigma[MaxOrder];
+  obs::oneBodyObs OneBodyObs;
+  // sigma, polar and delta can use the same observable
 
 private:
   void _TestOneLoopGamma();

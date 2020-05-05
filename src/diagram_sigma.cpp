@@ -18,8 +18,7 @@ void sigma::Build(int order) {
   // the bare interaction is automatically included
 
   for (int ol = 0; ol < LoopNum() - 1; ol++) {
-    Bubble.push_back(bubble());
-    auto &bub = Bubble.back();
+    bubble bub;
 
     ////////////////////   Right SubVer  ///////////////////
     int lvl = 0;
@@ -41,6 +40,48 @@ void sigma::Build(int order) {
       int G1idx = G1.AddTidxPair({t[OUTL], RInTL});
       int G2idx = G2.AddTidxPair({t[OUTR], RInTL});
       int G3idx = G3.AddTidxPair({RInTL, t[INR]});
+
+      Map.push_back({ol, G1idx, G2idx, G3idx});
+    }
+
+    Bubble.push_back(bub);
+  }
+}
+
+double sigma::Evaluate() {
+  // normalization
+  double Factor = 1.0 / pow(2.0 * PI, D);
+  if (Order == 0) {
+    return 1.0;
+  } else if (Order == 1) {
+    double GWeight = Prop.Green(-EPS, Var.LoopMom[0] + Var.LoopMom[1], UP, 0);
+    double VerWeight = Prop.Interaction(Var.LoopMom[1], 0);
+    // cout << GWeight << ", " << VerWeight << endl;
+    return GWeight * VerWeight * Factor;
+  }
+
+  // Sigma with LoopNum>=2
+  G1.K = Var.LoopMom[1];
+  G2.K = Var.LoopMom[2];
+  G3.K = Var.LoopMom[1] + Var.LoopMom[2] - Var.LoopMom[0];
+  G1.Evaluate();
+  G2.Evaluate();
+  G3.Evaluate();
+
+  double Weight = 0.0;
+
+  for (auto &b : Bubble) {
+    b.LVer.Evaluate(Var.LoopMom[0], G1.K, G3.K, G2.K, false);
+    b.RVer.Evaluate(G2.K, G3.K, G1.K, Var.LoopMom[0], false);
+
+    for (auto &map : Map) {
+      auto &LvW = b.LVer.Weight[map[0]];
+      auto &RvW = b.RVer.Weight[map[0]];
+      double w = (LvW[DIR] * RvW[DIR] + LvW[EX] * RvW[EX]) * SPIN;
+      w += LvW[DIR] * RvW[EX] + LvW[EX] + RvW[DIR];
+      w *= G1[map[1]] * G2[map[2]] * G3[map[3]] * 0.5;
+      Weight += w;
     }
   }
+  return Weight * Factor * Factor;
 }
