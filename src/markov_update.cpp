@@ -130,12 +130,59 @@ void markov::ChangeOrder() {
   return;
 };
 
+void markov::ChangeExtTau() {
+
+  if (GetTauNum(Var.CurrOrder) == 0)
+    return;
+
+  int TauIndex;
+
+  if (DiagType == SIGMA || DiagType == DELTA)
+    // ExtTau are 0 and TauNum-1
+    TauIndex = Random.irn(1, GetTauNum(Var.CurrOrder) - 2);
+  else if (DiagType == POLAR)
+    // ExtTau are 0 and 1
+    TauIndex = Random.irn(2, GetTauNum(Var.CurrOrder) - 1);
+  else
+    TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder) - 1);
+
+  Proposed[CHANGE_TAU][Var.CurrOrder]++;
+
+  double CurrTau = Var.Tau[TauIndex];
+  double NewTau;
+  double Prop = ShiftTau(CurrTau, NewTau);
+
+  Var.Tau[TauIndex] = NewTau;
+
+  NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
+
+  double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
+
+  if (Random.urn() < R) {
+    Accepted[CHANGE_TAU][Var.CurrOrder]++;
+    Var.CurrAbsWeight = NewAbsWeight;
+  } else {
+    // retore the old Tau if the update is rejected
+    // if TauIndex is external, then its partner can be different
+    Var.Tau[TauIndex] = CurrTau;
+  }
+};
+
 void markov::ChangeTau() {
 
   if (GetTauNum(Var.CurrOrder) == 0)
     return;
 
-  int TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder) - 1);
+  int TauIndex;
+
+  if (DiagType == SIGMA || DiagType == DELTA)
+    // ExtTau are 0 and TauNum-1
+    TauIndex = Random.irn(1, GetTauNum(Var.CurrOrder) - 2);
+  else if (DiagType == POLAR)
+    // ExtTau are 0 and 1
+    TauIndex = Random.irn(2, GetTauNum(Var.CurrOrder) - 1);
+  else
+    TauIndex = Random.irn(0, GetTauNum(Var.CurrOrder) - 1);
 
   Proposed[CHANGE_TAU][Var.CurrOrder]++;
 

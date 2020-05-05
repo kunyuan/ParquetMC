@@ -72,6 +72,7 @@ struct parameter {
   // external fermionic Momentum (LegK momentum)
   momentum ExtLegKTable[AngBinSize];
   double AngleTable[AngBinSize];
+  double ExtTauTable[TauBinSize];
 };
 
 struct variable {

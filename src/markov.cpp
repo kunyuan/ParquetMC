@@ -39,6 +39,7 @@ markov::markov() {
   for (int i = 0; i < MaxTauNum; i++) {
     Var.Tau[i] = Random.urn() * Para.Beta;
   }
+  Var.Tau[0] = 0.0; // reference tau
 
   // initialize spin variables
   // for (auto &sp : Var.LoopSpin)
@@ -64,8 +65,6 @@ markov::markov() {
     Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
   }
 
-  Var.CurrTau = Var.Tau[1] - Var.Tau[0];
-
   // initialize group
   Var.Counter = 0;
 
@@ -89,7 +88,7 @@ markov::markov() {
   UpdatesName[CHANGE_MOM] = NAME(CHANGE_MOM);
   UpdatesName[CHANGE_EXTMOM] = NAME(CHANGE_EXTMOM);
   UpdatesName[CHANGE_TAU] = NAME(CHANGE_TAU);
-  UpdatesName[CHANGE_SCALE] = NAME(CHANGE_SCALE);
+  UpdatesName[CHANGE_EXTTAU] = NAME(CHANGE_EXTTAU);
 
   // for(int i=0;i<MCUpdates;i++)
   // UpdatesName[(Updates)i]=NAME((Updates))

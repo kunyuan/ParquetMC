@@ -87,6 +87,10 @@ void InitPara() {
     for (int j = 1; j < D; j++)
       Para.ExtMomTable[i][j] = 0.0;
   }
+
+  for (int i = 0; i < TauBinSize; i++) {
+    Para.ExtTauTable[i] = Para.Beta * i / TauBinSize + 1.0e-9;
+  }
   // Para.ExtMomTable[0][0] = 0.0;
   // Para.ExtMomTable[1][0] = 2. * Para.Kf;
 

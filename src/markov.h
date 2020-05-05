@@ -27,6 +27,7 @@ public:
   void ChangeTau();
   void ChangeMomentum();
   void ChangeExtMomentum();
+  void ChangeExtTau();
   void ChangeOrder();
   void ChangeScale();
 
@@ -66,7 +67,7 @@ private:
     CHANGE_TAU,
     CHANGE_MOM,
     CHANGE_EXTMOM,
-    CHANGE_SCALE,
+    CHANGE_EXTTAU,
     END
   };
   std::string _DetailBalanceStr(Updates op);
