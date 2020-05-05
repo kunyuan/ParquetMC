@@ -127,6 +127,14 @@ void weight::SaveToFile() {
     OneBodyObs.Save();
 }
 
+void weight::Test() {
+  // cout << "start testing ..." << endl;
+  if (DiagType == GAMMA && Var.CurrOrder == 1)
+    _TestOneLoopGamma();
+  else if (DiagType == SIGMA && Var.CurrOrder == 2)
+    Sigma[Var.CurrOrder].Test();
+}
+
 void weight::Benchmark(int LoopNum, int Step) {
   timer Timer;
   Timer.start();

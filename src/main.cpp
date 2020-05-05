@@ -159,7 +159,7 @@ void MonteCarlo() {
       }
       // cout << "Testing ..." << endl;
       // cout << Var.Counter << endl;
-      // Markov.Weight.Test(1);
+      Markov.Weight.Test();
 
       if (i % 8 == 0)
         Markov.Weight.Measure();
@@ -169,7 +169,7 @@ void MonteCarlo() {
 
       if (i % 1000 == 0) {
         if (PrinterTimer.check(Para.PrinterTimer)) {
-          Markov.Weight.Test(1);
+          Markov.Weight.Test();
           Markov.DynamicTest();
           Markov.PrintDeBugMCInfo();
           Markov.PrintMCInfo();

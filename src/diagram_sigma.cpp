@@ -1,4 +1,6 @@
 #include "diagram.h"
+#include "utility/fmt/format.h"
+#include <iostream>
 
 using namespace diag;
 using namespace std;
@@ -18,7 +20,7 @@ void sigma::Build(int order) {
   // the bare interaction is automatically included
 
   for (int ol = 0; ol < LoopNum() - 1; ol++) {
-    bubble bub;
+    verPair bub;
 
     ////////////////////   Right SubVer  ///////////////////
     int lvl = 0;
@@ -34,6 +36,7 @@ void sigma::Build(int order) {
     bub.RVer.Build(lvl, oR, Rlopidx, RInTL, F, RIGHT, false);
 
     for (int ol = 0; ol < bub.LVer.Tpair.size(); ++ol) {
+      //   cout << ol << endl;
       // Assume the RVer is equal-time!
       auto &t = bub.LVer.Tpair[ol];
 
@@ -41,9 +44,10 @@ void sigma::Build(int order) {
       int G2idx = G2.AddTidxPair({t[OUTR], RInTL});
       int G3idx = G3.AddTidxPair({RInTL, t[INR]});
 
-      Map.push_back({ol, G1idx, G2idx, G3idx});
+      bub.Map.push_back({ol, G1idx, G2idx, G3idx});
     }
 
+    // cout << Map.size() << endl;
     Bubble.push_back(bub);
   }
 }
@@ -68,20 +72,100 @@ double sigma::Evaluate() {
   G2.Evaluate();
   G3.Evaluate();
 
+  //   cout << "G: " << G1[0] << ", " << G2[0] << ", " << G3[0] << endl;
+
   double Weight = 0.0;
 
   for (auto &b : Bubble) {
     b.LVer.Evaluate(Var.LoopMom[0], G1.K, G3.K, G2.K, false);
     b.RVer.Evaluate(G2.K, G3.K, G1.K, Var.LoopMom[0], false);
 
-    for (auto &map : Map) {
+    // cout << "left: " << b.LVer.Weight[DIR] << ", " << b.LVer.Weight[EX] <<
+    // endl; cout << "righ: " << b.RVer.Weight[DIR] << ", " << b.RVer.Weight[EX]
+    // << endl;
+
+    for (auto &map : b.Map) {
       auto &LvW = b.LVer.Weight[map[0]];
-      auto &RvW = b.RVer.Weight[map[0]];
+      auto &RvW = b.RVer.Weight[0];
       double w = (LvW[DIR] * RvW[DIR] + LvW[EX] * RvW[EX]) * SPIN;
-      w += LvW[DIR] * RvW[EX] + LvW[EX] + RvW[DIR];
+      //   cout << w << endl;
+      w += LvW[DIR] * RvW[EX] + LvW[EX] * RvW[DIR];
       w *= G1[map[1]] * G2[map[2]] * G3[map[3]] * 0.5;
+      //   cout << "G" << G1[map[1]] * G2[map[2]] * G3[map[3]] << endl;
       Weight += w;
     }
   }
   return Weight * Factor * Factor;
+}
+
+string sigma::ToString() {
+  if (Order <= 1)
+    return fmt::format("Order {0} is empty", Order);
+  string indent = "";
+  string Info =
+      indent + fmt::format("├Sigma: LoopNum: {0}, G1:{1}, G2: {2}, G3: {3}\n",
+                           LoopNum(), G1.Size(), G2.Size(), G3.Size());
+  Info += indent + fmt::format("└─\n");
+  for (int p = 0; p < Bubble.size(); p++) {
+    Info += indent + ". │\n";
+    verPair &pp = Bubble[p];
+    Info +=
+        indent + fmt::format(". ├PAIR - LVerLoopNum: {0}\n", pp.LVer.LoopNum());
+    Info += indent + fmt::format(". ├─Map:");
+
+    ASSERT_ALLWAYS(
+        pp.Map.size() == pp.LVer.Tpair.size() * pp.RVer.Tpair.size(),
+        fmt::format("Map size {0} != LVer.Tpair size {1} *RVer.Tpair size {2}!",
+                    pp.Map.size(), pp.LVer.Tpair.size(), pp.RVer.Tpair.size()));
+
+    for (auto &m : pp.Map)
+      Info += fmt::format("({0},{1},{2},{3}), ", m[0], m[1], m[2], m[3]);
+
+    Info += "\n";
+    // Info += "\n" + indent + ". │\n";
+    Info += pp.LVer.ToString(indent + ". ");
+    // Info +=
+    //     indent +
+    //     ".....................................................\n";
+
+    // Info += indent + ". │\n";
+    Info += pp.RVer.ToString(indent + ". ");
+  }
+
+  // Info += "=======================================================\n";
+  // Info += indent +
+  // "----------------------------------------------------\n";
+  return Info;
+}
+
+bool sigma::Test() {
+  // Two-loop sigma
+  if (Order != 2)
+    return false;
+
+  double Factor = 1.0 / pow(2.0 * PI, D);
+  momentum &ExtK = Var.LoopMom[0];
+  momentum &K1 = Var.LoopMom[1];
+  momentum &K2 = Var.LoopMom[2];
+  momentum K3 = K1 + K2 - ExtK;
+  double G1 = Prop.Green(Var.Tau[1] - Var.Tau[0], K1, UP, 0);
+  double G2 = Prop.Green(Var.Tau[1] - Var.Tau[0], K2, UP, 0);
+  double G3 = Prop.Green(Var.Tau[0] - Var.Tau[1], K3, UP, 0);
+  double VerDir = Prop.Interaction(K1 - ExtK, 0);
+  double VerEx = -Prop.Interaction(K2 - ExtK, 0);
+  double VerW = (VerDir * VerDir + VerEx * VerEx) * SPIN + 2.0 * VerDir * VerEx;
+  double Weight = VerW * G1 * G2 * G3 * Factor * Factor * 0.5;
+
+  //   cout << "Test G: " << G1 << ", " << G2 << ", " << G3 << endl;
+  //   cout << "Test: " << VerDir << ", " << VerEx << endl;
+
+  ASSERT_ALLWAYS(IsEqual(Weight, Evaluate()),
+                 "Sigma weight error: " << Weight << " vs " << Evaluate());
+  // cout << "G_test=" << G1 << ", " << G2 << ", " << G3 << endl;
+  // cout << "Ver_test=" << VerWeightDir << ", " << VerWeightExLeft << endl;
+
+  //   cout << "DIR=" << Weight1 + 2 * Weight2 << ", EX=" << -Weight3 << endl;
+  //   return Weight1 + 2 * Weight2;
+  //   cout << "Pass" << endl;
+  return true;
 }

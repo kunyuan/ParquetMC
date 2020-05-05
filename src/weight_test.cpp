@@ -15,14 +15,6 @@ extern parameter Para;
 extern variable Var;
 extern propagator Prop;
 
-void weight::Test(int LoopNum) {
-  // cout << "start testing ..." << endl;
-  if (DiagType == GAMMA && LoopNum == 1)
-    _TestOneLoopGamma();
-  else if (DiagType == SIGMA && LoopNum == 2)
-    _TestTwoLoopSigma();
-}
-
 void weight::_TestOneLoopGamma() {
   momentum InL = Var.LoopMom[INL];
   momentum OutL = Var.LoopMom[OUTL];

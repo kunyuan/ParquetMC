@@ -23,7 +23,7 @@ public:
   void LoadFile(){};
 
   void Benchmark(int LoopNum, int Step);
-  void Test(int LoopNum);
+  void Test();
 
   diag::vertex4 Gamma[MaxOrder];
   obs::ver4Obs GammaObs;

@@ -18,20 +18,27 @@ public:
   double Evaluate();
 };
 
+struct verPair {
+  vertex4 LVer;
+  vertex4 RVer;
+  // map LVerIdx and RVerIdx to VerIdx
+  // LVerIdx, G1idx, G2idx, G2idx
+  vector<array<int, 4>> Map;
+};
+
 class sigma {
 public:
   int Order;
   green G1, G2, G3;
-  vector<bubble> Bubble;
-
-  // Ver4, G0, G1, G2 index
-  vector<array<int, 4>> Map;
+  vector<verPair> Bubble;
 
   int TauNum() { return Order; }
   int LoopNum() { return Order; }
   void Build(int Order);
   double Evaluate();
   string ToString();
+
+  bool Test();
 };
 
 } // namespace diag

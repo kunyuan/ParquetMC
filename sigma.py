@@ -11,8 +11,8 @@ mat.rcParams["font.family"] = "Times New Roman"
 size = 12
 
 # XType = "Tau"
-# XType = "Mom"
-XType = "Z"
+XType = "Mom"
+# XType = "Z"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 Order = [0, 1, 2, 3, 4, 5]
@@ -114,14 +114,10 @@ for order in Order:
             else:
                 Data0 += d
     Data0 /= Norm
-    Data0 = Data0.reshape((TauBinSize+3, ExtMomBinSize))
-
-    DataEqT[(order)] = Data0[0, :]
-    DataW1[(order)] = Data0[1, :]
-    DataW2[(order)] = Data0[2, :]
+    Data0 = Data0.reshape((TauBinSize, ExtMomBinSize))
 
     # average the angle distribution
-    Data[(order)] = Data0[3:, :]
+    Data[(order)] = Data0
 
 # print DataEqT[(1)]
 
@@ -147,7 +143,7 @@ ColorList = ColorList*40
 
 if(XType == "Mom"):
     for o in Order:
-        ErrorPlot(ax, ExtMomBin, DataEqT[o],
+        ErrorPlot(ax, ExtMomBin, Data[o],
                   ColorList[o], 's', "Order {0}".format(o))
     ax.set_xlim([ExtMomBin[0], ExtMomBin[-1]])
     ax.set_xlabel("$Ext K$", size=size)
