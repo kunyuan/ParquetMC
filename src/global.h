@@ -4,49 +4,37 @@
 #include "utility/utility.h"
 #include <Eigen/Dense>
 #include <array>
-#include <cassert>
 #include <math.h>
 #include <vector>
-
-using namespace Eigen;
-using namespace std;
-
-enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
-enum diagram { SIGMA, POLAR, GAMMA, DELTA };
 
 // turn off all assert
 // #define NDEBUG
 
+enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
+enum diagram { SIGMA, POLAR, GAMMA, DELTA };
+
 ///////////  Global Constants ////////////////////
-// D=2 or D=3
-const int D = 3;
-// spin index
-const int SPIN = 2;
-// type of diagram
-const diagram DiagType = SIGMA;
-// type of calculation
-const type CalcType = VARIATIONAL;
-// number of q bins of the external momentum
-const int ExtMomBinSize = 32;
-// number of bins for the angle between InL and InR legs
-const int AngBinSize = 64;
-// number of tau bin
-const int TauBinSize = 256;
-// Max diagram order
-const int MaxOrder = 9;
+const int D = 3;                   // dimensions, 2 or 3
+const int SPIN = 2;                // spin index
+const type CalcType = VARIATIONAL; // calculation type
+const diagram DiagType = SIGMA;    // diagram type
+const int ExtMomBinSize = 32;      // external K bins
+const int AngBinSize = 64;         // angle bins
+const int TauBinSize = 256;        // tau bin
+const int MaxOrder = 9;            // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 // MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
 
 // momentum vector
-typedef Matrix<double, D, 1> momentum;
-
+typedef Eigen::Matrix<double, D, 1> momentum;
 // vertex4 weight, has Direct and Exchange components
-typedef Vector2d verWeight;
+typedef Eigen::Vector2d verWeight;
 
 /////////// Global Parameter ////////////////////
 struct parameter {
   // physical parameters
+  int Order;
   double Rs, Ef, Kf;    // r_s, fermi energy, fermi momentum,
   double Nf, Mu, Beta;  // chemical potential, inverse temperature
   double Mass2, Lambda; // screening length^2, shift
@@ -54,23 +42,19 @@ struct parameter {
   double MaxExtMom;     // the maximum external momentum
 
   // MC inputs
-  int Order;
   int TotalStep;                // total steps of the Monte Carlo
-  int Seed;                     // rng seed
-  int PID;                      // ID of the job
   int Sweep;                    // how many MC steps between two measuring
+  int Seed, PID;                // rng seed, job ID
   std::vector<double> ReWeight; // reweight factor for each group
 
   // others
-  int PrinterTimer;  // how many seconds between to printing to screen
-  int SaveFileTimer; // how many secondes between saving to file
-  int MessageTimer;  // how many secondes between two checking for message
-  int ReweightTimer; // how many secondes between two reweighting
+  int PrinterTimer;  // time interval to print to screen
+  int SaveFileTimer; // time interval to file
+  int MessageTimer;  // time interval to check for new input data
+  int ReweightTimer; // time interval to reweight different orders
 
   // external variable tables
-  // external bosonic Momentum (transfer momentum)
   momentum ExtMomTable[ExtMomBinSize];
-  // external fermionic Momentum (LegK momentum)
   momentum ExtLegKTable[AngBinSize];
   double AngleTable[AngBinSize];
   double ExtTauTable[TauBinSize];
@@ -85,8 +69,8 @@ struct variable {
   double CurrAbsWeight; // current abs weight
 
   // interval variables
-  array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
-  array<double, MaxTauNum> Tau;       // all tau variables
+  std::array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
+  std::array<double, MaxTauNum> Tau;       // all tau variables
 };
 
 //////////   Generic Global Constants  /////////////////

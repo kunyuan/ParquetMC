@@ -57,7 +57,7 @@ public:
   void Save();
 
 private:
-  string Name;
+  std::string Name;
   double Normalization;
   tensor3<double> _Estimator;
   double PhyWeight;
