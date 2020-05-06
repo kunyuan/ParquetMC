@@ -63,10 +63,13 @@ struct parameter {
 struct variable {
   long long int Counter; // counter to save the current MC step
 
-  int CurrOrder;
-  int CurrExtMomBin; // current bin of the external momentum
-  int CurrTau;
+  int CurrOrder;        // current order
   double CurrAbsWeight; // current abs weight
+
+  // external variables
+  int CurrExtMomBin;
+  int CurrExtTauBin;
+  int CurrExtAngBin;
 
   // interval variables
   std::array<momentum, MaxMomNum> LoopMom; // all momentum loop variables

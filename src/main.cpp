@@ -54,13 +54,11 @@ void InitPara() {
   // initialize external momentum
   for (int i = 0; i < ExtMomBinSize; i++) {
     // the external momentum only has x component
+    Para.ExtMomTable[i].setZero();
     if (DiagType == GAMMA)
       Para.ExtMomTable[i][0] = i * Para.MaxExtMom / ExtMomBinSize;
     else
       Para.ExtMomTable[i][0] = (i + 0.5) * Para.MaxExtMom / ExtMomBinSize;
-
-    for (int j = 1; j < D; j++)
-      Para.ExtMomTable[i][j] = 0.0;
   }
 
   for (int i = 0; i < TauBinSize; i++) {
