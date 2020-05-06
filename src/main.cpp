@@ -1,44 +1,19 @@
-//
-//  main.cpp
-//
-//  Created by Kun Chen on 1/21/19.
-//  Copyright (c) 2019 Kun Chen. All rights reserved.
-//
-
-/********************** include files *****************************************/
-#include "global.h"
 #include "markov.h"
-#include "utility/abort.h"
-#include "utility/logger.h"
 #include "utility/timer.h"
-#include "vertex4.h"
-#include "weight.h"
 #include <iostream>
 #include <math.h>
-#include <unistd.h>
 
 using namespace std;
 using namespace mc;
 void InitPara();
+void InitVar();
 void MonteCarlo();
 
 // Global variable
 RandomFactory Random;
 parameter Para;        // global parameters
-variable Var;          // global MC variables
 diag::propagator Prop; // global progator
-
-int main(int argc, const char *argv[]) {
-  cout << "Order, Beta, Rs, Mass2, Lambda, Charge2, MaxExtMom(*kF), "
-          "TotalStep(*1e6), "
-          "Seed, "
-          "PID\n";
-  cin >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >> Para.Lambda >>
-      Para.Charge2 >> Para.MaxExtMom >> Para.TotalStep >> Para.Seed >> Para.PID;
-  InitPara(); // initialize global parameters
-  MonteCarlo();
-  return 0;
-}
+variable Var;
 
 void InitPara() {
   //// initialize the global log configuration   /////////////
@@ -105,13 +80,47 @@ void InitPara() {
   Para.MessageTimer = 10;
 }
 
-void MonteCarlo() {
-  // LOG_INFO("Initializing Markov!");
+void InitVar() {
+  // initialize group
+  Var.Counter = 0;
+  // Var.CurrGroup = &Groups[0];
+  Var.CurrOrder = 0;
+
+  // initialize momentum variables
+  for (auto &mom : Var.LoopMom)
+    for (int i = 0; i < D; i++)
+      mom[i] = Random.urn() * Para.Kf / sqrt(D);
+
+  for (auto &t : Var.Tau)
+    t = Random.urn() * Para.Beta;
+  Var.Tau[0] = 0.0; // reference tau
+
+  if (DiagType == GAMMA) {
+    Var.CurrExtMomBin = 0;
+    for (int i = 0; i < 4; ++i) {
+      Var.LoopMom[i].setZero();
+      Var.LoopMom[i][0] = Para.Kf;
+    }
+  } else if (DiagType == SIGMA || DiagType == POLAR) {
+    Var.CurrExtMomBin = ExtMomBinSize / 2;
+    Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
+  }
+}
+
+int main(int argc, const char *argv[]) {
+  cout << "Order, Beta, Rs, Mass2, Lambda, Charge2, MaxExtMom(*kF), "
+          "TotalStep(*1e6), "
+          "Seed, "
+          "PID\n";
+  cin >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >> Para.Lambda >>
+      Para.Charge2 >> Para.MaxExtMom >> Para.TotalStep >> Para.Seed >> Para.PID;
+
+  InitPara(); // initialize global parameters
+
   markov Markov;
   InterruptHandler Interrupt;
 
   Random.Reset(Para.Seed);
-  Var.Counter = 0;
 
   timer ReweightTimer, PrinterTimer, SaveFileTimer, MessageTimer;
   PrinterTimer.start();
@@ -119,31 +128,24 @@ void MonteCarlo() {
   MessageTimer.start();
   ReweightTimer.start();
 
-  LOG_INFO("Start simulation ...")
-  long int WaitStep = 1000000;
-  int Flag = 0;
-  int Block = 0;
-
-  LOG_INFO("Loading Weight...")
+  LOG_INFO("Loading Weight ...")
   Markov.Weight.LoadFile();
+  InitVar(); // initialize MC variables
+  Var.CurrAbsWeight = fabs(Markov.Weight.Evaluate(Var.CurrOrder));
 
-  for (int order = 1; order <= Para.Order; ++order) {
-    // Markov.Weight.Test(1);
-    Markov.Weight.Benchmark(order, 50000);
-  }
+  ///////////////  Benchmark ////////////////////////////
+  // for (int order = 1; order <= Para.Order; ++order) {
+  //   Markov.Weight.Benchmark(order, 1000);
+  // }
+  //////////////////////////////////////////////////////
 
-  while (true) {
+  LOG_INFO("Start simulation ...")
+  int Block = 0;
+  while (Block < Para.TotalStep) {
     Block++;
-    if (Block > Para.TotalStep)
-      break;
 
     for (int i = 0; i < 1000000; i++) {
       Var.Counter++;
-      // cout << Para.Counter << endl;
-      // if (Para.Counter == 140737351830544) {
-      //   cout << "Before: " << Para.Counter << endl;
-      //   Markov.PrintDeBugMCInfo();
-      // }
 
       double x = Random.urn();
       if (x < 1.0 / 4.0) {
@@ -161,20 +163,15 @@ void MonteCarlo() {
         //   Markov.ChangeScale();
         // ;
       }
-      // cout << "Testing ..." << endl;
-      // cout << Var.Counter << endl;
-      // Markov.Weight.Test();
 
       if (i % 8 == 0)
+        // fast operations
         Markov.Weight.Measure();
 
-      // Markov.DynamicTest();
-      // Markov.Weight.Test(1);
-
       if (i % 1000 == 0) {
+        // slow operations
         if (PrinterTimer.check(Para.PrinterTimer)) {
           Markov.Weight.Test();
-          Markov.DynamicTest();
           Markov.PrintDeBugMCInfo();
           Markov.PrintMCInfo();
           LOG_INFO(ProgressBar((double)Block / Para.TotalStep));
@@ -197,23 +194,14 @@ void MonteCarlo() {
         }
       }
     }
-    if (Block == 100) {
-      // if (Flag == 0)
-      // Markov.UpdateWeight(1.0);
-      // LOG_INFO("Update weight, " << Block);
-      // Flag = 1;
-      // Markov.ClearStatis();
-    }
-    // if (i % (WaitStep * 10)) {
-    //   // LOG_INFO("Current IR Scale: " << Markov.Var.CurrIRScaleBin);
-    // }
   }
 
-  LOG_INFO("Simulation is ended!");
   Markov.PrintMCInfo();
   Interrupt.Delay(); // the process can not be killed in saving
   Markov.Weight.SaveToFile();
   Interrupt.Resume(); // after this point, the process can be killed
 
-  LOG_INFO("Quit Markov.");
+  LOG_INFO("Simulation is ended!");
+
+  return 0;
 }

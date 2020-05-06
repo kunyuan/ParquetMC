@@ -1,8 +1,5 @@
-#include "global.h"
-#include "utility/abort.h"
 #include "utility/fmt/format.h"
-#include "utility/timer.h"
-#include "weight.h"
+#include "vertex4.h"
 #include <array>
 #include <iostream>
 #include <string>
@@ -15,7 +12,7 @@ extern parameter Para;
 extern variable Var;
 extern propagator Prop;
 
-void weight::_TestOneLoopGamma() {
+void vertex4::_TestOneLoopGamma() {
   momentum InL = Var.LoopMom[INL];
   momentum OutL = Var.LoopMom[OUTL];
   momentum InR = Var.LoopMom[INR];
@@ -124,44 +121,7 @@ void weight::_TestOneLoopGamma() {
   return;
 }
 
-void weight::_TestTwoLoopGamma() {
-  // momentum InL = Var.LoopMom[INL];
-  // momentum OutL = Var.LoopMom[OUTL];
-  // momentum InR = Var.LoopMom[INR];
-  // momentum OutR = Var.LoopMom[OUTR];
-  // momentum K0 = Var.LoopMom[4];
-  // double Factor = 1.0 / pow(2.0 * PI, D);
-  // double dTau, GWeight, GWeightInBox;
-  // ver::weightMatrix TestWeight, Weight;
-
-  // return;
-}
-
-double weight::_TestTwoLoopSigma() {
-  double Factor = 1.0 / pow(2.0 * PI, D);
-  momentum &ExtK = Var.LoopMom[0];
-  momentum &K1 = Var.LoopMom[1];
-  momentum &K2 = Var.LoopMom[2];
-  double G1 = Prop.Green(Var.Tau[1] - Var.Tau[0], K1, UP, 0);
-  double G2 = Prop.Green(Var.Tau[1] - Var.Tau[0], K2, UP, 0);
-  double G3 = Prop.Green(Var.Tau[0] - Var.Tau[1], K1 + K2 - ExtK, UP, 0);
-  double VerWeightDir = Prop.Interaction(K1 - ExtK);
-  double VerWeightExLeft = Prop.Interaction(K2 - ExtK);
-
-  double Weight1 =
-      -VerWeightDir * VerWeightDir * G1 * G2 * G3 * SPIN * Factor * Factor;
-  double Weight2 =
-      VerWeightDir * VerWeightExLeft * G1 * G2 * G3 * Factor * Factor;
-  double Weight3 =
-      VerWeightExLeft * VerWeightExLeft * G1 * G2 * G3 * SPIN * Factor * Factor;
-  // cout << "G_test=" << G1 << ", " << G2 << ", " << G3 << endl;
-  // cout << "Ver_test=" << VerWeightDir << ", " << VerWeightExLeft << endl;
-
-  cout << "DIR=" << Weight1 + 2 * Weight2 << ", EX=" << -Weight3 << endl;
-  return Weight1 + 2 * Weight2;
-}
-
-verWeight weight::_GetWeight(int LoopNum, std::vector<channel> Channel) {
+verWeight vertex4::_GetWeight(int LoopNum, std::vector<channel> Channel) {
   verWeight Weight;
   // array<momentum *, 4> ExtLegK = {&Var.LoopMom[0], &Var.LoopMom[1],
   //                                 &Var.LoopMom[2], &Var.LoopMom[3]};

@@ -3,6 +3,7 @@
 
 #include "utility/utility.h"
 #include <Eigen/Dense>
+#include <array>
 #include <cassert>
 #include <math.h>
 #include <vector>
@@ -84,8 +85,8 @@ struct variable {
   double CurrAbsWeight; // current abs weight
 
   // interval variables
-  momentum LoopMom[MaxMomNum]; // all momentum loop variables
-  double Tau[MaxTauNum];       // all tau variables
+  array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
+  array<double, MaxTauNum> Tau;       // all tau variables
 };
 
 //////////   Generic Global Constants  /////////////////

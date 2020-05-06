@@ -19,13 +19,13 @@ void polar::Build(int order) {
     Vertex.Build(0,         // level
                  Order - 2, // loopNum
                  3,         // loop index of the first internal K of the vertex
-                 2,         // tau index of the InTL leg
+                 1,         // tau index of the InTL leg
                  Chan, RIGHT, false);
     for (auto &t : Vertex.Tpair) {
       int inL = G[INL].AddTidxPair({0, t[INL]});
       int outL = G[OUTL].AddTidxPair({t[OUTL], 0});
-      int inR = G[INR].AddTidxPair({1, t[INR]});
-      int outR = G[OUTR].AddTidxPair({t[OUTR], 1});
+      int inR = G[INR].AddTidxPair({TauNum() - 1, t[INR]});
+      int outR = G[OUTR].AddTidxPair({t[OUTR], TauNum() - 1});
       Gidx.push_back(array<int, 4>({inL, outL, inR, outR}));
     }
   }
@@ -37,7 +37,7 @@ double polar::Evaluate() {
   if (Order == 0)
     return 1.0;
   else if (Order == 1) {
-    double Tau = Var.Tau[1] - Var.Tau[0];
+    double Tau = Var.Tau[TauNum() - 1] - Var.Tau[0];
     double Weight = Prop.Green(Tau, Var.LoopMom[1], UP, 0);
     Weight *= Prop.Green(-Tau, Var.LoopMom[1] - Var.LoopMom[0], UP, 0);
 

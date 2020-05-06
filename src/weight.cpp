@@ -53,6 +53,36 @@ void weight::Initialization() {
   }
 }
 
+int diag::TauNum(int Order) {
+  if (DiagType == GAMMA)
+    return Order + 1;
+  else if (DiagType == SIGMA)
+    return Order;
+  else if (DiagType == POLAR)
+    return Order + 1;
+  else if (DiagType == DELTA)
+    return Order;
+  else
+    ASSERT(false, "Not Implemented!");
+}
+
+int diag::LoopNum(int Order) { return Order + diag::InterLoopIdx(); }
+
+int diag::InterLoopIdx() {
+  if (DiagType == GAMMA)
+    return 4;
+  else if (DiagType == SIGMA)
+    return 1;
+  else if (DiagType == POLAR)
+    return 1;
+  else if (DiagType == DELTA)
+    return 1;
+  else
+    ASSERT(false, "Not Implemented!");
+  // else if (DiagType == POLAR)
+  //   return Order + 2;
+}
+
 double weight::Evaluate(int Order) {
   if (Order == 0)
     return 1.0;
@@ -102,20 +132,9 @@ void weight::Measure() {
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);
     else {
-      double Weight, Tau;
-      if (DiagType == POLAR) {
-        Weight = Polar[Var.CurrOrder].Evaluate();
-        Tau = Var.Tau[1] - Var.Tau[0];
-
-      } else if (DiagType == SIGMA) {
-        Weight = Sigma[Var.CurrOrder].Evaluate();
-        Tau = Var.Tau[Var.CurrOrder - 1] - Var.Tau[0];
-
-      } else if (DiagType == DELTA) {
-        // Weight = Sigma[Var.CurrOrder].Evaluate();
-        // Tau = Var.Tau[Var.CurrOrder - 1] - Var.Tau[0];
-      }
-      OneBodyObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Tau, Weight, Factor);
+      double Tau = Var.Tau[TauNum(Var.CurrOrder) - 1] - Var.Tau[0];
+      OneBodyObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Tau,
+                         Evaluate(Var.CurrOrder), Factor);
     }
   }
 }
@@ -129,9 +148,9 @@ void weight::SaveToFile() {
 
 void weight::Test() {
   // cout << "start testing ..." << endl;
-  if (DiagType == GAMMA && Var.CurrOrder == 1)
-    _TestOneLoopGamma();
-  else if (DiagType == SIGMA && Var.CurrOrder == 2)
+  if (DiagType == GAMMA)
+    Gamma[Var.CurrOrder].Test();
+  else if (DiagType == SIGMA)
     Sigma[Var.CurrOrder].Test();
 }
 

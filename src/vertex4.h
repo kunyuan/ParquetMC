@@ -56,7 +56,9 @@ public:
   Evaluate(const momentum &KInL, const momentum &KOutL, const momentum &KInR,
            const momentum &KOutR,
            bool IsFast = false); // evaluate the weights with different Tidx
+
   string ToString(string indent = "");
+  void Test() { _TestOneLoopGamma(); };
 
 private:
   int Level;
@@ -84,6 +86,9 @@ private:
                 bool IsFast = false);
   void _EvalI(const momentum &KInL, const momentum &KOutL, const momentum &KInR,
               const momentum &KOutR, bool IsFast = false);
+
+  void _TestOneLoopGamma();
+  verWeight _GetWeight(int Order, vector<channel> Channel);
 };
 
 struct bubble {

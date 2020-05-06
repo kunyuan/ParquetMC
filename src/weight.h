@@ -12,6 +12,10 @@
 namespace diag {
 using namespace std;
 
+int TauNum(int Order);
+int LoopNum(int Order);
+int InterLoopIdx();
+
 class weight {
 public:
   weight() {}
@@ -34,10 +38,6 @@ public:
   // sigma, polar and delta can use the same observable
 
 private:
-  void _TestOneLoopGamma();
-  void _TestTwoLoopGamma();
-  double _TestTwoLoopSigma();
-  verWeight _GetWeight(int LoopNum, vector<channel> Channel);
 };
 
 }; // namespace diag

@@ -12,13 +12,13 @@ namespace mc {
 using namespace std;
 const int MCUpdates = 7;
 
-typedef array<double, ExtMomBinSize> polar;
-
 class markov {
 public:
   markov();
-  long long Counter;
 
+  diag::weight Weight; // Weight handler
+
+  // information printer
   void PrintMCInfo();
   void PrintDeBugMCInfo();
   void AdjustGroupReWeight();
@@ -31,22 +31,12 @@ public:
   void ChangeOrder();
   void ChangeScale();
 
-  int DynamicTest();
-
-  // MC variables
-  diag::weight Weight;
-
 private:
   double NewAbsWeight;
 
-  int GetTauNum(int Order);
-  int GetLoopNum(int Order);
-  int GetInterLoopIdx();
-
-  // MC updates
-
   double ShiftExtTransferK(const int &, int &);
   double ShiftExtLegK(const momentum &, momentum &);
+  double ShiftExtTau(const int &, int &);
   double ShiftK(const momentum &, momentum &);
   double ShiftTau(const double &, double &);
 
