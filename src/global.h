@@ -17,10 +17,7 @@ enum diagram { SIGMA, POLAR, GAMMA, DELTA };
 const int D = 3;                   // dimensions, 2 or 3
 const int SPIN = 2;                // spin index
 const type CalcType = VARIATIONAL; // calculation type
-const diagram DiagType = GAMMA;    // diagram type
-const int ExtMomBinSize = 32;      // external K bins
-const int AngBinSize = 64;         // angle bins
-const int TauBinSize = 256;        // tau bin
+const diagram DiagType = POLAR;    // diagram type
 const int MaxOrder = 9;            // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
@@ -54,10 +51,13 @@ struct parameter {
   int ReweightTimer; // time interval to reweight different orders
 
   // external variable tables
-  momentum ExtMomTable[ExtMomBinSize];
-  momentum ExtLegKTable[AngBinSize];
-  double AngleTable[AngBinSize];
-  double ExtTauTable[TauBinSize];
+
+  int ExtMomBinSize; // external K bins
+  int AngBinSize;    // angle bins
+  int TauBinSize;    // tau bin
+  std::vector<momentum> ExtMomTable;
+  std::vector<double> AngleTable;
+  std::vector<double> ExtTauTable;
 };
 
 struct variable {

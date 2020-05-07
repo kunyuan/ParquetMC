@@ -26,12 +26,17 @@ void InitPara() {
   LOG_INFO("NDEBUG mode is ON.");
 #endif
 
-  // polarization
-  // Para.ReWeight = {0.05, 1.0, 2.0, 5.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
-  // Sigma
-  // Para.ReWeight = {1.0, 3.0, 30.0, 1.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
-  // Gamma
-  Para.ReWeight = {10.0, 0.8, 0.4, 0.1, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
+  if (DiagType == POLAR)
+    // polarization
+    Para.ReWeight = {0.05, 1.0, 2.0, 5.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
+  else if (DiagType == SIGMA)
+    // Sigma
+    Para.ReWeight = {1.0, 3.0, 30.0, 1.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
+  else if (DiagType == GAMMA)
+    // Gamma
+    Para.ReWeight = {10.0, 0.8, 0.4, 0.1, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
+  else
+    ABORT("Not implemented!");
 
   //// initialize the global parameter //////////////////////
   double Kf;
@@ -51,27 +56,6 @@ void InitPara() {
   // scale all energy with E_F
   Para.Beta /= Para.Ef;
 
-  for (int i = 0; i < AngBinSize; i++) {
-    Para.AngleTable[i] = diag::Index2Angle(i, AngBinSize);
-  }
-
-  // initialize external momentum
-  for (int i = 0; i < ExtMomBinSize; i++) {
-    // the external momentum only has x component
-    Para.ExtMomTable[i].setZero();
-    if (DiagType == GAMMA)
-      Para.ExtMomTable[i][0] = i * Para.MaxExtMom / ExtMomBinSize;
-    else
-      Para.ExtMomTable[i][0] = (i + 0.5) * Para.MaxExtMom / ExtMomBinSize;
-  }
-
-  for (int i = 0; i < TauBinSize; i++) {
-    // Para.ExtTauTable[i] = Para.Beta * (i + 0.5) / TauBinSize;
-    Para.ExtTauTable[i] = Para.Beta * i / TauBinSize + 1.0e-10;
-  }
-  // Para.ExtMomTable[0][0] = 0.0;
-  // Para.ExtMomTable[1][0] = 2. * Para.Kf;
-
   LOG_INFO("Inverse Temperature: " << Para.Beta << "\n"
                                    << "r_s: " << Para.Rs << "\n"
                                    << "Fermi Mom: " << Para.Kf << "\n"
@@ -81,6 +65,78 @@ void InitPara() {
   Para.SaveFileTimer = 10;
   Para.ReweightTimer = 30;
   Para.MessageTimer = 10;
+
+  // Load external variable tables
+  // try {
+  LOG_INFO("Loading grids ...");
+
+  ifstream File;
+  string line;
+  File.open("grid.data", ios::in);
+  if (File.is_open()) {
+    File >> Para.TauBinSize;
+    LOG_INFO("TauTable: " << Para.TauBinSize);
+    getline(File, line);
+    Para.ExtTauTable.clear();
+    double bin;
+    for (int t = 0; t < Para.TauBinSize; ++t) {
+      File >> bin;
+      Para.ExtTauTable.push_back(bin);
+      // cout << bin << ", ";
+    }
+    // cout << endl;
+
+    File >> Para.ExtMomBinSize;
+    LOG_INFO("MomTable: " << Para.ExtMomBinSize);
+    getline(File, line);
+    Para.ExtMomTable.clear();
+    for (int k = 0; k < Para.ExtMomBinSize; ++k) {
+      momentum mom;
+      mom.setZero();
+      File >> mom[0];
+      Para.ExtMomTable.push_back(mom);
+    }
+
+    File >> Para.AngBinSize;
+    getline(File, line);
+    LOG_INFO("Angle Table: " << Para.AngBinSize);
+    Para.AngleTable.clear();
+    for (int ang = 0; ang < Para.ExtMomBinSize; ++ang) {
+      double angle;
+      File >> angle;
+      Para.AngleTable.push_back(angle);
+      // cout << angle << " ";
+    }
+    cout << "\n";
+
+    for (int i = 0; i < Para.AngBinSize; i++) {
+      Para.AngleTable[i] = diag::Index2Angle(i, Para.AngBinSize);
+    }
+
+    File.close();
+  } else
+    ABORT("Can not load grid file! \n");
+
+  // // initialize external momentum
+  // for (int i = 0; i < Para.ExtMomBinSize; i++) {
+  //   // the external momentum only has x component
+  //   Para.ExtMomTable[i].setZero();
+  //   if (DiagType == GAMMA)
+  //     Para.ExtMomTable[i][0] = i * Para.MaxExtMom / Para.ExtMomBinSize;
+  //   else
+  //     Para.ExtMomTable[i][0] = (i + 0.5) * Para.MaxExtMom /
+  //     Para.ExtMomBinSize;
+  // }
+  // for (int i = 0; i < Para.TauBinSize; i++) {
+  //   cout << Para.ExtTauTable[i] << endl;
+  // }
+  // // exit(0);
+
+  // for (int i = 0; i < Para.TauBinSize; i++) {
+  //   Para.ExtTauTable[i] = Para.Beta * i / Para.TauBinSize + 1.0e-10;
+  // }
+  // Para.ExtMomTable[0][0] = 0.0;
+  // Para.ExtMomTable[1][0] = 2. * Para.Kf;
 }
 
 void InitVar() {
@@ -103,15 +159,26 @@ void InitVar() {
   // Set the potential ExtTauBin
   Var.CurrExtTauBin = 0;
   Var.Tau[MaxTauNum - 1] = Para.ExtTauTable[Var.CurrExtTauBin];
+  // cout << "Tau: " << Var.Tau[MaxTauNum - 1] << endl;
 
   if (DiagType == GAMMA) {
     Var.CurrExtMomBin = 0;
-    for (int i = 0; i < 4; ++i) {
+    Var.CurrExtAngBin = 0;
+
+    for (int i = 0; i < 4; ++i)
       Var.LoopMom[i].setZero();
-      Var.LoopMom[i][0] = Para.Kf;
-    }
+
+    Var.LoopMom[INL][0] = Para.Kf;
+    Var.LoopMom[OUTL][0] = Para.Kf;
+
+    double theta = acos(Para.AngleTable[Var.CurrExtAngBin]);
+    Var.LoopMom[INR][0] = Para.Kf * cos(theta);
+    Var.LoopMom[INR][1] = Para.Kf * sin(theta);
+
+    Var.LoopMom[OUTR] = Var.LoopMom[INR];
+
   } else if (DiagType == SIGMA || DiagType == POLAR) {
-    Var.CurrExtMomBin = ExtMomBinSize / 2;
+    Var.CurrExtMomBin = 0;
     Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
   }
 }
@@ -174,6 +241,9 @@ int main(int argc, const char *argv[]) {
       // cout << Var.CurrExtTauBin << ": " << Var.Tau[0] << "-> "
       //      << Var.Tau[MaxTauNum - 1] << endl;
       // Markov.Weight.Test();
+      // cout << Var.LoopMom[0] << endl;
+      // cout << Var.Tau[MaxTauNum - 1] << endl;
+      // exit(0);
 
       if (i % 8 == 0)
         // fast operations

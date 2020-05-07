@@ -51,6 +51,9 @@ class param:
 
         self.EF = self.kF**2
         self.Beta /= self.EF
+        self.MaxExtMom *= self.kF
+        print "Rs={0}, kF={1}, EF={2}, Beta={3}".format(
+            self.Rs, self.kF, self.EF, self.Beta)
 
 
 def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):

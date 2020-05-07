@@ -33,17 +33,17 @@ if __name__ == "__main__":
     AngGrid = BuildAngleGrid(AngGridSize)
 
     with open(GridFile, "w") as f:
-        f.writelines("# TauGrid: {0}\n".format(TauGridSize))
+        f.writelines("{0} #TauGrid\n".format(TauGridSize))
         for t in TauGrid:
             f.write("{0} ".format(t))
         f.write("\n\n")
 
-        f.writelines("# MomGrid: {0}\n".format(MomGridSize))
+        f.writelines("{0} #MomGrid\n".format(MomGridSize))
         for k in MomGrid:
             f.write("{0} ".format(k))
         f.write("\n\n")
 
-        f.writelines("# AngGrid: {0}\n".format(AngGridSize))
+        f.writelines("{0} #AngGrid\n".format(AngGridSize))
         for a in AngGrid:
             f.write("{0} ".format(a))
         f.write("\n\n")

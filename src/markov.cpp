@@ -386,12 +386,12 @@ double markov::ShiftK(const momentum &OldMom, momentum &NewMom) {
 };
 
 double markov::ShiftExtTransferK(const int &OldExtMomBin, int &NewExtMomBin) {
-  NewExtMomBin = Random.irn(0, ExtMomBinSize - 1);
+  NewExtMomBin = Random.irn(0, Para.ExtMomBinSize - 1);
   return 1.0;
 };
 
 double markov::ShiftExtTau(const int &OldTauBin, int &NewTauBin) {
-  NewTauBin = Random.irn(0, TauBinSize - 1);
+  NewTauBin = Random.irn(0, Para.TauBinSize - 1);
   return 1.0;
 }
 
@@ -401,9 +401,9 @@ double markov::ShiftExtLegK(const momentum &OldExtMom, momentum &NewExtMom) {
   // NewExtMom[1] = Para.Kf * sin(Theta);
   // return 1.0;
 
-  int NewKBin = Random.irn(0, AngBinSize - 1);
+  int NewKBin = Random.irn(0, Para.AngBinSize - 1);
 
-  double AngCos = diag::Index2Angle(NewKBin, AngBinSize);
+  double AngCos = diag::Index2Angle(NewKBin, Para.AngBinSize);
   double theta = acos(AngCos);
   NewExtMom[0] = Para.Kf * cos(theta);
   NewExtMom[1] = Para.Kf * sin(theta);

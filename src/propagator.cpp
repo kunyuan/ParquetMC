@@ -107,11 +107,11 @@ double propagator::CounterBubble(const momentum &K) {
 }
 
 double diag::Index2Mom(const int &Index) {
-  return (Index + 0.5) / ExtMomBinSize * Para.MaxExtMom;
+  return (Index + 0.5) / Para.ExtMomBinSize * Para.MaxExtMom;
 };
 
 int diag::Mom2Index(const double &K) {
-  return int(K / Para.MaxExtMom * ExtMomBinSize);
+  return int(K / Para.MaxExtMom * Para.ExtMomBinSize);
 };
 
 double diag::Angle3D(const momentum &K1, const momentum &K2) {
@@ -145,11 +145,11 @@ int diag::Angle2Index(const double &Angle, const int &AngleNum) {
 }
 
 int diag::Tau2Index(const double &Tau) {
-  return int((Tau / Para.Beta) * TauBinSize);
+  return int((Tau / Para.Beta) * Para.TauBinSize);
 }
 
 double diag::Index2Tau(const int &Index) {
-  return (Index + 0.5) * Para.Beta / TauBinSize;
+  return (Index + 0.5) * Para.Beta / Para.TauBinSize;
 }
 
 void diag::_TestAngle2D() {

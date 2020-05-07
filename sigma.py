@@ -11,13 +11,13 @@ mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
 
-XType = "Tau"
-# XType = "Mom"
+# XType = "Tau"
+XType = "Mom"
 # XType = "Z"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 
-Para = param("inlist")
+Para = param()
 Order = range(0, Para.Order+1)
 TauBin, ExtMomBin, TauBinSize, ExtMomBinSize = [None, ]*4
 Data = {}  # key: (order)
