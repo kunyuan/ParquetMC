@@ -27,7 +27,10 @@ void InitPara() {
 #endif
 
   // Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
+  // polarization
   Para.ReWeight = {0.05, 1.0, 2.0, 5.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
+  // Sigma
+  Para.ReWeight = {1.0, 1.0, 1.0, 1.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
 
   //// initialize the global parameter //////////////////////
   double Kf;
@@ -62,7 +65,8 @@ void InitPara() {
   }
 
   for (int i = 0; i < TauBinSize; i++) {
-    Para.ExtTauTable[i] = Para.Beta * (i + 0.5) / TauBinSize;
+    // Para.ExtTauTable[i] = Para.Beta * (i + 0.5) / TauBinSize;
+    Para.ExtTauTable[i] = Para.Beta * i / TauBinSize + 1.0e-6;
   }
   // Para.ExtMomTable[0][0] = 0.0;
   // Para.ExtMomTable[1][0] = 2. * Para.Kf;
