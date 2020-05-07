@@ -15,11 +15,11 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
   // if tau is exactly zero, set tau=0^-
   double green, Ek, kk, k;
   if (Tau == 0.0)
-    Tau = -1.0e-10;
+    Tau = -1.0e-12;
 
   // equal time green's function
   if (GType == 1)
-    Tau = -1.0e-10;
+    Tau = -1.0e-12;
 
   double s = 1.0;
   if (Tau < 0.0) {
