@@ -173,6 +173,6 @@ bool sigma::Test() {
 
   //   cout << "DIR=" << Weight1 + 2 * Weight2 << ", EX=" << -Weight3 << endl;
   //   return Weight1 + 2 * Weight2;
-  //   cout << "Pass" << endl;
+  cout << "Pass" << endl;
   return true;
 }

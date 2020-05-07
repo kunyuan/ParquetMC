@@ -22,11 +22,11 @@ int LastInterTauIdx(int Order) {
   if (DiagType == GAMMA)
     return Order;
   else if (DiagType == SIGMA)
-    return Order - 1;
+    return Order - 2;
   else if (DiagType == POLAR)
     return Order - 1;
   else if (DiagType == DELTA)
-    return Order - 1;
+    return Order - 2;
   else
     ASSERT(false, "Not Implemented!");
 }
