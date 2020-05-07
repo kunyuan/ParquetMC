@@ -12,6 +12,8 @@ extern propagator Prop;
 void polar::Build(int order) {
   ASSERT_ALLWAYS(order >= 0, "Polar order must be larger than 0!");
   Order = order;
+  ExtTauIdx = MaxTauNum - 1;
+  ASSERT_ALLWAYS(ExtTauIdx > TauNum(), "MaxTauNum is too small!");
 
   // vertex is only needed for order>=2
   if (Order >= 2) {
@@ -24,8 +26,8 @@ void polar::Build(int order) {
     for (auto &t : Vertex.Tpair) {
       int inL = G[INL].AddTidxPair({0, t[INL]});
       int outL = G[OUTL].AddTidxPair({t[OUTL], 0});
-      int inR = G[INR].AddTidxPair({TauNum() - 1, t[INR]});
-      int outR = G[OUTR].AddTidxPair({t[OUTR], TauNum() - 1});
+      int inR = G[INR].AddTidxPair({ExtTauIdx, t[INR]});
+      int outR = G[OUTR].AddTidxPair({t[OUTR], ExtTauIdx});
       Gidx.push_back(array<int, 4>({inL, outL, inR, outR}));
     }
   }
@@ -37,7 +39,7 @@ double polar::Evaluate() {
   if (Order == 0)
     return 1.0;
   else if (Order == 1) {
-    double Tau = Var.Tau[TauNum() - 1] - Var.Tau[0];
+    double Tau = Var.Tau[ExtTauIdx] - Var.Tau[0];
     double Weight = Prop.Green(Tau, Var.LoopMom[1], UP, 0);
     Weight *= Prop.Green(-Tau, Var.LoopMom[1] - Var.LoopMom[0], UP, 0);
 

@@ -8,6 +8,7 @@ namespace diag {
 class polar {
 public:
   int Order;
+  int ExtTauIdx;
   vertex4 Vertex;
   array<green, 4> G;
   vector<array<int, 4>> Gidx; // external T list

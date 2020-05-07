@@ -12,10 +12,6 @@
 namespace diag {
 using namespace std;
 
-int TauNum(int Order);
-int LoopNum(int Order);
-int InterLoopIdx();
-
 class weight {
 public:
   weight() {}

@@ -17,6 +17,35 @@ using namespace mc;
 using namespace diag;
 using namespace std;
 
+int InterTauIdx(int Order) {
+  // the last internal tau index
+  if (DiagType == GAMMA)
+    return Order;
+  else if (DiagType == SIGMA)
+    return Order - 1;
+  else if (DiagType == POLAR)
+    return Order - 1;
+  else if (DiagType == DELTA)
+    return Order - 1;
+  else
+    ASSERT(false, "Not Implemented!");
+}
+
+int InterLoopIdx() {
+  if (DiagType == GAMMA)
+    return 4;
+  else if (DiagType == SIGMA)
+    return 1;
+  else if (DiagType == POLAR)
+    return 1;
+  else if (DiagType == DELTA)
+    return 1;
+  else
+    ASSERT(false, "Not Implemented!");
+}
+
+int LoopNum(int Order) { return Order + InterLoopIdx(); }
+
 void markov::ChangeOrder() {
   Updates Name;
   double Prop = 1.0;
@@ -28,13 +57,19 @@ void markov::ChangeOrder() {
     if (Var.CurrOrder == Para.Order)
       return;
     NewOrder = Var.CurrOrder + 1;
-    static momentum NewMom;
     double NewTau;
+
     // Generate New Tau
-    Prop = GetNewTau(NewTau);
-    int NewTauIndex = TauNum(Var.CurrOrder);
-    Var.Tau[NewTauIndex] = NewTau;
+    int NewTauIndex = InterTauIdx(Var.CurrOrder) + 1;
+    if (NewTauIndex < 1) {
+      Prop = 1.0;
+    } else {
+      Prop = GetNewTau(NewTau);
+      Var.Tau[NewTauIndex] = NewTau;
+    }
+
     // Generate New Mom
+    static momentum NewMom;
     Prop *= GetNewK(NewMom);
     Var.LoopMom[LoopNum(Var.CurrOrder)] = NewMom;
 
@@ -47,9 +82,9 @@ void markov::ChangeOrder() {
     NewOrder = Var.CurrOrder - 1;
 
     // Remove OldTau
-    int TauToRemove = TauNum(Var.CurrOrder) - 1;
+    int TauToRemove = InterTauIdx(Var.CurrOrder);
 
-    if (TauToRemove <= 0)
+    if (TauToRemove < 1)
       Prop = 1.0;
     else
       Prop = RemoveOldTau(Var.Tau[TauToRemove]);
@@ -75,58 +110,37 @@ void markov::ChangeOrder() {
 };
 
 void markov::ChangeExtTau() {
-
-  if (TauNum(Var.CurrOrder) == 0)
+  // Gamma diagram doesn't have ExtTau variable
+  if (DiagType == GAMMA)
     return;
 
-  int TauIndex;
+  Proposed[CHANGE_EXTTAU][Var.CurrOrder]++;
 
-  if (DiagType == SIGMA || DiagType == DELTA)
-    // ExtTau are 0 and TauNum-1
-    TauIndex = Random.irn(1, TauNum(Var.CurrOrder) - 2);
-  else if (DiagType == POLAR)
-    // ExtTau are 0 and 1
-    TauIndex = Random.irn(2, TauNum(Var.CurrOrder) - 1);
-  else
-    TauIndex = Random.irn(0, TauNum(Var.CurrOrder) - 1);
+  int ExtTauIdx = MaxTauNum - 1;
+  int CurrTauBin = Var.CurrExtTauBin;
+  double Prop = ShiftExtTau(CurrTauBin, Var.CurrExtTauBin);
 
-  Proposed[CHANGE_TAU][Var.CurrOrder]++;
-
-  double CurrTau = Var.Tau[TauIndex];
-  double NewTau;
-  double Prop = ShiftTau(CurrTau, NewTau);
-
-  Var.Tau[TauIndex] = NewTau;
+  Var.Tau[ExtTauIdx] = Para.ExtTauTable[Var.CurrExtTauBin];
 
   NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
 
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
-    Accepted[CHANGE_TAU][Var.CurrOrder]++;
+    Accepted[CHANGE_EXTTAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
-    // retore the old Tau if the update is rejected
-    // if TauIndex is external, then its partner can be different
-    Var.Tau[TauIndex] = CurrTau;
+    Var.CurrExtTauBin = CurrTauBin;
+    Var.Tau[ExtTauIdx] = Para.ExtTauTable[CurrTauBin];
   }
 };
 
 void markov::ChangeTau() {
 
-  if (TauNum(Var.CurrOrder) == 0)
+  if (InterTauIdx(Var.CurrOrder) < 1)
     return;
 
-  int TauIndex;
-
-  if (DiagType == SIGMA || DiagType == DELTA)
-    // ExtTau are 0 and TauNum-1
-    TauIndex = Random.irn(1, TauNum(Var.CurrOrder) - 2);
-  else if (DiagType == POLAR)
-    // ExtTau are 0 and 1
-    TauIndex = Random.irn(2, TauNum(Var.CurrOrder) - 1);
-  else
-    TauIndex = Random.irn(0, TauNum(Var.CurrOrder) - 1);
+  int TauIndex = Random.irn(1, InterTauIdx(Var.CurrOrder));
 
   Proposed[CHANGE_TAU][Var.CurrOrder]++;
 
@@ -144,8 +158,6 @@ void markov::ChangeTau() {
     Accepted[CHANGE_TAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
-    // retore the old Tau if the update is rejected
-    // if TauIndex is external, then its partner can be different
     Var.Tau[TauIndex] = CurrTau;
   }
 };
@@ -158,6 +170,7 @@ void markov::ChangeMomentum() {
   static momentum CurrMom;
 
   int LoopIndex = Random.irn(InterLoopIdx(), LoopNum(Var.CurrOrder) - 1);
+
   CurrMom = Var.LoopMom[LoopIndex];
   Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);
 
@@ -373,6 +386,11 @@ double markov::ShiftExtTransferK(const int &OldExtMomBin, int &NewExtMomBin) {
   return 1.0;
 };
 
+double markov::ShiftExtTau(const int &OldTauBin, int &NewTauBin) {
+  NewTauBin = Random.irn(0, TauBinSize - 1);
+  return 1.0;
+}
+
 double markov::ShiftExtLegK(const momentum &OldExtMom, momentum &NewExtMom) {
   // double Theta = Random.urn() * 1.0 * PI;
   // NewExtMom[0] = Para.Kf * cos(Theta);
@@ -423,7 +441,6 @@ markov::markov() {
 
   UpdatesName[INCREASE_ORDER] = NAME(INCREASE_ORDER);
   UpdatesName[DECREASE_ORDER] = NAME(DECREASE_ORDER);
-  UpdatesName[CHANGE_GROUP] = NAME(CHANGE_GROUP);
   UpdatesName[CHANGE_MOM] = NAME(CHANGE_MOM);
   UpdatesName[CHANGE_EXTMOM] = NAME(CHANGE_EXTMOM);
   UpdatesName[CHANGE_TAU] = NAME(CHANGE_TAU);

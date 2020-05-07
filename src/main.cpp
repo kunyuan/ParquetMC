@@ -62,7 +62,7 @@ void InitPara() {
   }
 
   for (int i = 0; i < TauBinSize; i++) {
-    Para.ExtTauTable[i] = Para.Beta * i / TauBinSize + 1.0e-9;
+    Para.ExtTauTable[i] = Para.Beta * (i + 0.5) / TauBinSize;
   }
   // Para.ExtMomTable[0][0] = 0.0;
   // Para.ExtMomTable[1][0] = 2. * Para.Kf;
@@ -91,7 +91,13 @@ void InitVar() {
 
   for (auto &t : Var.Tau)
     t = Random.urn() * Para.Beta;
-  Var.Tau[0] = 0.0; // reference tau
+
+  // reference tau, it should not be updated
+  Var.Tau[0] = 0.0;
+
+  // Set the potential ExtTauBin
+  Var.CurrExtTauBin = 0;
+  Var.Tau[MaxTauNum - 1] = Para.ExtTauTable[Var.CurrExtTauBin];
 
   if (DiagType == GAMMA) {
     Var.CurrExtMomBin = 0;

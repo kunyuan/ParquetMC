@@ -53,35 +53,6 @@ void weight::Initialization() {
   }
 }
 
-int diag::TauNum(int Order) {
-  if (DiagType == GAMMA)
-    return Order + 1;
-  else if (DiagType == SIGMA)
-    return Order;
-  else if (DiagType == POLAR)
-    return Order + 1;
-  else if (DiagType == DELTA)
-    return Order;
-  else
-    ASSERT(false, "Not Implemented!");
-}
-
-int diag::LoopNum(int Order) { return Order + diag::InterLoopIdx(); }
-
-int diag::InterLoopIdx() {
-  if (DiagType == GAMMA)
-    return 4;
-  else if (DiagType == SIGMA)
-    return 1;
-  else if (DiagType == POLAR)
-    return 1;
-  else if (DiagType == DELTA)
-    return 1;
-  else
-    ASSERT(false, "Not Implemented!");
-  // else if (DiagType == POLAR)
-  //   return Order + 2;
-}
 
 double weight::Evaluate(int Order) {
   if (Order == 0)
@@ -131,16 +102,14 @@ void weight::Measure() {
     // Polar, Sigma, Delta can be handled together
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);
-    else {
-      double Tau = Var.Tau[TauNum(Var.CurrOrder) - 1] - Var.Tau[0];
-      OneBodyObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Tau,
+    else
+      OneBodyObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtTauBin,
                          Evaluate(Var.CurrOrder), Factor);
-    }
   }
 }
 
 void weight::SaveToFile() {
-  if (DiagType == GAMMA)
+  if (DiagType == diagram::GAMMA)
     GammaObs.Save();
   else
     OneBodyObs.Save();

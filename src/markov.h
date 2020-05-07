@@ -10,7 +10,7 @@
 
 namespace mc {
 using namespace std;
-const int MCUpdates = 7;
+const int MCUpdates = 6;
 
 class markov {
 public:
@@ -53,7 +53,6 @@ private:
   enum Updates {
     INCREASE_ORDER = 0,
     DECREASE_ORDER,
-    CHANGE_GROUP,
     CHANGE_TAU,
     CHANGE_MOM,
     CHANGE_EXTMOM,

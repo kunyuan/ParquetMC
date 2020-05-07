@@ -17,14 +17,15 @@ oneBodyObs::oneBodyObs() {
   Normalization = 1.0e-10;
 
   if (DiagType == POLAR) {
-    PhyWeight = ExtMomBinSize;
-    // PhyWeight = TauBinSize;
+    PhyWeight = ExtMomBinSize * TauBinSize;
     Name = "polar";
   } else if (DiagType == SIGMA) {
-    PhyWeight = ExtMomBinSize / Para.Beta;
+    PhyWeight = ExtMomBinSize * TauBinSize;
+    // PhyWeight = ExtMomBinSize / Para.Beta;
     Name = "sigma";
   } else if (DiagType == DELTA) {
-    PhyWeight = ExtMomBinSize;
+    PhyWeight = ExtMomBinSize * TauBinSize;
+    // PhyWeight = ExtMomBinSize;
     Name = "delta";
   } else
     ABORT("Not implemented!");
@@ -33,24 +34,13 @@ oneBodyObs::oneBodyObs() {
 }
 
 void oneBodyObs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
-void oneBodyObs::Measure(int Order, int Kidx, double Tau, double Weight,
+void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
                          double Factor) {
+  ASSERT(KBin >= 0 && KBin < ExtMomBinSize, "Kidx is out of range!");
+  ASSERT(TauBin >= 0 && TauBin < TauBinSize, "TauIdx is out of range!");
 
-  if (Order == 0)
-    Normalization += 1.0 * Factor;
-  // only for Order >=1
-  else {
-    if (Tau < 0.0)
-      Tau = Tau + Para.Beta;
-
-    int TauIdx = int(Tau / Para.Beta * TauBinSize);
-
-    ASSERT(Kidx >= 0 && Kidx < ExtMomBinSize, "Kidx is out of range!");
-    ASSERT(TauIdx >= 0 && TauIdx < TauBinSize, "TauIdx is out of range!");
-
-    _Estimator(Order, Kidx, TauIdx) += Weight * Factor * TauBinSize / Para.Beta;
-    _Estimator(0, Kidx, TauIdx) += Weight * Factor * TauBinSize / Para.Beta;
-  }
+  _Estimator(Order, KBin, TauBin) += Weight * Factor;
+  _Estimator(0, KBin, TauBin) += Weight * Factor;
 }
 
 void oneBodyObs::Save() {

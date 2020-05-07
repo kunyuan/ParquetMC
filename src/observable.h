@@ -52,7 +52,7 @@ class oneBodyObs {
 public:
   oneBodyObs();
   void Measure0(double Factor);
-  void Measure(int Order, int Kidx, double Tau, double Weight,
+  void Measure(int Order, int KBin, int TauBin, double Weight,
                double Factor); // all tau variables
   void Save();
 
