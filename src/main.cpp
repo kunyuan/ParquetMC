@@ -27,7 +27,7 @@ void InitPara() {
 #endif
 
   // Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
-  Para.ReWeight = {1.0, 1.0, 1.0, 0.2, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
+  Para.ReWeight = {0.05, 1.0, 1.0, 0.2, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
 
   //// initialize the global parameter //////////////////////
   double Kf;
@@ -152,21 +152,22 @@ int main(int argc, const char *argv[]) {
       Var.Counter++;
 
       double x = Random.urn();
-      if (x < 1.0 / 4.0) {
+      if (x < 1.0 / 5.0) {
         Markov.ChangeOrder();
         // ;
-      } else if (x < 2.0 / 4.0) {
+      } else if (x < 2.0 / 5.0) {
         Markov.ChangeMomentum();
         // ;
-      } else if (x < 3.0 / 4.0) {
+      } else if (x < 3.0 / 5.0) {
         Markov.ChangeExtMomentum();
         // ;
-      } else if (x < 4.0 / 4.0) {
+      } else if (x < 4.0 / 5.0)
         Markov.ChangeTau();
-        // else if (x < 5.0 / 5.0) {
-        //   Markov.ChangeScale();
-        // ;
-      }
+      else if (x < 5.0 / 5.0)
+        Markov.ChangeExtTau();
+
+      // cout << Var.CurrExtTauBin << ": " << Var.Tau[0] << "-> "
+      //      << Var.Tau[MaxTauNum - 1] << endl;
 
       if (i % 8 == 0)
         // fast operations

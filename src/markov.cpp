@@ -119,6 +119,7 @@ void markov::ChangeExtTau() {
   int ExtTauIdx = MaxTauNum - 1;
   int CurrTauBin = Var.CurrExtTauBin;
   double Prop = ShiftExtTau(CurrTauBin, Var.CurrExtTauBin);
+  // cout << " Prop: " << Var.CurrExtTauBin << endl;
 
   Var.Tau[ExtTauIdx] = Para.ExtTauTable[Var.CurrExtTauBin];
 
