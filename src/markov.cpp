@@ -17,7 +17,7 @@ using namespace mc;
 using namespace diag;
 using namespace std;
 
-int InterTauIdx(int Order) {
+int LastInterTauIdx(int Order) {
   // the last internal tau index
   if (DiagType == GAMMA)
     return Order;
@@ -31,7 +31,7 @@ int InterTauIdx(int Order) {
     ASSERT(false, "Not Implemented!");
 }
 
-int InterLoopIdx() {
+int FirstInterLoopIdx() {
   if (DiagType == GAMMA)
     return 4;
   else if (DiagType == SIGMA)
@@ -44,7 +44,10 @@ int InterLoopIdx() {
     ASSERT(false, "Not Implemented!");
 }
 
-int LoopNum(int Order) { return Order + InterLoopIdx(); }
+int LastInterLoopIdx(int Order) {
+  // make sure Order>=1
+  return FirstInterLoopIdx() + Order - 1;
+}
 
 void markov::ChangeOrder() {
   Updates Name;
@@ -60,7 +63,7 @@ void markov::ChangeOrder() {
     double NewTau;
 
     // Generate New Tau
-    int NewTauIndex = InterTauIdx(Var.CurrOrder) + 1;
+    int NewTauIndex = LastInterTauIdx(Var.CurrOrder) + 1;
     if (NewTauIndex < 1) {
       Prop = 1.0;
     } else {
@@ -71,7 +74,7 @@ void markov::ChangeOrder() {
     // Generate New Mom
     static momentum NewMom;
     Prop *= GetNewK(NewMom);
-    Var.LoopMom[LoopNum(Var.CurrOrder)] = NewMom;
+    Var.LoopMom[LastInterLoopIdx(Var.CurrOrder) + 1] = NewMom;
 
   } else {
     // decrese order
@@ -82,7 +85,7 @@ void markov::ChangeOrder() {
     NewOrder = Var.CurrOrder - 1;
 
     // Remove OldTau
-    int TauToRemove = InterTauIdx(Var.CurrOrder);
+    int TauToRemove = LastInterTauIdx(Var.CurrOrder);
 
     if (TauToRemove < 1)
       Prop = 1.0;
@@ -90,7 +93,7 @@ void markov::ChangeOrder() {
       Prop = RemoveOldTau(Var.Tau[TauToRemove]);
 
     // Remove OldMom
-    int LoopToRemove = LoopNum(Var.CurrOrder) - 1;
+    int LoopToRemove = LastInterLoopIdx(Var.CurrOrder);
 
     Prop *= RemoveOldK(Var.LoopMom[LoopToRemove]);
   }
@@ -117,9 +120,8 @@ void markov::ChangeExtTau() {
   Proposed[CHANGE_EXTTAU][Var.CurrOrder]++;
 
   int ExtTauIdx = MaxTauNum - 1;
-  int CurrTauBin = Var.CurrExtTauBin;
-  double Prop = ShiftExtTau(CurrTauBin, Var.CurrExtTauBin);
-  // cout << " Prop: " << Var.CurrExtTauBin << endl;
+  int OldTauBin = Var.CurrExtTauBin;
+  double Prop = ShiftExtTau(OldTauBin, Var.CurrExtTauBin);
 
   Var.Tau[ExtTauIdx] = Para.ExtTauTable[Var.CurrExtTauBin];
 
@@ -131,17 +133,17 @@ void markov::ChangeExtTau() {
     Accepted[CHANGE_EXTTAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
-    Var.CurrExtTauBin = CurrTauBin;
-    Var.Tau[ExtTauIdx] = Para.ExtTauTable[CurrTauBin];
+    Var.CurrExtTauBin = OldTauBin;
+    Var.Tau[ExtTauIdx] = Para.ExtTauTable[OldTauBin];
   }
 };
 
 void markov::ChangeTau() {
 
-  if (InterTauIdx(Var.CurrOrder) < 1)
+  if (LastInterTauIdx(Var.CurrOrder) < 1)
     return;
 
-  int TauIndex = Random.irn(1, InterTauIdx(Var.CurrOrder));
+  int TauIndex = Random.irn(1, LastInterTauIdx(Var.CurrOrder));
 
   Proposed[CHANGE_TAU][Var.CurrOrder]++;
 
@@ -170,7 +172,8 @@ void markov::ChangeMomentum() {
   int CurrExtMomBin;
   static momentum CurrMom;
 
-  int LoopIndex = Random.irn(InterLoopIdx(), LoopNum(Var.CurrOrder) - 1);
+  int LoopIndex =
+      Random.irn(FirstInterLoopIdx(), LastInterLoopIdx(Var.CurrOrder));
 
   CurrMom = Var.LoopMom[LoopIndex];
   Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);

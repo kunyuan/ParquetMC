@@ -14,6 +14,7 @@ void sigma::Build(int order) {
   Order = order;
   if (order <= 1)
     return;
+  ASSERT(TauNum() < MaxTauNum - 1, "MaxTauNum is too small!");
 
   vector<channel> FULL = {I, T, U, S, TC, UC};
   vector<channel> F = {TC, UC};
@@ -26,11 +27,9 @@ void sigma::Build(int order) {
     int lvl = 0;
     int oR = LoopNum() - 2 - ol;
     int LInTL = 0;
-    int RInTL = LInTL + (ol + 1);
+    int RInTL = MaxTauNum - 1;
     int Llopidx = 3; // ExtK: 0, G1: 1, G2: 2
     int Rlopidx = 3 + ol;
-
-    ASSERT(RInTL == TauNum() - 1, "RInTL must be the last tau idx!");
 
     bub.LVer.Build(lvl, ol, Llopidx, LInTL, FULL, LEFT, false);
     bub.RVer.Build(lvl, oR, Rlopidx, RInTL, F, RIGHT, false);
@@ -150,13 +149,15 @@ bool sigma::Test() {
     return false;
 
   double Factor = 1.0 / pow(2.0 * PI, D);
+  int ExtTauIdx = MaxTauNum - 1;
   momentum &ExtK = Var.LoopMom[0];
   momentum &K1 = Var.LoopMom[1];
   momentum &K2 = Var.LoopMom[2];
   momentum K3 = K1 + K2 - ExtK;
-  double G1 = Prop.Green(Var.Tau[1] - Var.Tau[0], K1, UP, 0);
-  double G2 = Prop.Green(Var.Tau[1] - Var.Tau[0], K2, UP, 0);
-  double G3 = Prop.Green(Var.Tau[0] - Var.Tau[1], K3, UP, 0);
+  double Tau = Var.Tau[ExtTauIdx] - Var.Tau[0];
+  double G1 = Prop.Green(Tau, K1, UP, 0);
+  double G2 = Prop.Green(Tau, K2, UP, 0);
+  double G3 = Prop.Green(-Tau, K3, UP, 0);
   double VerDir = Prop.Interaction(K1 - ExtK, 0);
   double VerEx = -Prop.Interaction(K2 - ExtK, 0);
   double VerW = (VerDir * VerDir + VerEx * VerEx) * SPIN + 2.0 * VerDir * VerEx;
