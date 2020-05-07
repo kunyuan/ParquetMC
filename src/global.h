@@ -17,7 +17,7 @@ enum diagram { SIGMA, POLAR, GAMMA, DELTA };
 const int D = 3;                   // dimensions, 2 or 3
 const int SPIN = 2;                // spin index
 const type CalcType = VARIATIONAL; // calculation type
-const diagram DiagType = SIGMA;    // diagram type
+const diagram DiagType = GAMMA;    // diagram type
 const int ExtMomBinSize = 32;      // external K bins
 const int AngBinSize = 64;         // angle bins
 const int TauBinSize = 256;        // tau bin

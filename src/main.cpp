@@ -26,11 +26,12 @@ void InitPara() {
   LOG_INFO("NDEBUG mode is ON.");
 #endif
 
-  // Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
   // polarization
   // Para.ReWeight = {0.05, 1.0, 2.0, 5.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
   // Sigma
-  Para.ReWeight = {1.0, 3.0, 30.0, 1.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
+  // Para.ReWeight = {1.0, 3.0, 30.0, 1.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
+  // Gamma
+  Para.ReWeight = {2.0, 0.8, 0.4, 0.4, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
 
   //// initialize the global parameter //////////////////////
   double Kf;

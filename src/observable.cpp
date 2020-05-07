@@ -28,7 +28,7 @@ oneBodyObs::oneBodyObs() {
     // PhyWeight = ExtMomBinSize;
     Name = "delta";
   } else
-    ABORT("Not implemented!");
+    return;
 
   _Estimator.Initialize({Para.Order + 1, ExtMomBinSize, TauBinSize});
 }
