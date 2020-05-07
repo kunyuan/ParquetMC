@@ -15,11 +15,9 @@ XType = "Tau"
 # XType = "Mom"
 # XType = "Z"
 OrderByOrder = False
-SpinIndex = 2
-Dim = 3
 # 0: I, 1: T, 2: U, 3: S
 
-Para = param("inlist", Dim, SpinIndex)
+Para = param("inlist")
 Order = range(0, Para.Order+1)
 TauBin, ExtMomBin, TauBinSize, ExtMomBinSize = [None, ]*4
 Data = {}  # key: (order)

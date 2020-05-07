@@ -2,6 +2,13 @@ import os
 import sys
 import numpy as np
 
+##################### Global variables  #############################
+Dim = 3
+SpinIndex = 2
+InputFile = "inlist"
+#####################################################################
+
+
 '''
 For the given path, get the List of all files in the directory tree 
 '''
@@ -18,9 +25,9 @@ class param:
     Order, Beta, Rs, Mass2, Lambda, Charge2, TotalStep = [None, ]*7
     kF, Nf, EF, Bubble = [0.0, ]*4
 
-    def __init__(self, infile, Dim, SpinIndex):
+    def __init__(self):
 
-        with open(infile, "r") as file:
+        with open(InputFile, "r") as file:
             para = file.readline().split(" ")
             self.Order = int(para[0])
             self.Beta = float(para[1])
@@ -28,7 +35,8 @@ class param:
             self.Mass2 = float(para[3])
             self.Lambda = float(para[4])
             self.Charge2 = float(para[5])
-            self.TotalStep = float(para[6])
+            self.MaxExtMom = float(para[6])
+            self.TotalStep = int(para[7])
 
         if Dim == 3:
             self.kF = (9.0*np.pi/4.0)**(1.0/3.0)/self.Rs

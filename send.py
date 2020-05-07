@@ -14,6 +14,7 @@ Cluster = "local"
 rootdir = os.getcwd()
 inlist = open(rootdir+"/inlist", "r")
 execute = "feyncalc.exe"
+grid = "grid.data"
 
 for index, eachline in enumerate(inlist):
     para = eachline.split()
@@ -32,10 +33,17 @@ for index, eachline in enumerate(inlist):
 
     homedir = os.getcwd() + \
         "/Beta{0}_rs{1}_lambda{2}".format(para[1], para[2], para[3])
-    if(os.path.exists(homedir) != True):
+    if os.path.exists(homedir) != True:
         os.system("mkdir "+homedir)
 
     os.system("cp {0} {1}".format(execute, homedir))
+
+    if os.path.exists(grid) == True:
+        os.system("cp {0} {1}".format(grid, homedir))
+    else:
+        print "Run grid.py to generate grid.data first!"
+        sys.exit(0)
+
     if Cluster != "Rutgers":
         infilepath = homedir+"/infile"
         if(os.path.exists(infilepath) != True):
