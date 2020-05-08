@@ -1,16 +1,6 @@
-import numpy as np
 from scipy import integrate
 from utility import *
 from grid import *
-import matplotlib.pyplot as plt
-import matplotlib as mat
-import sys
-import glob
-import os
-import re
-mat.rcParams.update({'font.size': 16})
-mat.rcParams["font.family"] = "Times New Roman"
-size = 12
 
 # XType = "Tau"
 XType = "Mom"
@@ -25,35 +15,25 @@ MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
 folder = "./Beta{0}_rs{1}_lambda{2}/".format(
     int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
 
-Data = {}
+filename = "polar_pid[0-9]+.dat"
 
-for order in Order:
-    Norm = 0.0
-    Data[order] = None
-    for f in files:
-        if re.search("polar{0}_pid[0-9]+.dat".format(order), f):
-            print "Loading ", f
-            with open(f, "r") as file:
-                Step = int(file.readline().split(":")[-1])/1000000
-                Norm += float(file.readline().split(":")[-1])
-            d = np.loadtxt(f)
-            if Data[order] is None:
-                Data[order] = d
-            else:
-                Data[order] += d
-    Data[order] /= Norm
-    Data[order] = Data[order].reshape((TauBinSize, ExtMomBinSize))
+shape = (Para.Order+1, MomGridSize, TauGridSize)
 
+Avg, Err, Step = LoadFile(folder, filename, shape)
 
-fig, ax = plt.subplots()
+# fig, ax = plt.subplots()
+plt.figure()
 
 if(XType == "Mom"):
     for o in Order:
-        print Data[o].shape
-        ErrorPlot(ax, MomGrid, np.sum(Data[o][:, :], axis=0)*Para.Beta/TauGridSize,
-                  ColorList[o], 's', "Order {0}".format(o))
-    ax.set_xlim([MomGrid[0], MomGrid[-1]])
-    ax.set_xlabel("$Ext K$", size=size)
+        y = np.average(Avg[o, :, :], axis=1)
+        err = np.average(Err[o, :, :], axis=1)/np.sqrt(TauGridSize)
+        # err = np.average(Err[o, :, :], axis=1)
+        plt.errorbar(MomGrid, y, yerr=err, fmt='o-', capthick=1, capsize=4,
+                     color=ColorList[o], label="Order {0}".format(o))
+
+    plt.xlim([MomGrid[0], MomGrid[-1]])
+    plt.xlabel("$Ext K$", size=size)
 
     # x = ExtMomBin*kF
     # l = Mass2+Lambda
@@ -62,6 +42,7 @@ if(XType == "Mom"):
     # ErrorPlot(ax, ExtMomBin, y, "k", ".", "Analytic")
 
 elif(XType == "Tau"):
+    pass
     # N = 8
     # o = 2
     # for i in range(N):

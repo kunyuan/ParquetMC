@@ -1,85 +1,61 @@
-import numpy as np
 from scipy import integrate
 from utility import *
-import matplotlib.pyplot as plt
-import matplotlib as mat
-import sys
-import glob
-import os
-import re
-mat.rcParams.update({'font.size': 16})
-mat.rcParams["font.family"] = "Times New Roman"
-size = 12
+from grid import *
 
-# XType = "Tau"
-XType = "Mom"
+XType = "Tau"
+# XType = "Mom"
 # XType = "Z"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 
 Para = param()
 Order = range(0, Para.Order+1)
-TauBin, ExtMomBin, TauBinSize, ExtMomBinSize = [None, ]*4
-Data = {}  # key: (order)
+TauGrid = BuildTauGrid(Para.Beta, TauGridSize)
+MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
 
 folder = "./Beta{0}_rs{1}_lambda{2}/".format(
     int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
-files = getListOfFiles(folder)
 
-for order in Order:
-    Norm = 0.0
-    Data[order] = None
-    for f in files:
-        if re.search("sigma{0}_pid[0-9]+.dat".format(order), f):
-            print "Loading ", f
-            with open(f, "r") as file:
-                Step = int(file.readline().split(":")[-1])/1000000
-                Norm += float(file.readline().split(":")[-1])
-                TauBin = np.fromstring(file.readline().split(":")[1], sep=' ')
-                TauBinSize = len(TauBin)
-                ExtMomBin = np.fromstring(
-                    file.readline().split(":")[1], sep=' ')
-                ExtMomBinSize = len(ExtMomBin)
-            d = np.loadtxt(f)
-            if Data[order] is None:
-                Data[order] = d
-            else:
-                Data[order] += d
-    Data[order] /= Norm
-    Data[order] = Data[order].reshape((TauBinSize, ExtMomBinSize))
+filename = "sigma_pid[0-9]+.dat"
+
+shape = (Para.Order+1, MomGridSize, TauGridSize)
+
+Avg, Err, Step = LoadFile(folder, filename, shape)
 
 fig, ax = plt.subplots()
 
 if(XType == "Mom"):
     # Order 1 sigma is a delta function of tau
     o = 1
-    ErrorPlot(ax, ExtMomBin, np.average(Data[o][:, :], axis=0),
-              ColorList[o], 's', "Order {0}".format(o))
-    ax.set_xlim([ExtMomBin[0], ExtMomBin[-1]])
+    y = np.average(Avg[o, :, :], axis=1)
+    err = np.average(Err[o, :, :], axis=1)/np.sqrt(len(TauGrid))
+    plt.errorbar(MomGrid, y, yerr=err, fmt='o-', capthick=1,
+                 capsize=4, color=ColorList[o], label="Order {0}".format(o))
+    ax.set_xlim([MomGrid[0], MomGrid[-1]])
     ax.set_xlabel("$Ext K$", size=size)
 
-    x = ExtMomBin
+    x = MomGrid
     l = Para.Mass2+Para.Lambda
     kF = Para.kF
     y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
                       (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
-    ErrorPlot(ax, ExtMomBin, y, "k", ".", "Analytic")
+    ErrorPlot(ax, MomGrid, y, "k", ".", "Analytic")
 
 elif(XType == "Z"):
     # for o in Order:
     #     ErrorPlot(ax, ExtMomBin, (DataW1[o]-DataW2[o])/(2.0*np.pi/Beta),
     #               ColorList[o], 's', "Order {0}".format(o))
-    ax.set_xlim([ExtMomBin[0], ExtMomBin[-1]])
+    ax.set_xlim([MomGrid[0], MomGrid[-1]])
     ax.set_xlabel("$Ext K$", size=size)
 
 elif(XType == "Tau"):
     N = 8
     o = 2
     for i in range(N):
-        q = i*ExtMomBinSize/N
-        ErrorPlot(ax, TauBin/Para.Beta, Data[o][:, q], ColorList[i],
-                  's', "k={0}".format(ExtMomBin[q]))
-        ax.set_xlim([TauBin[0]/Para.Beta, TauBin[-1]/Para.Beta])
+        q = i*MomGridSize/N
+        ax.errorbar(TauGrid/Para.Beta, Avg[o, q, :], yerr=Err[o, q, :], fmt='o-',
+                    capthick=1, capsize=4, color=ColorList[i], label="k={0}".format(MomGrid[q]))
+    ax.set_xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])
 
     # ax.set_xticks([0.0,0.04,0.08,0.12])
     # ax.set_yticks([0.35,0.4,0.45,0.5])

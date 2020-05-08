@@ -193,20 +193,24 @@ void markov::ChangeMomentum() {
 
 void markov::ChangeExtMomentum() {
   double Prop;
-  int CurrExtMomBin;
-  static momentum CurrMom;
+  int OldExtMomBin, OldAngBin;
+  static momentum OldMom;
 
   if (DiagType == GAMMA) {
     // the INL, OUTL, OUTR momentum are fixed
-    CurrMom = Var.LoopMom[INR];
-    Prop = ShiftExtLegK(CurrMom, Var.LoopMom[INR]);
+    OldMom = Var.LoopMom[INR];
+    OldAngBin = Var.CurrExtAngBin;
+    Prop = ShiftExtLegK(OldAngBin, Var.CurrExtAngBin);
+
+    double theta = acos(Para.AngleTable[Var.CurrExtAngBin]);
+    Var.LoopMom[INR][0] = Para.Kf * cos(theta);
+    Var.LoopMom[INR][1] = Para.Kf * sin(theta);
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
+
   } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
-    // LoopIndex must be 0
-    CurrMom = Var.LoopMom[0];
     // In Momentum
-    CurrExtMomBin = Var.CurrExtMomBin;
-    Prop = ShiftExtTransferK(CurrExtMomBin, Var.CurrExtMomBin);
+    OldExtMomBin = Var.CurrExtMomBin;
+    Prop = ShiftExtTransferK(OldExtMomBin, Var.CurrExtMomBin);
     Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
   }
 
@@ -220,11 +224,12 @@ void markov::ChangeExtMomentum() {
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     if (DiagType == GAMMA) {
-      Var.LoopMom[INR] = CurrMom;
-      Var.LoopMom[OUTR] = CurrMom;
+      Var.CurrExtAngBin = OldAngBin;
+      Var.LoopMom[INR] = OldMom;
+      Var.LoopMom[OUTR] = OldMom;
     } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
-      Var.CurrExtMomBin = CurrExtMomBin;
-      Var.LoopMom[0] = CurrMom;
+      Var.CurrExtMomBin = OldExtMomBin;
+      Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
     }
   }
 };
@@ -395,18 +400,13 @@ double markov::ShiftExtTau(const int &OldTauBin, int &NewTauBin) {
   return 1.0;
 }
 
-double markov::ShiftExtLegK(const momentum &OldExtMom, momentum &NewExtMom) {
+double markov::ShiftExtLegK(const int &OldExtMom, int &NewExtMom) {
   // double Theta = Random.urn() * 1.0 * PI;
   // NewExtMom[0] = Para.Kf * cos(Theta);
   // NewExtMom[1] = Para.Kf * sin(Theta);
   // return 1.0;
 
-  int NewKBin = Random.irn(0, Para.AngBinSize - 1);
-
-  double AngCos = diag::Index2Angle(NewKBin, Para.AngBinSize);
-  double theta = acos(AngCos);
-  NewExtMom[0] = Para.Kf * cos(theta);
-  NewExtMom[1] = Para.Kf * sin(theta);
+  NewExtMom = Random.irn(0, Para.AngBinSize - 1);
 
   // ASSERT_ALLWAYS(diag::Angle2Index(cos(theta), AngBinSize) == NewKBin,
   //                "Not matched, " << NewKBin << " vs "

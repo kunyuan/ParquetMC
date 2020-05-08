@@ -53,7 +53,6 @@ void weight::Initialization() {
   }
 }
 
-
 double weight::Evaluate(int Order) {
   if (Order == 0)
     return 1.0;
@@ -95,8 +94,12 @@ void weight::Measure() {
 
       auto &ChanWeight = Gamma[Var.CurrOrder].ChanWeight;
 
-      GammaObs.Measure(Var.LoopMom[INL], Var.LoopMom[INR], Var.CurrExtMomBin,
-                       Var.CurrOrder, ChanWeight, Factor);
+      // double CosAng = diag::Angle3D(Var.LoopMom[INL], Var.LoopMom[INR]);
+      // int AngleIndex = diag::Angle2Index(CosAng, Para.AngBinSize);
+      // cout << AngleIndex << " vs " << Var.CurrExtAngBin << endl;
+
+      GammaObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtAngBin,
+                       ChanWeight, Factor);
     }
   } else {
     // Polar, Sigma, Delta can be handled together

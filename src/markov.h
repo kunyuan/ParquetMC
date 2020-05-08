@@ -35,7 +35,7 @@ private:
   double NewAbsWeight;
 
   double ShiftExtTransferK(const int &, int &);
-  double ShiftExtLegK(const momentum &, momentum &);
+  double ShiftExtLegK(const int &, int &);
   double ShiftExtTau(const int &, int &);
   double ShiftK(const momentum &, momentum &);
   double ShiftTau(const double &, double &);

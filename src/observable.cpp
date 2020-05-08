@@ -45,35 +45,21 @@ void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
 
 void oneBodyObs::Save() {
 
-  for (int order = 0; order <= Para.Order; order++) {
-    string FileName = fmt::format("{0}{1}_pid{2}.dat", Name, order, Para.PID);
-    ofstream VerFile;
-    VerFile.open(FileName, ios::out | ios::trunc);
+  string FileName = fmt::format("{0}_pid{1}.dat", Name, Para.PID);
+  ofstream VerFile;
+  VerFile.open(FileName, ios::out | ios::trunc);
 
-    if (VerFile.is_open()) {
+  if (VerFile.is_open()) {
 
-      VerFile << fmt::sprintf("#PID:%d, rs:%.3f, Beta: %.3f, Step: %d\n",
-                              Para.PID, Para.Rs, Para.Beta, Var.Counter);
-
-      VerFile << "# Norm: " << Normalization << endl;
-
-      VerFile << "# TauTable: ";
-      for (int t = 0; t < Para.TauBinSize; ++t)
-        VerFile << Para.Beta * t / Para.TauBinSize << " ";
-
-      VerFile << endl;
-      VerFile << "# ExtMomBinTable: ";
+    VerFile << "# Counter: " << Var.Counter << endl;
+    VerFile << "# Norm: " << Normalization << endl;
+    for (int order = 0; order <= Para.Order; order++)
       for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
-        VerFile << Para.ExtMomTable[qindex][0] << " ";
-      VerFile << endl;
-
-      for (int tindex = 0; tindex < Para.TauBinSize; ++tindex)
-        for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
+        for (int tindex = 0; tindex < Para.TauBinSize; ++tindex)
           VerFile << _Estimator(order, qindex, tindex) * PhyWeight << "  ";
-      VerFile.close();
-    } else {
-      LOG_WARNING(Name << " for PID " << Para.PID << " fails to save!");
-    }
+    VerFile.close();
+  } else {
+    LOG_WARNING(Name << " for PID " << Para.PID << " fails to save!");
   }
 }
 
@@ -86,14 +72,10 @@ ver4Obs::ver4Obs() {
 
 void ver4Obs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
 
-void ver4Obs::Measure(const momentum &InL, const momentum &InR,
-                      const int QIndex, int Order,
+void ver4Obs::Measure(int Order, int QIndex, int AngleIndex,
                       const std::vector<verWeight> &Weight, double Factor) {
 
   ASSERT(Order != 0, "Order must be >=1!");
-
-  double CosAng = diag::Angle3D(InL, InR);
-  int AngleIndex = diag::Angle2Index(CosAng, Para.AngBinSize);
 
   ASSERT(AngleIndex >= 0 && AngleIndex < Para.AngBinSize,
          "AngleIndex out of range!");

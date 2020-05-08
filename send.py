@@ -38,6 +38,7 @@ for index, eachline in enumerate(inlist):
 
     os.system("cp {0} {1}".format(execute, homedir))
 
+    os.system("python grid.py")
     if os.path.exists(grid) == True:
         os.system("cp {0} {1}".format(grid, homedir))
     else:

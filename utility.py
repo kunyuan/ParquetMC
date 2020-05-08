@@ -1,24 +1,20 @@
 import os
 import sys
+import re
+import glob
 import numpy as np
+
+import matplotlib.pyplot as plt
+import matplotlib as mat
+mat.rcParams.update({'font.size': 16})
+mat.rcParams["font.family"] = "Times New Roman"
+size = 12
 
 ##################### Global variables  #############################
 Dim = 3
 SpinIndex = 2
 InputFile = "inlist"
 #####################################################################
-
-
-'''
-For the given path, get the List of all files in the directory tree 
-'''
-
-
-def getListOfFiles(dirName):
-    listOfFiles = list()
-    for (dirpath, dirnames, filenames) in os.walk(dirName):
-        listOfFiles += [os.path.join(dirpath, file) for file in filenames]
-    return listOfFiles
 
 
 class param:
@@ -56,7 +52,58 @@ class param:
             self.Rs, self.kF, self.EF, self.Beta)
 
 
-def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
+# For the given path, get the List of all files in the directory tree
+def getListOfFiles(dirName):
+    listOfFiles = list()
+    for (dirpath, dirnames, filenames) in os.walk(dirName):
+        listOfFiles += [os.path.join(dirpath, file) for file in filenames]
+    return listOfFiles
+
+
+def Average(Data, Weights):
+    assert(len(Data) == len(Weights), "Data and Weights size must match!")
+    d = np.zeros(Data[0].shape)
+    Z = np.sum(Weights)
+    for i in range(len(Data)):
+        d += Data[i]*Weights[i]/Z
+    return d
+
+
+def LoadFile(Folder, FileName, Shape):
+    Step = []
+    Norm = []
+    Data = []
+
+    for f in getListOfFiles(Folder):
+        if re.search(FileName, f):
+            print "Loading ", f
+            try:
+                with open(f, "r") as file:
+                    Step.append(int(file.readline().split(":")[1]))
+                    Norm.append(float(file.readline().split(":")[1]))
+                assert(len(Norm) == len(Data)+1,
+                       "size of Data and Norm must be the same!")
+                Data.append(np.loadtxt(f)/Norm[-1])
+                # assert(len(Norm) == len(Data),
+                #        "size of Data and Norm must be the same!")
+            except Exception as e:
+                print "Failed to load {0}".format(f)
+                print str(e)
+
+    if len(Norm) == 0:
+        return None
+
+    print len(Data), len(Norm)
+
+    Avg = Average(Data, Norm)
+    Var = sum((d - Avg) ** 2 for d in Data) / len(Data)
+    # Var = Average((Data-Avg)**2, Norm)
+    Avg = Avg.reshape(Shape)
+    Var = Var.reshape(Shape)
+    return Avg, np.sqrt(Var)/np.sqrt(len(Norm)), Step
+
+
+def ErrorPlot(p, x, d, color='k', marker='s', label=None, size=4, shift=False):
     p.plot(x, d, marker=marker, c=color, label=label,
            lw=1, markeredgecolor="None", linestyle="--", markersize=size)
 

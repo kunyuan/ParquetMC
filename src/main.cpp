@@ -34,7 +34,7 @@ void InitPara() {
     Para.ReWeight = {1.0, 3.0, 30.0, 1.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
   else if (DiagType == GAMMA)
     // Gamma
-    Para.ReWeight = {10.0, 0.8, 0.4, 0.1, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
+    Para.ReWeight = {20.0, 0.8, 0.4, 0.1, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
   else
     ABORT("Not implemented!");
 
@@ -82,9 +82,7 @@ void InitPara() {
     for (int t = 0; t < Para.TauBinSize; ++t) {
       File >> bin;
       Para.ExtTauTable.push_back(bin);
-      // cout << bin << ", ";
     }
-    // cout << endl;
 
     File >> Para.ExtMomBinSize;
     LOG_INFO("MomTable: " << Para.ExtMomBinSize);
@@ -105,38 +103,16 @@ void InitPara() {
       double angle;
       File >> angle;
       Para.AngleTable.push_back(angle);
-      // cout << angle << " ";
     }
     cout << "\n";
 
-    for (int i = 0; i < Para.AngBinSize; i++) {
-      Para.AngleTable[i] = diag::Index2Angle(i, Para.AngBinSize);
-    }
+    // for (int i = 0; i < Para.AngBinSize; i++) {
+    //   Para.AngleTable[i] = diag::Index2Angle(i, Para.AngBinSize);
+    // }
 
     File.close();
   } else
     ABORT("Can not load grid file! \n");
-
-  // // initialize external momentum
-  // for (int i = 0; i < Para.ExtMomBinSize; i++) {
-  //   // the external momentum only has x component
-  //   Para.ExtMomTable[i].setZero();
-  //   if (DiagType == GAMMA)
-  //     Para.ExtMomTable[i][0] = i * Para.MaxExtMom / Para.ExtMomBinSize;
-  //   else
-  //     Para.ExtMomTable[i][0] = (i + 0.5) * Para.MaxExtMom /
-  //     Para.ExtMomBinSize;
-  // }
-  // for (int i = 0; i < Para.TauBinSize; i++) {
-  //   cout << Para.ExtTauTable[i] << endl;
-  // }
-  // // exit(0);
-
-  // for (int i = 0; i < Para.TauBinSize; i++) {
-  //   Para.ExtTauTable[i] = Para.Beta * i / Para.TauBinSize + 1.0e-10;
-  // }
-  // Para.ExtMomTable[0][0] = 0.0;
-  // Para.ExtMomTable[1][0] = 2. * Para.Kf;
 }
 
 void InitVar() {
@@ -211,8 +187,9 @@ int main(int argc, const char *argv[]) {
 
   ///////////////  Benchmark ////////////////////////////
   // for (int order = 1; order <= Para.Order; ++order) {
-  //   Markov.Weight.Benchmark(order, 1000);
+  //   Markov.Weight.Benchmark(order, 10000);
   // }
+  // exit(0);
   //////////////////////////////////////////////////////
 
   LOG_INFO("Start simulation ...")
