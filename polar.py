@@ -19,15 +19,16 @@ filename = "polar_pid[0-9]+.dat"
 
 shape = (Para.Order+1, MomGridSize, TauGridSize)
 
-Avg, Err, Step = LoadFile(folder, filename, shape)
+Data, Norm, Step = LoadFile(folder, filename, shape)
+Avg, Err = Estimate(Data, Norm)
 
 # fig, ax = plt.subplots()
 plt.figure()
 
 if(XType == "Mom"):
     for o in Order:
-        y = np.average(Avg[o, :, :], axis=1)
-        err = np.average(Err[o, :, :], axis=1)/np.sqrt(TauGridSize)
+        yList = [np.average(d[o, :, :], axis=1) for d in Data]
+        y, err = Estimate(yList, Norm)
         # err = np.average(Err[o, :, :], axis=1)
         plt.errorbar(MomGrid, y, yerr=err, fmt='o-', capthick=1, capsize=4,
                      color=ColorList[o], label="Order {0}".format(o))
