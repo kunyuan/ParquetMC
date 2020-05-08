@@ -1,95 +1,43 @@
-import os
-import sys
-import re
-import glob
 import time
-import numpy as np
 from color import *
 from utility import *
+from grid import *
 
 SleepTime = 5
-SpinIndex = 2
 IsIrreducible = False
 
-order = None
-rs = None
-Lambda = None
-Mass2 = None
-Beta = None
-Charge2 = None
-TotalStep = None
-OrderStr = None
-BetaStr = None
-rsStr = None
-ChargeStr = None
-Mass2Str = None
-LambdaStr = None
-
-with open("inlist", "r") as file:
-    line = file.readline()
-    para = line.split(" ")
-    OrderStr = para[0]
-    order = int(OrderStr)
-    BetaStr = para[1]
-    Beta = float(BetaStr)
-    rsStr = para[2]
-    rs = float(rsStr)
-    Mass2Str = para[3]
-    Mass2 = float(Mass2Str)
-    LambdaStr = para[4]
-    Lambda = float(LambdaStr)
-    ChargeStr = para[5]
-    Charge2 = float(ChargeStr)
-    TotalStep = float(para[7])
-
-print rs, Beta, Mass2, Lambda, TotalStep
+Para = param()
 
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
 # Channel = [3]
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
-Order = range(order+1)
+Order = range(Para.Order+1)
 # Order = [0, 1, 2, 3, ]
 
-folder = "./Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, Mass2Str)
+folder = "./Beta{0}_rs{1}_lambda{2}/".format(
+    int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
 
-AngleBin = None
-ExtMomBin = None
-AngleBinSize = None
-ExtMomBinSize = None
-Data = {}  # key: (order, channel)
-DataWithAngle = {}  # key: (order, channel)
-DataErr = {}  # key: (order, channel)
+filename = "vertex_pid[0-9]+.dat"
 
-##############   2D    ##################################
-###### Bare Green's function    #########################
-# kF = np.sqrt(2.0)/rs  # 2D
-# Bubble=0.11635  #2D, Beta=0.5, rs=1
-# Bubble = 0.15916/2  # 2D, Beta=10, rs=1
-# Bubble = 0.0795775  # 2D, Beta=20, rs=1
-
-#############  3D  ######################################
-kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
-Nf = kF/4.0/np.pi**2*SpinIndex
-Bubble = 0.0971916  # 3D, Beta=10, rs=1
-Step = None
+shape = (Para.Order+1, 4, AngGridSize, MomGridSize, 2)
 
 
 def AngleIntegation(Data, l):
     # l: angular momentum
     shape = Data.shape[1:]
     Result = np.zeros(shape)
-    for x in range(AngleBinSize):
+    for x in range(AngGrid):
         # Result += Data[x, ...] * \
         #     np.cos(l*AngleBin[x])*2.0*np.pi/AngleBinSize
-        Result += Data[x, ...]*2.0/AngleBinSize
+        Result += Data[x, ...]*2.0/AngGrid
     return Result/2.0
     # return Result
 
 
 def SpinMapping(Data):
-    d = np.copy(Data)
+    d = np.copy(AngleIntegation(Data, 0))
     d[..., 0] += d[..., 1]/SpinIndex
     d[..., 1] /= SpinIndex
     return d
@@ -100,18 +48,18 @@ def PrintInfo(Channel, Data, DataErr):
     Data = -np.copy(Data)
     DataErr = np.copy(DataErr)
 
-    Data[:, 0] *= Nf
-    Data[:, 1] *= Nf
-    DataErr[:, 0] *= Nf
-    DataErr[:, 1] *= Nf
+    Data[:, 0] *= Para.Nf
+    Data[:, 1] *= Para.Nf
+    DataErr[:, 0] *= Para.Nf
+    DataErr[:, 1] *= Para.Nf
 
     print "{0}     Q/kF,    Data,    Error".format(Channel)
     qData0 = Data[:, 0]
     print "As: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        ExtMomBin[i], qData0[i], DataErr[i, 0])
+        MomGrid[i], qData0[i], DataErr[i, 0])
     qData1 = Data[:, 1]
     print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        ExtMomBin[i], qData1[i], DataErr[i, 1])
+        MomGrid[i], qData1[i], DataErr[i, 1])
 
     # print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
     #     ExtMomBin[i], qData0[i]+qData1[i]/SpinIndex, DataErr[i, 0]+DataErr[i, 1]/SpinIndex)
@@ -123,113 +71,37 @@ while True:
 
     time.sleep(SleepTime)
 
-    files = getListOfFiles(folder)
-    for order in Order:
-        for chan in Channel:
-            Num = 0
-            Norm = 0
-            Data0 = None
-            DataList = []
-            FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
+    DataAngle, ErrAngle, Step = LoadFile(folder, filename, shape)
+    Data, Err, Step = LoadFile(folder, filename, shape, SpinMapping)
 
-            for f in files:
-                if re.search(FileName, f):
-                    print "Loading ", f
-                    Norm0 = -1
-                    d = None
-                    try:
-                        with open(f, "r") as file:
-                            line0 = file.readline()
-                            Step = int(line0.split(":")[-1])/1000000
-                            # print "Step:", Step
-                            line1 = file.readline()
-                            # print line1
-                            Norm0 = float(line1.split(":")[-1])
-                            # print "Norm: ", Norm0
-                            line3 = file.readline()
-                            if AngleBin is None:
-                                AngleBin = np.fromstring(
-                                    line3.split(":")[1], sep=' ')
-                                AngleBinSize = len(AngleBin)
-                                print AngleBinSize
-                            line4 = file.readline()
-
-                            if ExtMomBin is None:
-                                ExtMomBin = np.fromstring(
-                                    line4.split(":")[1], sep=' ')
-                                ExtMomBinSize = len(ExtMomBin)
-                                ExtMomBin /= kF
-                        # Num += 1
-                        # print "Load data..."
-                        d = np.loadtxt(f)
-
-                        if d is not None and Norm0 > 0:
-                            if Data0 is None:
-                                Data0 = d
-                            else:
-                                # Data0 = d
-                                Data0 += d
-
-                            Norm += Norm0
-
-                            dd = d.reshape(
-                                (AngleBinSize, ExtMomBinSize, 2))/Norm0
-                            dd = AngleIntegation(dd, 0)
-                            DataList.append(SpinMapping(dd))
-
-                    # print "Norm", Norm
-
-                    except:
-                        print "fail to load ", f
-
-            if Norm > 0 and Data0 is not None:
-                print "Total Weight: ", Data0[0]
-                Data0 /= Norm
-                Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize, 2))
-
-                # print "Channel: ", chan
-                if DataWithAngle.has_key((order, chan)):
-                    DataWithAngle[(order, chan)] = DataWithAngle[(
-                        order, chan)]*0.0+Data0*1.0
-                else:
-                    DataWithAngle[(order, chan)] = Data0
-
-                Data[(order, chan)] = SpinMapping(AngleIntegation(
-                    DataWithAngle[(order, chan)], 0))
-
-                # print np.array(DataList)
-                DataErr[(order, chan)] = np.std(np.array(
-                    DataList), axis=0)/np.sqrt(len(DataList))
-
-                # print "err", np.std(np.array(DataList))
-
-    if len(DataWithAngle) > 0:
+    if len(Data) > 0:
         print "Write Weight file."
-        for chan in Channel:
-            with open("weight{0}.data".format(chan), "w") as file:
-                for angle in range(AngleBinSize):
-                    for qidx in range(ExtMomBinSize):
+        with open("weight.data", "w") as file:
+            for chan in Channel:
+                for angle in range(AngGridSize):
+                    for qidx in range(MomGridSize):
                         for Dir in range(2):
                             file.write("{0} ".format(
-                                DataWithAngle[(0, chan)][angle, qidx, Dir]))
+                                DataAngle[0, chan, angle, qidx, Dir]))
 
-        with open("data.data", "a") as file:
-            file.write("Dir: {0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
-                Data[(0, 1)][0, 0], Data[(0, 1)][0, 0], Data[(0, 2)][0, 0], Data[(0, 3)][0, 0]))
-            file.write("Ex: {0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
-                Data[(0, 1)][0, 1], Data[(0, 1)][0, 1], Data[(0, 2)][0, 1], Data[(0, 3)][0, 1]))
+        # with open("data.data", "a") as file:
+        #     file.write("Dir: {0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
+        #         Data[(0, 1)][0, 0], Data[(0, 1)][0, 0], Data[(0, 2)][0, 0], Data[(0, 3)][0, 0]))
+        #     file.write("Ex: {0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
+        #         Data[(0, 1)][0, 1], Data[(0, 1)][0, 1], Data[(0, 2)][0, 1], Data[(0, 3)][0, 1]))
 
         # construct bare interaction
-        AngHalf = np.arccos(AngleBin)/2.0
+        AngHalf = np.arccos(AngGrid)/2.0
         Bare = np.zeros(2)
         if IsIrreducible == False:
-            Bare[0] -= 8.0*np.pi/(Mass2+Lambda)
-        ExBare = +8.0 * np.pi / ((2.0*kF*np.sin(AngHalf))**2+Mass2+Lambda)
+            Bare[0] -= 8.0*np.pi/(Para.Mass2+Para.Lambda)
+        ExBare = +8.0 * np.pi / \
+            ((2.0*Para.kF*np.sin(AngHalf))**2+Para.Mass2+Para.Lambda)
         # print "ExBare: ", AngleIntegation(ExBare, 0)
         Bare[1] += AngleIntegation(ExBare, 0)
         Bare = SpinMapping(Bare)
 
-        qData = np.zeros_like(Data[(1, 0)])
+        qData = np.zeros_like(Data[1, 0])
         qData[0, :] += Bare[:]
         qDataErr = np.zeros_like(DataErr[(1, 0)])
         for o in Order[1:]:

@@ -69,23 +69,24 @@ def Average(Data, Weights):
     return d
 
 
-def LoadFile(Folder, FileName, Shape):
+def LoadFile(Folder, FileName, Shape, Handler=None):
     Step = []
     Norm = []
     Data = []
 
     for f in getListOfFiles(Folder):
         if re.search(FileName, f):
-            print "Loading ", f
+            # print "Loading ", f
             try:
                 with open(f, "r") as file:
                     Step.append(int(file.readline().split(":")[1]))
                     Norm.append(float(file.readline().split(":")[1]))
                 assert(len(Norm) == len(Data)+1,
                        "size of Data and Norm must be the same!")
-                Data.append(np.loadtxt(f)/Norm[-1])
-                # assert(len(Norm) == len(Data),
-                #        "size of Data and Norm must be the same!")
+                d = np.loadtxt(f).reshape(Shape)
+                if Handler is not None:
+                    d = Handler(d)
+                Data.append(d/Norm[-1])
             except Exception as e:
                 print "Failed to load {0}".format(f)
                 print str(e)
@@ -93,13 +94,10 @@ def LoadFile(Folder, FileName, Shape):
     if len(Norm) == 0:
         return None
 
-    print len(Data), len(Norm)
+    # print len(Data), len(Norm)
 
     Avg = Average(Data, Norm)
     Var = sum((d - Avg) ** 2 for d in Data) / len(Data)
-    # Var = Average((Data-Avg)**2, Norm)
-    Avg = Avg.reshape(Shape)
-    Var = Var.reshape(Shape)
     return Avg, np.sqrt(Var)/np.sqrt(len(Norm)), Step
 
 

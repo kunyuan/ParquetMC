@@ -89,39 +89,23 @@ void ver4Obs::Measure(int Order, int QIndex, int AngleIndex,
   return;
 }
 void ver4Obs::Save() {
-  for (int chan = 0; chan < 4; chan++) {
-    for (int order = 0; order <= Para.Order; order++) {
-      string FileName =
-          fmt::format("vertex{0}_{1}_pid{2}.dat", order, chan, Para.PID);
-      ofstream VerFile;
-      VerFile.open(FileName, ios::out | ios::trunc);
+  string FileName = fmt::format("vertex_pid{0}.dat", Para.PID);
+  ofstream VerFile;
+  VerFile.open(FileName, ios::out | ios::trunc);
 
-      if (VerFile.is_open()) {
+  if (VerFile.is_open()) {
 
-        VerFile << fmt::sprintf("#PID:%d, rs:%.3f, Beta: %.3f, Step: %d\n",
-                                Para.PID, Para.Rs, Para.Beta, Var.Counter);
+    VerFile << "# Step: " << Var.Counter << endl;
+    VerFile << "# Norm: " << Normalization << endl;
 
-        VerFile << "# Norm: " << Normalization << endl;
-
-        VerFile << "# AngleTable: ";
-        for (int angle = 0; angle < Para.AngBinSize; ++angle)
-          VerFile << Para.AngleTable[angle] << " ";
-
-        VerFile << endl;
-        VerFile << "# ExtMomBinTable: ";
-        for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
-          VerFile << Para.ExtMomTable[qindex][0] << " ";
-        VerFile << endl;
-
+    for (int chan = 0; chan < 4; chan++)
+      for (int order = 0; order <= Para.Order; order++)
         for (int angle = 0; angle < Para.AngBinSize; ++angle)
           for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
             for (int dir = 0; dir < 2; ++dir)
               VerFile << _Estimator[chan](order, angle, qindex)[dir] * PhyWeight
                       << "  ";
-        VerFile.close();
-      } else {
-        LOG_WARNING("Vertex4 for PID " << Para.PID << " fails to save!");
-      }
-    }
-  }
-};
+    VerFile.close();
+  } else
+    LOG_WARNING("Vertex4 for PID " << Para.PID << " fails to save!");
+}
