@@ -60,16 +60,22 @@ def getListOfFiles(dirName):
     return listOfFiles
 
 
-def Average(Data, Weights):
-    assert(len(Data) == len(Weights), "Data and Weights size must match!")
-    d = np.zeros(Data[0].shape)
+def Estimate(Data, Weights):
+    """ Return Mean and Error  with given weights"""
+    # Assume weights are similar when calculating error bars
+    assert len(Data) == len(Weights), "Data and Weights size must match!"
+    assert len(Weights) > 0, "Data is empty!"
     Z = np.sum(Weights)
-    for i in range(len(Data)):
-        d += Data[i]*Weights[i]/Z
-    return d
+    Avg = sum(Data)/sum(Weights)
+    if len(Data) > 1:
+        Var = sum((d/norm - Avg) ** 2*norm/Z for (d, norm)
+                  in zip(Data, Weights))
+        return Avg, np.sqrt(Var/(len(Data)-1))
+    else:
+        return Avg, Var*0.0
 
 
-def LoadFile(Folder, FileName, Shape, Handler=None):
+def LoadFile(Folder, FileName, Shape):
     Step = []
     Norm = []
     Data = []
@@ -81,24 +87,16 @@ def LoadFile(Folder, FileName, Shape, Handler=None):
                 with open(f, "r") as file:
                     Step.append(int(file.readline().split(":")[1]))
                     Norm.append(float(file.readline().split(":")[1]))
-                assert(len(Norm) == len(Data)+1,
-                       "size of Data and Norm must be the same!")
-                d = np.loadtxt(f).reshape(Shape)
-                if Handler is not None:
-                    d = Handler(d)
-                Data.append(d/Norm[-1])
+
+                assert len(Norm) == len(Data) + \
+                    1, "size of Data and Norm must be the same!"
+
+                Data.append(np.loadtxt(f).reshape(Shape))
             except Exception as e:
                 print "Failed to load {0}".format(f)
                 print str(e)
 
-    if len(Norm) == 0:
-        return None
-
-    # print len(Data), len(Norm)
-
-    Avg = Average(Data, Norm)
-    Var = sum((d - Avg) ** 2 for d in Data) / len(Data)
-    return Avg, np.sqrt(Var)/np.sqrt(len(Norm)), Step
+    return Data, Norm, Step
 
 
 def ErrorPlot(p, x, d, color='k', marker='s', label=None, size=4, shift=False):

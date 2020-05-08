@@ -2,6 +2,7 @@ import time
 from color import *
 from utility import *
 from grid import *
+import traceback
 
 SleepTime = 5
 IsIrreducible = False
@@ -23,21 +24,12 @@ filename = "vertex_pid[0-9]+.dat"
 
 shape = (Para.Order+1, 4, AngGridSize, MomGridSize, 2)
 
-
-def AngleIntegation(Data, l):
-    # l: angular momentum
-    shape = Data.shape[1:]
-    Result = np.zeros(shape)
-    for x in range(AngGrid):
-        # Result += Data[x, ...] * \
-        #     np.cos(l*AngleBin[x])*2.0*np.pi/AngleBinSize
-        Result += Data[x, ...]*2.0/AngGrid
-    return Result/2.0
-    # return Result
+AngGrid = BuildAngleGrid(AngGridSize)
+MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
 
 
 def SpinMapping(Data):
-    d = np.copy(AngleIntegation(Data, 0))
+    d = np.copy(Data)
     d[..., 0] += d[..., 1]/SpinIndex
     d[..., 1] /= SpinIndex
     return d
@@ -61,20 +53,15 @@ def PrintInfo(Channel, Data, DataErr):
     print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
         MomGrid[i], qData1[i], DataErr[i, 1])
 
-    # print "As:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-    #     ExtMomBin[i], qData0[i]+qData1[i]/SpinIndex, DataErr[i, 0]+DataErr[i, 1]/SpinIndex)
-    # print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-    #     ExtMomBin[i], qData1[i]/SpinIndex, DataErr[i, 1]/SpinIndex)
-
 
 while True:
 
     time.sleep(SleepTime)
 
-    DataAngle, ErrAngle, Step = LoadFile(folder, filename, shape)
-    Data, Err, Step = LoadFile(folder, filename, shape, SpinMapping)
+    try:
+        DataList, NormList, Step = LoadFile(folder, filename, shape)
 
-    if len(Data) > 0:
+        DataAngle, ErrAngle = Estimate(DataList, NormList)
         print "Write Weight file."
         with open("weight.data", "w") as file:
             for chan in Channel:
@@ -90,42 +77,50 @@ while True:
         #     file.write("Ex: {0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
         #         Data[(0, 1)][0, 1], Data[(0, 1)][0, 1], Data[(0, 2)][0, 1], Data[(0, 3)][0, 1]))
 
+        # Keep the ExtMom=0 elements only, and average the angle
+        DataList = [np.average(d[:, :, :, 0, :], axis=2) for d in DataList]
+
         # construct bare interaction
-        AngHalf = np.arccos(AngGrid)/2.0
         Bare = np.zeros(2)
         if IsIrreducible == False:
             Bare[0] -= 8.0*np.pi/(Para.Mass2+Para.Lambda)
+
+        AngHalf = np.arccos(AngGrid)/2.0
         ExBare = +8.0 * np.pi / \
             ((2.0*Para.kF*np.sin(AngHalf))**2+Para.Mass2+Para.Lambda)
+        # print ExBare.shape
+
         # print "ExBare: ", AngleIntegation(ExBare, 0)
-        Bare[1] += AngleIntegation(ExBare, 0)
+        Bare[1] = np.average(ExBare)
         Bare = SpinMapping(Bare)
 
-        qData = np.zeros_like(Data[1, 0])
-        qData[0, :] += Bare[:]
-        qDataErr = np.zeros_like(DataErr[(1, 0)])
+        # print Bare
+
         for o in Order[1:]:
             print green("Order {0}".format(o))
-            qData += sum([Data[(o, i)] for i in range(4)])
-            qDataErr += sum([DataErr[(o, i)] for i in range(4)])
 
-            # qData += Data[(o, 1)]
-            # qDataErr += DataErr[(o, 1)]
+            # sum all four channels
+            DataAllList = [np.sum(d[1:o+1, ...], axis=1) for d in DataList]
+            DataAllList = [SpinMapping(d) for d in DataAllList]
+            Data, Err = Estimate(DataAllList, NormList)
+            Data += Bare  # I channel has a bare part
+            PrintInfo("Sum", Data, Err)
 
-            # qData = Data[(o, 1)]
-            # qDataErr = DataErr[(o, 1)]
-            # PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
-            # PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
-            # PrintInfo("U", Data[(o, 2)], DataErr[(o, 2)])
-            # PrintInfo("S", Data[(o, 3)], DataErr[(o, 3)])
-            PrintInfo("Sum", qData, qDataErr)
-            # print "\n"
+        #     # qData = Data[(o, 1)]
+        #     # qDataErr = DataErr[(o, 1)]
+        #     # PrintInfo("I", Data[(o, 0)], DataErr[(o, 0)])
+        #     # PrintInfo("T", Data[(o, 1)], DataErr[(o, 1)])
+        #     # PrintInfo("U", Data[(o, 2)], DataErr[(o, 2)])
+        #     # PrintInfo("S", Data[(o, 3)], DataErr[(o, 3)])
+        #     PrintInfo("Sum", qData, qDataErr)
+        #     # print "\n"
 
-        qData = sum([Data[(0, i)] for i in range(4)])
-        qData[0, :] += Bare[:]
-        qDataErr = sum([DataErr[(0, i)] for i in range(4)])
-        PrintInfo("\nTotal", qData, qDataErr)
+        flag = np.array([step/1000000 >= Para.TotalStep for step in Step])
+        if np.all(flag == True):
+            print "End of Simulation!"
+            sys.exit(0)
 
-    if Step >= TotalStep:
-        print "End of Simulation!"
-        sys.exit(0)
+    except Exception as e:
+        print e
+        traceback.print_exc()
+        pass
