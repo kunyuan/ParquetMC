@@ -114,7 +114,7 @@ void markov::ChangeOrder() {
 
 void markov::ChangeExtTau() {
   // Gamma diagram doesn't have ExtTau variable
-  if (DiagType == GAMMA)
+  if (DiagType == diagram::GAMMA)
     return;
 
   Proposed[CHANGE_EXTTAU][Var.CurrOrder]++;
@@ -169,11 +169,13 @@ void markov::ChangeMomentum() {
   if (Var.CurrOrder == 0)
     return;
   double Prop;
-  int CurrExtMomBin;
   static momentum CurrMom;
 
   int LoopIndex =
       Random.irn(FirstInterLoopIdx(), LastInterLoopIdx(Var.CurrOrder));
+
+  // cout << Var.CurrOrder << ", " << FirstInterLoopIdx() << ", "
+  //      << LastInterLoopIdx(Var.CurrOrder) << ", " << LoopIndex << endl;
 
   CurrMom = Var.LoopMom[LoopIndex];
   Prop = ShiftK(CurrMom, Var.LoopMom[LoopIndex]);

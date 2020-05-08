@@ -203,17 +203,15 @@ int main(int argc, const char *argv[]) {
       double x = Random.urn();
       if (x < 1.0 / 5.0) {
         Markov.ChangeOrder();
-        // ;
       } else if (x < 2.0 / 5.0) {
         Markov.ChangeMomentum();
-        // ;
       } else if (x < 3.0 / 5.0) {
         Markov.ChangeExtMomentum();
-        // ;
-      } else if (x < 4.0 / 5.0)
+      } else if (x < 4.0 / 5.0) {
         Markov.ChangeTau();
-      else if (x < 5.0 / 5.0)
+      } else if (x < 5.0 / 5.0) {
         Markov.ChangeExtTau();
+      }
 
       // cout << Var.CurrExtTauBin << ": " << Var.Tau[0] << "-> "
       //      << Var.Tau[MaxTauNum - 1] << endl;
