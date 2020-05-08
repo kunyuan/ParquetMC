@@ -1,5 +1,7 @@
 import numpy as np
 from scipy import integrate
+from utility import *
+from grid import *
 import matplotlib.pyplot as plt
 import matplotlib as mat
 import sys
@@ -73,10 +75,12 @@ Bubble = 0.0971916  # 3D, Beta=10, rs=1
 
 Data = {}  # key: (order, channel)
 DataWithAngle = {}  # key: (order, channel)
-AngleBin = None
-ExtMomBin = None
-AngleBinSize = None
-ExtMomBinSize = None
+
+Para = param()
+AngleBin = BuildAngleGrid(AngGridSize)
+ExtMomBin = BuildMomGrid(Para.MaxExtMom, MomGridSize)
+AngleBinSize = AngGridSize
+ExtMomBinSize = MomGridSize
 
 
 def AngleIntegation(Data, l):
@@ -118,7 +122,7 @@ for order in Order:
         # else:
         #     FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
 
-        FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
+        FileName = "vertex_pid[0-9]+.dat"
 
         for f in files:
             if re.match(FileName, f):
@@ -146,17 +150,18 @@ for order in Order:
                 else:
                     Data0 += d
         Data0 /= Norm
-        Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize, 2))
+        Data0 = Data0.reshape(
+            (Para.Order+1, 4, AngleBinSize, ExtMomBinSize, 2))
 
-        DataWithAngle[(order, chan)] = Data0
+        DataWithAngle[(order, chan)] = Data0[order, chan, ...]
 
         # average the angle distribution
-        Data[(order, chan)] = AngleIntegation(Data0, 0)
+        Data[(order, chan)] = AngleIntegation(Data0[order, chan, ...], 0)
 
 
-def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
-    p.plot(x, d, marker=marker, c=color, label=label,
-           lw=1, markeredgecolor="None", linestyle="--", markersize=size)
+# def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
+#     p.plot(x, d, marker=marker, c=color, label=label,
+#            lw=1, markeredgecolor="None", linestyle="--", markersize=size)
 
 
 w = 1-0.429
@@ -166,8 +171,8 @@ w = 1-0.429
 # ax = fig.add_subplot(122)
 
 # plt.subplot(1,2,2)
-ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y']
-ColorList = ColorList*40
+# ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y']
+# ColorList = ColorList*40
 
 if(XType == "Scale"):
     for i in range(ExtMomBinSize/4):

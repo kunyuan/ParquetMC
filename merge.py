@@ -36,22 +36,19 @@ def SpinMapping(Data):
 
 
 def PrintInfo(Channel, Data, DataErr):
-    i = 0
     Data = -np.copy(Data)
     DataErr = np.copy(DataErr)
 
-    Data[:, 0] *= Para.Nf
-    Data[:, 1] *= Para.Nf
-    DataErr[:, 0] *= Para.Nf
-    DataErr[:, 1] *= Para.Nf
+    Data *= Para.Nf
+    DataErr *= Para.Nf
+
+    # print Data.shape, DataErr.shape
 
     print "{0}     Q/kF,    Data,    Error".format(Channel)
-    qData0 = Data[:, 0]
     print "As: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        MomGrid[i], qData0[i], DataErr[i, 0])
-    qData1 = Data[:, 1]
+        MomGrid[0], Data[0], DataErr[0])
     print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        MomGrid[i], qData1[i], DataErr[i, 1])
+        MomGrid[0], Data[1], DataErr[1])
 
 
 while True:
@@ -99,8 +96,11 @@ while True:
         for o in Order[1:]:
             print green("Order {0}".format(o))
 
+            # sum all orders
+            DataAllList = [np.sum(d[1:o+1, ...], axis=0) for d in DataList]
             # sum all four channels
-            DataAllList = [np.sum(d[1:o+1, ...], axis=1) for d in DataList]
+            DataAllList = [np.sum(d, axis=0) for d in DataAllList]
+            # map DIR, EX to As, Aa
             DataAllList = [SpinMapping(d) for d in DataAllList]
             Data, Err = Estimate(DataAllList, NormList)
             Data += Bare  # I channel has a bare part

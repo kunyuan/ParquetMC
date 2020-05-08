@@ -20,15 +20,15 @@ filename = "sigma_pid[0-9]+.dat"
 
 shape = (Para.Order+1, MomGridSize, TauGridSize)
 
-Avg, Err, Step = LoadFile(folder, filename, shape)
+Data, Norm, Step = LoadFile(folder, filename, shape)
 
 fig, ax = plt.subplots()
 
 if(XType == "Mom"):
     # Order 1 sigma is a delta function of tau
     o = 1
-    y = np.average(Avg[o, :, :], axis=1)
-    err = np.average(Err[o, :, :], axis=1)/np.sqrt(len(TauGrid))
+    yList = [np.average(d[o, :, :], axis=1) for d in Data]
+    y, err = Estimate(yList, Norm)
     plt.errorbar(MomGrid, y, yerr=err, fmt='o-', capthick=1,
                  capsize=4, color=ColorList[o], label="Order {0}".format(o))
     ax.set_xlim([MomGrid[0], MomGrid[-1]])
@@ -53,6 +53,7 @@ elif(XType == "Tau"):
     o = 2
     for i in range(N):
         q = i*MomGridSize/N
+        Avg, Err = Estimate(Data, Norm)
         ax.errorbar(TauGrid/Para.Beta, Avg[o, q, :], yerr=Err[o, q, :], fmt='o-',
                     capthick=1, capsize=4, color=ColorList[i], label="k={0}".format(MomGrid[q]))
     ax.set_xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])

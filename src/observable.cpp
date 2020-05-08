@@ -95,11 +95,11 @@ void ver4Obs::Save() {
 
   if (VerFile.is_open()) {
 
-    VerFile << "# Step: " << Var.Counter << endl;
+    VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
 
-    for (int chan = 0; chan < 4; chan++)
-      for (int order = 0; order <= Para.Order; order++)
+    for (int order = 0; order <= Para.Order; order++)
+      for (int chan = 0; chan < 4; chan++)
         for (int angle = 0; angle < Para.AngBinSize; ++angle)
           for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
             for (int dir = 0; dir < 2; ++dir)
