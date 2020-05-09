@@ -130,8 +130,8 @@ void InitVar() {
     t = Random.urn() * Para.Beta;
 
   // reference tau, it should not be updated
-  Var.Tau[0] = 0.0;
-  // Var.Tau[0] = Para.Beta / 2.0;
+  // Var.Tau[0] = 0.0;
+  Var.Tau[0] = Para.Beta / 2.0;
 
   // Set the potential ExtTauBin
   Var.CurrExtTauBin = 0;
@@ -203,7 +203,7 @@ int main(int argc, const char *argv[]) {
       if (x < 1.0 / 5.0) {
         Markov.ChangeOrder();
       } else if (x < 2.0 / 5.0) {
-        // Markov.ChangeMomentum();
+        Markov.ChangeMomentum();
       } else if (x < 3.0 / 5.0) {
         Markov.ChangeExtMomentum();
       } else if (x < 4.0 / 5.0) {
