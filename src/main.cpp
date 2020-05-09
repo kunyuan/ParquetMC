@@ -35,6 +35,9 @@ void InitPara() {
   else if (DiagType == GAMMA)
     // Gamma
     Para.ReWeight = {10.0, 0.8, 0.4, 0.1, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
+  else if (DiagType == DELTA)
+    // Delta
+    Para.ReWeight = {1.0, 0.8, 10.0, 1.0, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
   else
     ABORT("Not implemented!");
 
@@ -130,8 +133,8 @@ void InitVar() {
     t = Random.urn() * Para.Beta;
 
   // reference tau, it should not be updated
-  // Var.Tau[0] = 0.0;
-  Var.Tau[0] = Para.Beta / 2.0;
+  Var.Tau[0] = 0.0;
+  // Var.Tau[0] = Para.Beta / 2.0;
 
   // Set the potential ExtTauBin
   Var.CurrExtTauBin = 0;
@@ -152,7 +155,7 @@ void InitVar() {
 
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
 
-  } else if (DiagType == SIGMA || DiagType == POLAR) {
+  } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
     Var.CurrExtMomBin = 0;
     Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
   }

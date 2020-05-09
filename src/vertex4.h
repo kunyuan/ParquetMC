@@ -27,8 +27,8 @@ public:
   int AddTidxPair(const array<int, 2> &Tpair);           // Add T pair
   double operator[](int Tidx) { return _Weight[Tidx]; }; // get _Weight[Tidx]
   // evaluate all weight with different T pairs and a given K
-  void Evaluate();
-  void Evaluate(const momentum &K);
+  void Evaluate(bool IsAnomal = false);
+  void Evaluate(const momentum &K, bool IsAnomal = false);
   int Size() { return _Tpair.size(); };
 
   vector<array<int, 2>> _Tpair;
@@ -49,6 +49,8 @@ public:
   vector<array<int, 4>> Tpair; // external T list
   vector<verWeight> Weight;    // size: equal to T.size()
 
+  vector<bubble> _UST; // bubble diagrams
+
   int TauNum() { return Order + 1; }
   int LoopNum() { return Order; }
   bool InBox() { return _InBox; }
@@ -68,7 +70,6 @@ private:
   int LoopIdx;
   bool _InBox; // this Ver4 is a SUB-diagram within a box
 
-  vector<bubble> _UST; // bubble diagrams
   // vector<envelope> Envelope; // envelop diagrams
 
   void _BuildBare();

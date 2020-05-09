@@ -7,6 +7,8 @@ class propagator {
 public:
   void Initialize();
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
+  double F(double TauIn, double TauOut, const momentum &K, spin Spin,
+           int GType = 0);
 
   verWeight Interaction(const momentum &KInL, const momentum &KOutL,
                         const momentum &KInR, const momentum &KOutR,
@@ -19,6 +21,8 @@ public:
 
 private:
   double _BareGreen(double Tau, const momentum &K, spin Spin, int GType = 0);
+  void LoadF();
+  void LoadGreen();
 };
 
 double Angle3D(const momentum &K1, const momentum &K2);

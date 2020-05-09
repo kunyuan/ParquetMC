@@ -22,21 +22,31 @@ int green::AddTidxPair(const array<int, 2> &T) {
   return _Tpair.size() - 1;
 }
 
-void green::Evaluate() {
+void green::Evaluate(bool IsAnomal) {
   int Size = _Tpair.size();
   for (int i = 0; i < Size; ++i) {
     auto &T = _Tpair[i];
-    _Weight[i] = Prop.Green(Var.Tau[T[OUT]] - Var.Tau[T[IN]], K, UP);
+    if (!IsAnomal)
+      _Weight[i] = Prop.Green(Var.Tau[T[OUT]] - Var.Tau[T[IN]], K, UP);
+    else
+      _Weight[i] = Prop.F(Var.Tau[T[IN]], Var.Tau[T[OUT]], K, UP);
     // if (Var.CurrOrder == 2)
     //   cout << T[IN] << "->" << T[OUT] << ": " << _Weight[i] << endl;
   }
 }
 
-void green::Evaluate(const momentum &_K) {
+void green::Evaluate(const momentum &_K, bool IsAnomal) {
   int Size = _Tpair.size();
   for (int i = 0; i < Size; ++i) {
     auto &T = _Tpair[i];
-    _Weight[i] = Prop.Green(Var.Tau[T[OUT]] - Var.Tau[T[IN]], _K, UP);
+    if (!IsAnomal)
+      _Weight[i] = Prop.Green(Var.Tau[T[OUT]] - Var.Tau[T[IN]], _K, UP);
+    else {
+      // if (Var.CurrOrder == 2)
+      //   cout << T[IN] << ", " << T[OUT] << endl;
+
+      _Weight[i] = Prop.F(Var.Tau[T[IN]], Var.Tau[T[OUT]], _K, UP);
+    }
   }
 }
 

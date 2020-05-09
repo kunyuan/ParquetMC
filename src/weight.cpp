@@ -51,6 +51,12 @@ void weight::Initialization() {
     }
   } else if (DiagType == DELTA) {
     ////////////////////////// Delta /////////////////////////
+    for (int order = 1; order <= Para.Order; order++) {
+      LOG_INFO("Generating order " << order);
+      Delta[order].Build(order);
+      if (order < 4)
+        LOG_INFO(Delta[order].Vertex.ToString());
+    }
   }
 }
 
@@ -78,6 +84,10 @@ double weight::Evaluate(int Order) {
   } else if (DiagType == diagram::SIGMA) {
     // self-energy diagram
     double Weight = Sigma[Order].Evaluate();
+    return Weight;
+  } else if (DiagType == diagram::DELTA) {
+    // self-energy diagram
+    double Weight = Delta[Order].Evaluate();
     return Weight;
   }
 }

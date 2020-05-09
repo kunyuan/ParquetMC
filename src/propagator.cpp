@@ -51,6 +51,14 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
   return green;
 }
 
+double propagator::F(double TauIn, double TauOut, const momentum &K, spin Spin,
+                     int GType) {
+  double TauMid = (TauOut - TauIn) / 2.0;
+  return Green(TauMid - TauIn, K, Spin, GType) *
+         Green(TauMid - TauOut, -K, Spin, GType);
+  // return exp(-3.0 * K.squaredNorm() / (Para.Kf * Para.Kf));
+}
+
 verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
                                   const momentum &KInR, const momentum &KOutR,
                                   bool Boxed, double ExtQ) {
@@ -91,14 +99,20 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
 double propagator::Interaction(const momentum &TranQ, int VerOrder) {
   double kQ = TranQ.norm();
-  double Weight =
-      -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
-
-  // interactions with counterterms
-  if (VerOrder > 0)
-    Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
-
-  return Weight;
+  if (VerOrder < 0) {
+    // Bare interaction
+    if (kQ > 1.0e-8)
+      return -8.0 * PI * Para.Charge2 / (kQ * kQ);
+    else
+      return 0.0;
+  } else {
+    // Order N shifted interaction
+    double Weight =
+        -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+    if (VerOrder > 0)
+      Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
+    return Weight;
+  }
 }
 
 double propagator::CounterBubble(const momentum &K) {

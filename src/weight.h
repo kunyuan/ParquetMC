@@ -30,7 +30,9 @@ public:
 
   diag::polar Polar[MaxOrder];
   diag::sigma Sigma[MaxOrder];
+  diag::delta Delta[MaxOrder];
   obs::oneBodyObs OneBodyObs;
+
   // sigma, polar and delta can use the same observable
 
 private:

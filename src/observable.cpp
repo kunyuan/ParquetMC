@@ -16,18 +16,18 @@ extern variable Var;
 oneBodyObs::oneBodyObs() {
   Normalization = 1.0e-10;
 
+  // The zeroth order of polar, sigma and delta all have one external K and one
+  // external Tau
+  PhyWeight = Para.ExtMomBinSize * Para.TauBinSize;
+
   if (DiagType == POLAR) {
-    PhyWeight = Para.ExtMomBinSize * Para.TauBinSize;
     Name = "polar";
   } else if (DiagType == SIGMA) {
-    PhyWeight = Para.ExtMomBinSize * Para.TauBinSize;
-    // PhyWeight = ExtMomBinSize / Para.Beta;
     Name = "sigma";
   } else if (DiagType == DELTA) {
-    PhyWeight = Para.ExtMomBinSize * Para.TauBinSize;
-    // PhyWeight = ExtMomBinSize;
     Name = "delta";
   } else
+    // do nothing
     return;
 
   _Estimator.Initialize({Para.Order + 1, Para.ExtMomBinSize, Para.TauBinSize});

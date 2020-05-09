@@ -42,5 +42,22 @@ public:
   bool Test();
 };
 
+class delta {
+public:
+  int Order;
+  vertex4 Vertex;
+  green F;
+  vector<int> Fidx; // external T list
+
+  int TauNum() { return Order; }
+  int LoopNum() { return Order; }
+  void Build(int Order);
+  double Evaluate();
+  string ToString();
+
+private:
+  void _ResetLastTidx(vertex4 &);
+};
+
 } // namespace diag
 #endif
