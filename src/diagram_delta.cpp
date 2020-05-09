@@ -71,7 +71,7 @@ double delta::Evaluate() {
   else if (Order == 1) {
     // bare interaction
     double Weight = Prop.Interaction(Var.LoopMom[0] + Var.LoopMom[1], -1);
-    Weight *= Prop.F(0.0, 0.0, Var.LoopMom[1], UP, 0);
+    Weight *= Prop.F(-1.0e-8, Var.LoopMom[1], UP, 0);
     return Weight * Factor;
   }
 

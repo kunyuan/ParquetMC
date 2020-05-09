@@ -30,8 +30,7 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
     s = -s;
   }
 
-  k = K.norm();
-  Ek = k * k; // bare propagator
+  Ek = K.squaredNorm(); // bare propagator
 
   double x = Para.Beta * (Ek - Para.Mu) / 2.0;
   double y = 2.0 * Tau / Para.Beta - 1.0;
@@ -51,12 +50,39 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
   return green;
 }
 
-double propagator::F(double TauIn, double TauOut, const momentum &K, spin Spin,
-                     int GType) {
-  double TauMid = (TauOut - TauIn) / 2.0;
-  return Green(TauMid - TauIn, K, Spin, GType) *
-         Green(TauMid - TauOut, -K, Spin, GType);
-  // return exp(-3.0 * K.squaredNorm() / (Para.Kf * Para.Kf));
+double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
+  double TauMid = Tau / 2.0;
+  return Green(TauMid, K, Spin, GType) * Green(TauMid - Tau, -K, Spin, GType);
+
+  // if (Tau = 0.0)
+  //   Tau = -1.0e-10;
+
+  // double Sign = -1.0;
+  // if (Tau < 0.0) {
+  //   // make sure 0<Tau<Beta
+  //   Tau = Para.Beta + Tau;
+  //   Sign *= -1.0;
+  // }
+
+  // double Ek = K.squaredNorm() - Para.Mu;
+  // double Prefactor, Term1, Term2;
+  // if (Ek < 0.0) {
+  //   double b = exp(Ek * Para.Beta);
+  //   double x = exp(Ek * (Para.Beta - Tau));
+  //   double y = 1.0 / (1 + 2.0 * b + b * b);
+  //   Term1 = Tau * x * y;
+  //   Term2 = 0.5 / Ek * exp(Ek * Tau) * (x * x - 1.0) * y;
+  //   return (Term1 + Term2) * Sign;
+  // } else if (Ek > 0.0) {
+  //   double b = exp(-Ek * Para.Beta);
+  //   double x = exp(-Ek * (Para.Beta - Tau));
+  //   double y = 1.0 / (1.0 + 2 * b + b * b);
+  //   Term1 = Tau * exp(-Ek * (Tau + Para.Beta)) * y;
+  //   Term2 = 0.5 / Ek * exp(-Ek * Tau) * (1.0 - x * x) * y;
+  //   return (Term1 + Term2) * Sign;
+  // } else
+  //   // unphysical
+  //   return 0.0;
 }
 
 verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,

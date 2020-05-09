@@ -7,8 +7,7 @@ class propagator {
 public:
   void Initialize();
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
-  double F(double TauIn, double TauOut, const momentum &K, spin Spin,
-           int GType = 0);
+  double F(double Tau, const momentum &K, spin Spin, int GType = 0);
 
   verWeight Interaction(const momentum &KInL, const momentum &KOutL,
                         const momentum &KInR, const momentum &KOutR,
