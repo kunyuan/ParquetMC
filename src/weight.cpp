@@ -21,6 +21,7 @@ void weight::Initialization() {
     vector<channel> Chan = {I, T, U, S, TC, UC};
     // vector<channel> Chan = {T};
     // vector<channel> Chan = {U, UC};
+    // vector<channel> Chan = {T};
     for (int order = 1; order <= Para.Order; order++) {
       LOG_INFO("Generating order " << order);
       Gamma[order].Build(0,     // level

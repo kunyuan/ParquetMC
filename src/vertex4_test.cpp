@@ -100,7 +100,7 @@ void vertex4::_TestOneLoopGamma() {
   TestWeight[DIR] = LVer[EX] * RVer[DIR] + LVer[DIR] * RVer[EX];
   TestWeight[EX] = LVer[DIR] * RVer[DIR] + LVer[EX] * RVer[EX];
   TestWeight *= GWeight;
-  TestWeight *= Factor * SymFactor[S];
+  TestWeight *= Factor * SymFactor[S] * cos(2.0 * PI / Para.Beta * dTau * 2.0);
 
   //   cout << "Calculate S chanel" << endl;
   Weight = _GetWeight(1, {S});

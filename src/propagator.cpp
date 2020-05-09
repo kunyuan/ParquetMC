@@ -55,6 +55,8 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
                                   const momentum &KInR, const momentum &KOutR,
                                   bool Boxed, double ExtQ) {
   verWeight Weight;
+  // Weight = {1.0, 0.0};
+  // return Weight;
 
   double kDiQ = (KInL - KOutL).norm();
   Weight[DIR] =

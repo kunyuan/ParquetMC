@@ -27,6 +27,8 @@ void green::Evaluate() {
   for (int i = 0; i < Size; ++i) {
     auto &T = _Tpair[i];
     _Weight[i] = Prop.Green(Var.Tau[T[OUT]] - Var.Tau[T[IN]], K, UP);
+    // if (Var.CurrOrder == 2)
+    //   cout << T[IN] << "->" << T[OUT] << ": " << _Weight[i] << endl;
   }
 }
 
@@ -62,9 +64,12 @@ void vertex4::Build(int level, int order, int loopIdx, int inTL,
     // normal diagram
     // _BuildI(II);
     // UST channel
-    for (auto &c : UST)
-      for (int ol = 0; ol < LoopNum(); ol++)
-        _UST.push_back(_BuildBubble(c, ol));
+    for (auto c : UST)
+      for (int ol = 0; ol < LoopNum(); ol++) {
+        auto bubble = _BuildBubble(c, ol);
+        if (bubble.Map.size() > 0)
+          _UST.push_back(bubble);
+      }
   }
 
   Weight.resize(Tpair.size());

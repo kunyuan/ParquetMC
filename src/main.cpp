@@ -34,7 +34,7 @@ void InitPara() {
     Para.ReWeight = {1.0, 3.0, 30.0, 1.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
   else if (DiagType == GAMMA)
     // Gamma
-    Para.ReWeight = {20.0, 0.8, 0.4, 0.1, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
+    Para.ReWeight = {10.0, 0.8, 0.4, 0.1, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
   else
     ABORT("Not implemented!");
 
@@ -131,6 +131,7 @@ void InitVar() {
 
   // reference tau, it should not be updated
   Var.Tau[0] = 0.0;
+  // Var.Tau[0] = Para.Beta / 2.0;
 
   // Set the potential ExtTauBin
   Var.CurrExtTauBin = 0;
@@ -139,14 +140,12 @@ void InitVar() {
 
   if (DiagType == GAMMA) {
     Var.CurrExtMomBin = 0;
-    Var.CurrExtAngBin = 0;
-
     for (int i = 0; i < 4; ++i)
       Var.LoopMom[i].setZero();
-
     Var.LoopMom[INL][0] = Para.Kf;
     Var.LoopMom[OUTL][0] = Para.Kf;
 
+    Var.CurrExtAngBin = 0;
     double theta = acos(Para.AngleTable[Var.CurrExtAngBin]);
     Var.LoopMom[INR][0] = Para.Kf * cos(theta);
     Var.LoopMom[INR][1] = Para.Kf * sin(theta);
@@ -204,7 +203,7 @@ int main(int argc, const char *argv[]) {
       if (x < 1.0 / 5.0) {
         Markov.ChangeOrder();
       } else if (x < 2.0 / 5.0) {
-        Markov.ChangeMomentum();
+        // Markov.ChangeMomentum();
       } else if (x < 3.0 / 5.0) {
         Markov.ChangeExtMomentum();
       } else if (x < 4.0 / 5.0) {
@@ -213,12 +212,37 @@ int main(int argc, const char *argv[]) {
         Markov.ChangeExtTau();
       }
 
+      // cout << Var.Tau[0] << endl;
       // cout << Var.CurrExtTauBin << ": " << Var.Tau[0] << "-> "
       //      << Var.Tau[MaxTauNum - 1] << endl;
       // Markov.Weight.Test();
       // cout << Var.LoopMom[0] << endl;
       // cout << Var.Tau[MaxTauNum - 1] << endl;
       // exit(0);
+      if (Var.CurrOrder == -1) {
+
+        momentum K1p = Var.LoopMom[4];
+        momentum K2p = Var.LoopMom[5] + Var.LoopMom[INR] - K1p;
+
+        cout << Var.CurrAbsWeight << " vs "
+             << Prop.Green(Var.Tau[1] - Var.Tau[0], Var.LoopMom[4], UP, 0) *
+                    Prop.Green(Var.Tau[0] - Var.Tau[2], Var.LoopMom[4], UP, 0) *
+                    Prop.Green(Var.Tau[2] - Var.Tau[1], Var.LoopMom[5], UP, 0) *
+                    Prop.Green(Var.Tau[1] - Var.Tau[2], K2p, UP, 0) /
+                    pow(2.0 * PI, 6) * SPIN
+             << endl;
+
+        // cout <<"K1="<< Prop.Green(Var.Tau[1] - Var.Tau[0], Var.LoopMom[4],
+        // UP, 0)<<endl; cout <<"K1p="<< Prop.Green(Var.Tau[0] - Var.Tau[1],
+        // Var.LoopMom[4], UP, 0)<<endl;
+        //             Prop.Green(Var.Tau[0] - Var.Tau[1], Var.LoopMom[4], UP,
+        //             0) * Prop.Green(Var.Tau[2] - Var.Tau[1], Var.LoopMom[5],
+        //             UP, 0) * Prop.Green(Var.Tau[1] - Var.Tau[2], K2p, UP, 0)
+        //             / pow(2.0 * PI, 6) * 1.0
+        //      << endl;
+
+        // exit(0);
+      }
 
       if (i % 8 == 0)
         // fast operations

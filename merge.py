@@ -76,6 +76,7 @@ while True:
 
         # Keep the ExtMom=0 elements only, and average the angle
         DataList = [np.average(d[:, :, :, 0, :], axis=2) for d in DataList]
+        # DataList = [d[:, :, 0, 0, :] for d in DataList]
 
         # construct bare interaction
         Bare = np.zeros(2)
@@ -91,8 +92,8 @@ while True:
         Bare[1] = np.average(ExBare)
         Bare = SpinMapping(Bare)
 
+        # Bare *= 0.0
         # print Bare
-
         for o in Order[1:]:
             print green("Order {0}".format(o))
 
@@ -115,6 +116,7 @@ while True:
         #     PrintInfo("Sum", qData, qDataErr)
         #     # print "\n"
 
+        print "\n"
         flag = np.array([step/1000000 >= Para.TotalStep for step in Step])
         if np.all(flag == True):
             print "End of Simulation!"

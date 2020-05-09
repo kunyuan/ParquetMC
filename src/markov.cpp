@@ -145,6 +145,8 @@ void markov::ChangeTau() {
 
   int TauIndex = Random.irn(1, LastInterTauIdx(Var.CurrOrder));
 
+  // int TauIndex = Random.irn(0, LastInterTauIdx(Var.CurrOrder));
+
   Proposed[CHANGE_TAU][Var.CurrOrder]++;
 
   double CurrTau = Var.Tau[TauIndex];

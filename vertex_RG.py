@@ -271,6 +271,7 @@ elif(XType == "Angle"):
             Bare[:, 0] += 8.0*np.pi/(Mass2+Lambda)*Nf
         Bare[:, 1] += -8.0 * np.pi / \
             ((2.0*kF*np.sin(AngHalf))**2+Mass2+Lambda)*Nf
+
         AngTotal[:, 0, 0] += Bare[:, 0]
         AngTotal[:, 0, 1] += Bare[:, 1]
 
@@ -283,6 +284,7 @@ elif(XType == "Angle"):
                   "q/kF={0}, Bare".format(ExtMomBin[0]))
 
     AngLandau = AngTotal+DataWithAngle[(0, 1)]*Nf
+
     if SpinIndex == 2:
         x = np.arccos(AngleBin)
         y = AngTotal[:, 0, 0]+AngTotal[:, 0, 1]/2.0
