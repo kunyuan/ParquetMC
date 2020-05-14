@@ -104,7 +104,8 @@ def ErrorPlot(p, x, d, color='k', marker='s', label=None, size=4, shift=False):
            lw=1, markeredgecolor="None", linestyle="--", markersize=size)
 
 
-ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y']
+ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy',
+             'y', 'cyan', 'darkgreen', 'violet', 'lime', 'purple']
 ColorList = ColorList*40
 
 

@@ -1,15 +1,31 @@
 import numpy as np
 from utility import *
 
-TauGridSize = 128
+TauGridSize = 1024
 MomGridSize = 64
 AngGridSize = 64
 GridFile = "grid.data"
 
 
-def BuildTauGrid(Beta, GridSize):
+def BuildTauGrid(Para, GridSize):
+    # non-unifor grid
+    # Size = GridSize-1
+    # arr = np.array(range(Size+1))
+    # TauGrid = arr*1.0
+    # c = Para.Beta*Para.EF/3.0
+    # for i in range(Size/2):
+    #     TauGrid[i] = Para.Beta/2.0 * \
+    #         np.exp(c*(float(i)/Size-0.5)) - \
+    #         Para.Beta/2.0*np.exp(-c*0.5)+1.0e-8
+    # for i in range(Size/2, Size+1):
+    #     TauGrid[i] = Para.Beta-Para.Beta/2.0 * \
+    #         np.exp(c*(0.5-float(i)/Size))+Para.Beta/2.0 * \
+    #         np.exp(-c*0.5)-1.0e-8
+    # uniform grid
     arr = np.array(range(GridSize))
-    TauGrid = arr*Beta/GridSize+1.0e-8
+    TauGrid = arr*Para.Beta/(GridSize-1)
+    TauGrid[0] += 1.0e-8
+    TauGrid[-1] -= 1.0e-8
     return TauGrid
 
 
@@ -28,7 +44,7 @@ def BuildAngleGrid(GridSize):
 if __name__ == "__main__":
     Para = param()
 
-    TauGrid = BuildTauGrid(Para.Beta, TauGridSize)
+    TauGrid = BuildTauGrid(Para, TauGridSize)
     MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
     AngGrid = BuildAngleGrid(AngGridSize)
 

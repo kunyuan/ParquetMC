@@ -1,18 +1,21 @@
 from scipy import integrate
 from utility import *
 from grid import *
+import basis
 
 XType = "Tau"
 # XType = "Mom"
 # XType = "Z"
-XType = "Freq"
+# XType = "Freq"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 
 Para = param()
 Order = range(0, Para.Order+1)
-TauGrid = BuildTauGrid(Para.Beta, TauGridSize)
+TauGrid = BuildTauGrid(Para, TauGridSize)
 MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
+
+Basis = basis.BuildBasis(TauGrid, Para.Beta, 15, "Fermi")
 
 folder = "./Beta{0}_rs{1}_lambda{2}/".format(
     int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
@@ -57,16 +60,18 @@ elif(XType == "Tau"):
         Avg, Err = Estimate(Data, Norm)
         ax.errorbar(TauGrid/Para.Beta, Avg[o, q, :], yerr=Err[o, q, :], fmt='o-',
                     capthick=1, capsize=4, color=ColorList[i], label="$k={0}k_F$".format(MomGrid[q]/Para.kF))
+
     ax.set_xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])
 
 
 elif(XType == "Freq"):
-    N = 32
+    N = 8
     o = 2
-    MaxFreq = 100
-    for i in range(22, 23):
-        # q = i*MomGridSize/N
-        q = i
+    MaxFreq = 200
+    # for i in range(22, 23):
+    # q = i
+    for i in range(N):
+        q = i*MomGridSize/N
         SigmaT, Err = Estimate([d[o, q, :] for d in Data], Norm)
         SigmaW = []
         SigmaW1 = []
@@ -86,10 +91,10 @@ elif(XType == "Freq"):
         print (SigmaW1[MaxFreq].imag-SigmaW1[MaxFreq-1].imag) / \
             (2.0*np.pi/Para.Beta)
 
-        ax.errorbar(Freq, SigmaW.imag, fmt='o-',
-                    capthick=1, capsize=4, color=ColorList[2*i], label="$k={0}k_F$, trapz".format(MomGrid[q]/Para.kF))
+        # ax.errorbar(Freq, SigmaW.imag, fmt='o-',
+        #             capthick=1, capsize=2, color=ColorList[2*i], label="$k={0}k_F$, trapz".format(MomGrid[q]/Para.kF))
         ax.errorbar(Freq, SigmaW1.imag, fmt='o-',
-                    capthick=1, capsize=4, color=ColorList[2*i+1], label="$k={0}k_F$, simps".format(MomGrid[q]/Para.kF))
+                    capthick=1, capsize=2, color=ColorList[2*i+1], label="$k={0}k_F$, simps".format(MomGrid[q]/Para.kF))
     # ax.set_xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])
 
 plt.legend(loc=1, frameon=False, fontsize=size)
