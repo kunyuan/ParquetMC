@@ -1,0 +1,20 @@
+#Order, Beta,  rs, Mass2, Lambda, charge2, TotalStep(1e6)
+   2,    40,  1.0,  0.0,    1.0,    1.0,       401
+
+#TauGrid, MomGrid, AngGrid, RealFreqGrid, MaxRealFreq(*EF), MaxExtMom(*kF), TauBasis 
+  1024,     64,       64,       1024,          30.0,           3.0,            32
+
+#Print, Save, ReWeight, Message, Collection /time interval (in Sec.)
+   10,   10,     30,       10,      10
+
+#Reweight
+# 0    1    2,   3    4    5     6    7    8    9 
+0.05, 1.0, 2.0, 5.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0   #polar
+
+1.0, 3.0, 30.0, 1.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0 #sigma
+10.0, 0.8, 0.4, 0.1, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0  #gamma
+1.0, 0.8, 10.0, 1.0, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0  #delta
+
+
+
+

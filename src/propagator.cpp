@@ -51,10 +51,6 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
 }
 
 double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
-  // double TauMid = Tau / 2.0;
-  // return Green(TauMid, K, Spin, GType) * Green(TauMid - Tau, -K, Spin,
-  // GType);
-
   if (Tau = 0.0)
     Tau = -1.0e-10;
 

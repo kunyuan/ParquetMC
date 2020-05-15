@@ -1,5 +1,6 @@
 #include "markov.h"
 #include "utility/timer.h"
+#include <algorithm>
 #include <iostream>
 #include <math.h>
 
@@ -14,32 +15,159 @@ RandomFactory Random;
 parameter Para;        // global parameters
 diag::propagator Prop; // global progator
 variable Var;
+void InitPara(), InitVar();
 
-void InitPara() {
-  //// initialize the global log configuration   /////////////
-  string LogFile = "_" + to_string(Para.PID) + ".log";
-  LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
+const string HelpStr = "Two parameters: PID Seed";
 
+int main(int argc, const char *argv[]) {
 #ifdef NDEBUG
   LOG_INFO("NDEBUG mode is OFF.");
 #else
   LOG_INFO("NDEBUG mode is ON.");
 #endif
+  // take two parameters: PID and Seed
+  Para.PID = atoi(argv[1]);
+  Para.Seed = atoi(argv[2]);
 
-  if (DiagType == POLAR)
-    // polarization
-    Para.ReWeight = {0.05, 1.0, 2.0, 5.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
-  else if (DiagType == SIGMA)
-    // Sigma
-    Para.ReWeight = {1.0, 3.0, 30.0, 1.0, 0.2, 0.05, 1.0, 1.0, 1.0, 1.0};
-  else if (DiagType == GAMMA)
-    // Gamma
-    Para.ReWeight = {10.0, 0.8, 0.4, 0.1, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
-  else if (DiagType == DELTA)
-    // Delta
-    Para.ReWeight = {1.0, 0.8, 10.0, 1.0, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0};
-  else
-    ABORT("Not implemented!");
+  //// initialize the global log configuration   /////////////
+  string LogFile = "_" + to_string(Para.PID) + ".log";
+  LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
+
+  ASSERT_ALLWAYS(Para.Seed > 0, "Random number seed must be positive integer!");
+  ASSERT_ALLWAYS(Para.PID >= 0, "PID must be positive integer!");
+  Random.Reset(Para.Seed);
+
+  InitPara(); // initialize global parameters
+
+  markov Markov;
+  InterruptHandler Interrupt;
+
+  timer ReweightTimer, PrinterTimer, SaveFileTimer, MessageTimer;
+  PrinterTimer.start();
+  SaveFileTimer.start();
+  MessageTimer.start();
+  ReweightTimer.start();
+
+  LOG_INFO("Loading Weight ...")
+  Markov.Weight.LoadFile();
+  InitVar(); // initialize MC variables
+  Var.CurrAbsWeight = fabs(Markov.Weight.Evaluate(Var.CurrOrder));
+
+  ///////////////  Benchmark ////////////////////////////
+  // for (int order = 1; order <= Para.Order; ++order) {
+  //   Markov.Weight.Benchmark(order, 10000);
+  // }
+  // exit(0);
+  //////////////////////////////////////////////////////
+
+  LOG_INFO("Start simulation ...")
+  int Block = 0;
+  while (Block < Para.TotalStep) {
+    Block++;
+
+    for (int i = 0; i < 1000000; i++) {
+      Var.Counter++;
+
+      double x = Random.urn();
+      if (x < 1.0 / 5.0) {
+        Markov.ChangeOrder();
+      } else if (x < 2.0 / 5.0) {
+        Markov.ChangeMomentum();
+      } else if (x < 3.0 / 5.0) {
+        Markov.ChangeExtMomentum();
+      } else if (x < 4.0 / 5.0) {
+        Markov.ChangeTau();
+      } else if (x < 5.0 / 5.0) {
+        Markov.ChangeExtTau();
+      }
+
+      // cout << Var.LoopMom[1].norm() << endl;
+
+      if (i % 8 == 0)
+        // fast operations
+        Markov.Weight.Measure();
+
+      if (i % 1000 == 0) {
+        // slow operations
+        if (PrinterTimer.check(Para.PrinterTimer)) {
+          Markov.Weight.Test();
+          Markov.PrintDeBugMCInfo();
+          Markov.PrintMCInfo();
+          LOG_INFO(ProgressBar((double)Block / Para.TotalStep));
+        }
+
+        if (SaveFileTimer.check(Para.SaveFileTimer)) {
+          Interrupt.Delay(); // the process can not be killed in saving
+          Markov.Weight.SaveToFile();
+          Interrupt.Resume(); // after this point, the process can be killed
+        }
+
+        if (ReweightTimer.check(Para.ReweightTimer)) {
+          Markov.AdjustGroupReWeight();
+          Para.ReweightTimer *= 1.5;
+        }
+
+        if (MessageTimer.check(Para.MessageTimer)) {
+          LOG_INFO("Loading Weight...")
+          Markov.Weight.LoadFile();
+        }
+      }
+    }
+  }
+
+  Markov.PrintMCInfo();
+  Interrupt.Delay(); // the process can not be killed in saving
+  Markov.Weight.SaveToFile();
+  Interrupt.Resume(); // after this point, the process can be killed
+
+  LOG_INFO("Simulation is ended!");
+
+  return 0;
+}
+
+stringstream GetLine(ifstream &File) {
+  string line;
+  while (true) {
+    getline(File, line);
+    line = trim(line);
+    // cout << "get " << line << endl;
+    if (line.size() > 0 && line[0] != '#') {
+      replace(line.begin(), line.end(), ',', ' ');
+      // cout << "return " << line << endl;
+      return stringstream(line);
+    }
+  }
+}
+
+void InitPara() {
+
+  ifstream File;
+  string line;
+  File.open("parameter", ios::in);
+  ASSERT_ALLWAYS(File.is_open(), "Can not load parameters! \n");
+  // parameters
+  auto paraStream = GetLine(File);
+  paraStream >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >>
+      Para.Lambda >> Para.Charge2 >> Para.TotalStep;
+
+  // grid information
+  int RealFreqGridSize;
+  double MaxRealFreq;
+  auto gridStream = GetLine(File);
+  gridStream >> Para.TauBinSize >> Para.ExtMomBinSize >> Para.AngBinSize >>
+      RealFreqGridSize >> MaxRealFreq >> Para.TauBasisSize;
+
+  // Timer information
+  auto timerStream = GetLine(File);
+  timerStream >> Para.PrinterTimer >> Para.SaveFileTimer >>
+      Para.ReweightTimer >> Para.MessageTimer;
+
+  // ReWeight information
+  auto reweightStream = GetLine(File);
+  for (int o = 0; o < Para.Order + 1; ++o)
+    reweightStream >> Para.ReWeight[o];
+
+  File.close();
 
   //// initialize the global parameter //////////////////////
   double Kf;
@@ -64,58 +192,47 @@ void InitPara() {
                                    << "Fermi Mom: " << Para.Kf << "\n"
                                    << "Fermi Energy: " << Para.Ef << "\n");
 
-  Para.PrinterTimer = 10;
-  Para.SaveFileTimer = 10;
-  Para.ReweightTimer = 30;
-  Para.MessageTimer = 10;
+  LOG_INFO("PrintTimer: " << Para.PrinterTimer << "\n"
+                          << "SaveTimer: " << Para.SaveFileTimer << "\n"
+                          << "ReWeightTimer: " << Para.ReweightTimer << "\n"
+                          << "MessageTimer: " << Para.MessageTimer << "\n");
 
   // Load external variable tables
   // try {
-  LOG_INFO("Loading grids ...");
+  // LOG_INFO("Loading grids ...");
 
-  ifstream File;
-  string line;
+  int Size;
   File.open("grid.data", ios::in);
-  if (File.is_open()) {
-    File >> Para.TauBinSize;
-    LOG_INFO("TauTable: " << Para.TauBinSize);
-    getline(File, line);
-    Para.ExtTauTable.clear();
-    double bin;
-    for (int t = 0; t < Para.TauBinSize; ++t) {
-      File >> bin;
-      Para.ExtTauTable.push_back(bin);
-    }
+  ASSERT_ALLWAYS(File.is_open(), "Can not load grid file! \n");
 
-    File >> Para.ExtMomBinSize;
-    LOG_INFO("MomTable: " << Para.ExtMomBinSize);
-    getline(File, line);
-    Para.ExtMomTable.clear();
-    for (int k = 0; k < Para.ExtMomBinSize; ++k) {
-      momentum mom;
-      mom.setZero();
-      File >> mom[0];
-      Para.ExtMomTable.push_back(mom);
-    }
+  GetLine(File) >> Size;
+  ASSERT_ALLWAYS(Size == Para.TauBinSize, "TauBinSize is invalid!");
+  Para.ExtTauTable.clear();
+  double bin;
+  for (int t = 0; t < Para.TauBinSize; ++t) {
+    File >> bin;
+    Para.ExtTauTable.push_back(bin);
+  }
 
-    File >> Para.AngBinSize;
-    getline(File, line);
-    LOG_INFO("Angle Table: " << Para.AngBinSize);
-    Para.AngleTable.clear();
-    for (int ang = 0; ang < Para.ExtMomBinSize; ++ang) {
-      double angle;
-      File >> angle;
-      Para.AngleTable.push_back(angle);
-    }
-    cout << "\n";
+  GetLine(File) >> Size;
+  ASSERT_ALLWAYS(Size == Para.ExtMomBinSize, "TauBinSize is invalid!");
+  Para.ExtMomTable.clear();
+  for (int k = 0; k < Para.ExtMomBinSize; ++k) {
+    momentum mom;
+    mom.setZero();
+    File >> mom[0];
+    Para.ExtMomTable.push_back(mom);
+  }
 
-    // for (int i = 0; i < Para.AngBinSize; i++) {
-    //   Para.AngleTable[i] = diag::Index2Angle(i, Para.AngBinSize);
-    // }
-
-    File.close();
-  } else
-    ABORT("Can not load grid file! \n");
+  GetLine(File) >> Size;
+  ASSERT_ALLWAYS(Size == Para.AngBinSize, "TauBinSize is invalid!");
+  Para.AngleTable.clear();
+  for (int ang = 0; ang < Para.ExtMomBinSize; ++ang) {
+    double angle;
+    File >> angle;
+    Para.AngleTable.push_back(angle);
+  }
+  File.close();
 }
 
 void InitVar() {
@@ -159,132 +276,4 @@ void InitVar() {
     Var.CurrExtMomBin = 0;
     Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
   }
-}
-
-int main(int argc, const char *argv[]) {
-  cout << "Order, Beta, Rs, Mass2, Lambda, Charge2, MaxExtMom(*kF), "
-          "TotalStep(*1e6), "
-          "Seed, "
-          "PID\n";
-  cin >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >> Para.Lambda >>
-      Para.Charge2 >> Para.MaxExtMom >> Para.TotalStep >> Para.Seed >> Para.PID;
-
-  InitPara(); // initialize global parameters
-
-  markov Markov;
-  InterruptHandler Interrupt;
-
-  Random.Reset(Para.Seed);
-
-  timer ReweightTimer, PrinterTimer, SaveFileTimer, MessageTimer;
-  PrinterTimer.start();
-  SaveFileTimer.start();
-  MessageTimer.start();
-  ReweightTimer.start();
-
-  LOG_INFO("Loading Weight ...")
-  Markov.Weight.LoadFile();
-  InitVar(); // initialize MC variables
-  Var.CurrAbsWeight = fabs(Markov.Weight.Evaluate(Var.CurrOrder));
-
-  ///////////////  Benchmark ////////////////////////////
-  // for (int order = 1; order <= Para.Order; ++order) {
-  //   Markov.Weight.Benchmark(order, 10000);
-  // }
-  // exit(0);
-  //////////////////////////////////////////////////////
-
-  LOG_INFO("Start simulation ...")
-  int Block = 0;
-  while (Block < Para.TotalStep) {
-    Block++;
-
-    for (int i = 0; i < 1000000; i++) {
-      Var.Counter++;
-
-      double x = Random.urn();
-      if (x < 1.0 / 5.0) {
-        Markov.ChangeOrder();
-      } else if (x < 2.0 / 5.0) {
-        Markov.ChangeMomentum();
-      } else if (x < 3.0 / 5.0) {
-        Markov.ChangeExtMomentum();
-      } else if (x < 4.0 / 5.0) {
-        Markov.ChangeTau();
-      } else if (x < 5.0 / 5.0) {
-        Markov.ChangeExtTau();
-      }
-
-      // cout << Var.Tau[0] << endl;
-      // cout << Var.CurrExtTauBin << ": " << Var.Tau[0] << "-> "
-      //      << Var.Tau[MaxTauNum - 1] << endl;
-      // Markov.Weight.Test();
-      // cout << Var.LoopMom[0] << endl;
-      // cout << Var.Tau[MaxTauNum - 1] << endl;
-      // exit(0);
-      if (Var.CurrOrder == -1) {
-
-        momentum K1p = Var.LoopMom[4];
-        momentum K2p = Var.LoopMom[5] + Var.LoopMom[INR] - K1p;
-
-        cout << Var.CurrAbsWeight << " vs "
-             << Prop.Green(Var.Tau[1] - Var.Tau[0], Var.LoopMom[4], UP, 0) *
-                    Prop.Green(Var.Tau[0] - Var.Tau[2], Var.LoopMom[4], UP, 0) *
-                    Prop.Green(Var.Tau[2] - Var.Tau[1], Var.LoopMom[5], UP, 0) *
-                    Prop.Green(Var.Tau[1] - Var.Tau[2], K2p, UP, 0) /
-                    pow(2.0 * PI, 6) * SPIN
-             << endl;
-
-        // cout <<"K1="<< Prop.Green(Var.Tau[1] - Var.Tau[0], Var.LoopMom[4],
-        // UP, 0)<<endl; cout <<"K1p="<< Prop.Green(Var.Tau[0] - Var.Tau[1],
-        // Var.LoopMom[4], UP, 0)<<endl;
-        //             Prop.Green(Var.Tau[0] - Var.Tau[1], Var.LoopMom[4], UP,
-        //             0) * Prop.Green(Var.Tau[2] - Var.Tau[1], Var.LoopMom[5],
-        //             UP, 0) * Prop.Green(Var.Tau[1] - Var.Tau[2], K2p, UP, 0)
-        //             / pow(2.0 * PI, 6) * 1.0
-        //      << endl;
-
-        // exit(0);
-      }
-
-      if (i % 8 == 0)
-        // fast operations
-        Markov.Weight.Measure();
-
-      if (i % 1000 == 0) {
-        // slow operations
-        if (PrinterTimer.check(Para.PrinterTimer)) {
-          Markov.Weight.Test();
-          Markov.PrintDeBugMCInfo();
-          Markov.PrintMCInfo();
-          LOG_INFO(ProgressBar((double)Block / Para.TotalStep));
-        }
-
-        if (SaveFileTimer.check(Para.SaveFileTimer)) {
-          Interrupt.Delay(); // the process can not be killed in saving
-          Markov.Weight.SaveToFile();
-          Interrupt.Resume(); // after this point, the process can be killed
-        }
-
-        if (ReweightTimer.check(Para.ReweightTimer)) {
-          Markov.AdjustGroupReWeight();
-          Para.ReweightTimer *= 1.5;
-        }
-
-        if (MessageTimer.check(Para.MessageTimer)) {
-          LOG_INFO("Loading Weight...")
-          Markov.Weight.LoadFile();
-        }
-      }
-    }
-  }
-
-  Markov.PrintMCInfo();
-  Interrupt.Delay(); // the process can not be killed in saving
-  Markov.Weight.SaveToFile();
-  Interrupt.Resume(); // after this point, the process can be killed
-
-  LOG_INFO("Simulation is ended!");
-
-  return 0;
 }

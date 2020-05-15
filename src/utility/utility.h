@@ -96,6 +96,8 @@ std::string ProgressBar(double progress);
 //   return std::string(format_buffer, length);
 // }
 
+std::string &trim(std::string &s, const char *t = " \t\n\r\f\v");
+
 // calculate A^B at the compile time
 template <int A, int B> struct get_power {
   static const int value = A * get_power<A, B - 1>::value;

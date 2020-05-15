@@ -3,6 +3,7 @@ import sys
 import re
 import glob
 import numpy as np
+from color import *
 
 import matplotlib.pyplot as plt
 import matplotlib as mat
@@ -13,26 +14,49 @@ size = 12
 ##################### Global variables  #############################
 Dim = 3
 SpinIndex = 2
-InputFile = "inlist"
 #####################################################################
 
 
+def GetLine(file):
+    while True:
+        line = file.readline().strip()
+        if len(line) > 0 and line[0] != "#":
+            return line
+
+
 class param:
-    Order, Beta, Rs, Mass2, Lambda, Charge2, TotalStep = [None, ]*7
-    kF, Nf, EF, Bubble = [0.0, ]*4
-
+    # Order, Beta, Rs, Mass2, Lambda, Charge2, TotalStep = [None, ]*7
+    # kF, Nf, EF, Bubble = [0.0, ]*4
     def __init__(self):
+        self.DataFolder = "Data"
+        self.InputFile = "parameter"
 
-        with open(InputFile, "r") as file:
-            para = file.readline().split(" ")
+        with open(self.InputFile, "r") as file:
+            file.readline()  # comment line
+            para = GetLine(file).split(",")
             self.Order = int(para[0])
             self.Beta = float(para[1])
             self.Rs = float(para[2])
             self.Mass2 = float(para[3])
             self.Lambda = float(para[4])
             self.Charge2 = float(para[5])
-            self.MaxExtMom = float(para[6])
-            self.TotalStep = int(para[7])
+            self.TotalStep = int(para[6])
+
+            grid = GetLine(file).split(",")
+            self.TauGridSize = int(grid[0])
+            self.MomGridSize = int(grid[1])
+            self.AngGridSize = int(grid[2])
+            self.RealFreqGridSize = int(grid[3])
+            self.MaxRealFreq = float(grid[4])
+            self.MaxExtMom = float(grid[5])
+            self.TauBasisSize = int(grid[6])
+
+            timer = GetLine(file).split(",")
+            self.PrintTimer = int(timer[0])
+            self.SaveTimer = int(timer[1])
+            self.ReWeightTimer = int(timer[2])
+            self.MessageTimer = int(timer[3])
+            self.CollectionTimer = int(timer[4])
 
         if Dim == 3:
             self.kF = (9.0*np.pi/4.0)**(1.0/3.0)/self.Rs
@@ -48,11 +72,25 @@ class param:
         self.EF = self.kF**2
         self.Beta /= self.EF
         self.MaxExtMom *= self.kF
-        print "Rs={0}, kF={1}, EF={2}, Beta={3}".format(
-            self.Rs, self.kF, self.EF, self.Beta)
+        self.MaxRealFreq *= self.EF
 
+        print yellow("Parameters:")
+        print "Rs={0}, kF={1}, EF={2}, Beta={3}, Mass2={4}, Lambda={5}\n".format(
+            self.Rs, self.kF, self.EF, self.Beta, self.Mass2, self.Lambda)
+
+        print yellow("Grid Information:")
+        print "TauSize={0}, MomSize={1}, AngleSize={2}, RealFreqSize={3}, TauBasisNum={4}".format(
+            self.TauGridSize, self.MomGridSize, self.AngGridSize, self.RealFreqGridSize, self.TauBasisSize)
+        print "MaxRealFreq={0}, MaxExtMom={1}\n".format(
+            self.MaxRealFreq, self.MaxExtMom)
+
+        print yellow("Timer Information:")
+        print "Print={0}, Save={1}, ReWeight={2}, Message={3}, Collection={4}".format(
+            self.PrintTimer, self.SaveTimer, self.ReWeightTimer, self.MessageTimer, self.CollectionTimer)
 
 # For the given path, get the List of all files in the directory tree
+
+
 def getListOfFiles(dirName):
     listOfFiles = list()
     for (dirpath, dirnames, filenames) in os.walk(dirName):
@@ -104,16 +142,15 @@ def ErrorPlot(p, x, d, color='k', marker='s', label=None, size=4, shift=False):
            lw=1, markeredgecolor="None", linestyle="--", markersize=size)
 
 
-ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y']
+ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy',
+             'y', 'cyan', 'darkgreen', 'violet', 'lime', 'purple']
 ColorList = ColorList*40
 
 
-def main():
-    dirName = "./Beta40_rs4.0_lambda0.2301"
+if __name__ == '__main__':
+    Para = param()
+
+    dirName = "./Data"
 
     for elem in getListOfFiles(dirName):
         print(elem)
-
-
-if __name__ == '__main__':
-    main()
