@@ -15,24 +15,6 @@ def SigmaT(data, norm, Para):
     dynamic, dynErr = Estimate(sumOrders, norm)
     return dynamic, dynErr
 
-    Coef = np.dot(Dynamic, Tau2Coef)
-    FittedDyn = np.dot(Coef, Coef2Tau)
-
-    print "Max of |Sigma-Fitted Sigma|: ", np.amax(abs(Dynamic-FittedDyn))
-
-    # fig, ax = plt.subplots()
-    # idx = 30
-    # ax.errorbar(Grid.TauGrid/Para.Beta, Dynamic[idx, :], yerr=DynErr[idx, :], fmt='o-',
-    #             capthick=1, capsize=4, color='r', label="k={0}, real".format(Grid.MomGrid[idx]))
-
-    # ax.plot(Grid.TauGrid/Para.Beta,
-    #         FittedDyn[idx, :], 'bo-', label="k={0}, real".format(Grid.MomGrid[idx]))
-
-    # plt.legend(loc=1, frameon=False, fontsize=size)
-    # plt.show()
-
-    return Coef
-
 
 if __name__ == "__main__":
 
