@@ -19,7 +19,7 @@ SpinIndex = 2
 
 def GetLine(file):
     while True:
-        line = file.readline()
+        line = file.readline().strip()
         if len(line) > 0 and line[0] != "#":
             return line
 
@@ -42,16 +42,21 @@ class param:
             self.Charge2 = float(para[5])
             self.TotalStep = int(para[6])
 
-            file.readline()  # blank
-            file.readline()  # comment line
             grid = GetLine(file).split(",")
             self.TauGridSize = int(grid[0])
             self.MomGridSize = int(grid[1])
             self.AngGridSize = int(grid[2])
             self.RealFreqGridSize = int(grid[3])
             self.MaxRealFreq = float(grid[4])
-            self.MaxExtMom = float(para[5])
+            self.MaxExtMom = float(grid[5])
             self.TauBasisSize = int(grid[6])
+
+            timer = GetLine(file).split(",")
+            self.PrintTimer = int(timer[0])
+            self.SaveTimer = int(timer[1])
+            self.ReWeightTimer = int(timer[2])
+            self.MessageTimer = int(timer[3])
+            self.CollectionTimer = int(timer[4])
 
         if Dim == 3:
             self.kF = (9.0*np.pi/4.0)**(1.0/3.0)/self.Rs
@@ -78,6 +83,10 @@ class param:
             self.TauGridSize, self.MomGridSize, self.AngGridSize, self.RealFreqGridSize, self.TauBasisSize)
         print "MaxRealFreq={0}, MaxExtMom={1}\n".format(
             self.MaxRealFreq, self.MaxExtMom)
+
+        print yellow("Timer Information:")
+        print "Print={0}, Save={1}, ReWeight={2}, Message={3}, Collection={4}".format(
+            self.PrintTimer, self.SaveTimer, self.ReWeightTimer, self.MessageTimer, self.CollectionTimer)
 
 # For the given path, get the List of all files in the directory tree
 

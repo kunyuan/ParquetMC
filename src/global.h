@@ -39,10 +39,10 @@ struct parameter {
   double MaxExtMom;     // the maximum external momentum
 
   // MC inputs
-  int TotalStep;                // total steps of the Monte Carlo
-  int Sweep;                    // how many MC steps between two measuring
-  int Seed, PID;                // rng seed, job ID
-  std::vector<double> ReWeight; // reweight factor for each group
+  int TotalStep; // total steps of the Monte Carlo
+  int Sweep;     // how many MC steps between two measuring
+  int Seed, PID; // rng seed, job ID
+  std::array<double, MaxOrder> ReWeight; // reweight factor for each group
 
   // others
   int PrinterTimer;  // time interval to print to screen
@@ -55,6 +55,7 @@ struct parameter {
   int ExtMomBinSize; // external K bins
   int AngBinSize;    // angle bins
   int TauBinSize;    // tau bin
+  int TauBasisSize;  // tau basis
   std::vector<momentum> ExtMomTable;
   std::vector<double> AngleTable;
   std::vector<double> ExtTauTable;

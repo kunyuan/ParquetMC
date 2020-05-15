@@ -20,8 +20,7 @@ MomGridSize = Para.MomGridSize
 
 Basis = basis.BuildBasis(TauGrid, Para.Beta, 15, "Fermi")
 
-folder = "./Beta{0}_rs{1}_lambda{2}/".format(
-    int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
+folder = "./Data"
 
 filename = "sigma_pid[0-9]+.dat"
 

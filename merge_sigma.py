@@ -34,64 +34,6 @@ def SigmaT(data, norm, Para):
     return Coef
 
 
-def FourierT2W(SigmaT, FreqGrid, TauGrid, Beta):
-    # print SigmaT.shape
-    MomGridSize = SigmaT.shape[0]
-    FreqGridSize = len(FreqGrid)
-    # TauGridSize = len(TauGrid)
-
-    SigmaT = np.array(SigmaT)
-
-    C0 = SigmaT[:, 0]+SigmaT[:, -1]
-    # C0 = SigmaT[:, 0]
-    # C0 /= 1.2
-    C1 = (SigmaT[:, 1]-SigmaT[:, 0])/(TauGrid[1]-TauGrid[0])
-    C1 += (SigmaT[:, -1]-SigmaT[:, -2])/(TauGrid[-1]-TauGrid[-2])
-
-    # for i in range(MomGridSize):
-    #     SigmaT[i, :] -= C0[i]/2
-    print SigmaT[12, 0], SigmaT[12, -1]
-    # SigmaT[i, :] -= C1[i]*(Beta/2.0-TauGrid)/2.0
-
-    SigmaW = np.zeros((MomGridSize, FreqGridSize), dtype=complex)
-
-    for n, wn in enumerate(FreqGrid):
-        tmp = SigmaT*np.exp(1j*TauGrid[np.newaxis, :]*wn)
-        # SigmaW[:, n] = integrate.trapz(tmp, TauGrid, axis=1)
-        SigmaW[:, n] = np.sum(tmp, axis=1)*Beta/len(TauGrid)
-        # if wn > -29.5*np.pi/Beta and wn < 29.5*np.pi/Beta:
-        #     SigmaW[:, n] = integrate.simps(tmp, TauGrid, axis=1)
-        # else:
-        #     SigmaW[:, n] = 0.0000/wn**2
-
-        # SigmaW[:, n] = C1/wn**2
-
-    return SigmaW, C0, C1
-
-
-def FourierW2T(SigmaW, FreqGrid, TauGrid, Beta, C0, C1):
-    # print SigmaT.shape
-    MomGridSize = SigmaW.shape[0]
-    TauGridSize = len(TauGrid)
-
-    SigmaT = np.zeros((MomGridSize, TauGridSize), dtype=complex)
-
-    for i, t in enumerate(TauGrid):
-        Phase = np.exp(-1j*FreqGrid*t)
-        SigmaT[:, i] = np.sum(SigmaW*Phase[np.newaxis, :], axis=1)/Beta
-
-    # ExtFreqGrid = np.array(range(-10000, 20))
-    # ExtFreqGrid = (2.0*ExtFreqGrid+1.0)*np.pi/Beta
-    # for i, t in enumerate(TauGrid):
-        # Phase = np.exp(-1j*FreqGrid*t)
-
-    # for i in range(MomGridSize):
-    #     SigmaT[i, :] += C0[i]/2
-        # SigmaT[i, :] += C1[i]*(Beta/2.0-TauGrid)/2.0
-
-    return SigmaT.real
-
-
 if __name__ == "__main__":
 
     fig, ax = plt.subplots()
@@ -101,8 +43,7 @@ if __name__ == "__main__":
     Spectral = spectral(Para)
     Order = range(0, Para.Order+1)
 
-    folder = "./Beta{0}_rs{1}_lambda{2}/".format(
-        int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
+    folder = "./Data"
 
     filename = "sigma_pid[0-9]+.dat"
 
