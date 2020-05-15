@@ -1,13 +1,14 @@
 #!/usr/bin/python
 import random
+from datetime import datetime
 import os
 import sys
 
 ##### Modify parameters here  ###############
 # Cluster="Rutgers"
 # Cluster="PBS"
-# Cluster = "local"
-Cluster = "condor"
+Cluster = "local"
+# Cluster = "condor"
 ############################################
 
 assert len(sys.argv) == 2, "Number of jobs is needed as a parameter!"
@@ -23,6 +24,7 @@ def CreateFolder(path):
 
 rootdir = os.getcwd()
 execute = "feyncalc.exe"
+random.seed(datetime.now())
 
 
 homedir = os.path.join(rootdir, "Data")
@@ -43,8 +45,8 @@ else:
     infilepath = homedir
 
 for pid in PIDList:
-    seed = random.SystemRandom().randint(0, 2**32)
-    # print seed
+    seed = random.randint(0, 2**31-1)
+    # print pid, seed
     outfile = os.path.join(outfilepath, "_out{0}".format(pid))  # output files
     jobfile = os.path.join(jobfilepath, "_job{0}.sh".format(pid))  # job files
 
@@ -83,5 +85,5 @@ for pid in PIDList:
     else:
         print("{0} means no submission.".format(Cluster))
 
-print("Jobs manage daemon is ended")
+print("\nJobs has submitted.")
 sys.exit(0)

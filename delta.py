@@ -8,14 +8,14 @@ XType = "Tau"
 Para = param()
 Grid = grid(Para)
 Order = range(0, Para.Order+1)
-TauGrid = BuildTauGrid(Para.Beta, TauGridSize)
-MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
+TauGrid = Grid.TauGrid
+MomGrid = Grid.MomGrid
 
 folder = "./Data"
 
 filename = "delta_pid[0-9]+.dat"
 
-shape = (Para.Order+1, MomGridSize, TauGridSize)
+shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
 
 Data, Norm, Step = LoadFile(folder, filename, shape)
 
@@ -44,7 +44,7 @@ elif(XType == "Tau"):
     N = 8
     o = 2
     for i in range(N):
-        q = i*MomGridSize/N
+        q = i*Para.MomGridSize/N
         dataList = [d[o, q, :] for d in Data]
         Avg, Err = Estimate(dataList, Norm)
         if i == N/2:
@@ -52,7 +52,7 @@ elif(XType == "Tau"):
             for d, norm, step in zip(dataList, Norm, Step):
                 print d[0]/norm, norm, step
         ax.errorbar(TauGrid/Para.Beta, Avg, yerr=Err, fmt='o-',
-                    capthick=1, capsize=4, color=ColorList[i], label="k={0}".format(MomGrid[q]))
+                    capthick=1, capsize=4, color=ColorList[i], label="k={0}".format(MomGrid[q]/Para.kF))
     ax.set_xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])
 
 

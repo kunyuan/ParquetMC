@@ -81,6 +81,8 @@ int main(int argc, const char *argv[]) {
         Markov.ChangeExtTau();
       }
 
+      // cout << Var.LoopMom[1].norm() << endl;
+
       if (i % 8 == 0)
         // fast operations
         Markov.Weight.Measure();

@@ -29,7 +29,7 @@ void green::Evaluate(bool IsAnomal) {
     if (!IsAnomal)
       _Weight[i] = Prop.Green(Var.Tau[T[OUT]] - Var.Tau[T[IN]], K, UP);
     else
-      _Weight[i] = Prop.F(Var.Tau[T[IN]], Var.Tau[T[OUT]], K, UP);
+      _Weight[i] = Prop.F(Var.Tau[T[OUT]] - Var.Tau[T[IN]], K, UP);
     // if (Var.CurrOrder == 2)
     //   cout << T[IN] << "->" << T[OUT] << ": " << _Weight[i] << endl;
   }
@@ -45,7 +45,7 @@ void green::Evaluate(const momentum &_K, bool IsAnomal) {
       // if (Var.CurrOrder == 2)
       //   cout << T[IN] << ", " << T[OUT] << endl;
 
-      _Weight[i] = Prop.F(Var.Tau[T[IN]], Var.Tau[T[OUT]], _K, UP);
+      _Weight[i] = Prop.F(Var.Tau[T[OUT]] - Var.Tau[T[IN]], _K, UP);
     }
   }
 }

@@ -1,5 +1,5 @@
 rm -r Beta*
-rm -r data
+rm -r Data
 rm *.log
 rm *.dat
 rm callgrind*
