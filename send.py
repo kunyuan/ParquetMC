@@ -6,10 +6,11 @@ import sys
 ##### Modify parameters here  ###############
 # Cluster="Rutgers"
 # Cluster="PBS"
-Cluster = "local"
-# Cluster="condor"
+# Cluster = "local"
+Cluster = "condor"
 ############################################
 
+assert len(sys.argv) == 2, "Number of jobs is needed as a parameter!"
 Number = int(sys.argv[1])
 print "Creating {0} jobs ...".format(Number)
 PIDList = range(Number)
@@ -53,7 +54,7 @@ for pid in PIDList:
         os.chdir("..")
 
     elif Cluster == "condor":
-        with open(jobfilepath+"/"+jobfile, "w") as fjob:
+        with open(jobfile, "w") as fjob:
             fjob.write("executable = {0}\n".format(execute))
             fjob.write("arguments = {0} {1}\n".format(pid, seed))
             fjob.write("output ={0}\n".format(outfile))
@@ -65,7 +66,7 @@ for pid in PIDList:
         os.system("rm {0}".format(jobfile))
         os.chdir("..")
     elif Cluster == "PBS":
-        with open(jobfilepath+"/"+jobfile, "w") as fjob:
+        with open(jobfile, "w") as fjob:
             fjob.write("#!/bin/sh\n"+"#PBS -N "+jobfile+"\n")
             fjob.write("#PBS -o "+homedir+"/Output\n")
             fjob.write("#PBS -e "+homedir+"/Error\n")

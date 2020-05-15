@@ -20,24 +20,24 @@ void InitPara(), InitVar();
 const string HelpStr = "Two parameters: PID Seed";
 
 int main(int argc, const char *argv[]) {
-  //// initialize the global log configuration   /////////////
-  string LogFile = "_" + to_string(Para.PID) + ".log";
-  LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
-
 #ifdef NDEBUG
   LOG_INFO("NDEBUG mode is OFF.");
 #else
   LOG_INFO("NDEBUG mode is ON.");
 #endif
-
-  ASSERT_ALLWAYS(argc == 3, HelpStr);
+  // take two parameters: PID and Seed
   Para.PID = atoi(argv[1]);
-  ASSERT_ALLWAYS(Para.PID >= 0, "PID must be positive integer!");
   Para.Seed = atoi(argv[2]);
+
+  //// initialize the global log configuration   /////////////
+  string LogFile = "_" + to_string(Para.PID) + ".log";
+  LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
+
   ASSERT_ALLWAYS(Para.Seed > 0, "Random number seed must be positive integer!");
+  ASSERT_ALLWAYS(Para.PID >= 0, "PID must be positive integer!");
+  Random.Reset(Para.Seed);
 
   InitPara(); // initialize global parameters
-  Random.Reset(Para.Seed);
 
   markov Markov;
   InterruptHandler Interrupt;
@@ -131,7 +131,7 @@ stringstream GetLine(ifstream &File) {
     // cout << "get " << line << endl;
     if (line.size() > 0 && line[0] != '#') {
       replace(line.begin(), line.end(), ',', ' ');
-      cout << "return " << line << endl;
+      // cout << "return " << line << endl;
       return stringstream(line);
     }
   }
@@ -143,21 +143,25 @@ void InitPara() {
   string line;
   File.open("parameter", ios::in);
   ASSERT_ALLWAYS(File.is_open(), "Can not load parameters! \n");
-  auto paraStream = GetLine(File); // parameters
+  // parameters
+  auto paraStream = GetLine(File);
   paraStream >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >>
       Para.Lambda >> Para.Charge2 >> Para.TotalStep;
 
+  // grid information
   int RealFreqGridSize;
   double MaxRealFreq;
-  auto gridStream = GetLine(File); // Grid information
+  auto gridStream = GetLine(File);
   gridStream >> Para.TauBinSize >> Para.ExtMomBinSize >> Para.AngBinSize >>
       RealFreqGridSize >> MaxRealFreq >> Para.TauBasisSize;
 
-  auto timerStream = GetLine(File); // Timer information
+  // Timer information
+  auto timerStream = GetLine(File);
   timerStream >> Para.PrinterTimer >> Para.SaveFileTimer >>
       Para.ReweightTimer >> Para.MessageTimer;
 
-  auto reweightStream = GetLine(File); // Timer information
+  // ReWeight information
+  auto reweightStream = GetLine(File);
   for (int o = 0; o < Para.Order + 1; ++o)
     reweightStream >> Para.ReWeight[o];
 

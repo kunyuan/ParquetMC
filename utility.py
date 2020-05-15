@@ -27,9 +27,9 @@ def GetLine(file):
 class param:
     # Order, Beta, Rs, Mass2, Lambda, Charge2, TotalStep = [None, ]*7
     # kF, Nf, EF, Bubble = [0.0, ]*4
-    InputFile = "parameter"
-
     def __init__(self):
+        self.DataFolder = "Data"
+        self.InputFile = "parameter"
 
         with open(self.InputFile, "r") as file:
             file.readline()  # comment line
@@ -150,7 +150,7 @@ ColorList = ColorList*40
 if __name__ == '__main__':
     Para = param()
 
-    dirName = "./Beta40_rs4.0_lambda0.2301"
+    dirName = "./Data"
 
     for elem in getListOfFiles(dirName):
         print(elem)
