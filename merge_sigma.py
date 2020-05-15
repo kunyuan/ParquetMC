@@ -15,6 +15,24 @@ def SigmaT(data, norm, Para):
     dynamic, dynErr = Estimate(sumOrders, norm)
     return dynamic, dynErr
 
+    Coef = np.dot(Dynamic, Tau2Coef)
+    FittedDyn = np.dot(Coef, Coef2Tau)
+
+    print "Max of |Sigma-Fitted Sigma|: ", np.amax(abs(Dynamic-FittedDyn))
+
+    # fig, ax = plt.subplots()
+    # idx = 30
+    # ax.errorbar(Grid.TauGrid/Para.Beta, Dynamic[idx, :], yerr=DynErr[idx, :], fmt='o-',
+    #             capthick=1, capsize=4, color='r', label="k={0}, real".format(Grid.MomGrid[idx]))
+
+    # ax.plot(Grid.TauGrid/Para.Beta,
+    #         FittedDyn[idx, :], 'bo-', label="k={0}, real".format(Grid.MomGrid[idx]))
+
+    # plt.legend(loc=1, frameon=False, fontsize=size)
+    # plt.show()
+
+    return Coef
+
 
 def FourierT2W(SigmaT, FreqGrid, TauGrid, Beta):
     # print SigmaT.shape
@@ -76,75 +94,88 @@ def FourierW2T(SigmaW, FreqGrid, TauGrid, Beta, C0, C1):
 
 if __name__ == "__main__":
 
+    fig, ax = plt.subplots()
+
     Para = param()
+    Grid = grid(Para)
+    Spectral = spectral(Para)
     Order = range(0, Para.Order+1)
-    TauGrid = BuildTauGrid(Para, TauGridSize)
-    MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
 
     folder = "./Beta{0}_rs{1}_lambda{2}/".format(
         int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
 
     filename = "sigma_pid[0-9]+.dat"
 
-    shape = (Para.Order+1, MomGridSize, TauGridSize)
+    shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
 
     Data, Norm, Step = LoadFile(folder, filename, shape)
 
     Static, StaticErr = SigmaStatic(Data, Norm, Para)
     Dynamic, DynErr = SigmaT(Data, Norm, Para)
 
-    # UniTauGrid = np.array(range(0, 1001), dtype=float)/1000.0*Para.Beta
-    # UniTauGrid[0] += 2.0e-8
-    # UniTauGrid[-1] -= 2.0e-8
-    # f = interpolate.interp1d(TauGrid, Dynamic)
-    # SigmaT = f(UniTauGrid)
+    print "Maximum Error of Dynamic Sigma: ", np.amax(abs(DynErr))
+
+    ut, st, vt = Spectral.TauKernel(Grid.TauGrid, "Fermi")
+    FittedDyn, Coef = FitData(Dynamic, Para.TauBasisSize, vt)
+    spectral = Data2Spectral(Dynamic, Para.TauBasisSize, ut, st, vt)
+
+    # idx = 30
+    # ax.errorbar(Grid.TauGrid/Para.Beta, Dynamic[idx, :], yerr=DynErr[idx, :], fmt='o-',
+    #             capthick=1, capsize=4, color='r', label="k={0}, real".format(Grid.MomGrid[idx]))
+
+    # ax.plot(Grid.TauGrid/Para.Beta,
+    #         FittedDyn[idx, :], 'bo-', label="k={0}, real".format(Grid.MomGrid[idx]))
+
+    # plt.legend(loc=1, frameon=False, fontsize=size)
+    # plt.show()
 
     MaxFreq = 512
     Freq = np.array(range(-MaxFreq, MaxFreq))
-    # print len(Freq)
+    # # print len(Freq)
     phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 
-    # print SigmaT.shape
-    SigmaW, C0, C1 = FourierT2W(Dynamic, phyFreq, TauGrid, Para.Beta)
+    uw, sw, vw = Spectral.MatFreqKernel(phyFreq, "Fermi")
+    SigmaW = Spectral2Data(spectral, Para.TauBasisSize, uw, sw, vw)
 
-    # print len(Freq)
-    phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
-    SigmaT = FourierW2T(SigmaW, phyFreq, TauGrid, Para.Beta, C0, C1)
+    # idx = 12
 
-    # Plot SigmaW
-    fig, ax = plt.subplots()
-    idx = 12
-    # ax.errorbar(TauGrid/Para.Beta, Dynamic[idx, :], yerr=0.0, fmt='o-',
-    #             capthick=1, capsize=4, color=ColorList[idx], label="k={0}".format(MomGrid[idx]))
+    # ax.plot(Freq, SigmaW[idx, :].real, "ro-",
+    #         label="k={0}, real".format(Grid.MomGrid[idx]))
+    # ax.plot(Freq, SigmaW[idx, :].imag, "bs-",
+    #         label="k={0}, imag".format(Grid.MomGrid[idx]))
 
-    # ax.errorbar(UniTauGrid/Para.Beta, SigmaT[idx, :], yerr=0.0, fmt='o-',
-    #             capthick=1, capsize=4, color=ColorList[idx+1], label="k={0}, inter".format(MomGrid[idx]))
+    # plt.legend(loc=1, frameon=False, fontsize=size)
+    # plt.show()
 
-    # ax.errorbar(Freq, SigmaW[idx, :].imag, yerr=0.0, fmt='o-',
-    #             capthick=1, capsize=4, color=ColorList[idx], label="k={0}".format(MomGrid[idx]))
+    BareG = np.zeros((Grid.MomSize, len(phyFreq)), dtype=complex)
+    for i, q in enumerate(Grid.MomGrid):
+        BareG[i, :] = -1.0/(1j*phyFreq-q*q+Para.EF)
 
-    # ax.errorbar(Freq, -5.0/phyFreq**2, yerr=0.0, fmt='o-',
-    #             capthick=1, capsize=4, color=ColorList[idx+1], label="k={0}".format(MomGrid[idx]))
+    # dG_W = 1.0/(1.0/BareG-SigmaW)
+    dG_W = SigmaW*BareG*BareG/(1-SigmaW*BareG)
 
-    # ax.errorbar(Freq, C0[idx]/(phyFreq), yerr=0.0, fmt='o-',
-    #             capthick=1, capsize=4, color=ColorList[idx+2], label="k={0}, 1/iwn".format(MomGrid[idx]))
+    FittedGW, Coefp = FitData(dG_W, Para.TauBasisSize, vw)
 
-    # ax.set_xlim([-1000, 1000])
-    # ax.set_ylim([-0.1, 0.1])
+    # idx = 30
+    # ax.plot(Freq,
+    #         dG_W[idx, :], 'rs-', label="k={0}, real".format(Grid.MomGrid[idx]))
+    # ax.plot(Freq,
+    #         FittedGW[idx, :], 'bo-', label="k={0}, real".format(Grid.MomGrid[idx]))
 
-    ax.errorbar(TauGrid/Para.Beta, Dynamic[idx, :], yerr=0.0, fmt='o-',
-                capthick=1, capsize=4, color=ColorList[idx+1], label="k={0}, real".format(MomGrid[idx]))
+    # plt.legend(loc=1, frameon=False, fontsize=size)
+    # plt.show()
 
-    ax.errorbar(TauGrid/Para.Beta, SigmaT[idx, :], yerr=0.0, fmt='o-',
-                capthick=1, capsize=4, color=ColorList[idx+2], label="k={0}, imag".format(MomGrid[idx]))
+    spectral = Data2Spectral(dG_W, Para.TauBasisSize, uw, sw, vw)
 
-    # BareG = np.zeros((MomGridSize, 2*MaxFreq), dtype=complex)
-    # for i, q in enumerate(MomGrid):
-    #     BareG[i, :] = -1.0/(1j*phyFreq-q*q+Para.EF)
+    print "Max imaginary part of the spectral: ", np.amax(abs(spectral.imag))
+    dG_T = Spectral2Data(spectral, Para.TauBasisSize, ut, st, vt)
 
-    # dG_W = SigmaW*BareG*BareG/(1-SigmaW*BareG)
+    idx = 32
+    ax.plot(Grid.TauGrid/Para.Beta, dG_T[idx, :].real, "ro-",
+            label="k={0}, real".format(Grid.MomGrid[idx]))
 
-    # dG_T = np.zeros((MomGridSize, TauGridSize), dtype=float)
+    plt.legend(loc=1, frameon=False, fontsize=size)
+    plt.show()
 
     # ax.set_xticks([0.0,0.04,0.08,0.12])
     # ax.set_yticks([0.35,0.4,0.45,0.5])
@@ -156,10 +187,3 @@ if __name__ == "__main__":
     # ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
 
     # ax.text(0.02,0.47, "$\\sim {\\frac{1}{2}-}\\frac{1}{2} {\\left( \\frac{r}{L} \\right)} ^{2-s}$", fontsize=28)
-
-plt.legend(loc=1, frameon=False, fontsize=size)
-# plt.title("2D density integral")
-# plt.tight_layout()
-
-# plt.savefig("spin_rs1_lambda1.pdf")
-plt.show()

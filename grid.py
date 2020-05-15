@@ -40,7 +40,7 @@ class grid:
 
     def __MomGrid(self):
         arr = np.array(range(self.MomSize))
-        KGrid = arr*Para.MaxExtMom/self.MomSize+1.0e-8
+        KGrid = arr*self.Para.MaxExtMom/self.MomSize+1.0e-8
         return KGrid
 
     def __AngleGrid(self):
@@ -59,23 +59,21 @@ class spectral:
             -para.MaxRealFreq, para.MaxRealFreq, para.RealFreqGridSize)
 
     def TauBasis(self, TauGrid, Type, Num):
-        """u.T[0:Num, :] gives the first N basis for Tau axis"""
-        u, s, _ = self.TauKernel(TauGrid, Type)
-        print yellow("Singular Value (0-{0}): ".format(Num))
-        print s[:Num]
-        return u.T[:Num, :]
+        """v[0:Num, :] maps N coefficients to Tau, v.T[:, 0:Num] maps Tau to coefficients"""
+        _, s, v = self.TauKernel(TauGrid, Type)
+        print yellow("Smallest Singular Value: {0} ".format(s[-1]))
+        return v.T[:, :Num]
 
     def MatFreqBasis(self, MatFreqGrid, Type, Num):
-        """u.T[0:Num, :] gives the first N basis for Tau axis"""
-        u, s, _ = self.MatFreqKernel(MatFreqGrid, Type)
-        print yellow("Singular Value (0-{0}): ".format(Num))
-        print s[:Num]
-        return u.T[:Num, :]
+        """v[0:Num, :] maps Tau to N coefficients, v.T[:, 0:Num] maps coefficients to Tau"""
+        _, s, v = self.MatFreqKernel(MatFreqGrid, Type)
+        print yellow("Smallest Singular Value: {0} ".format(s[-1]))
+        return v.T[:, :Num]
 
     def TauKernel(self, TauGrid, Type):
-        kernel = np.zeros([len(TauGrid), self.RealFreqSize])
+        kernel = np.zeros([self.RealFreqSize, len(TauGrid)])
         for i, w in enumerate(self.RealFreqGrid):
-            kernel[:, i] = self.Kernel(w, TauGrid, Para.Beta, Type)
+            kernel[i, :] = self.Kernel(w, TauGrid, self.Para.Beta, Type)
         # multiply the kernel with Delta \omega
         kernel *= 2.0*self.Para.MaxRealFreq/self.RealFreqSize
         u, s, v = linalg.svd(kernel)
@@ -83,9 +81,9 @@ class spectral:
 
     def MatFreqKernel(self, MatFreqGrid, Type):
         """v[:, 0:N] gives the first N basis for Matsubara frequency axis"""
-        kernel = np.zeros([len(MatFreqGrid), self.RealFreqSize], dtype=complex)
+        kernel = np.zeros([self.RealFreqSize, len(MatFreqGrid)], dtype=complex)
         for i, w in enumerate(self.RealFreqGrid):
-            kernel[:, i] = 1.0/(1j*MatFreqGrid-w)
+            kernel[i, :] = 1.0/(1j*MatFreqGrid-w)
         kernel *= 2.0*self.Para.MaxRealFreq/self.RealFreqSize
         u, s, v = linalg.svd(kernel)
         return u, s, v
@@ -102,6 +100,34 @@ class spectral:
         else:
             print "Not implemented!"
             raise ValueError
+
+
+def FitData(Data, Num, v):
+    assert Num < v.shape[0], "Number of basis is too large!"
+    coef = np.dot(Data, v.T[:, :Num])
+    fitted = np.dot(coef, v[:Num, :])
+    print "Max of |Sigma-Fitted Sigma|: ", np.amax(abs(Data-fitted))
+    return fitted, coef
+
+
+def Data2Spectral(Data, Num, u, s, v):
+    ss = np.zeros((v.shape[0], u.shape[0]))
+    assert Num < u.shape[0], "Number of basis is too large!"
+    assert Num < v.shape[0], "Number of basis is too large!"
+    for i in range(Num):
+        ss[i, i] = 1.0/s[i]
+    InvKernel = np.dot(np.dot(v.T, ss), u.T)
+    return np.dot(Data, InvKernel)
+
+
+def Spectral2Data(spectral, Num, u, s, v):
+    ss = np.zeros((u.shape[0], v.shape[0]))
+    assert Num < u.shape[0], "Number of basis is too large!"
+    assert Num < v.shape[0], "Number of basis is too large!"
+    for i in range(Num):
+        ss[i, i] = s[i]
+    Kernel = np.dot(np.dot(u, ss), v)
+    return np.dot(spectral, Kernel)
 
 
 if __name__ == "__main__":
@@ -127,9 +153,9 @@ if __name__ == "__main__":
 
         basis = Spectral.TauBasis(Grid.TauGrid, "Fermi", Para.TauBasisSize)
         f.writelines("{0} #FermiTauBasis\n".format(Para.TauBasisSize))
-        for b in range(Para.TauBasisSize):
-            for t in range(Para.TauGridSize):
-                f.write("{0} ".format(basis[b, t]))
+        for t in range(Para.TauGridSize):
+            for b in range(Para.TauBasisSize):
+                f.write("{0} ".format(basis[t, b]))
         f.write("\n\n")
 
     pass

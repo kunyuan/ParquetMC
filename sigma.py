@@ -11,9 +11,12 @@ OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 
 Para = param()
+Grid = grid(Para)
 Order = range(0, Para.Order+1)
-TauGrid = BuildTauGrid(Para, TauGridSize)
-MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
+TauGrid = Grid.TauGrid
+MomGrid = Grid.MomGrid
+TauGridSize = Para.TauGridSize
+MomGridSize = Para.MomGridSize
 
 Basis = basis.BuildBasis(TauGrid, Para.Beta, 15, "Fermi")
 
