@@ -25,12 +25,14 @@ def FourierT2W(SigmaT, FreqGrid, TauGrid, Beta):
     SigmaT = np.array(SigmaT)
 
     C0 = SigmaT[:, 0]+SigmaT[:, -1]
+    # C0 = SigmaT[:, 0]
     # C0 /= 1.2
     C1 = (SigmaT[:, 1]-SigmaT[:, 0])/(TauGrid[1]-TauGrid[0])
     C1 += (SigmaT[:, -1]-SigmaT[:, -2])/(TauGrid[-1]-TauGrid[-2])
 
-    for i in range(MomGridSize):
-        SigmaT[i, :] -= C0[i]/2
+    # for i in range(MomGridSize):
+    #     SigmaT[i, :] -= C0[i]/2
+    print SigmaT[12, 0], SigmaT[12, -1]
     # SigmaT[i, :] -= C1[i]*(Beta/2.0-TauGrid)/2.0
 
     SigmaW = np.zeros((MomGridSize, FreqGridSize), dtype=complex)
@@ -65,8 +67,8 @@ def FourierW2T(SigmaW, FreqGrid, TauGrid, Beta, C0, C1):
     # for i, t in enumerate(TauGrid):
         # Phase = np.exp(-1j*FreqGrid*t)
 
-    for i in range(MomGridSize):
-        SigmaT[i, :] += C0[i]/2
+    # for i in range(MomGridSize):
+    #     SigmaT[i, :] += C0[i]/2
         # SigmaT[i, :] += C1[i]*(Beta/2.0-TauGrid)/2.0
 
     return SigmaT.real
@@ -97,8 +99,8 @@ if __name__ == "__main__":
     # f = interpolate.interp1d(TauGrid, Dynamic)
     # SigmaT = f(UniTauGrid)
 
-    MaxFreq = 1024
-    Freq = np.array(range(0, MaxFreq))
+    MaxFreq = 512
+    Freq = np.array(range(-MaxFreq, MaxFreq))
     # print len(Freq)
     phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 
