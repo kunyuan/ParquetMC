@@ -6,12 +6,12 @@ XType = "Tau"
 # XType = "Mom"
 
 Para = param()
+Grid = grid(Para)
 Order = range(0, Para.Order+1)
 TauGrid = BuildTauGrid(Para.Beta, TauGridSize)
 MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
 
-folder = "./Beta{0}_rs{1}_lambda{2}/".format(
-    int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
+folder = "./Data"
 
 filename = "delta_pid[0-9]+.dat"
 
