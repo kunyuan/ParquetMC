@@ -120,7 +120,7 @@ def LoadFile(Folder, FileName, Shape):
 
     for f in getListOfFiles(Folder):
         if re.search(FileName, f):
-            # print "Loading ", f
+            print "Loading ", f
             try:
                 with open(f, "r") as file:
                     Step.append(int(file.readline().split(":")[1]))

@@ -18,18 +18,23 @@ class grid:
 
     def __TauGrid(self):
         ########### logirthmic grid #####################
-        # Size = GridSize-1
-        # arr = np.array(range(Size+1))
-        # TauGrid = arr*1.0
-        # c = Para.Beta*Para.EF/3.0
-        # for i in range(Size/2):
-        #     TauGrid[i] = Para.Beta/2.0 * \
-        #         np.exp(c*(float(i)/Size-0.5)) - \
-        #         Para.Beta/2.0*np.exp(-c*0.5)+1.0e-8
-        # for i in range(Size/2, Size+1):
-        #     TauGrid[i] = Para.Beta-Para.Beta/2.0 * \
-        #         np.exp(c*(0.5-float(i)/Size))+Para.Beta/2.0 * \
-        #         np.exp(-c*0.5)-1.0e-8
+        # N = self.Para.TauGridSize/2
+        # a = self.Para.EF*self.Para.Beta/6.0
+        # b = a/(N-1)
+        # eps = 1.0e-8/self.Para.Beta
+
+        # TauGrid = np.zeros(self.Para.TauGridSize)
+
+        # print a, b
+        # assert a > 1, "Coeff a must be much larger than 1!"
+        # assert b > 0, "Coeff b must be larger than 0!"
+
+        # for i in range(N):
+        #     TauGrid[i] = 0.5*np.exp(-a)*(np.exp(b*i)-1.0)+eps
+        #     # print i, b*i, a
+        #     TauGrid[2*N-1-i] = 1.0-TauGrid[i]
+
+        # TauGrid *= self.Para.Beta
 
         ########## uniform grid  #########################
         arr = np.array(range(self.TauSize))
@@ -75,7 +80,7 @@ class spectral:
         for i, w in enumerate(self.RealFreqGrid):
             kernel[i, :] = self.Kernel(w, TauGrid, self.Para.Beta, Type)
         # multiply the kernel with Delta \omega
-        kernel *= 2.0*self.Para.MaxRealFreq/self.RealFreqSize
+        kernel *= 2.0*self.Para.MaxRealFreq/self.RealFreqSize/2.0/np.pi
         u, s, v = linalg.svd(kernel)
         return u, s, v
 
@@ -83,8 +88,8 @@ class spectral:
         """v[:, 0:N] gives the first N basis for Matsubara frequency axis"""
         kernel = np.zeros([self.RealFreqSize, len(MatFreqGrid)], dtype=complex)
         for i, w in enumerate(self.RealFreqGrid):
-            kernel[i, :] = 1.0/(1j*MatFreqGrid-w)
-        kernel *= 2.0*self.Para.MaxRealFreq/self.RealFreqSize
+            kernel[i, :] = 1.0/(1j*MatFreqGrid+w)
+        kernel *= 2.0*self.Para.MaxRealFreq/self.RealFreqSize/2.0/np.pi
         u, s, v = linalg.svd(kernel)
         return u, s, v
 
@@ -100,6 +105,37 @@ class spectral:
         else:
             print "Not implemented!"
             raise ValueError
+
+
+def Kernel(w, t, beta, Type):
+    if Type == "Fermi":
+        x, y = beta*w/2, 2*t/beta-1
+        if x > 100:
+            return np.exp(-x*(y+1.))
+        elif x < -100:
+            return np.exp(x*(1.0-y))
+        else:
+            return np.exp(-x*y)/(2*np.cosh(x))
+    else:
+        print "Not implemented!"
+        raise ValueError
+
+
+def TauKernel(Beta, TauGrid, RealFreqGrid, Type):
+    dRealFreq = (RealFreqGrid[-1]-RealFreqGrid[0])/len(RealFreqGrid)
+    kernel = np.zeros([len(RealFreqGrid), len(TauGrid)])
+    for i, w in enumerate(RealFreqGrid):
+        kernel[i, :] = Kernel(w, TauGrid, Beta, Type)
+    # multiply the kernel with Delta \omega
+    return kernel*dRealFreq/2.0/np.pi
+
+
+def MatFreqKernel(Beta, MatFreqGrid, RealFreqGrid, Type):
+    dRealFreq = (RealFreqGrid[-1]-RealFreqGrid[0])/len(RealFreqGrid)
+    kernel = np.zeros([len(RealFreqGrid), len(MatFreqGrid)], dtype=complex)
+    for i, w in enumerate(RealFreqGrid):
+        kernel[i, :] = 1.0/(1j*MatFreqGrid+w)
+    return kernel*dRealFreq/2.0/np.pi
 
 
 def FitData(Data, Num, v):

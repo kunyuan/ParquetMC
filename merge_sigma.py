@@ -1,5 +1,6 @@
 from scipy import integrate
 from scipy import interpolate
+import fourier
 from utility import *
 from grid import *
 
@@ -25,6 +26,14 @@ if __name__ == "__main__":
     Spectral = spectral(Para)
     Order = range(0, Para.Order+1)
 
+    MaxFreq = 512
+    Freq = np.array(range(-MaxFreq, MaxFreq))
+    # # print len(Freq)
+    phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
+
+    Fourier = fourier.fourier(Grid.TauGrid, phyFreq, Para.Beta)
+    Fourier.InitializeKernel(100.0, 1024, "Fermi")
+
     folder = "./Data"
 
     filename = "sigma_pid[0-9]+.dat"
@@ -38,9 +47,28 @@ if __name__ == "__main__":
 
     print "Maximum Error of Dynamic Sigma: ", np.amax(abs(DynErr))
 
-    ut, st, vt = Spectral.TauKernel(Grid.TauGrid, "Fermi")
-    FittedDyn, Coef = FitData(Dynamic, Para.TauBasisSize, vt)
-    spectral = Data2Spectral(Dynamic, Para.TauBasisSize, ut, st, vt)
+    SigmaW, Spec = Fourier.SpectralT2W(Dynamic, threshold=1.0e-14)
+    SigmaWp = Fourier.naiveT2W(Dynamic)
+    C0 = Dynamic[:, 0]+Dynamic[:, -1]
+
+    idx = 32
+    print C0[idx]
+    # ax.plot(Freq, Spec[idx, :], "k--",
+    #         label="k={0}, spectral".format(Grid.MomGrid[idx]))
+    ax.plot(Freq, SigmaW[idx, :].imag, "r--",
+            label="k={0}, spectral".format(Grid.MomGrid[idx]))
+    ax.plot(Freq, SigmaWp[idx, :].imag, "b--",
+            label="k={0}, naive".format(Grid.MomGrid[idx]))
+    ax.plot(Freq, -C0[idx]/phyFreq, "g--",
+            label="k={0}, tail".format(Grid.MomGrid[idx]))
+
+    ax.set_ylim([-0.12, 0.12])
+    plt.legend(loc=1, frameon=False, fontsize=size)
+    plt.show()
+
+    # ut, st, vt = Spectral.TauKernel(Grid.TauGrid, "Fermi")
+    # FittedDyn, Coef = FitData(Dynamic, Para.TauBasisSize, vt)
+    # spectral = Data2Spectral(Dynamic, Para.TauBasisSize, ut, st, vt)
 
     # idx = 30
     # ax.errorbar(Grid.TauGrid/Para.Beta, Dynamic[idx, :], yerr=DynErr[idx, :], fmt='o-',
@@ -52,13 +80,8 @@ if __name__ == "__main__":
     # plt.legend(loc=1, frameon=False, fontsize=size)
     # plt.show()
 
-    MaxFreq = 512
-    Freq = np.array(range(-MaxFreq, MaxFreq))
-    # # print len(Freq)
-    phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
-
-    uw, sw, vw = Spectral.MatFreqKernel(phyFreq, "Fermi")
-    SigmaW = Spectral2Data(spectral, Para.TauBasisSize, uw, sw, vw)
+    # uw, sw, vw = Spectral.MatFreqKernel(phyFreq, "Fermi")
+    # SigmaW = Spectral2Data(spectral, Para.TauBasisSize, uw, sw, vw)
 
     # idx = 12
 
@@ -70,14 +93,14 @@ if __name__ == "__main__":
     # plt.legend(loc=1, frameon=False, fontsize=size)
     # plt.show()
 
-    BareG = np.zeros((Grid.MomSize, len(phyFreq)), dtype=complex)
-    for i, q in enumerate(Grid.MomGrid):
-        BareG[i, :] = -1.0/(1j*phyFreq-q*q+Para.EF)
+    # BareG = np.zeros((Grid.MomSize, len(phyFreq)), dtype=complex)
+    # for i, q in enumerate(Grid.MomGrid):
+    #     BareG[i, :] = -1.0/(1j*phyFreq-q*q+Para.EF)
 
     # dG_W = 1.0/(1.0/BareG-SigmaW)
-    dG_W = SigmaW*BareG*BareG/(1-SigmaW*BareG)
+    # dG_W = SigmaW*BareG*BareG/(1-SigmaW*BareG)
 
-    FittedGW, Coefp = FitData(dG_W, Para.TauBasisSize, vw)
+    # FittedGW, Coefp = FitData(dG_W, Para.TauBasisSize, vw)
 
     # idx = 30
     # ax.plot(Freq,
@@ -88,17 +111,17 @@ if __name__ == "__main__":
     # plt.legend(loc=1, frameon=False, fontsize=size)
     # plt.show()
 
-    spectral = Data2Spectral(dG_W, Para.TauBasisSize, uw, sw, vw)
+    # spectral = Data2Spectral(dG_W, Para.TauBasisSize, uw, sw, vw)
 
-    print "Max imaginary part of the spectral: ", np.amax(abs(spectral.imag))
-    dG_T = Spectral2Data(spectral, Para.TauBasisSize, ut, st, vt)
+    # print "Max imaginary part of the spectral: ", np.amax(abs(spectral.imag))
+    # dG_T = Spectral2Data(spectral, Para.TauBasisSize, ut, st, vt)
 
-    idx = 32
-    ax.plot(Grid.TauGrid/Para.Beta, dG_T[idx, :].real, "ro-",
-            label="k={0}, real".format(Grid.MomGrid[idx]))
+    # idx = 32
+    # ax.plot(Grid.TauGrid/Para.Beta, dG_T[idx, :].real, "ro-",
+    #         label="k={0}, real".format(Grid.MomGrid[idx]))
 
-    plt.legend(loc=1, frameon=False, fontsize=size)
-    plt.show()
+    # plt.legend(loc=1, frameon=False, fontsize=size)
+    # plt.show()
 
     # ax.set_xticks([0.0,0.04,0.08,0.12])
     # ax.set_yticks([0.35,0.4,0.45,0.5])
