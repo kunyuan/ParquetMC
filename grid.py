@@ -63,8 +63,28 @@ class grid:
         return TauGrid, dTauGrid
 
     def __MomGrid(self):
-        arr = np.array(range(self.MomSize))
-        KGrid = arr*self.Para.MaxExtMom/self.MomSize+1.0e-8
+        ##### Uniform Grid #############################
+        # arr = np.array(range(self.MomSize))
+        # KGrid = arr*self.Para.MaxExtMom/self.MomSize+1.0e-8
+
+        ##### Fermonic Grid ############################
+        KGrid = np.zeros(self.MomSize)
+        # the momentum scale corresponds to the temperature 1/Beta
+        kT = np.sqrt(1.0/self.Para.Beta)
+        N = self.MomSize/2
+        a = self.Para.kF/kT/3.0
+        assert a > 1, "Coeff a must be much larger than 1!"
+        # print a
+
+        b = np.log(1.0+np.exp(a))/N
+        for i in range(N):
+            KGrid[i] = self.Para.kF*(1.0-np.exp(-a)*(np.exp(-b*(i-N))-1.0))
+        KGrid[0] = 0.0
+
+        b = np.log(1.0+np.exp(a)*(self.Para.MaxExtMom/self.Para.kF-1.0))/(N-1)
+        for i in range(N, 2*N):
+            KGrid[i] = self.Para.kF*(1.0+np.exp(-a)*(np.exp(b*(i-N))-1.0))
+
         return KGrid
 
     def __AngleGrid(self):

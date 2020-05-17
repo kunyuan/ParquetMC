@@ -1,5 +1,3 @@
-from scipy import integrate
-from scipy import interpolate
 import fourier
 from utility import *
 from grid import *
@@ -26,12 +24,17 @@ def PlotSigmaW(SigmaT, idx, Save=True):
     # ax.plot(Freq, Spec[idx, :], "k--",
     #         label="k={0}, spectral".format(Grid.MomGrid[idx]))
     k = Grid.MomGrid[idx]/Para.kF
-    ax1.plot(Freq, SigmaW.imag, "r--",
+    ax1.plot(phyFreq, SigmaW.imag, "ro",
              label="$k/k_F={0}$, spectral".format(k))
-    ax1.plot(Freq, SigmaWp.imag, "b--",
+    ax1.plot(phyFreq, SigmaWp.imag, "b--",
              label="$k/k_F={0}$, naive".format(k))
-    ax1.plot(Freq, -C0/phyFreq, "g--",
+    ax1.plot(phyFreq, -C0/phyFreq, "g--",
              label="$k/k_F={0}$, tail".format(k))
+
+    # ax1.plot(phyFreq, SigmaW.real, "ro",
+    #          label="$k/k_F={0}$, spectral".format(k))
+    # ax1.plot(phyFreq, SigmaWp.real, "b--",
+    #          label="$k/k_F={0}$, naive".format(k))
 
     ax1.set_ylim([-0.12, 0.12])
 
@@ -45,6 +48,20 @@ def PlotSigmaW(SigmaT, idx, Save=True):
     ax2.legend(loc=1, frameon=False, fontsize=size)
     if Save:
         plt.savefig("SigmaW.pdf")
+    else:
+        plt.show()
+
+
+def PlotDataK(dataK, wn, FreqGrid, Save=True):
+    fig, ax = plt.subplots()
+    ax.plot(Grid.MomGrid, dataK[:, wn].real, "ro-",
+            label="$n={0}$, real".format(FreqGrid[wn]))
+    ax.plot(Grid.MomGrid, dataK[:, wn].imag, "bo-",
+            label="$n={0}$, imag".format(FreqGrid[wn]))
+
+    plt.legend(loc=1, frameon=False, fontsize=size)
+    if Save:
+        plt.savefig("DataK.pdf")
     else:
         plt.show()
 
@@ -97,9 +114,11 @@ if __name__ == "__main__":
 
     print "Maximum Error of Dynamic Sigma: ", np.amax(abs(DynErr))
 
-    PlotSigmaW(Dynamic, int(Para.MomGridSize/3), True)
+    # PlotSigmaW(Dynamic, int(Para.MomGridSize/3), True)
 
     SigmaW, _ = Fourier.SpectralT2W(Dynamic)
+
+    PlotDataK(SigmaW, MaxFreq, Freq, False)
 
     BareG = np.zeros((Grid.MomSize, len(phyFreq)), dtype=complex)
     for i, q in enumerate(Grid.MomGrid):
