@@ -113,6 +113,7 @@ void weight::Measure() {
                        ChanWeight, Factor);
     }
   } else {
+    Factor /= Para.ExtTauReWeight[Var.CurrExtTauBin];
     // Polar, Sigma, Delta can be handled together
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);

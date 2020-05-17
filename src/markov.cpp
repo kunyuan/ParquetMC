@@ -127,7 +127,8 @@ void markov::ChangeExtTau() {
 
   NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
 
-  double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
+  double R = Prop * NewAbsWeight * Para.ExtTauReWeight[Var.CurrExtTauBin] /
+             Var.CurrAbsWeight / Para.ExtTauReWeight[OldTauBin];
 
   if (Random.urn() < R) {
     Accepted[CHANGE_EXTTAU][Var.CurrOrder]++;

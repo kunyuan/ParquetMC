@@ -17,22 +17,72 @@ def SigmaT(data, norm, Para):
     return dynamic, dynErr
 
 
-if __name__ == "__main__":
+def PlotSigmaW(SigmaT, idx, Save=True):
+    SigmaW, Spec = Fourier.SpectralT2W(SigmaT[idx, :])
+    C0 = SigmaT[idx, 0]+SigmaT[idx, -1]
+    SigmaWp = Fourier.naiveT2W(SigmaT[idx, :])
 
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    # ax.plot(Freq, Spec[idx, :], "k--",
+    #         label="k={0}, spectral".format(Grid.MomGrid[idx]))
+    k = Grid.MomGrid[idx]/Para.kF
+    ax1.plot(Freq, SigmaW.imag, "r--",
+             label="$k/k_F={0}$, spectral".format(k))
+    ax1.plot(Freq, SigmaWp.imag, "b--",
+             label="$k/k_F={0}$, naive".format(k))
+    ax1.plot(Freq, -C0/phyFreq, "g--",
+             label="$k/k_F={0}$, tail".format(k))
+
+    ax1.set_ylim([-0.12, 0.12])
+
+    SigmaTp = Fourier.naiveW2T(SigmaW)
+    ax2.plot(Grid.TauGrid, Dynamic[idx, :], "r--",
+             label="$k/k_F={0}$, original".format(k))
+    ax2.plot(Grid.TauGrid, SigmaTp.real, "b--",
+             label="$k/k_F={0}$, spectral fourier".format(k))
+
+    ax1.legend(loc=1, frameon=False, fontsize=size)
+    ax2.legend(loc=1, frameon=False, fontsize=size)
+    if Save:
+        plt.savefig("SigmaW.pdf")
+    else:
+        plt.show()
+
+
+def PlotSigmaT(dataW, idx, Save=True):
+    dataT, Spec = Fourier.SpectralW2T(dataW[idx, :])
+    dataTp = Fourier.naiveW2T(dataW[idx, :])
+
+    k = Grid.MomGrid[idx]/Para.kF
     fig, ax = plt.subplots()
+    ax.plot(Grid.TauGrid, dataT.real, "r--",
+            label="$k/k_F={0}$, spectral".format(k))
+    ax.plot(Grid.TauGrid, dataTp.real, "b--",
+            label="$k/k_F={0}$, naive".format(k))
+
+    # ax1.set_ylim([-0.12, 0.12])
+
+    plt.legend(loc=1, frameon=False, fontsize=size)
+    if Save:
+        plt.savefig("DeltaG.pdf")
+    else:
+        plt.show()
+
+
+if __name__ == "__main__":
 
     Para = param()
     Grid = grid(Para)
     Spectral = spectral(Para)
     Order = range(0, Para.Order+1)
 
-    MaxFreq = 512
+    MaxFreq = 1024
     Freq = np.array(range(-MaxFreq, MaxFreq))
     # # print len(Freq)
     phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 
     Fourier = fourier.fourier(Grid.TauGrid, phyFreq, Para.Beta)
-    Fourier.InitializeKernel(100.0, 1024, "Fermi")
+    Fourier.InitializeKernel(100.0, 1024, "Fermi", 1.0e-13)
 
     folder = "./Data"
 
@@ -47,89 +97,20 @@ if __name__ == "__main__":
 
     print "Maximum Error of Dynamic Sigma: ", np.amax(abs(DynErr))
 
-    SigmaW, Spec = Fourier.SpectralT2W(Dynamic, threshold=1.0e-14)
-    SigmaWp = Fourier.naiveT2W(Dynamic)
-    C0 = Dynamic[:, 0]+Dynamic[:, -1]
+    PlotSigmaW(Dynamic, int(Para.MomGridSize/3), True)
 
-    idx = 32
-    print C0[idx]
-    # ax.plot(Freq, Spec[idx, :], "k--",
-    #         label="k={0}, spectral".format(Grid.MomGrid[idx]))
-    ax.plot(Freq, SigmaW[idx, :].imag, "r--",
-            label="k={0}, spectral".format(Grid.MomGrid[idx]))
-    ax.plot(Freq, SigmaWp[idx, :].imag, "b--",
-            label="k={0}, naive".format(Grid.MomGrid[idx]))
-    ax.plot(Freq, -C0[idx]/phyFreq, "g--",
-            label="k={0}, tail".format(Grid.MomGrid[idx]))
+    SigmaW, _ = Fourier.SpectralT2W(Dynamic)
 
-    ax.set_ylim([-0.12, 0.12])
-    plt.legend(loc=1, frameon=False, fontsize=size)
-    plt.show()
+    BareG = np.zeros((Grid.MomSize, len(phyFreq)), dtype=complex)
+    for i, q in enumerate(Grid.MomGrid):
+        BareG[i, :] = -1.0/(1j*phyFreq-q*q+Para.EF)
 
-    # ut, st, vt = Spectral.TauKernel(Grid.TauGrid, "Fermi")
-    # FittedDyn, Coef = FitData(Dynamic, Para.TauBasisSize, vt)
-    # spectral = Data2Spectral(Dynamic, Para.TauBasisSize, ut, st, vt)
+    dG_W = 1.0/(1.0/BareG-SigmaW)
+    dG_W = SigmaW*BareG*BareG/(1-SigmaW*BareG)
 
-    # idx = 30
-    # ax.errorbar(Grid.TauGrid/Para.Beta, Dynamic[idx, :], yerr=DynErr[idx, :], fmt='o-',
-    #             capthick=1, capsize=4, color='r', label="k={0}, real".format(Grid.MomGrid[idx]))
+    dG_T, _ = Fourier.SpectralW2T(dG_W)
+    dG_Tp = Fourier.naiveW2T(dG_W)
 
-    # ax.plot(Grid.TauGrid/Para.Beta,
-    #         FittedDyn[idx, :], 'bo-', label="k={0}, real".format(Grid.MomGrid[idx]))
+    print "Maximum Error of \delta G: ", np.amax(abs(dG_T-dG_Tp))
 
-    # plt.legend(loc=1, frameon=False, fontsize=size)
-    # plt.show()
-
-    # uw, sw, vw = Spectral.MatFreqKernel(phyFreq, "Fermi")
-    # SigmaW = Spectral2Data(spectral, Para.TauBasisSize, uw, sw, vw)
-
-    # idx = 12
-
-    # ax.plot(Freq, SigmaW[idx, :].real, "ro-",
-    #         label="k={0}, real".format(Grid.MomGrid[idx]))
-    # ax.plot(Freq, SigmaW[idx, :].imag, "bs-",
-    #         label="k={0}, imag".format(Grid.MomGrid[idx]))
-
-    # plt.legend(loc=1, frameon=False, fontsize=size)
-    # plt.show()
-
-    # BareG = np.zeros((Grid.MomSize, len(phyFreq)), dtype=complex)
-    # for i, q in enumerate(Grid.MomGrid):
-    #     BareG[i, :] = -1.0/(1j*phyFreq-q*q+Para.EF)
-
-    # dG_W = 1.0/(1.0/BareG-SigmaW)
-    # dG_W = SigmaW*BareG*BareG/(1-SigmaW*BareG)
-
-    # FittedGW, Coefp = FitData(dG_W, Para.TauBasisSize, vw)
-
-    # idx = 30
-    # ax.plot(Freq,
-    #         dG_W[idx, :], 'rs-', label="k={0}, real".format(Grid.MomGrid[idx]))
-    # ax.plot(Freq,
-    #         FittedGW[idx, :], 'bo-', label="k={0}, real".format(Grid.MomGrid[idx]))
-
-    # plt.legend(loc=1, frameon=False, fontsize=size)
-    # plt.show()
-
-    # spectral = Data2Spectral(dG_W, Para.TauBasisSize, uw, sw, vw)
-
-    # print "Max imaginary part of the spectral: ", np.amax(abs(spectral.imag))
-    # dG_T = Spectral2Data(spectral, Para.TauBasisSize, ut, st, vt)
-
-    # idx = 32
-    # ax.plot(Grid.TauGrid/Para.Beta, dG_T[idx, :].real, "ro-",
-    #         label="k={0}, real".format(Grid.MomGrid[idx]))
-
-    # plt.legend(loc=1, frameon=False, fontsize=size)
-    # plt.show()
-
-    # ax.set_xticks([0.0,0.04,0.08,0.12])
-    # ax.set_yticks([0.35,0.4,0.45,0.5])
-    # ax.set_ylim([-0.02, 0.125])
-    # ax.set_ylim([0.07, 0.125])
-    # ax.xaxis.set_label_coords(0.97, -0.01)
-    # # ax.yaxis.set_label_coords(0.97, -0.01)
-    # ax.text(-0.012,0.52, "$-I$", fontsize=size)
-    # ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
-
-    # ax.text(0.02,0.47, "$\\sim {\\frac{1}{2}-}\\frac{1}{2} {\\left( \\frac{r}{L} \\right)} ^{2-s}$", fontsize=28)
+    PlotSigmaT(dG_W, int(Para.MomGridSize/3), True)

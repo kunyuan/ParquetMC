@@ -12,36 +12,55 @@ class grid:
         self.AngSize = para.AngGridSize
 
         #### Grid ############################
-        self.TauGrid = self.__TauGrid()
+        self.TauGrid, self.dTauGrid = self.__TauGrid()
         self.MomGrid = self.__MomGrid()
         self.AngGrid = self.__AngleGrid()
 
     def __TauGrid(self):
         ########### logirthmic grid #####################
-        # N = self.Para.TauGridSize/2
-        # a = self.Para.EF*self.Para.Beta/6.0
-        # b = a/(N-1)
-        # eps = 1.0e-8/self.Para.Beta
+        N = self.Para.TauGridSize/2
+        a = self.Para.EF*self.Para.Beta/6.0
+        b = a/(N-0.5)
+        eps = 1.0e-8/self.Para.Beta
 
-        # TauGrid = np.zeros(self.Para.TauGridSize)
+        TauGrid = np.zeros(self.TauSize)
 
-        # print a, b
-        # assert a > 1, "Coeff a must be much larger than 1!"
-        # assert b > 0, "Coeff b must be larger than 0!"
+        print a, b
+        assert a > 1, "Coeff a must be much larger than 1!"
+        assert b > 0, "Coeff b must be larger than 0!"
 
-        # for i in range(N):
-        #     TauGrid[i] = 0.5*np.exp(-a)*(np.exp(b*i)-1.0)+eps
-        #     # print i, b*i, a
-        #     TauGrid[2*N-1-i] = 1.0-TauGrid[i]
+        for i in range(N):
+            TauGrid[i] = 0.5*np.exp(-a)*(np.exp(b*i)-1.0)+eps
+            # print i, b*i, a
+            TauGrid[2*N-1-i] = 1.0-TauGrid[i]
 
-        # TauGrid *= self.Para.Beta
+        TauGrid *= self.Para.Beta
 
         ########## uniform grid  #########################
-        arr = np.array(range(self.TauSize))
-        TauGrid = arr*self.Para.Beta/(self.TauSize-1)
-        TauGrid[0] += 1.0e-8
-        TauGrid[-1] -= 1.0e-8
-        return TauGrid
+        # arr = np.array(range(self.TauSize))
+        # TauGrid = arr*self.Para.Beta/(self.TauSize-1)
+        # TauGrid[0] += 1.0e-8
+        # TauGrid[-1] -= 1.0e-8
+
+        ######### set the Tau bin weight  ###############
+        dTauGrid = np.zeros_like(TauGrid)
+        dTauGrid += 1.0
+        # for i, t in enumerate(TauGrid):
+        #     if t > 3.0/self.Para.EF and t < self.Para.Beta-3.0/self.Para.EF:
+        #         dTauGrid[i] = 8.0
+        # dTauGrid[0] = 8.0
+        # dTauGrid[-1] = 8.0
+        # dTauGrid /= np.sum(dTauGrid)
+
+        # dTauGrid = np.zeros_like(TauGrid)
+        # for i in range(1, self.TauSize-1):
+        #     dTauGrid[i] = (TauGrid[i+1]-TauGrid[i-1])/2.0
+
+        # dTauGrid[0] = (TauGrid[1]-TauGrid[0])/2.0+TauGrid[0]
+        # dTauGrid[-1] = (TauGrid[-1]-TauGrid[-2])/2.0 + \
+        #     (self.Para.Beta-TauGrid[-1])
+
+        return TauGrid, dTauGrid
 
     def __MomGrid(self):
         arr = np.array(range(self.MomSize))
@@ -174,6 +193,11 @@ if __name__ == "__main__":
     with open("grid.data", "w") as f:
         f.writelines("{0} #TauGrid\n".format(Grid.TauSize))
         for t in Grid.TauGrid:
+            f.write("{0} ".format(t))
+        f.write("\n\n")
+
+        f.writelines("{0} #dTauGrid\n".format(Grid.TauSize))
+        for t in Grid.dTauGrid:
             f.write("{0} ".format(t))
         f.write("\n\n")
 

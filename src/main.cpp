@@ -215,7 +215,26 @@ void InitPara() {
   }
 
   GetLine(File) >> Size;
-  ASSERT_ALLWAYS(Size == Para.ExtMomBinSize, "TauBinSize is invalid!");
+  ASSERT_ALLWAYS(Size == Para.TauBinSize, "TauBinSize is invalid!");
+  Para.ExtTauReWeight.clear();
+  for (int t = 0; t < Para.TauBinSize; ++t) {
+    File >> bin;
+    Para.ExtTauReWeight.push_back(bin);
+  }
+
+  // make the first and the last tau weights bigger
+  // Para.ExtTauReWeight[0] /= 100.0;
+  // Para.ExtTauReWeight[Para.TauBinSize - 1] /= 100.0;
+
+  // normalize the tau bin weights
+  double TotalWeight = 0.0;
+  for (auto &w : Para.ExtTauReWeight)
+    TotalWeight += w;
+  for (auto &w : Para.ExtTauReWeight)
+    w /= TotalWeight;
+
+  GetLine(File) >> Size;
+  ASSERT_ALLWAYS(Size == Para.ExtMomBinSize, "ExtMomBinSize is invalid!");
   Para.ExtMomTable.clear();
   for (int k = 0; k < Para.ExtMomBinSize; ++k) {
     momentum mom;
@@ -225,7 +244,7 @@ void InitPara() {
   }
 
   GetLine(File) >> Size;
-  ASSERT_ALLWAYS(Size == Para.AngBinSize, "TauBinSize is invalid!");
+  ASSERT_ALLWAYS(Size == Para.AngBinSize, "AngBinSize is invalid!");
   Para.AngleTable.clear();
   for (int ang = 0; ang < Para.ExtMomBinSize; ++ang) {
     double angle;

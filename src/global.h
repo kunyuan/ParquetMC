@@ -59,6 +59,7 @@ struct parameter {
   std::vector<momentum> ExtMomTable;
   std::vector<double> AngleTable;
   std::vector<double> ExtTauTable;
+  std::vector<double> ExtTauReWeight;
 };
 
 struct variable {
