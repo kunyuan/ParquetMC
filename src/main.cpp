@@ -206,10 +206,6 @@ void InitPara() {
   // Grid.Initialize({0.0, Para.Beta / 2.0}, Para.TauBinSize / 2 + 1, true,
   //                 Para.Ef * Para.Beta / 4.0);
 
-  auto TauGrid = tauGrid();
-  TauGrid.Initialize(Para.Beta, Para.TauBinSize, Para.Ef * Para.Beta / 4.0);
-  cout << TauGrid.ToString() << endl;
-
   int Size;
   File.open("grid.data", ios::in);
   ASSERT_ALLWAYS(File.is_open(), "Can not load grid file! \n");
@@ -222,6 +218,13 @@ void InitPara() {
     File >> bin;
     Para.ExtTauTable.push_back(bin);
   }
+
+  // auto TauGrid = tauGrid();
+  // TauGrid.Initialize(Para.Beta, Para.TauBinSize, Para.Ef * Para.Beta / 10.0);
+  // cout << TauGrid.ToString() << endl;
+  // for (int t = 0; t < Para.TauBinSize; ++t) {
+  //   Para.ExtTauTable[t] = TauGrid.Grid(t);
+  // }
 
   GetLine(File) >> Size;
   ASSERT_ALLWAYS(Size == Para.TauBinSize, "TauBinSize is invalid!");

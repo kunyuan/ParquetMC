@@ -1,6 +1,7 @@
 #ifndef FeynCalc_global_h
 #define FeynCalc_global_h
 
+#include "grid.h"
 #include "utility/utility.h"
 #include <Eigen/Dense>
 #include <array>
@@ -12,6 +13,8 @@
 
 enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
 enum diagram { SIGMA, POLAR, GAMMA, DELTA };
+
+#define DiagType SIGMA
 
 ///////////  Global Constants ////////////////////
 const int D = 3;                   // dimensions, 2 or 3
@@ -51,15 +54,23 @@ struct parameter {
   int ReweightTimer; // time interval to reweight different orders
 
   // external variable tables
+  // int ExtMomBinSize; // external K bins
+  // int AngBinSize;    // angle bins
+  // int TauBinSize;    // tau bin
+  // int TauBasisSize;  // tau basis
+  // std::vector<momentum> ExtMomTable;
+  // std::vector<double> AngleTable;
+  // std::vector<double> ExtTauTable;
+  // std::vector<double> ExtTauReWeight;
 
-  int ExtMomBinSize; // external K bins
-  int AngBinSize;    // angle bins
-  int TauBinSize;    // tau bin
-  int TauBasisSize;  // tau basis
-  std::vector<momentum> ExtMomTable;
-  std::vector<double> AngleTable;
-  std::vector<double> ExtTauTable;
-  std::vector<double> ExtTauReWeight;
+  tauGrid TauGrid;
+  uniformGrid AngleGrid;
+
+#if DiagType == SIGMA
+  kFermiGrid KGrid;
+#else
+  kBoseGrid KGrid;
+#endif
 };
 
 struct variable {
