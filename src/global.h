@@ -99,6 +99,8 @@ const int LEFT = 0, RIGHT = 1;
 const int INL = 0, OUTL = 1, INR = 2, OUTR = 3;
 const int DIRECT = 0, EXCHANGE = 1;
 const int DIR = 0, EX = 1;
+const int HEAD = 0, TAIL = 1;
+const int FERMI = 0, BOSE = 1;
 
 //////////////////////////////////////////////////////
 

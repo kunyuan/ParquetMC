@@ -1,3 +1,4 @@
+#include "grid.h"
 #include "markov.h"
 #include "utility/timer.h"
 #include <algorithm>
@@ -200,6 +201,14 @@ void InitPara() {
   // Load external variable tables
   // try {
   // LOG_INFO("Loading grids ...");
+
+  // auto Grid = grid();
+  // Grid.Initialize({0.0, Para.Beta / 2.0}, Para.TauBinSize / 2 + 1, true,
+  //                 Para.Ef * Para.Beta / 4.0);
+
+  auto TauGrid = tauGrid();
+  TauGrid.Initialize(Para.Beta, Para.TauBinSize, Para.Ef * Para.Beta / 4.0);
+  cout << TauGrid.ToString() << endl;
 
   int Size;
   File.open("grid.data", ios::in);
