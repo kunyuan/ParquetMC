@@ -20,9 +20,9 @@ const int MaxOrder = 9; // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
-const diagtype DiagType = POLAR;
-// typedef kFermiGrid kGrid; // for sigma
-typedef kBoseGrid kGrid; // for gamma, polar and delta
+const diagtype DiagType = SIGMA;
+typedef kFermiGrid kGrid; // for sigma
+// typedef kBoseGrid kGrid; // for gamma, polar and delta
 
 typedef Eigen::Matrix<double, D, 1> momentum; // momentum vector
 typedef Eigen::Vector2d verWeight; // direct and exchange weights for gamma

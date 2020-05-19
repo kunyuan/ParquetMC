@@ -1,3 +1,4 @@
+import seaborn as sns
 import os
 import sys
 import re
@@ -11,10 +12,8 @@ mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
 
-##################### Global variables  #############################
-Dim = 3
-SpinIndex = 2
-#####################################################################
+sns.set_style("whitegrid")
+sns.set_palette("colorblind", n_colors=16)
 
 
 def GetLine(file):
@@ -22,6 +21,13 @@ def GetLine(file):
         line = file.readline().strip()
         if len(line) > 0 and line[0] != "#":
             return line
+
+
+def getListOfFiles(dirName):
+    listOfFiles = list()
+    for (dirpath, dirnames, filenames) in os.walk(dirName):
+        listOfFiles += [os.path.join(dirpath, file) for file in filenames]
+    return listOfFiles
 
 
 class param:
@@ -40,7 +46,9 @@ class param:
             self.Mass2 = float(para[3])
             self.Lambda = float(para[4])
             self.Charge2 = float(para[5])
-            self.TotalStep = int(para[6])
+            self.Dim = int(para[6])
+            self.Spin = int(para[7])
+            self.TotalStep = int(para[8])
 
             grid = GetLine(file).split(",")
             self.TauGridSize = int(grid[0])
@@ -55,15 +63,15 @@ class param:
             self.MessageTimer = int(timer[3])
             self.CollectionTimer = int(timer[4])
 
-        if Dim == 3:
+        if self.Dim == 3:
             self.kF = (9.0*np.pi/4.0)**(1.0/3.0)/self.Rs
-            self.Nf = self.kF/4.0/np.pi**2*SpinIndex
-        elif Dim == 2:
+            self.Nf = self.kF/4.0/np.pi**2*self.Spin
+        elif self.Dim == 2:
             self.kF = np.sqrt(2.0)/self.Rs  # 2D
-            print "Not Implemented for Dimension {0}".format(Dim)
+            print "Not Implemented for Dimension {0}".format(self.Dim)
             sys.exit(0)
         else:
-            print "Not Implemented for Dimension {0}".format(Dim)
+            print "Not Implemented for Dimension {0}".format(self.Dim)
             sys.exit(0)
 
         self.EF = self.kF**2
@@ -71,8 +79,8 @@ class param:
         self.MaxExtMom *= self.kF
 
         print yellow("Parameters:")
-        print "Rs={0}, kF={1}, EF={2}, Beta={3}, Mass2={4}, Lambda={5}\n".format(
-            self.Rs, self.kF, self.EF, self.Beta, self.Mass2, self.Lambda)
+        print "Rs={0}, kF={1}, EF={2}, Beta={3}, Mass2={4}, Lambda={5}, Dim={6}, Spin={7}\n".format(
+            self.Rs, self.kF, self.EF, self.Beta, self.Mass2, self.Lambda, self.Dim, self.Spin)
 
         print yellow("Grid Information:")
         print "TauSize={0}, MomSize={1}, AngleSize={2}, MaxExtMom={3}".format(
@@ -83,13 +91,6 @@ class param:
             self.PrintTimer, self.SaveTimer, self.ReWeightTimer, self.MessageTimer, self.CollectionTimer)
 
 # For the given path, get the List of all files in the directory tree
-
-
-def getListOfFiles(dirName):
-    listOfFiles = list()
-    for (dirpath, dirnames, filenames) in os.walk(dirName):
-        listOfFiles += [os.path.join(dirpath, file) for file in filenames]
-    return listOfFiles
 
 
 def Estimate(Data, Weights):
@@ -107,7 +108,7 @@ def Estimate(Data, Weights):
         return Avg, Var*0.0
 
 
-def LoadFile(Folder, FileName):
+def LoadFile(Folder, FileName, shape=None):
     Step = []
     Norm = []
     Data = []
@@ -131,7 +132,11 @@ def LoadFile(Folder, FileName):
                 assert len(Norm) == len(Data) + \
                     1, "size of Data and Norm must be the same!"
 
-                Data.append(np.loadtxt(f))
+                if shape == None:
+                    Data.append(np.loadtxt(f))
+                else:
+                    Data.append(np.loadtxt(f).reshape(shape))
+
             except Exception as e:
                 print "Failed to load {0}".format(f)
                 print str(e)
@@ -152,7 +157,7 @@ ColorList = ColorList*40
 if __name__ == '__main__':
     Para = param()
 
-    dirName = "./Data"
+    dirName = "../Data"
     filename = "sigma_pid[0-9]+.dat"
 
     LoadFile(dirName, filename)

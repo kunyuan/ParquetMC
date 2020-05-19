@@ -1,7 +1,6 @@
 #include "grid.h"
 #include "markov.h"
 #include "utility/timer.h"
-#include <algorithm>
 #include <iostream>
 #include <math.h>
 
@@ -128,30 +127,16 @@ int main(int argc, const char *argv[]) {
   return 0;
 }
 
-stringstream GetLine(ifstream &File) {
-  string line;
-  while (true) {
-    getline(File, line);
-    line = trim(line);
-    // cout << "get " << line << endl;
-    if (line.size() > 0 && line[0] != '#') {
-      replace(line.begin(), line.end(), ',', ' ');
-      // cout << "return " << line << endl;
-      return stringstream(line);
-    }
-  }
-}
-
 void InitPara() {
-
   ifstream File;
-  string line;
   File.open("parameter", ios::in);
   ASSERT_ALLWAYS(File.is_open(), "Can not load parameters! \n");
   // parameters
+  int dim, spin;
   auto paraStream = GetLine(File);
   paraStream >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >>
-      Para.Lambda >> Para.Charge2 >> Para.TotalStep;
+      Para.Lambda >> Para.Charge2 >> dim >> spin >> Para.TotalStep;
+  ASSERT_ALLWAYS(dim == D && spin == SPIN, "Dimension or SPIN doesn't match!");
 
   // grid information
   int TauSize, KSize, AngSize;
@@ -199,13 +184,17 @@ void InitPara() {
                           << "ReWeightTimer: " << Para.ReweightTimer << "\n"
                           << "MessageTimer: " << Para.MessageTimer << "\n");
 
+  // initialize grids
   Para.TauGrid.Initialize(Para.Beta, TauSize, 6.0 / Para.Ef);
   Para.AngleGrid.Initialize({-1.0, 1.0}, AngSize);
 
-  if (DiagType == SIGMA)
+  if (typeid(kGrid) == typeid(kFermiGrid)) {
+    // fermionic kGrid
     Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 4.0);
-  else
+  } else {
+    // bosonic kGrid
     Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
+  }
 }
 
 void InitVar() {

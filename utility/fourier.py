@@ -1,8 +1,7 @@
 import numpy as np
-import grid
 from scipy import integrate
-from scipy.interpolate import UnivariateSpline
 from scipy import interpolate
+import spectral
 import numpy.linalg as linalg
 
 
@@ -23,14 +22,14 @@ class fourier:
                                         MaxRealFreq, RealFreqSize)
         self.RealFreqSize = RealFreqSize
         self.Type = Type
-        self.KernelT = grid.TauKernel(
+        self.KernelT = spectral.TauKernel(
             self.Beta, self.TauGrid, self.RealFreqGrid, self.Type)
 
-        self.uKernelT = grid.TauKernel(
+        self.uKernelT = spectral.TauKernel(
             self.Beta, self.uTauGrid, self.RealFreqGrid, self.Type)
         self.uInvKernelT = linalg.pinv(self.uKernelT, Threshold)
 
-        self.KernelW = grid.MatFreqKernel(
+        self.KernelW = spectral.MatFreqKernel(
             self.Beta, self.WnGrid, self.RealFreqGrid, self.Type)
         self.InvKernelW = linalg.pinv(self.KernelW, Threshold)
 

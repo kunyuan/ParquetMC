@@ -1,7 +1,6 @@
 #!/usr/bin/python
-from scipy import integrate
-from utility import *
-import fourier
+from utility.IO import *
+import utility.fourier as fourier
 
 # XType = "Tau"
 XType = "Mom"
