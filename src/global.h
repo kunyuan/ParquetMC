@@ -20,7 +20,7 @@ const int MaxOrder = 9; // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
-const diagtype DiagType = DELTA;
+const diagtype DiagType = SIGMA;
 typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 

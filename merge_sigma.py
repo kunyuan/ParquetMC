@@ -128,3 +128,13 @@ if __name__ == "__main__":
     print "Maximum Error of \delta G: ", np.amax(abs(dG_T-dG_Tp))
 
     PlotSigmaT(dG_W, range(0, Para.MomGridSize, Para.MomGridSize/8), False)
+
+    with open("green.dat", "w") as f:
+        for k in range(Para.MomGridSize):
+            f.write("{0} ".format(Static[k]))
+        f.write("\n")
+
+        for k in range(Para.MomGridSize):
+            for t in range(Para.TauGridSize):
+                f.write("{0} ".format(dG_T[k, t].real))
+        f.write("\n")

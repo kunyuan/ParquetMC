@@ -3,9 +3,9 @@ from utility.IO import *
 import utility.fourier as fourier
 
 # XType = "Tau"
-# XType = "Mom"
+XType = "Mom"
 # XType = "Z"
-XType = "Freq"
+# XType = "Freq"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 
