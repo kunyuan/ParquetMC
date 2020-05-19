@@ -21,11 +21,6 @@ void InitPara(), InitVar();
 const string HelpStr = "Two parameters: PID Seed";
 
 int main(int argc, const char *argv[]) {
-#ifdef NDEBUG
-  LOG_INFO("NDEBUG mode is OFF.");
-#else
-  LOG_INFO("NDEBUG mode is ON.");
-#endif
   // take two parameters: PID and Seed
   Para.PID = atoi(argv[1]);
   Para.Seed = atoi(argv[2]);
@@ -33,6 +28,12 @@ int main(int argc, const char *argv[]) {
   //// initialize the global log configuration   /////////////
   string LogFile = "_" + to_string(Para.PID) + ".log";
   LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
+
+#ifdef NDEBUG
+  LOG_INFO("NDEBUG mode is OFF.");
+#else
+  LOG_INFO("NDEBUG mode is ON.");
+#endif
 
   ASSERT_ALLWAYS(Para.Seed > 0, "Random number seed must be positive integer!");
   ASSERT_ALLWAYS(Para.PID >= 0, "PID must be positive integer!");
@@ -82,7 +83,8 @@ int main(int argc, const char *argv[]) {
         Markov.ChangeExtTau();
       }
 
-      // cout << Var.LoopMom[1].norm() << endl;
+      // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << ", "
+      //      << Var.LoopMom[0][2] << endl;
 
       if (i % 8 == 0)
         // fast operations
@@ -152,11 +154,10 @@ void InitPara() {
       Para.Lambda >> Para.Charge2 >> Para.TotalStep;
 
   // grid information
-  int RealFreqGridSize;
-  double MaxRealFreq;
+  int TauSize, KSize, AngSize;
+  double MaxK;
   auto gridStream = GetLine(File);
-  gridStream >> Para.TauBinSize >> Para.ExtMomBinSize >> Para.AngBinSize >>
-      RealFreqGridSize >> MaxRealFreq >> Para.TauBasisSize;
+  gridStream >> TauSize >> KSize >> AngSize >> MaxK;
 
   // Timer information
   auto timerStream = GetLine(File);
@@ -183,7 +184,7 @@ void InitPara() {
   Para.Ef = Kf * Kf;
   Para.Mu = Para.Ef;
   Para.Nf = Kf / (4.0 * PI * PI) * SPIN;
-  Para.MaxExtMom *= Kf;
+  MaxK *= Kf;
 
   // scale all energy with E_F
   Para.Beta /= Para.Ef;
@@ -198,72 +199,13 @@ void InitPara() {
                           << "ReWeightTimer: " << Para.ReweightTimer << "\n"
                           << "MessageTimer: " << Para.MessageTimer << "\n");
 
-  // Load external variable tables
-  // try {
-  // LOG_INFO("Loading grids ...");
+  Para.TauGrid.Initialize(Para.Beta, TauSize, 6.0 / Para.Ef);
+  Para.AngleGrid.Initialize({-1.0, 1.0}, AngSize);
 
-  // auto Grid = grid();
-  // Grid.Initialize({0.0, Para.Beta / 2.0}, Para.TauBinSize / 2 + 1, true,
-  //                 Para.Ef * Para.Beta / 4.0);
-
-  int Size;
-  File.open("grid.data", ios::in);
-  ASSERT_ALLWAYS(File.is_open(), "Can not load grid file! \n");
-
-  GetLine(File) >> Size;
-  ASSERT_ALLWAYS(Size == Para.TauBinSize, "TauBinSize is invalid!");
-  Para.ExtTauTable.clear();
-  double bin;
-  for (int t = 0; t < Para.TauBinSize; ++t) {
-    File >> bin;
-    Para.ExtTauTable.push_back(bin);
-  }
-
-  // auto TauGrid = tauGrid();
-  // TauGrid.Initialize(Para.Beta, Para.TauBinSize, Para.Ef * Para.Beta / 10.0);
-  // cout << TauGrid.ToString() << endl;
-  // for (int t = 0; t < Para.TauBinSize; ++t) {
-  //   Para.ExtTauTable[t] = TauGrid.Grid(t);
-  // }
-
-  GetLine(File) >> Size;
-  ASSERT_ALLWAYS(Size == Para.TauBinSize, "TauBinSize is invalid!");
-  Para.ExtTauReWeight.clear();
-  for (int t = 0; t < Para.TauBinSize; ++t) {
-    File >> bin;
-    Para.ExtTauReWeight.push_back(bin);
-  }
-
-  // make the first and the last tau weights bigger
-  // Para.ExtTauReWeight[0] /= 100.0;
-  // Para.ExtTauReWeight[Para.TauBinSize - 1] /= 100.0;
-
-  // normalize the tau bin weights
-  double TotalWeight = 0.0;
-  for (auto &w : Para.ExtTauReWeight)
-    TotalWeight += w;
-  for (auto &w : Para.ExtTauReWeight)
-    w /= TotalWeight;
-
-  GetLine(File) >> Size;
-  ASSERT_ALLWAYS(Size == Para.ExtMomBinSize, "ExtMomBinSize is invalid!");
-  Para.ExtMomTable.clear();
-  for (int k = 0; k < Para.ExtMomBinSize; ++k) {
-    momentum mom;
-    mom.setZero();
-    File >> mom[0];
-    Para.ExtMomTable.push_back(mom);
-  }
-
-  GetLine(File) >> Size;
-  ASSERT_ALLWAYS(Size == Para.AngBinSize, "AngBinSize is invalid!");
-  Para.AngleTable.clear();
-  for (int ang = 0; ang < Para.ExtMomBinSize; ++ang) {
-    double angle;
-    File >> angle;
-    Para.AngleTable.push_back(angle);
-  }
-  File.close();
+  if (DiagType == SIGMA)
+    Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 4.0);
+  else
+    Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
 }
 
 void InitVar() {
@@ -286,25 +228,26 @@ void InitVar() {
 
   // Set the potential ExtTauBin
   Var.CurrExtTauBin = 0;
-  Var.Tau[MaxTauNum - 1] = Para.ExtTauTable[Var.CurrExtTauBin];
+  Var.Tau[MaxTauNum - 1] = Para.TauGrid.Grid[Var.CurrExtTauBin];
   // cout << "Tau: " << Var.Tau[MaxTauNum - 1] << endl;
 
-  if (DiagType == GAMMA) {
-    Var.CurrExtMomBin = 0;
-    for (int i = 0; i < 4; ++i)
-      Var.LoopMom[i].setZero();
-    Var.LoopMom[INL][0] = Para.Kf;
-    Var.LoopMom[OUTL][0] = Para.Kf;
+#if DiagType == GAMMA
+  Var.CurrExtMomBin = 0;
+  for (int i = 0; i < 4; ++i)
+    Var.LoopMom[i].setZero();
+  Var.LoopMom[INL][0] = Para.Kf;
+  Var.LoopMom[OUTL][0] = Para.Kf;
 
-    Var.CurrExtAngBin = 0;
-    double theta = acos(Para.AngleTable[Var.CurrExtAngBin]);
-    Var.LoopMom[INR][0] = Para.Kf * cos(theta);
-    Var.LoopMom[INR][1] = Para.Kf * sin(theta);
+  Var.CurrExtAngBin = 0;
+  double theta = acos(Para.AngleGrid.Grid[Var.CurrExtAngBin]);
+  Var.LoopMom[INR][0] = Para.Kf * cos(theta);
+  Var.LoopMom[INR][1] = Para.Kf * sin(theta);
 
-    Var.LoopMom[OUTR] = Var.LoopMom[INR];
+  Var.LoopMom[OUTR] = Var.LoopMom[INR];
 
-  } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
-    Var.CurrExtMomBin = 0;
-    Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
-  }
+#elif DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA
+  Var.CurrExtMomBin = 0;
+  Var.LoopMom[0].setZero();
+  Var.LoopMom[0][0] = Para.KGrid.Grid[Var.CurrExtMomBin];
+#endif
 }

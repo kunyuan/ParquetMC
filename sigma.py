@@ -1,32 +1,31 @@
 from scipy import integrate
 from utility import *
-from grid import *
-import basis
 
-XType = "Tau"
-# XType = "Mom"
+# XType = "Tau"
+XType = "Mom"
 # XType = "Z"
 # XType = "Freq"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 
 Para = param()
-Grid = grid(Para)
 Order = range(0, Para.Order+1)
-TauGrid = Grid.TauGrid
-MomGrid = Grid.MomGrid
-TauGridSize = Para.TauGridSize
-MomGridSize = Para.MomGridSize
-
-Basis = basis.BuildBasis(TauGrid, Para.Beta, 15, "Fermi")
 
 folder = "./Data"
 
 filename = "sigma_pid[0-9]+.dat"
 
-shape = (Para.Order+1, MomGridSize, TauGridSize)
 
-Data, Norm, Step = LoadFile(folder, filename, shape)
+Data, Norm, Step, Grid = LoadFile(folder, filename)
+
+MomGrid = Grid["KGrid"]
+TauGrid = Grid["TauGrid"]
+MomGridSize = len(MomGrid)
+TauGridSize = len(TauGrid)
+print MomGridSize, TauGridSize
+
+shape = (Para.Order+1, MomGridSize, TauGridSize)
+Data = [data.reshape(shape) for data in Data]
 
 fig, ax = plt.subplots()
 

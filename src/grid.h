@@ -27,7 +27,7 @@ private:
 class tauGrid {
 public:
   int Size;
-  void Initialize(double beta, int size, double lambda);
+  void Initialize(double beta, int size, double scale);
   int Floor(double x); // return the index of a given value
   Eigen::VectorXd Grid;
   Eigen::VectorXd Weight;
@@ -44,7 +44,7 @@ public:
   double MaxK;
   double kF;
   int kFIdx;
-  void Initialize(double kF, double MaxK, int size, double lambda);
+  void Initialize(double kF, double MaxK, int size, double scale);
   int Floor(double x); // return the index of a given value
   Eigen::VectorXd Grid;
   std::string ToString();
@@ -61,7 +61,7 @@ public:
   double kF;
   int kFIdx;
   int TwokFIdx;
-  void Initialize(double kF, double MaxK, int size, double lambda);
+  void Initialize(double kF, double MaxK, int size, double scale);
   int Floor(double x); // return the index of a given value
   Eigen::VectorXd Grid;
   std::string ToString();

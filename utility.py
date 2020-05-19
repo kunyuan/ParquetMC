@@ -46,10 +46,7 @@ class param:
             self.TauGridSize = int(grid[0])
             self.MomGridSize = int(grid[1])
             self.AngGridSize = int(grid[2])
-            self.RealFreqGridSize = int(grid[3])
-            self.MaxRealFreq = float(grid[4])
-            self.MaxExtMom = float(grid[5])
-            self.TauBasisSize = int(grid[6])
+            self.MaxExtMom = float(grid[3])
 
             timer = GetLine(file).split(",")
             self.PrintTimer = int(timer[0])
@@ -72,17 +69,14 @@ class param:
         self.EF = self.kF**2
         self.Beta /= self.EF
         self.MaxExtMom *= self.kF
-        self.MaxRealFreq *= self.EF
 
         print yellow("Parameters:")
         print "Rs={0}, kF={1}, EF={2}, Beta={3}, Mass2={4}, Lambda={5}\n".format(
             self.Rs, self.kF, self.EF, self.Beta, self.Mass2, self.Lambda)
 
         print yellow("Grid Information:")
-        print "TauSize={0}, MomSize={1}, AngleSize={2}, RealFreqSize={3}, TauBasisNum={4}".format(
-            self.TauGridSize, self.MomGridSize, self.AngGridSize, self.RealFreqGridSize, self.TauBasisSize)
-        print "MaxRealFreq={0}, MaxExtMom={1}\n".format(
-            self.MaxRealFreq, self.MaxExtMom)
+        print "TauSize={0}, MomSize={1}, AngleSize={2}, MaxExtMom={3}".format(
+            self.TauGridSize, self.MomGridSize, self.AngGridSize, self.MaxExtMom)
 
         print yellow("Timer Information:")
         print "Print={0}, Save={1}, ReWeight={2}, Message={3}, Collection={4}".format(
@@ -113,10 +107,11 @@ def Estimate(Data, Weights):
         return Avg, Var*0.0
 
 
-def LoadFile(Folder, FileName, Shape):
+def LoadFile(Folder, FileName):
     Step = []
     Norm = []
     Data = []
+    Grid = {}
 
     for f in getListOfFiles(Folder):
         if re.search(FileName, f):
@@ -125,16 +120,23 @@ def LoadFile(Folder, FileName, Shape):
                 with open(f, "r") as file:
                     Step.append(int(file.readline().split(":")[1]))
                     Norm.append(float(file.readline().split(":")[1]))
+                    while True:
+                        g = file.readline().split(":")
+                        if g[0].find("Grid") != -1:
+                            key = g[0].strip(" #")
+                            Grid[key] = np.fromstring(g[1], sep=' ')
+                        else:
+                            break
 
                 assert len(Norm) == len(Data) + \
                     1, "size of Data and Norm must be the same!"
 
-                Data.append(np.loadtxt(f).reshape(Shape))
+                Data.append(np.loadtxt(f))
             except Exception as e:
                 print "Failed to load {0}".format(f)
                 print str(e)
 
-    return Data, Norm, Step
+    return Data, Norm, Step, Grid
 
 
 def ErrorPlot(p, x, d, color='k', marker='s', label=None, size=4, shift=False):
@@ -151,6 +153,8 @@ if __name__ == '__main__':
     Para = param()
 
     dirName = "./Data"
+    filename = "sigma_pid[0-9]+.dat"
 
-    for elem in getListOfFiles(dirName):
-        print(elem)
+    LoadFile(dirName, filename)
+    # for elem in getListOfFiles(dirName):
+    #     print(elem)

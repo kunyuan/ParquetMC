@@ -1,6 +1,5 @@
 from scipy import integrate
 from utility import *
-from grid import *
 
 # XType = "Tau"
 XType = "Mom"
@@ -9,16 +8,16 @@ OrderByOrder = False
 
 Para = param()
 Order = range(0, Para.Order+1)
-TauGrid = BuildTauGrid(Para.Beta, TauGridSize)
-MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
 
-folder = "./Data"
+Data, Norm, Step, Grids = LoadFile("./Data", "polar_pid[0-9]+.dat")
 
-filename = "polar_pid[0-9]+.dat"
+TauGrid = Grids["TauGrid"]
+MomGrid = Grids["KGrid"]
+TauGridSize = len(TauGrid)
+MomGridSize = len(MomGrid)
 
 shape = (Para.Order+1, MomGridSize, TauGridSize)
-
-Data, Norm, Step = LoadFile(folder, filename, shape)
+Data = [data.reshape(shape) for data in Data]
 Avg, Err = Estimate(Data, Norm)
 
 # fig, ax = plt.subplots()
@@ -29,10 +28,10 @@ if(XType == "Mom"):
         yList = [np.average(d[o, :, :], axis=1) for d in Data]
         y, err = Estimate(yList, Norm)
         # err = np.average(Err[o, :, :], axis=1)
-        plt.errorbar(MomGrid, y, yerr=err, fmt='o-', capthick=1, capsize=4,
+        plt.errorbar(MomGrid/Para.kF, y, yerr=err, fmt='o-', capthick=1, capsize=4,
                      color=ColorList[o], label="Order {0}".format(o))
 
-    plt.xlim([MomGrid[0], MomGrid[-1]])
+    plt.xlim([MomGrid[0]/Para.kF, MomGrid[-1]/Para.kF])
     plt.xlabel("$Ext K$", size=size)
 
     # x = ExtMomBin*kF

@@ -33,9 +33,6 @@ CreateFolder(homedir)
 os.system("cp {0} {1}".format(execute, homedir))
 os.system("cp {0} {1}".format("parameter", homedir))
 
-os.system("python grid.py")
-os.system("cp {0} {1}".format("grid.data", homedir))
-
 if Cluster != "Rutgers":
     outfilepath = os.path.join(homedir, "outfile")
     CreateFolder(outfilepath)

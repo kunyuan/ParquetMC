@@ -65,7 +65,7 @@ double weight::Evaluate(int Order) {
     return 1.0;
 
   // higher order
-  if (DiagType == diagram::GAMMA) {
+  if (DiagType == diagtype::GAMMA) {
     Gamma[Order].Evaluate(Var.LoopMom[INL],  // KInL
                           Var.LoopMom[OUTL], // KOutL
                           Var.LoopMom[INR],  // KInR
@@ -77,15 +77,15 @@ double weight::Evaluate(int Order) {
       ChanWeight[0] += w;
     return ChanWeight[0][DIR] + ChanWeight[0][EX] / SPIN;
 
-  } else if (DiagType == diagram::POLAR) {
+  } else if (DiagType == diagtype::POLAR) {
     // polarization diagram
     double Weight = Polar[Order].Evaluate();
     return Weight;
-  } else if (DiagType == diagram::SIGMA) {
+  } else if (DiagType == diagtype::SIGMA) {
     // self-energy diagram
     double Weight = Sigma[Order].Evaluate();
     return Weight;
-  } else if (DiagType == diagram::DELTA) {
+  } else if (DiagType == diagtype::DELTA) {
     // self-energy diagram
     double Weight = Delta[Order].Evaluate();
     return Weight;
@@ -95,7 +95,7 @@ double weight::Evaluate(int Order) {
 void weight::Measure() {
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
 
-  if (DiagType == diagram::GAMMA) {
+  if (DiagType == diagtype::GAMMA) {
     if (Var.CurrOrder == 0) {
       // order zero
       GammaObs.Measure0(Factor);
@@ -113,7 +113,7 @@ void weight::Measure() {
                        ChanWeight, Factor);
     }
   } else {
-    Factor /= Para.ExtTauReWeight[Var.CurrExtTauBin];
+    Factor /= Para.TauGrid.Weight[Var.CurrExtTauBin];
     // Polar, Sigma, Delta can be handled together
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);
@@ -124,7 +124,7 @@ void weight::Measure() {
 }
 
 void weight::SaveToFile() {
-  if (DiagType == diagram::GAMMA)
+  if (DiagType == GAMMA)
     GammaObs.Save();
   else
     OneBodyObs.Save();
