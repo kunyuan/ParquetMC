@@ -1,5 +1,7 @@
+#!/usr/bin/python
 from scipy import integrate
 from utility import *
+import fourier
 
 # XType = "Tau"
 XType = "Mom"
@@ -18,17 +20,21 @@ MomGridSize = len(MomGrid)
 
 shape = (Para.Order+1, MomGridSize, TauGridSize)
 Data = [data.reshape(shape) for data in Data]
+print Data[0].shape
 Avg, Err = Estimate(Data, Norm)
 
 # fig, ax = plt.subplots()
 plt.figure()
 
 if(XType == "Mom"):
+
+    phyFreq = [0.0, ]
+    Fourier = fourier.fourier(TauGrid, [phyFreq, ], Para.Beta)
     for o in Order:
-        yList = [np.average(d[o, :, :], axis=1) for d in Data]
+        yList = [Fourier.naiveT2W(d[o, :, :]) for d in Data]
         y, err = Estimate(yList, Norm)
         # err = np.average(Err[o, :, :], axis=1)
-        plt.errorbar(MomGrid/Para.kF, y, yerr=err, fmt='o-', capthick=1, capsize=4,
+        plt.errorbar(MomGrid/Para.kF, y[:, 0], yerr=err, fmt='o-', capthick=1, capsize=4,
                      color=ColorList[o], label="Order {0}".format(o))
 
     # x = ExtMomBin*kF
@@ -42,7 +48,7 @@ if(XType == "Mom"):
 
 elif(XType == "Tau"):
     N = 8
-    o = 2
+    o = 1
     for i in range(N):
         q = i*MomGridSize/N
         Avg, Err = Estimate(Data, Norm)

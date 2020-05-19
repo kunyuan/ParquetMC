@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from scipy import integrate
 from utility import *
 
