@@ -1,8 +1,8 @@
 #Order, Beta,  rs, Mass2, Lambda, charge2, TotalStep(1e6)
-   2,    40,  1.0,  0.0,    1.0,    1.0,       401
+   2,    40,  1.0,  0.0,    1.0,    1.0,       101
 
-#TauGrid, MomGrid, AngGrid, RealFreqGrid, MaxRealFreq(*EF), MaxExtMom(*kF), TauBasis 
-  1024,     64,       64,       1024,          30.0,           3.0,            32
+#TauGrid, MomGrid, AngGrid, MaxExtMom(*kF) 
+  128,     64,       64,       30.0
 
 #Print, Save, ReWeight, Message, Collection /time interval (in Sec.)
    10,   10,     30,       10,      10

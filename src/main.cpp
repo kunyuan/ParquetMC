@@ -231,23 +231,22 @@ void InitVar() {
   Var.Tau[MaxTauNum - 1] = Para.TauGrid.Grid[Var.CurrExtTauBin];
   // cout << "Tau: " << Var.Tau[MaxTauNum - 1] << endl;
 
-#if DiagType == GAMMA
-  Var.CurrExtMomBin = 0;
-  for (int i = 0; i < 4; ++i)
-    Var.LoopMom[i].setZero();
-  Var.LoopMom[INL][0] = Para.Kf;
-  Var.LoopMom[OUTL][0] = Para.Kf;
+  if (DiagType == GAMMA) {
+    Var.CurrExtMomBin = 0;
+    for (int i = 0; i < 4; ++i)
+      Var.LoopMom[i].setZero();
+    Var.LoopMom[INL][0] = Para.Kf;
+    Var.LoopMom[OUTL][0] = Para.Kf;
 
-  Var.CurrExtAngBin = 0;
-  double theta = acos(Para.AngleGrid.Grid[Var.CurrExtAngBin]);
-  Var.LoopMom[INR][0] = Para.Kf * cos(theta);
-  Var.LoopMom[INR][1] = Para.Kf * sin(theta);
+    Var.CurrExtAngBin = 0;
+    double theta = acos(Para.AngleGrid.Grid[Var.CurrExtAngBin]);
+    Var.LoopMom[INR][0] = Para.Kf * cos(theta);
+    Var.LoopMom[INR][1] = Para.Kf * sin(theta);
 
-  Var.LoopMom[OUTR] = Var.LoopMom[INR];
-
-#elif DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA
-  Var.CurrExtMomBin = 0;
-  Var.LoopMom[0].setZero();
-  Var.LoopMom[0][0] = Para.KGrid.Grid[Var.CurrExtMomBin];
-#endif
+    Var.LoopMom[OUTR] = Var.LoopMom[INR];
+  } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
+    Var.CurrExtMomBin = 0;
+    Var.LoopMom[0].setZero();
+    Var.LoopMom[0][0] = Para.KGrid.Grid[Var.CurrExtMomBin];
+  }
 }
