@@ -44,7 +44,7 @@ int logGrid::Floor(double x) {
 }
 
 double logGrid::Grid(int idx) {
-  cout << _a + _b * exp(Lambda * (idx - Idx[0])) << endl;
+  // cout << _a + _b * exp(Lambda * (idx - Idx[0])) << endl;
   return _a + _b * exp(Lambda * (idx - Idx[0]));
 }
 

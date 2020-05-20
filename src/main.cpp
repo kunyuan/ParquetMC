@@ -29,9 +29,9 @@ int main(int argc, const char *argv[]) {
   LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
 
 #ifdef NDEBUG
-  LOG_INFO("NDEBUG mode is OFF.");
+  LOG_INFO("NDEBUG mode is ON. e.g, Turn on Range checking ...");
 #else
-  LOG_INFO("NDEBUG mode is ON.");
+  LOG_INFO("NDEBUG mode is OFF. e.g, Turn off Range checking ...");
 #endif
 
   ASSERT_ALLWAYS(Para.Seed > 0, "Random number seed must be positive integer!");
@@ -153,7 +153,6 @@ void InitPara() {
   auto reweightStream = GetLine(File);
   for (int o = 0; o < Para.Order + 1; ++o)
     reweightStream >> Para.ReWeight[o];
-
   File.close();
 
   //// initialize the global parameter //////////////////////
@@ -195,6 +194,9 @@ void InitPara() {
     // bosonic kGrid
     Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
   }
+
+  if (BoldG)
+    Prop.LoadGreen("green.dat");
 }
 
 void InitVar() {

@@ -1,3 +1,4 @@
+#define FMT_HEADER_ONLY
 #include "observable.h"
 #include "propagator.h"
 #include "utility/abort.h"

@@ -1,6 +1,7 @@
 #ifndef FeynCalc_global_h
 #define FeynCalc_global_h
 
+#define FMT_HEADER_ONLY
 #include "grid.h"
 #include "utility/utility.h"
 #include <Eigen/Dense>
@@ -20,6 +21,7 @@ const int MaxOrder = 9; // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
+const bool BoldG = true;
 const diagtype DiagType = SIGMA;
 typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
@@ -94,7 +96,5 @@ const int DIR = 0, EX = 1;
 const int HEAD = 0, TAIL = 1;
 
 //////////////////////////////////////////////////////
-
-#define FMT_HEADER_ONLY
 
 #endif

@@ -1,8 +1,13 @@
+#define FMT_HEADER_ONLY
 #include "propagator.h"
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
+#include <iostream>
 
 using namespace diag;
+using namespace std;
+using namespace Eigen;
+
 extern parameter Para;
 extern variable Var;
 
@@ -49,6 +54,26 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
                  << ", Ek=" << Ek << ", Green=" << green << ", Mom=" << K);
 
   return green;
+}
+
+void propagator::LoadGreen(string FileName) {
+
+  _StaticSigma.setZero(Para.KGrid.Size);
+  _DeltaG.setZero(Para.KGrid.Size, Para.TauGrid.Size);
+
+  ifstream File;
+  File.open(FileName, ios::in);
+  ASSERT_ALLWAYS(File.is_open(), "Can not load Green weights! \n");
+
+  for (int k = 0; k < Para.KGrid.Size; ++k)
+    File >> _StaticSigma[k];
+
+  for (int k = 0; k < Para.KGrid.Size; ++k)
+    for (int t = 0; t < Para.KGrid.Size; ++t)
+      File >> _DeltaG(k, t);
+
+  for (int k = 0; k < Para.KGrid.Size; ++k)
+    cout << _StaticSigma[k] << ", " << endl;
 }
 
 double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
@@ -146,6 +171,35 @@ double propagator::CounterBubble(const momentum &K) {
   Factor *=
       Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
   return Factor;
+}
+
+double propagator::_Interp1D(double K, const weight1D &data) {
+  int idx0 = Para.KGrid.Floor(K);
+  int idx1 = idx0 + 1;
+  double K0 = Para.KGrid.Grid[idx0];
+  double K1 = Para.KGrid.Grid[idx1];
+  ASSERT(K0 <= K && K1 > K,
+         "Interpolate fails: " << K0 << "<" << K << "<" << K1);
+  return (data[idx0] * (K1 - K) + data[idx1] * (K - K0)) / (K1 - K0);
+}
+double propagator::_Interp2D(double K, double T, const weight2D &data) {
+  int Tidx0 = Para.TauGrid.Floor(T);
+  double dT0 = T - Para.TauGrid.Grid[Tidx0],
+         dT1 = Para.TauGrid.Grid[Tidx0 + 1] - T;
+  ASSERT(dT0 >= 0.0 && dT1 > 0.0,
+         "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
+
+  int Kidx0 = Para.KGrid.Floor(K);
+  int dK0 = K - Para.KGrid.Grid[Kidx0], dK1 = Para.KGrid.Grid[Kidx0 + 1] - K;
+  ASSERT(dK0 >= 0.0 && dK1 > 0.0,
+         "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
+
+  double d00 = data(Kidx0, Tidx0), d01 = data(Kidx0, Tidx0 + 1);
+  double d10 = data(Kidx0 + 1, Tidx0), d11 = data(Kidx0 + 1, Tidx0 + 1);
+
+  double g0 = d00 * dK1 + d10 * dK0;
+  double g1 = d01 * dK1 + d11 * dK0;
+  return (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
 }
 
 double diag::Angle3D(const momentum &K1, const momentum &K2) {

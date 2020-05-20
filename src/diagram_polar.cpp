@@ -1,3 +1,4 @@
+#define FMT_HEADER_ONLY
 #include "diagram.h"
 #include "utility/fmt/format.h"
 #include <iostream>

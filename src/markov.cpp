@@ -4,6 +4,7 @@
 //  Created by Kun Chen on 1/21/19.
 //  Copyright (c) 2019 Kun Chen. All rights reserved.
 //
+#define FMT_HEADER_ONLY
 #include "markov.h"
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
