@@ -11,6 +11,24 @@ using namespace Eigen;
 extern parameter Para;
 extern variable Var;
 
+double Fock(double k) {
+  // warning: this function only works for T=0!!!!
+  double l = sqrt(Para.Mass2 + Para.Lambda);
+  double kF = Para.Kf;
+  double fock = 1.0 + l / kF * atan((k - kF) / l);
+  fock -= l / kF * atan((k + kF) / l);
+  fock -= (l * l - k * k + kF * kF) / 4.0 / k / kF *
+          log((l * l + (k - kF) * (k - kF)) / (l * l + (k + kF) * (k + kF)));
+  fock *= (-2.0 * kF) / PI;
+
+  double shift = 1.0 - l / kF * atan(2.0 * kF / l);
+  shift -= l * l / 4.0 / kF / kF * log(l * l / (l * l + 4.0 * kF * kF));
+  shift *= (-2.0 * kF) / PI;
+
+  return fock - shift;
+  // return fock;
+}
+
 double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
   return _BareGreen(Tau, K, Spin, GType);
 }
@@ -37,6 +55,17 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
 
   k = K.norm();
   Ek = k * k; // bare propagator
+  // Ek += Fock(k);
+
+  if (k < Para.KGrid.MaxK) {
+    double sigma = _Interp1D(k, _StaticSigma);
+    // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
+    //                "fail at: " << Para.KGrid.Floor(k) << " , " << sigma
+    //                            << " vs " << Fock(k));
+    // cout << Para.KGrid.Floor(k) << ", " << sigma + Fock(k) << endl;
+    Ek += -sigma;
+    // Ek += Fock(k);
+  }
 
   double x = Para.Beta * (Ek - Para.Mu) / 2.0;
   double y = 2.0 * Tau / Para.Beta - 1.0;
@@ -63,7 +92,12 @@ void propagator::LoadGreen(string FileName) {
 
   ifstream File;
   File.open(FileName, ios::in);
-  ASSERT_ALLWAYS(File.is_open(), "Can not load Green weights! \n");
+  if (!File.is_open()) {
+    LOG_WARNING("Can not load Green weights! Initialze with zeros!\n");
+    _StaticSigma.setZero();
+    _DeltaG.setZero();
+    return;
+  }
 
   for (int k = 0; k < Para.KGrid.Size; ++k)
     File >> _StaticSigma[k];
@@ -73,11 +107,11 @@ void propagator::LoadGreen(string FileName) {
       File >> _DeltaG(k, t);
 
   for (int k = 0; k < Para.KGrid.Size; ++k)
-    cout << _StaticSigma[k] << ", " << endl;
+    cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
 }
 
 double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
-  if (Tau = 0.0)
+  if (Tau == 0.0)
     Tau = -1.0e-10;
 
   double Sign = -1.0;
@@ -178,6 +212,8 @@ double propagator::_Interp1D(double K, const weight1D &data) {
   int idx1 = idx0 + 1;
   double K0 = Para.KGrid.Grid[idx0];
   double K1 = Para.KGrid.Grid[idx1];
+  // cout << K << "=>" << idx0 << ": " << K0 << "  " << idx1 << ": " << K1 <<
+  // endl;
   ASSERT(K0 <= K && K1 > K,
          "Interpolate fails: " << K0 << "<" << K << "<" << K1);
   return (data[idx0] * (K1 - K) + data[idx1] * (K - K0)) / (K1 - K0);

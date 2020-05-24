@@ -104,6 +104,13 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
       auto &Lw = LVerW[map[LVERT]];
       auto &Rw = RVerW[map[RVERT]];
 
+      // cout << "g " << G[0][map[G0T]] << ", " << G[chan][map[GXT]] << endl;
+      // cout << "Order: " << Order << ", c=" << chan << ", " << GWeight << ",
+      // ["
+      //      << Lw[DIR] << ", " << Lw[EX] << "], [" << Rw[DIR] << ", " <<
+      //      Rw[EX]
+      //      << "]" << endl;
+
       if (chan == T || chan == TC) {
         W[DIR] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         W[EX] = Lw[EX] * Rw[EX];

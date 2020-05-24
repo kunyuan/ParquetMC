@@ -37,7 +37,9 @@ void logGrid::Initialize(array<double, 2> bound, array<double, 2> idx,
 };
 
 int logGrid::Floor(double x) {
-  ASSERT(x >= Bound[0] && x <= Bound[1], "x must be within the bounds!");
+  ASSERT((x >= Bound[0] && x <= Bound[1]) || (x >= Bound[1] && x <= Bound[0]),
+         "x must be within the bounds! " << x << " not in [" << Bound[0] << ", "
+                                         << Bound[1] << "]");
   int idx = Idx[0] + 1.0 / Lambda * log((x - _a) / _b);
 
   return idx;
@@ -202,7 +204,7 @@ void uniformGrid::Initialize(array<double, 2> bounds, int size) {
   LowerBound = bounds[0];
   Delta = (bounds[1] - bounds[0]) / (size - 1);
   for (int i = 0; i < size; ++i)
-    Grid[i] = i * Delta;
+    Grid[i] = i * Delta + LowerBound;
 }
 
 int uniformGrid::Floor(double x) {

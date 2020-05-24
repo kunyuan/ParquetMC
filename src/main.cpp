@@ -54,15 +54,16 @@ int main(int argc, const char *argv[]) {
   InitVar(); // initialize MC variables
   Var.CurrAbsWeight = fabs(Markov.Weight.Evaluate(Var.CurrOrder));
 
+  // Markov.Weight.Test();
+
   ///////////////  Benchmark ////////////////////////////
   // for (int order = 1; order <= Para.Order; ++order) {
-  //   Markov.Weight.Benchmark(order, 10000);
+  //   Markov.Weight.Benchmark(order, 1);
   // }
   // exit(0);
   //////////////////////////////////////////////////////
 
-  LOG_INFO("Start simulation ...")
-  int Block = 0;
+  LOG_INFO("Start simulation ...") int Block = 0;
   while (Block < Para.TotalStep) {
     Block++;
 
@@ -189,14 +190,14 @@ void InitPara() {
 
   if (typeid(kGrid) == typeid(kFermiGrid)) {
     // fermionic kGrid
-    Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 4.0);
+    Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 6.0);
   } else {
     // bosonic kGrid
     Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
   }
 
   if (BoldG)
-    Prop.LoadGreen("green.dat");
+    Prop.LoadGreen("green.data");
 }
 
 void InitVar() {
@@ -215,12 +216,10 @@ void InitVar() {
 
   // reference tau, it should not be updated
   Var.Tau[0] = 0.0;
-  // Var.Tau[0] = Para.Beta / 2.0;
 
   // Set the potential ExtTauBin
   Var.CurrExtTauBin = 0;
   Var.Tau[MaxTauNum - 1] = Para.TauGrid.Grid[Var.CurrExtTauBin];
-  // cout << "Tau: " << Var.Tau[MaxTauNum - 1] << endl;
 
   if (DiagType == GAMMA) {
     Var.CurrExtMomBin = 0;

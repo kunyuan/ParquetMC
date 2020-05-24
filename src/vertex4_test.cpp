@@ -21,7 +21,7 @@ void vertex4::_TestOneLoopGamma() {
   momentum K0 = Var.LoopMom[4];
   double Factor = 1.0 / pow(2.0 * PI, D);
   double dTau, GWeight, GWeightInBox;
-  verWeight TestWeight, Weight;
+  verWeight Weight, CWeight, RefWeight, TestWeight;
 
   // one loop T and TC diagram
   momentum K1 = OutL + K0 - InL;
@@ -31,25 +31,31 @@ void vertex4::_TestOneLoopGamma() {
   GWeight = Prop.Green(dTau, K0, UP, 0) * Prop.Green(-dTau, K1, UP, 0);
   GWeightInBox = Prop.Green(dTau, K0, UP, 0) * Prop.Green(-dTau, K0, UP, 0);
 
-  TestWeight.setZero();
-  TestWeight[DIR] = LVer[DIR] * RVer[DIR] * SPIN + LVer[EX] * RVer[DIR] +
-                    LVer[DIR] * RVer[EX];
-  TestWeight[EX] = LVer[EX] * RVer[EX];
-  TestWeight *= GWeight;
-  TestWeight[DIR] -= GWeightInBox * LVer[DIR] * RVer[DIR] * Para.Lambda /
-                     (8.0 * PI) / Para.Nf * SPIN;
-  TestWeight *= Factor * SymFactor[T];
+  Weight[DIR] = LVer[DIR] * RVer[DIR] * SPIN + LVer[EX] * RVer[DIR] +
+                LVer[DIR] * RVer[EX];
+  Weight[EX] = LVer[EX] * RVer[EX];
+  Weight *= GWeight;
+  Weight *= Factor * SymFactor[T];
+
+  CWeight[DIR] = GWeightInBox * LVer[DIR] * RVer[DIR] * Para.Lambda /
+                 (8.0 * PI) / Para.Nf * SPIN;
+  CWeight[EX] = 0.0;
+  // cout << CWeight[DIR] << endl;
+  CWeight *= Factor * SymFactor[T];
+
+  TestWeight = Weight - CWeight;
 
   Weight = _GetWeight(1, {T, TC});
 
   if (abs(Weight[DIR] - TestWeight[DIR]) > 1.0e-10 ||
       abs(Weight[EX] - TestWeight[EX]) > 1.0e-10) {
-    cout << fmt::format("G: {}", GWeight * Factor) << endl;
-    cout << fmt::format(
-                "GInBox: {}, sep: {}, {}",
-                GWeightInBox * Factor * Para.Lambda / (8.0 * PI) / Para.Nf,
-                Prop.Green(dTau, K0, UP, 0), Prop.Green(-dTau, K0, UP, 0))
-         << endl;
+    cout << fmt::format("G: {}", GWeight) << endl;
+    cout << fmt::format("Gbox: {}", GWeightInBox) << endl;
+    // cout << fmt::format(
+    //             "GInBox: {}, sep: {}, {}",
+    //             GWeightInBox * Factor * Para.Lambda / (8.0 * PI) / Para.Nf,
+    //             Prop.Green(dTau, K0, UP, 0), Prop.Green(-dTau, K0, UP, 0))
+    //      << endl;
     cout << fmt::format("LVer: {}, {}", LVer[DIR], LVer[EX]) << endl;
     cout << fmt::format("RVer: {}, {}", RVer[DIR], RVer[EX]) << endl;
     ABORT(fmt::format(

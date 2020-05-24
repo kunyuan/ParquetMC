@@ -75,6 +75,8 @@ double weight::Evaluate(int Order) {
     for (auto &w : ChanWeight)
       // collapse all channel to I
       ChanWeight[0] += w;
+    cout << Order << ", " << ChanWeight[0][DIR] << ", " << ChanWeight[0][EX]
+         << endl;
     return ChanWeight[0][DIR] + ChanWeight[0][EX] / SPIN;
 
   } else if (DiagType == diagtype::POLAR) {

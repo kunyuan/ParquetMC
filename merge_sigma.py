@@ -107,6 +107,13 @@ if __name__ == "__main__":
     Static, StaticErr = SigmaStatic(Data, Norm, Para)
     Dynamic, DynErr = SigmaT(Data, Norm, Para)
 
+    # print abs(MomGrid-Para.kF)
+    arr = np.amin(abs(MomGrid-Para.kF))
+    kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0]
+    # print kFidx
+    print "Mu=", Static[kFidx]
+    Static -= Static[kFidx]  # subtract the self-energy shift
+
     print "Maximum Error of Dynamic Sigma: ", np.amax(abs(DynErr))
 
     PlotSigmaW(Dynamic, int(Para.MomGridSize/3), False)
@@ -129,7 +136,7 @@ if __name__ == "__main__":
 
     PlotSigmaT(dG_W, range(0, Para.MomGridSize, Para.MomGridSize/8), False)
 
-    with open("green.dat", "w") as f:
+    with open("green.data", "w") as f:
         for k in range(Para.MomGridSize):
             f.write("{0} ".format(Static[k]))
         f.write("\n")
