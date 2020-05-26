@@ -112,7 +112,9 @@ int main(int argc, const char *argv[]) {
 
         if (MessageTimer.check(Para.MessageTimer)) {
           LOG_INFO("Loading Weight...")
-          Markov.Weight.LoadFile();
+          if (BoldG)
+            Prop.LoadGreen();
+          // Markov.Weight.LoadFile();
         }
       }
     }
@@ -190,14 +192,14 @@ void InitPara() {
 
   if (typeid(kGrid) == typeid(kFermiGrid)) {
     // fermionic kGrid
-    Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 6.0);
+    Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2.0);
   } else {
     // bosonic kGrid
     Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
   }
 
   if (BoldG)
-    Prop.LoadGreen("green.data");
+    Prop.LoadGreen();
 }
 
 void InitVar() {

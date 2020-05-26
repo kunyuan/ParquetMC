@@ -57,14 +57,14 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
   Ek = k * k; // bare propagator
   // Ek += Fock(k);
 
-  // if (k < Para.KGrid.MaxK) {
-  //   double sigma = _Interp1D(k, _StaticSigma);
-  // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
-  //                "fail at: " << Para.KGrid.Floor(k) << " , " << sigma
-  //                            << " vs " << Fock(k));
-  // Ek += -sigma;
-  // Ek += Fock(k);
-  // }
+  if (BoldG && k < Para.KGrid.MaxK) {
+    double sigma = _Interp1D(k, _StaticSigma);
+    // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
+    //                "fail at: " << Para.KGrid.Floor(k) << " , " << sigma
+    //                            << " vs " << Fock(k));
+    Ek += -sigma;
+    // Ek += Fock(k);
+  }
 
   double x = Para.Beta * (Ek - Para.Mu) / 2.0;
   double y = 2.0 * Tau / Para.Beta - 1.0;
@@ -84,27 +84,32 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
   return green;
 }
 
-void propagator::LoadGreen(string FileName) {
+void propagator::LoadGreen() {
 
   _StaticSigma.setZero(Para.KGrid.Size);
   _DeltaG.setZero(Para.KGrid.Size, Para.TauGrid.Size);
 
   ifstream File;
-  File.open(FileName, ios::in);
-  if (!File.is_open()) {
-    LOG_WARNING("Can not load Green weights! Initialze with zeros!\n");
+  File.open("dispersion.data", ios::in);
+  if (File.is_open()) {
+    for (int k = 0; k < Para.KGrid.Size; ++k)
+      File >> _StaticSigma[k];
+  } else {
+    LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
     _StaticSigma.setZero();
-    _DeltaG.setZero();
-    return;
   }
+  File.close();
 
-  for (int k = 0; k < Para.KGrid.Size; ++k)
-    File >> _StaticSigma[k];
-
-  for (int k = 0; k < Para.KGrid.Size; ++k)
-    for (int t = 0; t < Para.KGrid.Size; ++t)
-      File >> _DeltaG(k, t);
-
+  File.open("green.data", ios::in);
+  if (!File.is_open()) {
+    for (int k = 0; k < Para.KGrid.Size; ++k)
+      for (int t = 0; t < Para.KGrid.Size; ++t)
+        File >> _DeltaG(k, t);
+  } else {
+    LOG_WARNING("Can not load Green weights! Initialze with zeros!\n");
+    _DeltaG.setZero();
+  }
+  File.close();
   for (int k = 0; k < Para.KGrid.Size; ++k)
     cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
 }

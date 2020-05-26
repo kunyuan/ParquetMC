@@ -25,13 +25,13 @@ public:
   double CounterBubble(const momentum &K);
 
   void LoadF();
-  void LoadGreen(std::string FileName);
+  void LoadGreen();
 
 private:
   double _BareGreen(double Tau, const momentum &K, spin Spin, int GType = 0);
 
-  double _Interp1D(double K, const weight1D& data);
-  double _Interp2D(double K, double tau, const weight2D& data);
+  double _Interp1D(double K, const weight1D &data);
+  double _Interp2D(double K, double tau, const weight2D &data);
 
   weight1D _StaticSigma;
   weight2D _DeltaG;

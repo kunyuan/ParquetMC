@@ -3,14 +3,14 @@ from utility.IO import *
 import utility.fourier as fourier
 
 # XType = "Tau"
-XType = "Mom"
-# XType = "Z"
+# XType = "Mom"
+XType = "Z"
 # XType = "Freq"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 
 Para = param()
-Order = range(0, Para.Order+1)
+Order = range(2, Para.Order+1)
 
 Data, Norm, Step, Grid = LoadFile("./Data", "sigma_pid[0-9]+.dat")
 
@@ -42,10 +42,23 @@ if(XType == "Mom"):
     ErrorPlot(ax, MomGrid, y, "k", ".", "Analytic")
 
 elif(XType == "Z"):
-    # for o in Order:
-    #     ErrorPlot(ax, ExtMomBin, (DataW1[o]-DataW2[o])/(2.0*np.pi/Beta),
-    #               ColorList[o], 's', "Order {0}".format(o))
-    ax.set_xlim([MomGrid[0], MomGrid[-1]])
+
+    phyFreq = np.array([-1, 1])*np.pi / Para.Beta
+    Fourier = fourier.fourier(TauGrid, phyFreq, Para.Beta)
+
+    arr = np.amin(abs(MomGrid-Para.kF))
+    kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
+
+    for o in Order:
+        # print Data[0][o, :, :].shape
+        dataW = [Fourier.naiveT2W(d[o, :, :]) for d in Data]
+        SigmaW, Err = Estimate(dataW, Norm)
+        # print SigmaW.shape
+        # print SigmaW[:, 1]-SigmaW[:, 0]
+        ErrorPlot(ax, MomGrid/Para.kF, (SigmaW[:, 1].imag-SigmaW[:, 0].imag)/(2.0*np.pi/Para.Beta),
+                  ColorList[o], 's', "Order {0}".format(o))
+        plt.axvline(x=1.0, linestyle='--')
+    ax.set_xlim([MomGrid[0]/Para.kF, MomGrid[-1]/Para.kF])
     ax.set_xlabel("$Ext K$", size=size)
 
 elif(XType == "Tau"):
