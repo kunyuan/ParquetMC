@@ -56,9 +56,9 @@ int main(int argc, const char *argv[]) {
 
   // Markov.Weight.Test();
 
-  ///////////////  Benchmark ////////////////////////////
+  /////////////  Benchmark ////////////////////////////
   // for (int order = 1; order <= Para.Order; ++order) {
-  //   Markov.Weight.Benchmark(order, 1);
+  //   Markov.Weight.Benchmark(order, 1000);
   // }
   // exit(0);
   //////////////////////////////////////////////////////

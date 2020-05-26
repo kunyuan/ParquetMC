@@ -22,7 +22,7 @@ const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
 const bool BoldG = true;
-const diagtype DiagType = POLAR;
+const diagtype DiagType = GAMMA;
 typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 
