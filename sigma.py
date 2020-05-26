@@ -50,8 +50,10 @@ elif(XType == "Z"):
     kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
 
     for o in Order:
-        # print Data[0][o, :, :].shape
-        dataW = [Fourier.naiveT2W(d[o, :, :]) for d in Data]
+        # print np.sum(Data[0][1:o, :, :], axis=0).shape
+        dataW = [Fourier.naiveT2W(np.sum(d[2:o+1, :, :], axis=0))
+                 for d in Data]
+        # print dataW[0].shape
         SigmaW, Err = Estimate(dataW, Norm)
         # print SigmaW.shape
         # print SigmaW[:, 1]-SigmaW[:, 0]
