@@ -61,6 +61,24 @@ void oneBodyObs::Save() {
   } else {
     LOG_WARNING(Name << " for PID " << Para.PID << " fails to save!");
   }
+  FileName = fmt::format("{0}_pid{1}_verb.dat", Name, Para.PID);
+  VerFile.open(FileName, ios::out | ios::trunc);
+
+  if (VerFile.is_open()) {
+
+    VerFile << "# Counter: " << Var.Counter << endl;
+    VerFile << "# Norm: " << Normalization << endl;
+    for (int order = 0; order <= Para.Order; order++)
+      for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
+        for (int tindex = 0; tindex < Para.TauBinSize; ++tindex)
+          VerFile << order << "\t"
+                  << Para.ExtMomTable[qindex].norm() << "\t"
+                  << Para.ExtTauTable[tindex] << "\t"
+                  << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
+    VerFile.close();
+  } else {
+    LOG_WARNING(Name << " for PID " << Para.PID << " fails to save!");
+  }
 }
 
 ver4Obs::ver4Obs() {
