@@ -69,6 +69,8 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
   verWeight W;
   double GWeight, ProjFactor;
   double Factor = 1.0 / pow(2.0 * PI, D);
+
+  double TcWeight = 0.0;
   for (auto &b : _UST) {
     // cout << "before, " << b.Channel << ", " << b.Map.size() << endl;
     channel chan = b.Channel;
@@ -123,6 +125,9 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         W[EX] = Lw[DIR] * Rw[DIR] + Lw[EX] * Rw[EX];
       }
 
+      if (chan == TC)
+        TcWeight += W[DIR] * GWeight;
+
       if (Level > 0 || IsFast == false)
         Weight[map[VERT]] += W * GWeight;
       else {
@@ -134,5 +139,24 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         // ChanWeight[ChanMap[chan]] += W * GWeight;
       }
     }
+  }
+
+  if (abs(TcWeight) > 1.0e-10 && LoopNum() == 4) {
+    int order = LoopNum();
+    auto q = KInL - KOutL;
+    double weight = pow(Prop.Interaction(q, 0), order + 1);
+    // cout << weight << endl;
+    for (int o = LoopIdx; o < LoopIdx + order; o++) {
+      weight *=
+          Prop.CounterBubble(Var.LoopMom[o]) * (1.0 / pow(2.0 * PI, D)) * 2;
+    }
+    // cout << weight << endl;
+    cout << order << ": " << TcWeight << " vs " << weight << "\n";
+    if (abs(TcWeight - weight) > 1.0e-12 && Var.Counter > 10000) {
+      // LOG_INFO(ToString());
+      cout << Var.Counter << endl;
+      exit(0);
+    }
+    // cout << Lw[DIR] << ", " << Rw[DIR] << endl;
   }
 }

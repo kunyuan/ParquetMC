@@ -55,7 +55,7 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
 
   k = K.norm();
   Ek = k * k; // bare propagator
-  Ek += Fock(k);
+  // Ek += Fock(k);
 
   // if (BoldG && k < Para.KGrid.MaxK) {
   // double sigma = _Interp1D(k, _StaticSigma);
