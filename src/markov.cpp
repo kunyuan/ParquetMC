@@ -351,13 +351,12 @@ double markov::ShiftK(const momentum &OldMom, momentum &NewMom) {
     Prop = 1.0;
   } else if (x < 2.0 / 3) {
     double k = OldMom.norm();
-    if (k < 1.0e-9) {
+    if (k < 1.0e-12) {
       Prop = 0.0;
       NewMom = OldMom;
     } else {
       const double Lambda = 1.5;
-      double knew = k / Lambda + Random.urn() * (Lambda - 1.0 / Lambda) * k;
-      double Ratio = knew / k;
+      double Ratio = 1.0 / Lambda + Random.urn() * (Lambda - 1.0 / Lambda);
       for (int i = 0; i < D; i++)
         NewMom[i] = OldMom[i] * Ratio;
       if (D == 2)
@@ -365,34 +364,11 @@ double markov::ShiftK(const momentum &OldMom, momentum &NewMom) {
       else if (D == 3)
         Prop = Ratio;
     }
-
-    // if (isnan(Var.LoopMom[0][0]) || isnan(Var.LoopMom[0][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[1][0]) || isnan(Var.LoopMom[1][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[2][0]) || isnan(Var.LoopMom[2][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[3][0]) || isnan(Var.LoopMom[3][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[4][0]) || isnan(Var.LoopMom[4][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[5][0]) || isnan(Var.LoopMom[5][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[6][0]) || isnan(Var.LoopMom[6][0])) {
-    //   cout << "Na" << endl;
-    // }
   } else {
     for (int i = 0; i < D; i++)
       NewMom[i] = -OldMom[i];
     Prop = 1.0;
   }
-
   return Prop;
 };
 

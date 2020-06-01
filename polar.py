@@ -5,6 +5,7 @@ import utility.fourier as fourier
 # XType = "Tau"
 XType = "Mom"
 OrderByOrder = False
+# Unit=1.0
 # 0: I, 1: T, 2: U, 3: S
 
 Para = param()
@@ -29,11 +30,17 @@ if(XType == "Mom"):
 
     phyFreq = [0.0, ]
     Fourier = fourier.fourier(TauGrid, [phyFreq, ], Para.Beta)
-    for o in Order:
+    for o in Order[1:]:
         yList = [Fourier.naiveT2W(d[o, :, :]) for d in Data]
         y, err = Estimate(yList, Norm)
+        print y.shape
+        Unit = 1.0/Para.kF
+        # Unit = 1.0
+        for i in range(len(y)):
+            print "{:10.6f} {:10.6f} {:10.6f}".format(
+                MomGrid[i]/Para.kF, y[i, 0].real*Unit, err[i, 0].real*Unit*2.0)
         # err = np.average(Err[o, :, :], axis=1)
-        plt.errorbar(MomGrid/Para.kF, y[:, 0], yerr=err, fmt='o-', capthick=1, capsize=4,
+        plt.errorbar(MomGrid/Para.kF, y[:, 0], yerr=err*2.0, fmt='o-', capthick=1, capsize=4,
                      color=ColorList[o], label="Order {0}".format(o))
 
     # x = ExtMomBin*kF

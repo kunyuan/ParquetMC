@@ -19,6 +19,9 @@ void polar::Build(int order) {
   // vertex is only needed for order>=2
   if (Order >= 2) {
     vector<channel> Chan = {I, T, U, S, TC, UC};
+    // vector<channel> Chan = {
+    //     T,
+    // };
     Vertex.Build(0,         // level
                  Order - 2, // loopNum
                  3,         // loop index of the first internal K of the vertex

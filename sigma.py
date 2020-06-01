@@ -3,8 +3,8 @@ from utility.IO import *
 import utility.fourier as fourier
 
 # XType = "Tau"
-# XType = "Mom"
-XType = "Z"
+XType = "Mom"
+# XType = "Z"
 # XType = "Freq"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
@@ -29,9 +29,9 @@ if(XType == "Mom"):
     o = 1
     yList = [np.average(d[o, :, :], axis=1) for d in Data]
     y, err = Estimate(yList, Norm)
-    plt.errorbar(MomGrid, y, yerr=err, fmt='o-', capthick=1,
-                 capsize=4, color=ColorList[o], label="Order {0}".format(o))
-    ax.set_xlim([MomGrid[0], MomGrid[-1]])
+    # plt.errorbar(MomGrid, y, yerr=err, fmt='o-', capthick=1,
+    #              capsize=4, color=ColorList[o], label="Order {0}".format(o))
+    ax.set_xlim([MomGrid[0]/Para.kF, MomGrid[-1]/Para.kF])
     ax.set_xlabel("$Ext K$", size=size)
 
     x = MomGrid
@@ -39,7 +39,14 @@ if(XType == "Mom"):
     kF = Para.kF
     y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
                       (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
-    ErrorPlot(ax, MomGrid, y, "k", ".", "Analytic")
+
+    x = kF
+    Mu = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
+                       (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
+    print "Mu: ", Mu
+    for i in range(MomGridSize):
+        print "{:12.6f}{:12.6f}".format(MomGrid[i]/Para.kF, (y[i]-Mu)/Para.EF)
+    ax.plot(MomGrid/Para.kF, (y-Mu), "ko-")
 
 elif(XType == "Z"):
 
@@ -93,7 +100,7 @@ elif(XType == "Freq"):
                     capthick=1, capsize=2, markersize=2, label="$k={0}k_F$".format(MomGrid[q]/Para.kF))
     # ax.set_xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])
 
-plt.legend(loc=4, frameon=False, fontsize=size)
+plt.legend(loc=1, frameon=False, fontsize=size)
 # plt.title("2D density integral")
 # plt.tight_layout()
 

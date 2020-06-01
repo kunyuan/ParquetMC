@@ -63,7 +63,8 @@ int main(int argc, const char *argv[]) {
   // exit(0);
   //////////////////////////////////////////////////////
 
-  LOG_INFO("Start simulation ...") int Block = 0;
+  LOG_INFO("Start simulation ...");
+  int Block = 0;
   while (Block < Para.TotalStep) {
     Block++;
 

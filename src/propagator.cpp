@@ -55,16 +55,15 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
 
   k = K.norm();
   Ek = k * k; // bare propagator
-  // Ek += Fock(k);
+  Ek += Fock(k);
 
-  if (BoldG && k < Para.KGrid.MaxK) {
-    double sigma = _Interp1D(k, _StaticSigma);
-    // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
-    //                "fail at: " << Para.KGrid.Floor(k) << " , " << sigma
-    //                            << " vs " << Fock(k));
-    Ek += -sigma;
-    // Ek += Fock(k);
-  }
+  // if (BoldG && k < Para.KGrid.MaxK) {
+  // double sigma = _Interp1D(k, _StaticSigma);
+  // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
+  //                "fail at: " << Para.KGrid.Floor(k) << " , " << sigma
+  //                            << " vs " << Fock(k));
+  // Ek += -sigma;
+  // }
 
   double x = Para.Beta * (Ek - Para.Mu) / 2.0;
   double y = 2.0 * Tau / Para.Beta - 1.0;
