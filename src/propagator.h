@@ -2,6 +2,8 @@
 #define propagator_H
 #include "global.h"
 
+using namespace std;
+
 namespace diag {
 class propagator {
 public:
@@ -22,6 +24,8 @@ private:
   double _BareGreen(double Tau, const momentum &K, spin Spin, int GType = 0);
   void LoadF();
   void LoadGreen();
+  vector<double> _f;
+  vector<double> _taulist;
 };
 
 double Angle3D(const momentum &K1, const momentum &K2);

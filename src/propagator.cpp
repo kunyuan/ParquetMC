@@ -1,10 +1,39 @@
 #include "propagator.h"
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
+#include <vector>
 
 using namespace diag;
+using namespace std;
 extern parameter Para;
 extern variable Var;
+
+void propagator::Initialize(){
+  _f = vector<double>(Para.TauBinSize * Para.ExtMomBinSize);
+  _taulist = vector<double>(Para.TauBinSize);
+}
+
+void propagator::LoadF(){
+  try {
+    string FileName = fmt::format("./f.dat");
+    ifstream VerFile;
+    VerFile.open(FileName, ios::in);
+    if (VerFile.is_open()) {
+      for (int tau = 0; tau < Para.TauBinSize; tau++){
+        VerFile >> _taulist[tau];
+      }
+      for (int tau =0; tau<Para.TauBinSize;tau++)
+        for (int qindex = 0; qindex<Para.ExtMomBinSize; qindex++){
+          VerFile >> _f[tau*Para.ExtMomBinSize+qindex];
+        }
+      VerFile.close();
+    }
+  } catch (int e) {
+    LOG_INFO("Can not load f file!");
+  }
+  // load F from file, and store
+  return;
+}
 
 double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
   return _BareGreen(Tau, K, Spin, GType);
