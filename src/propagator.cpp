@@ -55,7 +55,7 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
 
   k = K.norm();
   Ek = k * k; // bare propagator
-  // Ek += Fock(k);
+  Ek += Fock(k);
 
   // if (BoldG && k < Para.KGrid.MaxK) {
   // double sigma = _Interp1D(k, _StaticSigma);
@@ -149,7 +149,7 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
 
 verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
                                   const momentum &KInR, const momentum &KOutR,
-                                  bool Boxed, double ExtQ) {
+                                  double ExtQ) {
   verWeight Weight;
   // Weight = {1.0, 0.0};
   // return Weight;
@@ -165,19 +165,15 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   if (DiagType == POLAR && IsEqual(kDiQ, ExtQ))
     Weight[DIR] = 0.0;
 
-  if (!Boxed) {
-    double kExQ = (KInL - KOutR).norm();
-    Weight[EX] =
-        8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+  double kExQ = (KInL - KOutR).norm();
+  Weight[EX] =
+      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
 
-    if (DiagType == SIGMA && IsZero(kExQ))
-      Weight[EX] = 0.0;
+  if (DiagType == SIGMA && IsZero(kExQ))
+    Weight[EX] = 0.0;
 
-    // check irreducibility
-    if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
-      Weight[EX] = 0.0;
-
-  } else
+  // check irreducibility
+  if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
@@ -185,8 +181,12 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   return Weight;
 }
 
-double propagator::Interaction(const momentum &TranQ, int VerOrder) {
+double propagator::Interaction(const momentum &TranQ, int VerOrder,
+                               double ExtQ) {
   double kQ = TranQ.norm();
+  if (DiagType == POLAR && IsEqual(kQ, ExtQ))
+    return 0.0;
+
   if (VerOrder < 0) {
     // Bare interaction
     if (kQ > 1.0e-8)
@@ -205,8 +205,13 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder) {
 
 double propagator::CounterBubble(const momentum &K) {
   double Factor = Para.Lambda / (8.0 * PI * Para.Nf);
-  Factor *=
-      Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
+  // Factor *=
+  //     Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
+
+  double Ek = K.squaredNorm() - Para.Ef;
+  Factor *= -0.5 / (1.0 + cosh(Ek * Para.Beta));
+
+  // ASSERT_ALLWAYS(IsEqual())
   return Factor;
 }
 

@@ -26,8 +26,9 @@ void polar::Build(int order) {
                  Order - 2, // loopNum
                  3,         // loop index of the first internal K of the vertex
                  1,         // tau index of the InTL leg
-                 Chan, RIGHT, false);
+                 Chan, RIGHT);
     for (auto &t : Vertex.Tpair) {
+      // cout << t[0] << ", " << t[1] << ", " << t[2] << ", " << t[3] << endl;
       int inL = G[INL].AddTidxPair({0, t[INL]});
       int outL = G[OUTL].AddTidxPair({t[OUTL], 0});
       int inR = G[INR].AddTidxPair({ExtTauIdx, t[INR]});

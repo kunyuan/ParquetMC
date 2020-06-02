@@ -24,7 +24,7 @@ void delta::Build(int order) {
                Order - 1, // loopNum
                2,         // loop index of the first internal K of the vertex
                0,         // tau index of the InTL leg
-               Chan, RIGHT, false);
+               Chan, RIGHT);
   for (auto &t : Vertex.Tpair) {
     int idx = F.AddTidxPair({t[OUTL], t[OUTR]});
     Fidx.push_back(idx);

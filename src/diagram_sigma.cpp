@@ -32,8 +32,8 @@ void sigma::Build(int order) {
     int Llopidx = 3; // ExtK: 0, G1: 1, G2: 2
     int Rlopidx = 3 + ol;
 
-    bub.LVer.Build(lvl, ol, Llopidx, LInTL, FULL, LEFT, false);
-    bub.RVer.Build(lvl, oR, Rlopidx, RInTL, F, RIGHT, false);
+    bub.LVer.Build(lvl, ol, Llopidx, LInTL, FULL, LEFT);
+    bub.RVer.Build(lvl, oR, Rlopidx, RInTL, F, RIGHT);
 
     for (int ol = 0; ol < bub.LVer.Tpair.size(); ++ol) {
       //   cout << ol << endl;

@@ -49,6 +49,8 @@ void vertex4::_TestOneLoopGamma() {
 
   if (abs(Weight[DIR] - TestWeight[DIR]) > 1.0e-10 ||
       abs(Weight[EX] - TestWeight[EX]) > 1.0e-10) {
+    cout << fmt::format("G0: {}", Prop.Green(dTau, K0, UP, 0)) << endl;
+    cout << fmt::format("GT: {}", Prop.Green(-dTau, K1, UP, 0)) << endl;
     cout << fmt::format("G: {}", GWeight) << endl;
     cout << fmt::format("Gbox: {}", GWeightInBox) << endl;
     // cout << fmt::format(
@@ -138,7 +140,7 @@ verWeight vertex4::_GetWeight(int LoopNum, std::vector<channel> Channel) {
              1, // loopNum
              4, // loop index of the first internal K
              0, // tau index of the InTL leg
-             Channel, RIGHT, false);
+             Channel, RIGHT);
 
   Ver4.Evaluate(Var.LoopMom[INL], Var.LoopMom[OUTL], Var.LoopMom[INR],
                 Var.LoopMom[OUTR], true);

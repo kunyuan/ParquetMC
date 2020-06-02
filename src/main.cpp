@@ -86,6 +86,7 @@ int main(int argc, const char *argv[]) {
 
       // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << ", "
       //      << Var.LoopMom[0][2] << endl;
+      Markov.Weight.Test();
 
       if (i % 8 == 0)
         // fast operations

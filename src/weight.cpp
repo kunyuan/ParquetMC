@@ -28,7 +28,7 @@ void weight::Initialization() {
                          order, // loopNum
                          4,     // loop index of the first internal K
                          0,     // tau index of the InTL leg
-                         Chan, RIGHT, false);
+                         Chan, RIGHT);
       if (order < 4)
         LOG_INFO(Gamma[order].ToString());
     }
