@@ -7,6 +7,7 @@ using namespace std;
 namespace diag {
 class propagator {
 public:
+  propagator();
   void Initialize();
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
   double F(double Tau, const momentum &K, spin Spin, int GType = 0);
@@ -23,9 +24,12 @@ public:
 private:
   double _BareGreen(double Tau, const momentum &K, spin Spin, int GType = 0);
   void LoadF();
+  void TestF();
   void LoadGreen();
+  double ExtrapF(double Tau,double K);
   vector<double> _f;
   vector<double> _taulist;
+  vector<double> _extMom;
 };
 
 double Angle3D(const momentum &K1, const momentum &K2);
