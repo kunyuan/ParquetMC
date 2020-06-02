@@ -58,7 +58,7 @@ int main(int argc, const char *argv[]) {
 
   /////////////  Benchmark ////////////////////////////
   // for (int order = 1; order <= Para.Order; ++order) {
-  //   Markov.Weight.Benchmark(order, 1000);
+  //   Markov.Weight.Benchmark(order, 10000);
   // }
   // exit(0);
   //////////////////////////////////////////////////////
