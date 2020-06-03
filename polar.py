@@ -31,7 +31,9 @@ if(XType == "Mom"):
     phyFreq = [0.0, ]
     Fourier = fourier.fourier(TauGrid, [phyFreq, ], Para.Beta)
     for o in Order[1:]:
-        yList = [Fourier.naiveT2W(d[o, :, :]) for d in Data]
+        # yList = [Fourier.naiveT2W(d[o, :, :]) for d in Data]
+        yList = [Fourier.naiveT2W(np.sum(d[1:o+1, :, :], axis=0))
+                 for d in Data]
         y, err = Estimate(yList, Norm)
         print y.shape
         Unit = 1.0/Para.kF
