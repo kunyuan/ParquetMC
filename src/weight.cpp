@@ -47,7 +47,7 @@ void weight::Initialization() {
     for (int order = 1; order <= Para.Order; order++) {
       LOG_INFO("Generating order " << order);
       Polar[order].Build(order);
-      if (order < 4)
+      if (order < 5)
         LOG_INFO(Polar[order].Vertex.ToString());
     }
   } else if (DiagType == DELTA) {

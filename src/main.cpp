@@ -95,7 +95,7 @@ int main(int argc, const char *argv[]) {
       if (i % 1000 == 0) {
         // slow operations
         if (PrinterTimer.check(Para.PrinterTimer)) {
-          Markov.Weight.Test();
+          // Markov.Weight.Test();
           Markov.PrintDeBugMCInfo();
           Markov.PrintMCInfo();
           LOG_INFO(ProgressBar((double)Block / Para.TotalStep));
@@ -140,7 +140,7 @@ void InitPara() {
   int dim, spin;
   auto paraStream = GetLine(File);
   paraStream >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >>
-      Para.Lambda >> Para.Charge2 >> dim >> spin >> Para.TotalStep;
+      Para.Lambda >> Para.Delta >> dim >> spin >> Para.TotalStep;
   ASSERT_ALLWAYS(dim == D && spin == SPIN, "Dimension or SPIN doesn't match!");
 
   // grid information

@@ -38,7 +38,7 @@ struct parameter {
   double Rs, Ef, Kf;    // r_s, fermi energy, fermi momentum,
   double Nf, Mu, Beta;  // chemical potential, inverse temperature
   double Mass2, Lambda; // screening length^2, shift
-  double Charge2;       // screening length^2
+  double Delta;         // screening length^2
 
   // MC inputs
   int TotalStep;             // total steps of the Monte Carlo

@@ -55,7 +55,7 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
 
   k = K.norm();
   Ek = k * k; // bare propagator
-  Ek += Fock(k);
+  // Ek += Fock(k);
 
   // if (BoldG && k < Para.KGrid.MaxK) {
   // double sigma = _Interp1D(k, _StaticSigma);
@@ -149,14 +149,19 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
 
 verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
                                   const momentum &KInR, const momentum &KOutR,
-                                  double ExtQ) {
+                                  double ExtQ, bool InBox) {
   verWeight Weight;
   // Weight = {1.0, 0.0};
   // return Weight;
+  double C = 100.0 * Para.Kf * Para.Kf;
+  // double C = 1.0;
 
   double kDiQ = (KInL - KOutL).norm();
-  Weight[DIR] =
-      -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+  // Weight[DIR] = -8.0 * PI / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+  Weight[DIR] = -8.0 * PI /
+                (kDiQ * kDiQ + Para.Lambda +
+                 Para.Delta * kDiQ * kDiQ * C / (C + kDiQ * kDiQ)) /
+                (1.0 + Para.Delta * C / (C + kDiQ * kDiQ));
 
   if (DiagType == SIGMA && IsZero(kDiQ))
     Weight[DIR] = 0.0;
@@ -166,15 +171,37 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
     Weight[DIR] = 0.0;
 
   double kExQ = (KInL - KOutR).norm();
-  Weight[EX] =
-      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+  // Weight[EX] = 8.0 * PI / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+  if (!InBox) {
+    // Weight[EX] = 8.0 * PI / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+    Weight[EX] = 8.0 * PI / (kExQ * kExQ + Para.Lambda + Para.Delta) /
+                 (1.0 + Para.Delta);
+    // Weight[EX] = 16.0 * PI * Para.Delta * C / Para.Lambda / (kDiQ * kDiQ +
+    // C); Weight[EX] = 0.0;
 
-  if (DiagType == SIGMA && IsZero(kExQ))
-    Weight[EX] = 0.0;
+    if (DiagType == SIGMA && IsZero(kExQ))
+      Weight[EX] = 0.0;
 
-  // check irreducibility
-  if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
-    Weight[EX] = 0.0;
+    // check irreducibility
+    if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
+      Weight[EX] = 0.0;
+
+    Weight[EX] -= 16.0 * PI * pow(Para.Delta * C, 2) / Para.Lambda /
+                  (kDiQ * kDiQ + C) / (kDiQ * kDiQ + (1.0 + Para.Delta) * C);
+  } else {
+    // Weight[EX] = 0.0;
+    Weight[EX] = 16.0 * PI * Para.Delta * C / Para.Lambda /
+                 (kDiQ * kDiQ + C * (1.0 + Para.Delta));
+  }
+
+  // Weight[EX] += 16.0 * PI * pow(Para.Delta * C, 2) / Para.Lambda /
+  //               (kDiQ * kDiQ + C) / (kDiQ * kDiQ + (1.0 + Para.Delta) * C);
+  // Weight[EX] -= 16.0 * PI * pow(Para.Delta * C, 2) / Para.Lambda /
+  //               (kDiQ * kDiQ + C) / (kDiQ * kDiQ + (1.0 + Para.Delta) * C);
+
+  // Weight[EX] = 0.0;
+  // if (InBox)
+  //   cout << Weight[EX] << endl;
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
@@ -190,13 +217,12 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
   if (VerOrder < 0) {
     // Bare interaction
     if (kQ > 1.0e-8)
-      return -8.0 * PI * Para.Charge2 / (kQ * kQ);
+      return -8.0 * PI / (kQ * kQ);
     else
       return 0.0;
   } else {
     // Order N shifted interaction
-    double Weight =
-        -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+    double Weight = -8.0 * PI / (kQ * kQ + Para.Mass2 + Para.Lambda);
     if (VerOrder > 0)
       Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
     return Weight;
@@ -204,7 +230,8 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
 }
 
 double propagator::CounterBubble(const momentum &K) {
-  double Factor = Para.Lambda / (8.0 * PI * Para.Nf);
+  double Factor = Para.Lambda / (8.0 * PI * Para.Nf / SPIN);
+  // cout << Factor << endl;
   // Factor *=
   //     Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
 

@@ -107,7 +107,8 @@ void kFermiGrid::Initialize(double kf, double maxK, int size, double scale) {
   Grid.resize(size);
   MaxK = maxK;
   kF = kf;
-  kFIdx = Size * log(kF) / (log(kF) + log(maxK - kF)) - 1;
+  // kFIdx = Size * log(kF) / (log(kF) + log(maxK - kF)) - 1;
+  kFIdx = Size / 3;
   // cout << kFIdx << endl;
   double lambda = kF / scale / kFIdx;
 

@@ -77,7 +77,8 @@ void vertex4::Build(int level, int order, int loopIdx, int inTL,
         Channel.push_back(c);
         for (int ol = 0; ol < LoopNum(); ol++) {
           auto bubble = _BuildBubble(c, ol);
-          _UST.push_back(bubble);
+          if (bubble.Map.size() > 0)
+            _UST.push_back(bubble);
         }
       } else if (c == I) {
         // I channel
@@ -108,9 +109,12 @@ int vertex4::_AddTidxPair(const array<int, 4> &T) {
 }
 
 bubble vertex4::_BuildBubble(channel chan, int ol) {
-  vector<channel> FULL = {I, T, U, S, TC, UC};
-  vector<channel> F = {I, U, S, TC, UC};
+  // vector<channel> FULL = {I, T, U, S, TC, UC};
+  // vector<channel> F = {I, U, S, TC, UC};
   vector<channel> V = {I, T, U, TC, UC};
+
+  vector<channel> FULL = {I, T, TC};
+  vector<channel> F = {I, TC};
 
   ASSERT_ALLWAYS(chan != I, "BuildUST can not process I channel!");
   ASSERT_ALLWAYS(ol < LoopNum(),
@@ -130,12 +134,12 @@ bubble vertex4::_BuildBubble(channel chan, int ol) {
     bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL, RIGHT);
     break;
   case U:
-    // continue;
+    return bub;
     bub.LVer.Build(lvl, ol, Llopidx, Tidx, F, LEFT);
     bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL, RIGHT);
     break;
   case S:
-    // continue;
+    return bub;
     bub.LVer.Build(lvl, ol, Llopidx, Tidx, V, LEFT);
     bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL, RIGHT);
     break;

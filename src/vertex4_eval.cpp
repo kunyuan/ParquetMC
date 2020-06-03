@@ -142,29 +142,72 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
     //      << endl;
     for (auto &c : ChannelCT) {
       if (c == TC) {
-        double weight =
-            pow(Prop.Interaction(KInL - KOutL, 0, Var.LoopMom[0].norm()),
-                LoopNum() + 1);
+        // double weight =
+        //     pow(Prop.Interaction(KInL - KOutL, 0, Var.LoopMom[0].norm()),
+        //         LoopNum() + 1);
+        auto verweight = Prop.Interaction(KInL, KOutL, KInR, KOutR,
+                                          Var.LoopMom[0].norm(), true);
+        // auto weight = pow(verweight[DIR], LoopNum() + 1);
+        // ASSERT_ALLWAYS(IsEqual(verweight[EX], 0.0),
+        //                "wrong! " << verweight[DIR] << ", " << verweight[EX]
+        //                          << ", " << Para.Delta);
+        auto ver = verweight;
+        double weight = 1.0;
+
         for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
-          weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+          weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor;
+          verWeight v = ver;
+          v[DIR] = 2.0 * ver[DIR] * verweight[DIR] + ver[DIR] * verweight[EX] +
+                   ver[EX] * verweight[DIR];
+          v[EX] = ver[EX] * verweight[EX];
+          ver = v;
         }
-        if (IsFast && Level == 0)
-          ChanWeight[T][DIR] += weight * SymFactor[TC];
-        else
+        // ASSERT_ALLWAYS(IsEqual(pow(verweight[EX], LoopNum() + 1), ver[EX]),
+        //                "Fail: " << verweight[EX] << ", " << ver[EX]);
+        // ASSERT_ALLWAYS(IsEqual(ver[DIR], 0.0),
+        //                "wrong! " << ver[DIR] << ", " << ver[EX]);
+        // cout << ver[DIR] << ", " << ver[EX] << endl;
+        if (IsFast && Level == 0) {
+          ChanWeight[T][DIR] += ver[DIR] * weight * SymFactor[TC];
+          ChanWeight[T][EX] += ver[EX] * weight * SymFactor[TC];
+        } else {
           // counter-term Tpair and the weight are always the first element
-          Weight[0][DIR] += weight * SymFactor[TC];
+          Weight[0][DIR] += ver[DIR] * weight * SymFactor[TC];
+          Weight[0][EX] += ver[EX] * weight * SymFactor[TC];
+        }
       } else if (c == UC) {
+        // auto verweight =
+        //     Prop.Interaction(KInL, KOutR, KInR, KOutL,
+        //     Var.LoopMom[0].norm());
+        // auto weight = pow(verweight[DIR], LoopNum() + 1);
+        // auto ver = verweight;
+        // double weight = 1.0;
+
         double weight =
             pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
                 LoopNum() + 1);
         for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
-          weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+          weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor;
+          // verWeight v = ver;
+          // v[DIR] = 2.0 * ver[DIR] * verweight[DIR] + ver[DIR] * verweight[EX]
+          // +
+          //          ver[EX] * verweight[DIR];
+          // v[EX] = ver[EX] * verweight[EX];
+          // ver = v;
         }
-        if (IsFast && Level == 0)
+        // ASSERT_ALLWAYS(IsEqual(verweight[EX], 0.0),
+        //                "wrong! " << verweight[DIR] << ", " << verweight[EX]);
+        if (IsFast && Level == 0) {
           ChanWeight[U][EX] += weight * SymFactor[UC];
-        else
+          // ChanWeight[U][EX] += ver[DIR] * weight * SymFactor[UC];
+          // ChanWeight[U][DIR] += ver[EX] * weight * SymFactor[UC];
+        } else {
+
           // counter-term Tpair and the weight are always the first element
           Weight[0][EX] += weight * SymFactor[UC];
+          // Weight[0][EX] += ver[DIR] * weight * SymFactor[UC];
+          // Weight[0][DIR] += ver[EX] * weight * SymFactor[UC];
+        }
       }
     }
   }
