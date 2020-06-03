@@ -1,4 +1,5 @@
 #include "weight.h"
+#include "diag/vertex4.h"
 #include "global.h"
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
