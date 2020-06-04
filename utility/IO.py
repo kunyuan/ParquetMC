@@ -83,11 +83,27 @@ class param:
 # For the given path, get the List of all files in the directory tree
 
 
-def Estimate(Data, Weights):
+# def Estimate(Data, Weights, axis=0):
+#     """ Return Mean and Error  with given weights"""
+#     # Assume weights are similar when calculating error bars
+#     Weights = np.array(Weights)
+#     Num = len(Weights)
+#     assert Num > 0, "Data is empty!"
+#     assert Data.shape[0] == Num, "Data and Weights size must match!"
+#     Avg = np.average(Data, weights=Weights, axis=0)
+#     Var = np.average((Data-Avg)**2, weights=Weights, axis=0)
+#     Err = np.sqrt(Var/(Num-1)) if Num > 1 else 0.0
+#     return Avg, Err
+
+def Estimate(Data, Weights, operation=None):
     """ Return Mean and Error  with given weights"""
     # Assume weights are similar when calculating error bars
     assert len(Data) == len(Weights), "Data and Weights size must match!"
     assert len(Weights) > 0, "Data is empty!"
+
+    if operation is not None:
+        Data = [operation(d) for d in Data]
+
     Z = np.sum(Weights)
     Avg = sum(Data)/sum(Weights)
     if len(Data) > 1:
@@ -131,9 +147,8 @@ def LoadFile(Folder, FileName, shape=None):
                 print "Failed to load {0}".format(f)
                 print str(e)
 
+    # return np.array(Data), np.array(Norm), np.array(Step), Grid
     return Data, Norm, Step, Grid
-
-
 
 
 if __name__ == '__main__':

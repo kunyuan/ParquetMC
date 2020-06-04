@@ -23,7 +23,6 @@ MomGridSize = len(MomGrid)
 
 shape = (Para.Order+1, MomGridSize, TauGridSize)
 Data = [data.reshape(shape) for data in Data]
-print Data[0].shape
 Avg, Err = Estimate(Data, Norm)
 
 fig, ax = plt.subplots()
@@ -36,10 +35,8 @@ if(XType == "Mom"):
     phyFreq = [0.0, ]
     Fourier = fourier.fourier(TauGrid, [phyFreq, ], Para.Beta)
     for o in Order[1:]:
-        # yList = [Fourier.naiveT2W(d[o, :, :]) for d in Data]
-        yList = [Fourier.naiveT2W(np.sum(d[1:o+1, :, :], axis=0))
-                 for d in Data]
-        y, err = Estimate(yList, Norm)
+        y, err = Estimate(Data, Norm, lambda x: Fourier.naiveT2W(
+            np.sum(x[1:o+1, :, :], axis=0)))
         # print y.shape
         # Unit = 1.0/Para.kF
         # Unit = 1.0
