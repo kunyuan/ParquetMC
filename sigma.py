@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from utility.IO import *
 import utility.fourier as fourier
+import matplotlib.pyplot as plt
 
 # XType = "Tau"
 XType = "Mom"
@@ -105,4 +106,5 @@ plt.legend(loc=1, frameon=False, fontsize=size)
 # plt.tight_layout()
 
 # plt.savefig("spin_rs1_lambda1.pdf")
+plt.grid()
 plt.show()

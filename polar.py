@@ -1,6 +1,9 @@
 #!/usr/bin/python
+# import seaborn as sns
+# import matplotlib.pyplot as plt
 from utility.IO import *
 import utility.fourier as fourier
+from utility.plot import *
 
 # XType = "Tau"
 XType = "Mom"
@@ -23,8 +26,10 @@ Data = [data.reshape(shape) for data in Data]
 print Data[0].shape
 Avg, Err = Estimate(Data, Norm)
 
-# fig, ax = plt.subplots()
-plt.figure()
+fig, ax = plt.subplots()
+# print "original ", fig
+# fig, ax = plt.figure()
+lines = []
 
 if(XType == "Mom"):
 
@@ -35,24 +40,24 @@ if(XType == "Mom"):
         yList = [Fourier.naiveT2W(np.sum(d[1:o+1, :, :], axis=0))
                  for d in Data]
         y, err = Estimate(yList, Norm)
-        print y.shape
-        Unit = 1.0/Para.kF
+        # print y.shape
+        # Unit = 1.0/Para.kF
         # Unit = 1.0
-        for i in range(len(y)):
-            print "{:10.6f} {:10.6f} {:10.6f}".format(
-                MomGrid[i]/Para.kF, y[i, 0].real*Unit, err[i, 0].real*Unit*2.0)
+        # for i in range(len(y)):
+        # print "{:10.6f} {:10.6f} {:10.6f}".format(
+        #     MomGrid[i]/Para.kF, y[i, 0].real*Unit, err[i, 0].real*Unit*2.0)
         # err = np.average(Err[o, :, :], axis=1)
-        plt.errorbar(MomGrid/Para.kF, y[:, 0], yerr=err*2.0, fmt='o-', capthick=1, capsize=4,
-                     color=ColorList[o], label="Order {0}".format(o))
+        Errorbar(MomGrid/Para.kF, y[:, 0], err*2.0, fmt='o-',
+                 color=ColorList[o], label="Order {0}".format(o))
 
     # x = ExtMomBin*kF
     # l = Mass2+Lambda
     # y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
     #                   (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
-    # ErrorPlot(ax, ExtMomBin, y, "k", ".", "Analytic")
+    # ErrorPlot(ExtMomBin, y, y*0.0, "k", ".", "Analytic")
 
-    plt.xlim([MomGrid[0]/Para.kF, MomGrid[-1]/Para.kF])
-    plt.xlabel("$Ext K$", size=size)
+    ax.set_xlim([MomGrid[0]/Para.kF, MomGrid[-1]/Para.kF])
+    ax.set_xlabel("$Ext K$", size=size)
 
 elif(XType == "Tau"):
     N = 8
@@ -60,14 +65,17 @@ elif(XType == "Tau"):
     for i in range(N):
         q = i*MomGridSize/N
         Avg, Err = Estimate(Data, Norm)
-        plt.errorbar(TauGrid/Para.Beta, Avg[o, q, :], yerr=Err[o, q, :], fmt='o-',
-                     capthick=1, capsize=4, color=ColorList[i], label="$k={0}k_F$".format(MomGrid[q]/Para.kF))
+        # plt.errorbar(TauGrid/Para.Beta, Avg[o, q, :], yerr=Err[o, q, :], fmt='o-',
+        #              capthick=1, capsize=4, color=ColorList[i], label="$k={0}k_F$".format(MomGrid[q]/Para.kF))
 
     plt.xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])
 
-plt.legend(loc=1, frameon=False, fontsize=size)
-# plt.title("2D density integral")
-# plt.tight_layout()
+# leg = ax.legend(handler_map=my_handler_map)
+leg = ax.legend(loc=1, frameon=False, fontsize=size)
+
+_ = InteractiveLegend(ax)  # keep the obj to prevent be collected by gc
 
 # plt.savefig("spin_rs1_lambda1.pdf")
+# fig.canvas.mpl_connect('pick_event', l.onpick)
+plt.grid()
 plt.show()

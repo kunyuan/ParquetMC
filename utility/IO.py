@@ -1,19 +1,9 @@
-import seaborn as sns
-import os
-import sys
-import re
-import glob
-import numpy as np
 from color import *
-
-import matplotlib.pyplot as plt
-import matplotlib as mat
-mat.rcParams.update({'font.size': 16})
-mat.rcParams["font.family"] = "Times New Roman"
-size = 12
-
-sns.set_style("whitegrid")
-sns.set_palette("colorblind", n_colors=16)
+import numpy as np
+import glob
+import re
+import sys
+import os
 
 
 def GetLine(file):
@@ -144,14 +134,6 @@ def LoadFile(Folder, FileName, shape=None):
     return Data, Norm, Step, Grid
 
 
-def ErrorPlot(p, x, d, color='k', marker='s', label=None, size=4, shift=False):
-    p.plot(x, d, marker=marker, c=color, label=label,
-           lw=1, markeredgecolor="None", linestyle="--", markersize=size)
-
-
-ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy',
-             'y', 'cyan', 'darkgreen', 'violet', 'lime', 'purple']
-ColorList = ColorList*40
 
 
 if __name__ == '__main__':

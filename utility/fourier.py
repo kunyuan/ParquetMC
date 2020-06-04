@@ -14,7 +14,7 @@ class fourier:
         self.Beta = Beta
 
         self.uTauGrid = np.linspace(0.0, Beta, 4096)  # uniform grid
-        print "TauGrid", self.TauGrid[0], Beta-self.TauGrid[-1]
+        # print "TauGrid", self.TauGrid[0], Beta-self.TauGrid[-1]
         self.uTauGrid[0] = 2.e-8
         self.uTauGrid[-1] = Beta-4.e-7
 
@@ -49,8 +49,8 @@ class fourier:
 
     def SpectralW2T(self, dataW):
         spectral = np.dot(dataW, self.InvKernelW)
-        print self.InvKernelW.shape
-        print dataW.shape
+        # print self.InvKernelW.shape
+        # print dataW.shape
         dataT = np.dot(spectral, self.uKernelT)
         f = interpolate.interp1d(self.uTauGrid, dataT, axis=-1)
         sTauGrid = np.array(self.TauGrid)

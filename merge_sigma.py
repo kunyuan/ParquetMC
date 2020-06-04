@@ -1,5 +1,6 @@
 from utility.IO import *
 import utility.fourier as fourier
+import matplotlib.pyplot as plt
 
 
 def SigmaStatic(data, norm, Para):
@@ -47,6 +48,7 @@ def PlotSigmaW(SigmaT, MomGrid, idx, Save=True):
 
     ax1.legend(loc=1, frameon=False, fontsize=size)
     ax2.legend(loc=1, frameon=False, fontsize=size)
+    plt.grid()
     if Save:
         plt.savefig("SigmaW.pdf")
     else:
@@ -63,6 +65,7 @@ def PlotDataK(dataK, wn, FreqGrid, Save=True):
     plt.axvline(x=Para.kF, linestyle='--')
 
     plt.legend(loc=1, frameon=False, fontsize=size)
+    plt.grid()
     if Save:
         plt.savefig("DataK.pdf")
     else:
@@ -88,6 +91,7 @@ def PlotSigmaT(dataW, kList, Save=True):
     ax.set_xlim([TauGrid[0]/Para.Beta, TauGrid[-1]/Para.Beta])
 
     plt.legend(loc=1, frameon=False, fontsize=size)
+    plt.grid()
     if Save:
         plt.savefig("DeltaG.pdf")
     else:
@@ -119,6 +123,7 @@ def PlotG(dataT, kFidx, Save=True):
         ax2.set_xlabel("$\\tau/\\beta$")
 
     plt.legend(loc=1, frameon=False, fontsize=size)
+    plt.grid()
     if Save:
         plt.savefig("DeltaG_T.pdf")
     else:
