@@ -1,18 +1,7 @@
+#!/usr/bin/env python
 from utility.IO import *
 import utility.fourier as fourier
-import matplotlib.pyplot as plt
-
-
-def SigmaStatic(data, norm, Para):
-    order1 = [np.average(d[1, :, :], axis=1) for d in data]
-    static, staticErr = Estimate(order1, norm)
-    return static, staticErr
-
-
-def SigmaT(data, norm, Para):
-    sumOrders = [np.sum(d[2:Para.Order+1, ...], axis=0) for d in data]
-    dynamic, dynErr = Estimate(sumOrders, norm)
-    return dynamic, dynErr
+from utility.plot import *
 
 
 def PlotSigmaW(SigmaT, MomGrid, idx, Save=True):
@@ -66,6 +55,7 @@ def PlotDataK(dataK, wn, FreqGrid, Save=True):
 
     plt.legend(loc=1, frameon=False, fontsize=size)
     plt.grid()
+    _ = InteractiveLegend(ax)
     if Save:
         plt.savefig("DataK.pdf")
     else:
@@ -92,6 +82,7 @@ def PlotSigmaT(dataW, kList, Save=True):
 
     plt.legend(loc=1, frameon=False, fontsize=size)
     plt.grid()
+    _ = InteractiveLegend(ax)
     if Save:
         plt.savefig("DeltaG.pdf")
     else:
@@ -116,6 +107,8 @@ def PlotG(dataT, kFidx, Save=True):
 
     for idx in [kFidx/2, kFidx, kFidx*2]:
         k = MomGrid[idx]
+        print dataT.shape
+        print TauGrid.shape
         ax2.plot(TauGrid/Para.Beta, dataT[idx, :].real, "--",
                  label="$k/k_F={0:.4f}$, spectral".format(k/Para.kF))
         ax2.plot([TauGrid[0], TauGrid[-1]], [0.5, 0.5], linestyle='--')
@@ -148,8 +141,11 @@ if __name__ == "__main__":
     Fourier = fourier.fourier(TauGrid, phyFreq, Para.Beta)
     Fourier.InitializeKernel(100.0, 1024, "Fermi", 1.0e-13)
 
-    Static, StaticErr = SigmaStatic(Data, Norm, Para)
-    Dynamic, DynErr = SigmaT(Data, Norm, Para)
+    # first order is a constant of tau
+    Static, StaticErr = Estimate(
+        Data, Norm, lambda d: np.average(d[1, :, :], axis=1))
+    Dynamic, DynErr = Estimate(
+        Data, Norm, lambda d: np.sum(d[2:Para.Order+1, ...], axis=0))
 
     # print abs(MomGrid-Para.kF)
     arr = np.amin(abs(MomGrid-Para.kF))

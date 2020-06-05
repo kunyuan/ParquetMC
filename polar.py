@@ -1,6 +1,4 @@
 #!/usr/bin/python
-# import seaborn as sns
-# import matplotlib.pyplot as plt
 from utility.IO import *
 import utility.fourier as fourier
 from utility.plot import *

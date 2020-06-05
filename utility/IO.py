@@ -80,9 +80,6 @@ class param:
         print "Print={0}, Save={1}, ReWeight={2}, Message={3}, Collection={4}".format(
             self.PrintTimer, self.SaveTimer, self.ReWeightTimer, self.MessageTimer, self.CollectionTimer)
 
-# For the given path, get the List of all files in the directory tree
-
-
 # def Estimate(Data, Weights, axis=0):
 #     """ Return Mean and Error  with given weights"""
 #     # Assume weights are similar when calculating error bars
@@ -94,6 +91,7 @@ class param:
 #     Var = np.average((Data-Avg)**2, weights=Weights, axis=0)
 #     Err = np.sqrt(Var/(Num-1)) if Num > 1 else 0.0
 #     return Avg, Err
+
 
 def Estimate(Data, Weights, operation=None):
     """ Return Mean and Error  with given weights"""
@@ -115,9 +113,7 @@ def Estimate(Data, Weights, operation=None):
 
 
 def LoadFile(Folder, FileName, shape=None):
-    Step = []
-    Norm = []
-    Data = []
+    Step, Norm, Data = [], [], []
     Grid = {}
 
     for f in getListOfFiles(Folder):
@@ -147,7 +143,6 @@ def LoadFile(Folder, FileName, shape=None):
                 print "Failed to load {0}".format(f)
                 print str(e)
 
-    # return np.array(Data), np.array(Norm), np.array(Step), Grid
     return Data, Norm, Step, Grid
 
 
