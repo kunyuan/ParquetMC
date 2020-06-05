@@ -33,7 +33,7 @@ if(XType == "Mom"):
     ax.set_xlabel("$K$", size=size)
 
     x = MomGrid
-    l = Para.Mass2+Para.Lambda
+    l = np.sqrt(Para.Mass2+Para.Lambda)
     # print(Para.Mass2, Para.Lambda)
     kF = Para.kF
     y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
