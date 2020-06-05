@@ -1,5 +1,5 @@
 import numpy as np
-from IO import *
+from utility.IO import *
 import numpy.linalg as linalg
 
 
@@ -15,13 +15,13 @@ class spectral:
     def TauBasis(self, TauGrid, Type, Num):
         """v[0:Num, :] maps N coefficients to Tau, v.T[:, 0:Num] maps Tau to coefficients"""
         _, s, v = self.TauKernel(TauGrid, Type)
-        print yellow("Smallest Singular Value: {0} ".format(s[-1]))
+        print(yellow(f"Smallest Singular Value: {s[-1]} "))
         return v.T[:, :Num]
 
     def MatFreqBasis(self, MatFreqGrid, Type, Num):
         """v[0:Num, :] maps Tau to N coefficients, v.T[:, 0:Num] maps coefficients to Tau"""
         _, s, v = self.MatFreqKernel(MatFreqGrid, Type)
-        print yellow("Smallest Singular Value: {0} ".format(s[-1]))
+        print(yellow(f"Smallest Singular Value: {s[-1]} "))
         return v.T[:, :Num]
 
     def TauKernel(self, TauGrid, Type):
@@ -52,7 +52,7 @@ class spectral:
             else:
                 return np.exp(-x*y)/(2*np.cosh(x))
         else:
-            print "Not implemented!"
+            print("Not implemented!")
             raise ValueError
 
 
@@ -66,7 +66,7 @@ def Kernel(w, t, beta, Type):
         else:
             return np.exp(-x*y)/(2*np.cosh(x))
     else:
-        print "Not implemented!"
+        print("Not implemented!")
         raise ValueError
 
 
@@ -91,7 +91,7 @@ def FitData(Data, Num, v):
     assert Num < v.shape[0], "Number of basis is too large!"
     coef = np.dot(Data, v.T[:, :Num])
     fitted = np.dot(coef, v[:Num, :])
-    print "Max of |Sigma-Fitted Sigma|: ", np.amax(abs(Data-fitted))
+    print("Max of |Sigma-Fitted Sigma|: ", np.amax(abs(Data-fitted)))
     return fitted, coef
 
 

@@ -29,9 +29,9 @@ int main(int argc, const char *argv[]) {
   LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
 
 #ifdef NDEBUG
-  LOG_INFO("NDEBUG mode is ON. e.g, Turn on Range checking ...");
-#else
   LOG_INFO("NDEBUG mode is OFF. e.g, Turn off Range checking ...");
+#else
+  LOG_INFO("NDEBUG mode is ON. e.g, Turn on Range checking ...");
 #endif
 
   ASSERT_ALLWAYS(Para.Seed > 0, "Random number seed must be positive integer!");
@@ -181,7 +181,8 @@ void InitPara() {
   LOG_INFO("Inverse Temperature: " << Para.Beta << "\n"
                                    << "r_s: " << Para.Rs << "\n"
                                    << "Fermi Mom: " << Para.Kf << "\n"
-                                   << "Fermi Energy: " << Para.Ef << "\n");
+                                   << "Fermi Energy: " << Para.Ef << "\n"
+                                   << "Lambda: " << Para.Lambda << "\n");
 
   LOG_INFO("PrintTimer: " << Para.PrinterTimer << "\n"
                           << "SaveTimer: " << Para.SaveFileTimer << "\n"

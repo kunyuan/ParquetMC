@@ -1,4 +1,4 @@
-from color import *
+from utility.color import *
 import numpy as np
 import glob
 import re
@@ -58,27 +58,24 @@ class param:
             self.Nf = self.kF/4.0/np.pi**2*self.Spin
         elif self.Dim == 2:
             self.kF = np.sqrt(2.0)/self.Rs  # 2D
-            print "Not Implemented for Dimension {0}".format(self.Dim)
+            print(f"Not Implemented for Dimension {self.Dim}")
             sys.exit(0)
         else:
-            print "Not Implemented for Dimension {0}".format(self.Dim)
+            print(f"Not Implemented for Dimension {self.Dim}")
             sys.exit(0)
 
         self.EF = self.kF**2
         self.Beta /= self.EF
         self.MaxExtMom *= self.kF
 
-        print yellow("Parameters:")
-        print "Rs={0}, kF={1}, EF={2}, Beta={3}, Mass2={4}, Lambda={5}, Dim={6}, Spin={7}\n".format(
-            self.Rs, self.kF, self.EF, self.Beta, self.Mass2, self.Lambda, self.Dim, self.Spin)
+        print(yellow("Parameters:"))
+        print(f"Rs={self.Rs}, kF={self.kF}, EF={self.EF}, Beta={self.Beta}, Mass2={self.Mass2}, Lambda={self.Lambda}, Dim={self.Dim}, Spin={self.Spin}\n")
+        print(yellow("Grid Information:"))
+        print(
+            f"TauSize={self.TauGridSize}, MomSize={self.MomGridSize}, AngleSize={self.AngGridSize}, MaxExtMom={self.MaxExtMom}")
 
-        print yellow("Grid Information:")
-        print "TauSize={0}, MomSize={1}, AngleSize={2}, MaxExtMom={3}".format(
-            self.TauGridSize, self.MomGridSize, self.AngGridSize, self.MaxExtMom)
-
-        print yellow("Timer Information:")
-        print "Print={0}, Save={1}, ReWeight={2}, Message={3}, Collection={4}".format(
-            self.PrintTimer, self.SaveTimer, self.ReWeightTimer, self.MessageTimer, self.CollectionTimer)
+        print(yellow("Timer Information:"))
+        print("Print={self.PrintTimer}, Save={self.SaveTimer}, ReWeight={self.ReWeightTimer}, Message={self.MessageTimer}, Collection={self.CollectionTimer}")
 
 # def Estimate(Data, Weights, axis=0):
 #     """ Return Mean and Error  with given weights"""
@@ -118,7 +115,7 @@ def LoadFile(Folder, FileName, shape=None):
 
     for f in getListOfFiles(Folder):
         if re.search(FileName, f):
-            print "Loading ", f
+            print("Loading ", f)
             try:
                 with open(f, "r") as file:
                     Step.append(int(file.readline().split(":")[1]))
@@ -140,8 +137,8 @@ def LoadFile(Folder, FileName, shape=None):
                     Data.append(np.loadtxt(f).reshape(shape))
 
             except Exception as e:
-                print "Failed to load {0}".format(f)
-                print str(e)
+                print(f"Failed to load {f}")
+                print(str(e))
 
     return Data, Norm, Step, Grid
 

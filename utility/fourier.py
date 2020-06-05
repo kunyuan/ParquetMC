@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import integrate
 from scipy import interpolate
-import spectral
+import utility.spectral as spectral
 import numpy.linalg as linalg
 
 

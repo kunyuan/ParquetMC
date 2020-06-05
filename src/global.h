@@ -9,7 +9,7 @@
 #include <math.h>
 #include <vector>
 
-// turn off all assert
+// comment to turn on all assert
 // #define NDEBUG
 
 enum diagtype { GAMMA, SIGMA, POLAR, DELTA };

@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from utility.IO import *
 import utility.fourier as fourier
 from utility.plot import *
 
 # XType = "Tau"
-# XType = "Mom"
-XType = "Z"
+XType = "Mom"
+# XType = "Z"
 # XType = "Freq"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
@@ -27,15 +27,14 @@ fig, ax = plt.subplots()
 
 if(XType == "Mom"):
     # Order 1 sigma is a delta function of tau
-    o = 1
-    y, err = Estimate(Data, Norm, lambda d: np.average(d[o, :, :], axis=1))
-    Errorbar(MomGrid, y, err, fmt='o-',
-             color=ColorList[o], label="Order {0}".format(o))
+    y, err = Estimate(Data, Norm, lambda d: np.average(d[1, :, :], axis=1))
+    Errorbar(MomGrid/Para.kF, y, err, fmt='o-', color="r", label="Order 1")
     ax.set_xlim([MomGrid[0]/Para.kF, MomGrid[-1]/Para.kF])
-    ax.set_xlabel("$Ext K$", size=size)
+    ax.set_xlabel("$K$", size=size)
 
     x = MomGrid
     l = Para.Mass2+Para.Lambda
+    # print(Para.Mass2, Para.Lambda)
     kF = Para.kF
     y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
                       (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
@@ -43,10 +42,10 @@ if(XType == "Mom"):
     x = kF
     Mu = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
                        (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
-    print "Mu: ", Mu
+    print("Mu: ", Mu)
     for i in range(MomGridSize):
-        print "{:12.6f}{:12.6f}".format(MomGrid[i]/Para.kF, (y[i]-Mu)/Para.EF)
-    ax.plot(MomGrid/Para.kF, (y-Mu), "ko-")
+        print(f"{MomGrid[i]/Para.kF:12.6f}{(y[i]-Mu)/Para.EF:12.6f}")
+    ax.plot(MomGrid/Para.kF, y, "ko-")
 
 elif(XType == "Z"):
 

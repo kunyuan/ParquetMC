@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from utility.IO import *
 import utility.fourier as fourier
 from utility.plot import *
@@ -106,10 +106,8 @@ def PlotG(dataT, kFidx, Save=True):
     # ax1.set_ylim([-0.12, 0.12])
 
     for idx in [kFidx/2, kFidx, kFidx*2]:
-        k = MomGrid[idx]
-        print dataT.shape
-        print TauGrid.shape
-        ax2.plot(TauGrid/Para.Beta, dataT[idx, :].real, "--",
+        k = MomGrid[int(idx)]
+        ax2.plot(TauGrid/Para.Beta, dataT[int(idx), :].real, "--",
                  label="$k/k_F={0:.4f}$, spectral".format(k/Para.kF))
         ax2.plot([TauGrid[0], TauGrid[-1]], [0.5, 0.5], linestyle='--')
         ax2.set_xlim([TauGrid[0]/Para.Beta, TauGrid[-1]/Para.Beta])
@@ -151,20 +149,20 @@ if __name__ == "__main__":
     arr = np.amin(abs(MomGrid-Para.kF))
     kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
     # print kFidx
-    print "Mu=", Static[kFidx]
+    print("Mu=", Static[kFidx])
     Static -= Static[kFidx]  # subtract the self-energy shift
 
-    print "Maximum Error of Dynamic Sigma: ", np.amax(abs(DynErr))
+    print("Maximum Error of Dynamic Sigma: ", np.amax(abs(DynErr)))
 
-    print "MomGrid idx at the Fermi surface: ", kFidx
+    print("MomGrid idx at the Fermi surface: ", kFidx)
     # PlotSigmaW(Dynamic, MomGrid, kFidx, False)
 
     SigmaW, _ = Fourier.SpectralT2W(Dynamic)
 
     s0, s1 = SigmaW[kFidx, MaxFreq-1], SigmaW[kFidx, MaxFreq]
-    print "Z=", 1.0-(s1.imag-s0.imag)/(2.0*np.pi/Para.Beta)
+    print("Z=", 1.0-(s1.imag-s0.imag)/(2.0*np.pi/Para.Beta))
     dMu = (s0.real+s1.real)/2.0
-    print "Dynamic chemical shift: ", dMu
+    print("Dynamic chemical shift: ", dMu)
     # PlotDataK(SigmaW, MaxFreq, Freq, False)
 
     BareG = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
@@ -184,7 +182,7 @@ if __name__ == "__main__":
     # print BareG[kFidx, :]
     # PlotSigmaT(dG_W, [kFidx/2, kFidx, kFidx*2], False)
     PlotG(dG_T, kFidx, False)
-    print "Maximum Error of \delta G: ", np.amax(abs(dG_T-dG_Tp))
+    print("Maximum Error of \delta G: ", np.amax(abs(dG_T-dG_Tp)))
 
     with open("dispersion.data", "w") as f:
         for k in range(Para.MomGridSize):
