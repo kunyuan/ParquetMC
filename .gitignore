@@ -36,6 +36,7 @@
 *.dat
 *.pdf
 *.png
+TAGS
 
 infile/
 outfile/

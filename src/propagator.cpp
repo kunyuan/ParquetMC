@@ -209,6 +209,39 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   Weight[EX] = 0.0;
   return Weight;
 }
+verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
+                                  const momentum &KInR, const momentum &KOutR,
+                                  double ExtQ) {
+  verWeight Weight;
+  // Weight = {1.0, 0.0};
+  // return Weight;
+
+  double kDiQ = (KInL - KOutL).norm();
+  Weight[DIR] =
+      -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+
+  if (DiagType == SIGMA && IsZero(kDiQ))
+    Weight[DIR] = 0.0;
+
+  // check irreducibility
+  if (DiagType == POLAR && IsEqual(kDiQ, ExtQ))
+    Weight[DIR] = 0.0;
+
+  double kExQ = (KInL - KOutR).norm();
+  Weight[EX] =
+      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+
+  if (DiagType == SIGMA && IsZero(kExQ))
+    Weight[EX] = 0.0;
+
+  // check irreducibility
+  if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
+    Weight[EX] = 0.0;
+
+  // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
+  // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
+  return Weight;
+}
 
 double propagator::Interaction(const momentum &TranQ, int VerOrder) {
   double kQ = TranQ.norm();
@@ -222,6 +255,27 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder) {
     // Order N shifted interaction
     double Weight =
         -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+    if (VerOrder > 0)
+      Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
+    return Weight;
+  }
+}
+double propagator::Interaction(const momentum &TranQ, int VerOrder,
+                               double ExtQ) {
+  double kQ = TranQ.norm();
+  if (DiagType == POLAR && IsEqual(kQ, ExtQ))
+    return 0.0;
+
+  if (VerOrder < 0) {
+    // Bare interaction
+    if (kQ > 1.0e-8)
+      return -8.0 * PI * Para.Charge2 / (kQ * kQ);
+    else
+      return 0.0;
+  } else {
+    // Order N shifted interaction
+    double Weight =
+      -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
     if (VerOrder > 0)
       Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
     return Weight;

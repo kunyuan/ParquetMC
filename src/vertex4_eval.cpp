@@ -25,6 +25,7 @@ void vertex4::Evaluate(const momentum &KInL, const momentum &KOutL,
   }
 
   _EvalUST(KInL, KOutL, KInR, KOutR, IsFast);
+  _EvalUST_CT(KInL, KOutL, KInR, KOutR, IsFast);
   // if (Ver4.LoopNum >= 3)
   //   _EvalI(KInL, KOutL, KInR, KOutR, IsFast);
   return;
@@ -35,10 +36,10 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
 
   // only bare coupling
   if (DiagType == POLAR)
-    Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR, _InBox,
-                                 Var.LoopMom[0].norm());
+    Weight[0] =
+        Prop.Interaction(KInL, KOutL, KInR, KOutR, Var.LoopMom[0].norm());
   else
-    Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR, _InBox);
+    Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
   return;
 }
 
@@ -50,16 +51,13 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
   G[0].Evaluate();
 
   for (auto chan : Channel) {
-    if (chan == T || chan == TC) {
+    if (chan == T) {
       G[T].K = KOutL + G[0].K - KInL;
-      if (!_InBox)
-        G[T].Evaluate();
-    } else if (chan == U || chan == UC) {
-      ASSERT(!_InBox, "U diagram can't be in box!");
+      G[T].Evaluate();
+    } else if (chan == U) {
       G[U].K = KOutR + G[0].K - KInL;
       G[U].Evaluate();
     } else if (chan == S) {
-      ASSERT(!_InBox, "S diagram can't be in box!");
       G[S].K = KInL + KInR - G[0].K;
       G[S].Evaluate();
     }
@@ -69,6 +67,7 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
   verWeight W;
   double GWeight, ProjFactor;
   double Factor = 1.0 / pow(2.0 * PI, D);
+
   for (auto &b : _UST) {
     // cout << "before, " << b.Channel << ", " << b.Map.size() << endl;
     channel chan = b.Channel;
@@ -76,10 +75,10 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
 
     // cout << _UST.size() << endl;
     // cout << "before: " << b.Channel << ", " << b.Map.size() << endl;
-    if (chan == T || chan == TC) {
+    if (chan == T) {
       b.LVer.Evaluate(KInL, KOutL, G[T].K, G[0].K);
       b.RVer.Evaluate(G[0].K, G[T].K, KInR, KOutR);
-    } else if (chan == U || chan == UC) {
+    } else if (chan == U) {
       b.LVer.Evaluate(KInL, KOutR, G[U].K, G[0].K);
       b.RVer.Evaluate(G[0].K, G[U].K, KInR, KOutL);
     } else if (chan == S) {
@@ -94,20 +93,22 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
     // cout << "after2: " << b.Channel << ", " << b.Map.size() << endl << endl;
 
     for (auto &map : b.Map) {
-      if (chan == TC || chan == UC || _InBox)
-        // counter-diagram weight
-        GWeight = ProjFactor * Prop.CounterBubble(G[0].K);
-      else
-        // normal diagram
-        GWeight = ProjFactor * G[0][map[G0T]] * G[chan][map[GXT]];
+      GWeight = ProjFactor * G[0][map[G0T]] * G[chan][map[GXT]];
 
       auto &Lw = LVerW[map[LVERT]];
       auto &Rw = RVerW[map[RVERT]];
 
-      if (chan == T || chan == TC) {
+      // cout << "g " << G[0][map[G0T]] << ", " << G[chan][map[GXT]] << endl;
+      // cout << "Order: " << Order << ", c=" << chan << ", " << GWeight << ",
+      // ["
+      //      << Lw[DIR] << ", " << Lw[EX] << "], [" << Rw[DIR] << ", " <<
+      //      Rw[EX]
+      //      << "]" << endl;
+
+      if (chan == T) {
         W[DIR] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         W[EX] = Lw[EX] * Rw[EX];
-      } else if (chan == U || chan == UC) {
+      } else if (chan == U) {
         W[EX] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         W[DIR] = Lw[EX] * Rw[EX];
       } else if (chan == S) {
@@ -125,6 +126,45 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         ChanWeight[ChanMap[chan]] +=
             W * GWeight * cos(2.0 * PI / Para.Beta * dTau);
         // ChanWeight[ChanMap[chan]] += W * GWeight;
+      }
+    }
+  }
+}
+
+void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
+                          const momentum &KInR, const momentum &KOutR,
+                          bool IsFast) {
+  if (ChannelCT.size() > 0) {
+    double Factor = 1.0 / pow(2.0 * PI, D);
+    // cout << weight << endl;
+    // ProjFactor = SymFactor[chan] * Factor;
+    // cout << Tpair[0][0] << ", " << Tpair[0][1] << Tpair[0][2] << Tpair[0][3]
+    //      << endl;
+    for (auto &c : ChannelCT) {
+      if (c == TC) {
+        double weight =
+            pow(Prop.Interaction(KInL - KOutL, 0, Var.LoopMom[0].norm()),
+                LoopNum() + 1);
+        for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
+          weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+        }
+        if (IsFast && Level == 0)
+          ChanWeight[T][DIR] += weight * SymFactor[TC];
+        else
+          // counter-term Tpair and the weight are always the first element
+          Weight[0][DIR] += weight * SymFactor[TC];
+      } else if (c == UC) {
+        double weight =
+            pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
+                LoopNum() + 1);
+        for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
+          weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+        }
+        if (IsFast && Level == 0)
+          ChanWeight[U][EX] += weight * SymFactor[UC];
+        else
+          // counter-term Tpair and the weight are always the first element
+          Weight[0][EX] += weight * SymFactor[UC];
       }
     }
   }

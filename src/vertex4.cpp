@@ -1,3 +1,4 @@
+#define FMT_HEADER_ONLY
 #include "vertex4.h"
 #include "utility/fmt/format.h"
 #include <iostream>
@@ -51,35 +52,38 @@ void green::Evaluate(const momentum &_K, bool IsAnomal) {
 }
 
 void vertex4::Build(int level, int order, int loopIdx, int inTL,
-                    const vector<channel> &chan, int side, bool inBox) {
+                    const vector<channel> &chan, int side) {
   Level = level;
   Side = side;
   Tidx = inTL;
   LoopIdx = loopIdx;
-  _InBox = inBox;
-  Channel = chan;
   Order = order;
-
+  Channel.clear();
+  ChannelCT.clear();
   if (LoopNum() == 0) {
     // the same for left and right vertex with loopnum=0
     _AddTidxPair({Tidx, Tidx, Tidx, Tidx});
   } else {
-    vector<channel> UST, II;
-    for (auto &c : Channel) {
-      if (c == I)
-        II.push_back(c);
-      else
-        UST.push_back(c);
-    }
-    // normal diagram
-    // _BuildI(II);
-    // UST channel
-    for (auto c : UST)
-      for (int ol = 0; ol < LoopNum(); ol++) {
-        auto bubble = _BuildBubble(c, ol);
-        if (bubble.Map.size() > 0)
-          _UST.push_back(bubble);
+    // push counter-term Tpair first
+    for (auto &c : chan) {
+      if (c == TC || c == UC) {
+        ChannelCT.push_back(c);
+        _AddTidxPair({Tidx, Tidx, Tidx, Tidx});
       }
+    }
+
+    for (auto &c : chan) {
+      if (c == T || c == U || c == S) {
+        Channel.push_back(c);
+        for (int ol = 0; ol < LoopNum(); ol++) {
+          auto bubble = _BuildBubble(c, ol);
+          _UST.push_back(bubble);
+        }
+      } else if (c == I) {
+        // I channel
+        Channel.push_back(c);
+      }
+    }
   }
 
   Weight.resize(Tpair.size());
@@ -107,8 +111,6 @@ bubble vertex4::_BuildBubble(channel chan, int ol) {
   vector<channel> FULL = {I, T, U, S, TC, UC};
   vector<channel> F = {I, U, S, TC, UC};
   vector<channel> V = {I, T, U, TC, UC};
-  vector<channel> FULL_CT = {I, T, TC};
-  vector<channel> F_CT = {I, TC};
 
   ASSERT_ALLWAYS(chan != I, "BuildUST can not process I channel!");
   ASSERT_ALLWAYS(ol < LoopNum(),
@@ -124,33 +126,18 @@ bubble vertex4::_BuildBubble(channel chan, int ol) {
 
   switch (chan) {
   case T:
-    if (!_InBox) {
-      bub.LVer.Build(lvl, ol, Llopidx, Tidx, F, LEFT, false);
-      bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL, RIGHT, false);
-    } else {
-      bub.LVer.Build(lvl, ol, Llopidx, Tidx, F_CT, LEFT, true);
-      bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL_CT, RIGHT, true);
-    }
+    bub.LVer.Build(lvl, ol, Llopidx, Tidx, F, LEFT);
+    bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL, RIGHT);
     break;
   case U:
     // continue;
-    ASSERT_ALLWAYS(!_InBox,
-                   "Ver4 in box can't have U diagram! Level: " << Level);
-    bub.LVer.Build(lvl, ol, Llopidx, Tidx, F, LEFT, false);
-    bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL, RIGHT, false);
+    bub.LVer.Build(lvl, ol, Llopidx, Tidx, F, LEFT);
+    bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL, RIGHT);
     break;
   case S:
     // continue;
-    ASSERT_ALLWAYS(!_InBox,
-                   "Ver4 in box can't have S diagram! Level: " << Level);
-    bub.LVer.Build(lvl, ol, Llopidx, Tidx, V, LEFT, false);
-    bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL, RIGHT, false);
-    break;
-  case TC:
-  case UC:
-    // continue;
-    bub.LVer.Build(lvl, ol, Llopidx, Tidx, F_CT, LEFT, true);
-    bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL_CT, RIGHT, true);
+    bub.LVer.Build(lvl, ol, Llopidx, Tidx, V, LEFT);
+    bub.RVer.Build(lvl, oR, Rlopidx, RInT, FULL, RIGHT);
     break;
   default:
     ABORT("The channel does not exist!");
@@ -180,12 +167,6 @@ bubble vertex4::_BuildBubble(channel chan, int ol) {
         VerTidx = _AddTidxPair({LvT[INL], RvT[OUTL], LvT[INR], RvT[OUTR]});
         GTidx = G[chan].AddTidxPair({LvT[OUTL], RvT[INR]});
         break;
-      case TC:
-      case UC:
-        // counterterms are equal-time
-        VerTidx = _AddTidxPair({LvT[INL], LvT[INL], LvT[INL], LvT[INL]});
-        GTidx = G[chan].AddTidxPair({RvT[OUTL], LvT[INR]});
-        break;
       default:
         ABORT("The channel does not exist! " << chan);
         break;
@@ -206,10 +187,8 @@ string vertex4::ToString(string indent) {
   // string Info =
   //     indent +
   //     "==============================================================\n";
-  string Info =
-      indent +
-      fmt::format("├Level: {0}, {1}, LoopNum: {2}, Boxed: {3}, G0:{4}\n", Level,
-                  SideStr, LoopNum(), _InBox, G[0].Size());
+  string Info = indent + fmt::format("├Level: {0}, {1}, LoopNum: {2}, G0:{3}\n",
+                                     Level, SideStr, LoopNum(), G[0].Size());
   Info += indent + fmt::format("├─Tau[{0}]: ", Tpair.size());
   for (auto &t : Tpair)
     Info +=
