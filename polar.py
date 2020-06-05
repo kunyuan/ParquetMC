@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 from utility.IO import *
 import utility.fourier as fourier
 from utility.plot import *
 
-# XType = "Tau"
-XType = "Mom"
+XType = "Tau"
+# XType = "Mom"
 OrderByOrder = False
 # Unit=1.0
 # 0: I, 1: T, 2: U, 3: S
@@ -58,10 +58,10 @@ elif(XType == "Tau"):
     N = 8
     o = 1
     for i in range(N):
-        q = i*MomGridSize/N
+        q = int(i*MomGridSize/N)
         Avg, Err = Estimate(Data, Norm)
-        # plt.errorbar(TauGrid/Para.Beta, Avg[o, q, :], yerr=Err[o, q, :], fmt='o-',
-        #              capthick=1, capsize=4, color=ColorList[i], label="$k={0}k_F$".format(MomGrid[q]/Para.kF))
+        plt.errorbar(TauGrid/Para.Beta, Avg[o, q, :], yerr=Err[o, q, :], fmt='o-',
+                     capthick=1, capsize=4, color=ColorList[i], label="$k={0}k_F$".format(MomGrid[q]/Para.kF))
 
     plt.xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])
 
