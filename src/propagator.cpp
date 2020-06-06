@@ -127,7 +127,9 @@ double propagator::ExtrapF(double Tau, double K){
   try{
     int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
     int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
-      return _f.at(t*Para.ExtMomBinSize+ExtQ);
+    t=Para.TauBinSize*Tau/Para.Beta;
+
+    return _f.at(t*Para.ExtMomBinSize+ExtQ);
   }
   catch (std::out_of_range){
     std::cout<<"Access F out of range!"<<endl;
@@ -145,7 +147,7 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
     Tau = Para.Beta + Tau;
     Sign *= -1.0;
   }
-  return Sign*ExtrapF(Tau,K.norm());
+  return ExtrapF(Tau,K.norm());
   return Sign*exp(-K.squaredNorm())*(Para.Beta-2*Tau);
   // double Ek = K.squaredNorm() - Para.Mu;
   // // return Sign * Tau * exp(-Ek * Tau) / 2.0 / (1 + cosh(Para.Beta * Ek));
