@@ -10,7 +10,7 @@ public:
   propagator();
   void Initialize();
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
-  double F(double Tau, const momentum &K, spin Spin, int GType = 0);
+  double F(double Tau, const momentum &K, spin Spin, int GType = 0, int chan=0);
 
   verWeight Interaction(const momentum &KInL, const momentum &KOutL,
                         const momentum &KInR, const momentum &KOutR,
@@ -31,7 +31,7 @@ private:
   void LoadF();
   void TestF();
   void LoadGreen();
-  double ExtrapF(double Tau,double K);
+  double ExtrapF(double Tau,double K, int chan=0);
   vector<double> _f;
   vector<double> _taulist;
   vector<double> _extMom;

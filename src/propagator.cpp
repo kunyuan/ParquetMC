@@ -13,7 +13,7 @@ propagator::propagator(){
 }
 
 void propagator::Initialize(){
-  _f = vector<double>(Para.TauBinSize * Para.ExtMomBinSize);
+  _f = vector<double>(Para.TauBinSize * Para.ExtMomBinSize * ChannelNum);
   _taulist = vector<double>(Para.TauBinSize);
   for(int i=0;i<Para.ExtMomBinSize;i++){
     _extMom.push_back(Para.ExtMomTable[i].norm());
@@ -24,18 +24,20 @@ void propagator::Initialize(){
 
 void propagator::LoadF(){
   try {
-    string FileName = fmt::format("./f.dat");
-    ifstream VerFile;
-    VerFile.open(FileName, ios::in);
-    if (VerFile.is_open()) {
-      for (int tau = 0; tau < Para.TauBinSize; tau++){
-        VerFile >> _taulist.at(tau);
-      }
-      for (int tau =0; tau<Para.TauBinSize;tau++)
-        for (int qindex = 0; qindex<Para.ExtMomBinSize; qindex++){
-          VerFile >> _f.at(tau*Para.ExtMomBinSize+qindex);
+    for(int chan=0;chan<ChannelNum;chan++){      
+      string FileName = fmt::format("./f{0}.dat",chan);
+      ifstream VerFile;
+      VerFile.open(FileName, ios::in);
+      if (VerFile.is_open()) {
+        for (int tau = 0; tau < Para.TauBinSize; tau++){
+          VerFile >> _taulist.at(tau);
         }
-      VerFile.close();
+        for (int tau =0; tau<Para.TauBinSize;tau++)
+          for (int qindex = 0; qindex<Para.ExtMomBinSize; qindex++){
+            VerFile >> _f.at(chan*Para.ExtMomBinSize*Para.TauBinSize+tau*Para.ExtMomBinSize+qindex);
+          }
+        VerFile.close();
+      }
     }
   } catch (int e) {
     LOG_INFO("Can not load f file!");
@@ -123,12 +125,12 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
   return green;
 }
 
-double propagator::ExtrapF(double Tau, double K){
+double propagator::ExtrapF(double Tau, double K, int chan){
   try{
     int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
     int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
 
-    return _f.at(t*Para.ExtMomBinSize+ExtQ);
+    return _f.at(chan*Para.ExtMomBinSize*Para.TauBinSize+t*Para.ExtMomBinSize+ExtQ);
   }
   catch (std::out_of_range){
     std::cout<<"Access F out of range!"<<endl;
@@ -136,7 +138,7 @@ double propagator::ExtrapF(double Tau, double K){
   }
 }
 
-double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
+double propagator::F(double Tau, const momentum &K, spin Spin, int GType, int chan) {
   if (Tau == 0.0)
     Tau = 1.0e-10;
 
@@ -146,7 +148,7 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
     Tau = Para.Beta + Tau;
     Sign *= -1.0;
   }
-  return Sign*ExtrapF(Tau,K.norm());
+  return Sign*ExtrapF(Tau,K.norm(),chan);
   return Sign*exp(-K.squaredNorm())*(Para.Beta-2*Tau);
   // double Ek = K.squaredNorm() - Para.Mu;
   // // return Sign * Tau * exp(-Ek * Tau) / 2.0 / (1 + cosh(Para.Beta * Ek));

@@ -53,6 +53,7 @@ public:
   int LoopNum() { return Order; }
   void Build(int Order);
   double Evaluate();
+  double Evaluate(int channel);
   string ToString();
 
 private:

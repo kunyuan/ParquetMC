@@ -29,6 +29,7 @@ public:
   // evaluate all weight with different T pairs and a given K
   void Evaluate(bool IsAnomal = false);
   void Evaluate(const momentum &K, bool IsAnomal = false);
+  void Evaluate(const momentum &K, int chan=0);// for delta in different channels
   int Size() { return _Tpair.size(); };
 
   vector<array<int, 2>> _Tpair;

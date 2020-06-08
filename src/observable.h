@@ -55,9 +55,11 @@ public:
   void Measure(int Order, int KBin, int TauBin, double Weight,
                double Factor); // all tau variables
   void Save();
+  void Save(int);
 
 private:
   std::string Name;
+  int channel; // channel s=0,p=1,d=2 ...
   double Normalization;
   tensor3<double> _Estimator;
   double PhyWeight;
