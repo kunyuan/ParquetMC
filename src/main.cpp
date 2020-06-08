@@ -39,7 +39,7 @@ int main(int argc, const char *argv[]) {
   Random.Reset(Para.Seed);
 
   InitPara(); // initialize global parameters
-
+  Prop.Initialize();
   markov Markov;
   InterruptHandler Interrupt;
 

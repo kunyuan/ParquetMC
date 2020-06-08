@@ -3,6 +3,8 @@
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 using namespace diag;
 using namespace std;
@@ -27,6 +29,76 @@ double Fock(double k) {
 
   return fock - shift;
   // return fock;
+}
+
+propagator::propagator(){
+}
+
+void propagator::Initialize(){
+  _f = vector<double>(Para.TauBinSize * Para.ExtMomBinSize);
+  _taulist = vector<double>(Para.TauBinSize);
+  for(int i=0;i<Para.ExtMomBinSize;i++){
+    _extMom.push_back(Para.ExtMomTable[i].norm());
+  }
+  LoadF();
+  TestF();
+}
+
+void propagator::LoadF(){
+  try {
+    string FileName = fmt::format("./f.dat");
+    ifstream VerFile;
+    VerFile.open(FileName, ios::in);
+    if (VerFile.is_open()) {
+      for (int tau = 0; tau < Para.TauBinSize; tau++){
+        VerFile >> _taulist.at(tau);
+      }
+      for (int tau =0; tau<Para.TauBinSize;tau++)
+        for (int qindex = 0; qindex<Para.ExtMomBinSize; qindex++){
+          VerFile >> _f.at(tau*Para.ExtMomBinSize+qindex);
+        }
+      VerFile.close();
+    }
+  } catch (int e) {
+    LOG_INFO("Can not load f file!");
+    throw ;
+  }
+  // load F from file, and store
+  return;
+}
+
+void propagator::TestF(){
+  try {
+    string FileName = fmt::format("./ftest.dat");
+    ofstream VerFile;
+    VerFile.open(FileName, ios::out);
+    if (VerFile.is_open()) {
+      for (int tau = 0; tau < Para.TauBinSize; tau++){
+        VerFile << _taulist.at(tau)<<"\n";
+      }
+      VerFile << "mombin\n";
+      for (int k = 0; k < Para.ExtMomBinSize; k++){
+        VerFile << _extMom.at(k)<<"\n";
+      }
+      for (int tau =0; tau<Para.TauBinSize;tau++)
+        for (int qindex = 0; qindex<Para.ExtMomBinSize; qindex++){
+          VerFile << _f.at(tau*Para.ExtMomBinSize+qindex)<<"\t";
+        }
+      VerFile<<"\n";
+      //      VerFile << ExtrapF(0.5,0.5)<<"\t at 0.5 0.5\n";
+      VerFile.close();
+    }
+  } catch (int e) {
+    LOG_INFO("Can not write f file!");
+    throw ;
+  }
+  catch (std::out_of_range){
+    LOG_INFO("Test F out of range!");
+    throw ;
+  }
+  // load F from file, and store
+  return;
+
 }
 
 double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
@@ -113,6 +185,21 @@ void propagator::LoadGreen() {
     cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
 }
 
+
+double propagator::ExtrapF(double Tau, double K){
+  try{
+    int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
+    int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
+    t=Para.TauBinSize*Tau/Para.Beta;
+
+    return _f.at(t*Para.ExtMomBinSize+ExtQ);
+  }
+  catch (std::out_of_range){
+    std::cout<<"Access F out of range!"<<endl;
+    throw;
+  }
+}
+
 double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
   if (Tau == 0.0)
     Tau = -1.0e-10;
@@ -123,28 +210,29 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
     Tau = Para.Beta + Tau;
     Sign *= -1.0;
   }
+  return ExtrapF(Tau,K.norm());
+  return Sign*exp(-K.squaredNorm())*(Para.Beta-2*Tau);
+  // double Ek = K.squaredNorm() - Para.Mu;
+  // // return Sign * Tau * exp(-Ek * Tau) / 2.0 / (1 + cosh(Para.Beta * Ek));
 
-  double Ek = K.squaredNorm() - Para.Mu;
-  // return Sign * Tau * exp(-Ek * Tau) / 2.0 / (1 + cosh(Para.Beta * Ek));
-
-  double Prefactor, Term1, Term2;
-  if (Ek < 0.0) {
-    double b = exp(Ek * Para.Beta);
-    double x = exp(Ek * (Para.Beta - Tau));
-    double y = 1.0 / (1 + 2.0 * b + b * b);
-    Term1 = Tau * x * y;
-    Term2 = 0.5 / Ek * exp(Ek * Tau) * (x * x - 1.0) * y;
-    return (Term1 + Term2) * Sign;
-  } else if (Ek > 0.0) {
-    double b = exp(-Ek * Para.Beta);
-    double x = exp(-Ek * (Para.Beta - Tau));
-    double y = 1.0 / (1.0 + 2 * b + b * b);
-    Term1 = Tau * exp(-Ek * (Tau + Para.Beta)) * y;
-    Term2 = 0.5 / Ek * exp(-Ek * Tau) * (1.0 - x * x) * y;
-    return (Term1 + Term2) * Sign;
-  } else
-    // unphysical
-    return 0.0;
+  // double Prefactor, Term1, Term2;
+  // if (Ek < 0.0) {
+  //   double b = exp(Ek * Para.Beta);
+  //   double x = exp(Ek * (Para.Beta - Tau));
+  //   double y = 1.0 / (1 + 2.0 * b + b * b);
+  //   Term1 = Tau * x * y;
+  //   Term2 = 0.5 / Ek * exp(Ek * Tau) * (x * x - 1.0) * y;
+  //   return (Term1 + Term2) * Sign;
+  // } else if (Ek > 0.0) {
+  //   double b = exp(-Ek * Para.Beta);
+  //   double x = exp(-Ek * (Para.Beta - Tau));
+  //   double y = 1.0 / (1.0 + 2 * b + b * b);
+  //   Term1 = Tau * exp(-Ek * (Tau + Para.Beta)) * y;
+  //   Term2 = 0.5 / Ek * exp(-Ek * Tau) * (1.0 - x * x) * y;
+  //   return (Term1 + Term2) * Sign;
+  // } else
+  //   // unphysical
+  //   return 0.0;
 }
 
 verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
@@ -178,6 +266,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
+  Weight[EX] = 0.0;
   return Weight;
 }
 
