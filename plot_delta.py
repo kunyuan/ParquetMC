@@ -7,8 +7,7 @@ import numpy as np
 #from pynufft import NUFFT_cpu, NUFFT_hsa
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from utility import *
-from grid import *
+from utility.IO import *
 import psutil
 
 
@@ -197,7 +196,7 @@ os.system("cp {0} {1}".format("grid.data", homedir))
 os.chdir(homedir)
 
 
-for loopcounter in range(20):
+for loopcounter in range(1):
 
     f_freq=np.multiply(gg,delta)
     phase_shift=np.exp(-1j*np.pi/Beta*TauBin)

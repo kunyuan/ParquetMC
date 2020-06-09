@@ -35,10 +35,10 @@ propagator::propagator(){
 }
 
 void propagator::Initialize(){
-  _f = vector<double>(Para.TauBinSize * Para.ExtMomBinSize);
-  _taulist = vector<double>(Para.TauBinSize);
-  for(int i=0;i<Para.ExtMomBinSize;i++){
-    _extMom.push_back(Para.ExtMomTable[i].norm());
+  _f = vector<double>(Para.TauGrid.Size * Para.KGrid.Size);
+  _taulist = vector<double>(Para.TauGrid.Size);
+  for(int i=0;i<Para.KGrid.Size;i++){
+    _extMom.push_back(Para.KGrid.Grid[i]);
   }
   LoadF();
   TestF();
@@ -50,12 +50,12 @@ void propagator::LoadF(){
     ifstream VerFile;
     VerFile.open(FileName, ios::in);
     if (VerFile.is_open()) {
-      for (int tau = 0; tau < Para.TauBinSize; tau++){
+      for (int tau = 0; tau < Para.TauGrid.Size; tau++){
         VerFile >> _taulist.at(tau);
       }
-      for (int tau =0; tau<Para.TauBinSize;tau++)
-        for (int qindex = 0; qindex<Para.ExtMomBinSize; qindex++){
-          VerFile >> _f.at(tau*Para.ExtMomBinSize+qindex);
+      for (int tau =0; tau<Para.TauGrid.Size;tau++)
+        for (int qindex = 0; qindex<Para.KGrid.Size; qindex++){
+          VerFile >> _f.at(tau*Para.KGrid.Size+qindex);
         }
       VerFile.close();
     }
@@ -73,16 +73,16 @@ void propagator::TestF(){
     ofstream VerFile;
     VerFile.open(FileName, ios::out);
     if (VerFile.is_open()) {
-      for (int tau = 0; tau < Para.TauBinSize; tau++){
+      for (int tau = 0; tau < Para.TauGrid.Size; tau++){
         VerFile << _taulist.at(tau)<<"\n";
       }
       VerFile << "mombin\n";
-      for (int k = 0; k < Para.ExtMomBinSize; k++){
+      for (int k = 0; k < Para.KGrid.Size; k++){
         VerFile << _extMom.at(k)<<"\n";
       }
-      for (int tau =0; tau<Para.TauBinSize;tau++)
-        for (int qindex = 0; qindex<Para.ExtMomBinSize; qindex++){
-          VerFile << _f.at(tau*Para.ExtMomBinSize+qindex)<<"\t";
+      for (int tau =0; tau<Para.TauGrid.Size;tau++)
+        for (int qindex = 0; qindex<Para.KGrid.Size; qindex++){
+          VerFile << _f.at(tau*Para.KGrid.Size+qindex)<<"\t";
         }
       VerFile<<"\n";
       //      VerFile << ExtrapF(0.5,0.5)<<"\t at 0.5 0.5\n";
@@ -190,9 +190,9 @@ double propagator::ExtrapF(double Tau, double K){
   try{
     int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
     int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
-    t=Para.TauBinSize*Tau/Para.Beta;
+    t=Para.TauGrid.Size*Tau/Para.Beta;
 
-    return _f.at(t*Para.ExtMomBinSize+ExtQ);
+    return _f.at(t*Para.KGrid.Size+ExtQ);
   }
   catch (std::out_of_range){
     std::cout<<"Access F out of range!"<<endl;
