@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import time
 from color import *
 from utility import *

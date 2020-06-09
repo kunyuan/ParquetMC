@@ -1,33 +1,40 @@
 #ifndef FeynCalc_global_h
 #define FeynCalc_global_h
 
+#define FMT_HEADER_ONLY
+#include "grid.h"
 #include "utility/utility.h"
 #include <Eigen/Dense>
 #include <array>
 #include <math.h>
 #include <vector>
 
-// turn off all assert
+// comment to turn on all assert
 // #define NDEBUG
 
-enum type { GU, GW, RG, PARQUET, BARE, VARIATIONAL, RENORMALIZED };
-enum diagram { SIGMA, POLAR, GAMMA, DELTA };
+enum diagtype { GAMMA, SIGMA, POLAR, DELTA };
 
 ///////////  Global Constants ////////////////////
-const int D = 3;                   // dimensions, 2 or 3
-const int SPIN = 2;                // spin index
-const type CalcType = VARIATIONAL; // calculation type
-const diagram DiagType = DELTA;    // diagram type
-const int MaxOrder = 9;            // Max diagram order
+const int D = 3;        // dimensions, 2 or 3
+const int SPIN = 2;     // spin index
+const int MaxOrder = 9; // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
+
 const int ChannelNum = 3;
 // MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
 
-// momentum vector
-typedef Eigen::Matrix<double, D, 1> momentum;
-// vertex4 weight, has Direct and Exchange components
-typedef Eigen::Vector2d verWeight;
+
+
+const int IsDynamic = false;
+const bool BoldG = true;
+
+const diagtype DiagType = POLAR;
+typedef kFermiGrid kGrid; // for sigma
+// typedef kBoseGrid kGrid; // for gamma, polar and delta
+
+typedef Eigen::Matrix<double, D, 1> momentum; // momentum vector
+typedef Eigen::Vector2d verWeight; // direct and exchange weights for gamma
 
 /////////// Global Parameter ////////////////////
 struct parameter {
@@ -37,13 +44,12 @@ struct parameter {
   double Nf, Mu, Beta;  // chemical potential, inverse temperature
   double Mass2, Lambda; // screening length^2, shift
   double Charge2;       // screening length^2
-  double MaxExtMom;     // the maximum external momentum
 
   // MC inputs
-  int TotalStep; // total steps of the Monte Carlo
-  int Sweep;     // how many MC steps between two measuring
-  int Seed, PID; // rng seed, job ID
-  std::array<double, MaxOrder> ReWeight; // reweight factor for each group
+  int TotalStep;             // total steps of the Monte Carlo
+  int Sweep;                 // how many MC steps between two measuring
+  int Seed, PID;             // rng seed, job ID
+  double ReWeight[MaxOrder]; // reweight factor for each group
 
   // others
   int PrinterTimer;  // time interval to print to screen
@@ -52,14 +58,9 @@ struct parameter {
   int ReweightTimer; // time interval to reweight different orders
 
   // external variable tables
-
-  int ExtMomBinSize; // external K bins
-  int AngBinSize;    // angle bins
-  int TauBinSize;    // tau bin
-  int TauBasisSize;  // tau basis
-  std::vector<momentum> ExtMomTable;
-  std::vector<double> AngleTable;
-  std::vector<double> ExtTauTable;
+  tauGrid TauGrid;
+  kGrid KGrid;
+  uniformGrid AngleGrid;
 };
 
 struct variable {
@@ -99,9 +100,8 @@ const int LEFT = 0, RIGHT = 1;
 const int INL = 0, OUTL = 1, INR = 2, OUTR = 3;
 const int DIRECT = 0, EXCHANGE = 1;
 const int DIR = 0, EX = 1;
+const int HEAD = 0, TAIL = 1;
 
 //////////////////////////////////////////////////////
-
-#define FMT_HEADER_ONLY
 
 #endif

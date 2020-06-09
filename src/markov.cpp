@@ -4,6 +4,7 @@
 //  Created by Kun Chen on 1/21/19.
 //  Copyright (c) 2019 Kun Chen. All rights reserved.
 //
+#define FMT_HEADER_ONLY
 #include "markov.h"
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
@@ -114,7 +115,7 @@ void markov::ChangeOrder() {
 
 void markov::ChangeExtTau() {
   // Gamma diagram doesn't have ExtTau variable
-  if (DiagType == diagram::GAMMA)
+  if (DiagType == GAMMA)
     return;
 
   Proposed[CHANGE_EXTTAU][Var.CurrOrder]++;
@@ -123,18 +124,19 @@ void markov::ChangeExtTau() {
   int OldTauBin = Var.CurrExtTauBin;
   double Prop = ShiftExtTau(OldTauBin, Var.CurrExtTauBin);
 
-  Var.Tau[ExtTauIdx] = Para.ExtTauTable[Var.CurrExtTauBin];
+  Var.Tau[ExtTauIdx] = Para.TauGrid.Grid[Var.CurrExtTauBin];
 
   NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
 
-  double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
+  double R = Prop * NewAbsWeight * Para.TauGrid.Weight[Var.CurrExtTauBin] /
+             Var.CurrAbsWeight / Para.TauGrid.Weight[OldTauBin];
 
   if (Random.urn() < R) {
     Accepted[CHANGE_EXTTAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.CurrExtTauBin = OldTauBin;
-    Var.Tau[ExtTauIdx] = Para.ExtTauTable[OldTauBin];
+    Var.Tau[ExtTauIdx] = Para.TauGrid.Grid[OldTauBin];
   }
 };
 
@@ -206,7 +208,7 @@ void markov::ChangeExtMomentum() {
     OldAngBin = Var.CurrExtAngBin;
     Prop = ShiftExtLegK(OldAngBin, Var.CurrExtAngBin);
 
-    double theta = acos(Para.AngleTable[Var.CurrExtAngBin]);
+    double theta = acos(Para.AngleGrid.Grid[Var.CurrExtAngBin]);
     Var.LoopMom[INR][0] = Para.Kf * cos(theta);
     Var.LoopMom[INR][1] = Para.Kf * sin(theta);
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
@@ -215,7 +217,7 @@ void markov::ChangeExtMomentum() {
     // In Momentum
     OldExtMomBin = Var.CurrExtMomBin;
     Prop = ShiftExtTransferK(OldExtMomBin, Var.CurrExtMomBin);
-    Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
+    Var.LoopMom[0][0] = Para.KGrid.Grid[Var.CurrExtMomBin];
   }
 
   Proposed[CHANGE_EXTMOM][Var.CurrOrder]++;
@@ -233,7 +235,7 @@ void markov::ChangeExtMomentum() {
       Var.LoopMom[OUTR] = OldMom;
     } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
       Var.CurrExtMomBin = OldExtMomBin;
-      Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
+      Var.LoopMom[0][0] = Para.KGrid.Grid[Var.CurrExtMomBin];
     }
   }
 };
@@ -349,13 +351,12 @@ double markov::ShiftK(const momentum &OldMom, momentum &NewMom) {
     Prop = 1.0;
   } else if (x < 2.0 / 3) {
     double k = OldMom.norm();
-    if (k < 1.0e-9) {
+    if (k < 1.0e-12) {
       Prop = 0.0;
       NewMom = OldMom;
     } else {
       const double Lambda = 1.5;
-      double knew = k / Lambda + Random.urn() * (Lambda - 1.0 / Lambda) * k;
-      double Ratio = knew / k;
+      double Ratio = 1.0 / Lambda + Random.urn() * (Lambda - 1.0 / Lambda);
       for (int i = 0; i < D; i++)
         NewMom[i] = OldMom[i] * Ratio;
       if (D == 2)
@@ -363,44 +364,21 @@ double markov::ShiftK(const momentum &OldMom, momentum &NewMom) {
       else if (D == 3)
         Prop = Ratio;
     }
-
-    // if (isnan(Var.LoopMom[0][0]) || isnan(Var.LoopMom[0][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[1][0]) || isnan(Var.LoopMom[1][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[2][0]) || isnan(Var.LoopMom[2][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[3][0]) || isnan(Var.LoopMom[3][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[4][0]) || isnan(Var.LoopMom[4][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[5][0]) || isnan(Var.LoopMom[5][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[6][0]) || isnan(Var.LoopMom[6][0])) {
-    //   cout << "Na" << endl;
-    // }
   } else {
     for (int i = 0; i < D; i++)
       NewMom[i] = -OldMom[i];
     Prop = 1.0;
   }
-
   return Prop;
 };
 
 double markov::ShiftExtTransferK(const int &OldExtMomBin, int &NewExtMomBin) {
-  NewExtMomBin = Random.irn(0, Para.ExtMomBinSize - 1);
+  NewExtMomBin = Random.irn(0, Para.KGrid.Size - 1);
   return 1.0;
 };
 
 double markov::ShiftExtTau(const int &OldTauBin, int &NewTauBin) {
-  NewTauBin = Random.irn(0, Para.TauBinSize - 1);
+  NewTauBin = Random.irn(0, Para.TauGrid.Size - 1);
   return 1.0;
 }
 
@@ -410,7 +388,7 @@ double markov::ShiftExtLegK(const int &OldExtMom, int &NewExtMom) {
   // NewExtMom[1] = Para.Kf * sin(Theta);
   // return 1.0;
 
-  NewExtMom = Random.irn(0, Para.AngBinSize - 1);
+  NewExtMom = Random.irn(0, Para.AngleGrid.Size - 1);
 
   // ASSERT_ALLWAYS(diag::Angle2Index(cos(theta), AngBinSize) == NewKBin,
   //                "Not matched, " << NewKBin << " vs "

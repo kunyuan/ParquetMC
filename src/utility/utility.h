@@ -104,4 +104,6 @@ template <int A, int B> struct get_power {
 };
 template <int A> struct get_power<A, 0> { static const int value = 1; };
 
+std::stringstream GetLine(std::ifstream &File);
+
 #endif

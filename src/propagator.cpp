@@ -1,22 +1,44 @@
+#define FMT_HEADER_ONLY
 #include "propagator.h"
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
+#include <iostream>
 #include <vector>
 #include <algorithm>
-#include <iostream>
+
 using namespace diag;
 using namespace std;
+using namespace Eigen;
+
 extern parameter Para;
 extern variable Var;
+
+double Fock(double k) {
+  // warning: this function only works for T=0!!!!
+  double l = sqrt(Para.Mass2 + Para.Lambda);
+  double kF = Para.Kf;
+  double fock = 1.0 + l / kF * atan((k - kF) / l);
+  fock -= l / kF * atan((k + kF) / l);
+  fock -= (l * l - k * k + kF * kF) / 4.0 / k / kF *
+          log((l * l + (k - kF) * (k - kF)) / (l * l + (k + kF) * (k + kF)));
+  fock *= (-2.0 * kF) / PI;
+
+  double shift = 1.0 - l / kF * atan(2.0 * kF / l);
+  shift -= l * l / 4.0 / kF / kF * log(l * l / (l * l + 4.0 * kF * kF));
+  shift *= (-2.0 * kF) / PI;
+
+  return fock - shift;
+  // return fock;
+}
 
 propagator::propagator(){
 }
 
 void propagator::Initialize(){
-  _f = vector<double>(Para.TauBinSize * Para.ExtMomBinSize * ChannelNum);
-  _taulist = vector<double>(Para.TauBinSize);
-  for(int i=0;i<Para.ExtMomBinSize;i++){
-    _extMom.push_back(Para.ExtMomTable[i].norm());
+  _f = vector<double>(Para.TauGrid.Size * Para.KGrid.Size * ChannelNum);
+  _taulist = vector<double>(Para.TauGrid.Size);
+  for(int i=0;i<Para.KGrid.Size;i++){
+    _extMom.push_back(Para.KGrid.Grid[i]);
   }
   LoadF();
   TestF();
@@ -29,12 +51,12 @@ void propagator::LoadF(){
       ifstream VerFile;
       VerFile.open(FileName, ios::in);
       if (VerFile.is_open()) {
-        for (int tau = 0; tau < Para.TauBinSize; tau++){
+        for (int tau = 0; tau < Para.TauGrid.Size; tau++){
           VerFile >> _taulist.at(tau);
         }
-        for (int tau =0; tau<Para.TauBinSize;tau++)
-          for (int qindex = 0; qindex<Para.ExtMomBinSize; qindex++){
-            VerFile >> _f.at(chan*Para.ExtMomBinSize*Para.TauBinSize+tau*Para.ExtMomBinSize+qindex);
+        for (int tau =0; tau<Para.TauGrid.Size;tau++)
+          for (int qindex = 0; qindex<Para.KGrid.Size; qindex++){
+            VerFile >> _f.at(chan*Para.TauGrid.Size*Para.KGrid.Size+tau*Para.KGrid.Size+qindex);
           }
         VerFile.close();
       }
@@ -53,16 +75,16 @@ void propagator::TestF(){
     ofstream VerFile;
     VerFile.open(FileName, ios::out);
     if (VerFile.is_open()) {
-      for (int tau = 0; tau < Para.TauBinSize; tau++){
+      for (int tau = 0; tau < Para.TauGrid.Size; tau++){
         VerFile << _taulist.at(tau)<<"\n";
       }
       VerFile << "mombin\n";
-      for (int k = 0; k < Para.ExtMomBinSize; k++){
+      for (int k = 0; k < Para.KGrid.Size; k++){
         VerFile << _extMom.at(k)<<"\n";
       }
-      for (int tau =0; tau<Para.TauBinSize;tau++)
-        for (int qindex = 0; qindex<Para.ExtMomBinSize; qindex++){
-          VerFile << _f.at(tau*Para.ExtMomBinSize+qindex)<<"\t";
+      for (int tau =0; tau<Para.TauGrid.Size;tau++)
+        for (int qindex = 0; qindex<Para.KGrid.Size; qindex++){
+          VerFile << _f.at(tau*Para.KGrid.Size+qindex)<<"\t";
         }
       VerFile<<"\n";
       //      VerFile << ExtrapF(0.5,0.5)<<"\t at 0.5 0.5\n";
@@ -105,7 +127,17 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
     s = -s;
   }
 
-  Ek = K.squaredNorm(); // bare propagator
+  k = K.norm();
+  Ek = k * k; // bare propagator
+  Ek += Fock(k);
+
+  // if (BoldG && k < Para.KGrid.MaxK) {
+  // double sigma = _Interp1D(k, _StaticSigma);
+  // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
+  //                "fail at: " << Para.KGrid.Floor(k) << " , " << sigma
+  //                            << " vs " << Fock(k));
+  // Ek += -sigma;
+  // }
 
   double x = Para.Beta * (Ek - Para.Mu) / 2.0;
   double y = 2.0 * Tau / Para.Beta - 1.0;
@@ -125,12 +157,43 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
   return green;
 }
 
+void propagator::LoadGreen() {
+
+  _StaticSigma.setZero(Para.KGrid.Size);
+  _DeltaG.setZero(Para.KGrid.Size, Para.TauGrid.Size);
+
+  ifstream File;
+  File.open("dispersion.data", ios::in);
+  if (File.is_open()) {
+    for (int k = 0; k < Para.KGrid.Size; ++k)
+      File >> _StaticSigma[k];
+  } else {
+    LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
+    _StaticSigma.setZero();
+  }
+  File.close();
+
+  File.open("green.data", ios::in);
+  if (!File.is_open()) {
+    for (int k = 0; k < Para.KGrid.Size; ++k)
+      for (int t = 0; t < Para.KGrid.Size; ++t)
+        File >> _DeltaG(k, t);
+  } else {
+    LOG_WARNING("Can not load Green weights! Initialze with zeros!\n");
+    _DeltaG.setZero();
+  }
+  File.close();
+  for (int k = 0; k < Para.KGrid.Size; ++k)
+    cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
+}
+
 double propagator::ExtrapF(double Tau, double K, int chan){
   try{
     int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
     int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
+    t=Para.TauGrid.Size*Tau/Para.Beta;
 
-    return _f.at(chan*Para.ExtMomBinSize*Para.TauBinSize+t*Para.ExtMomBinSize+ExtQ);
+    return _f.at(chan*Para.TauGrid.Size*Para.KGrid.Size+t*Para.KGrid.Size+ExtQ);
   }
   catch (std::out_of_range){
     std::cout<<"Access F out of range!"<<endl;
@@ -140,7 +203,7 @@ double propagator::ExtrapF(double Tau, double K, int chan){
 
 double propagator::F(double Tau, const momentum &K, spin Spin, int GType, int chan) {
   if (Tau == 0.0)
-    Tau = 1.0e-10;
+    Tau = -1.0e-10;
 
   double Sign = -1.0;
   if (Tau < 0.0) {
@@ -148,6 +211,7 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType, int ch
     Tau = Para.Beta + Tau;
     Sign *= -1.0;
   }
+
   return Sign*ExtrapF(Tau,K.norm(),chan);
   return Sign*exp(-K.squaredNorm())*(Para.Beta-2*Tau);
   // double Ek = K.squaredNorm() - Para.Mu;
@@ -175,7 +239,7 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType, int ch
 
 verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
                                   const momentum &KInR, const momentum &KOutR,
-                                  bool Boxed, double ExtQ) {
+                                  double ExtQ) {
   verWeight Weight;
   // Weight = {1.0, 0.0};
   // return Weight;
@@ -191,19 +255,15 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   if (DiagType == POLAR && IsEqual(kDiQ, ExtQ))
     Weight[DIR] = 0.0;
 
-  if (!Boxed) {
-    double kExQ = (KInL - KOutR).norm();
-    Weight[EX] =
-        8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+  double kExQ = (KInL - KOutR).norm();
+  Weight[EX] =
+      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
 
-    if (DiagType == SIGMA && IsZero(kExQ))
-      Weight[EX] = 0.0;
+  if (DiagType == SIGMA && IsZero(kExQ))
+    Weight[EX] = 0.0;
 
-    // check irreducibility
-    if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
-      Weight[EX] = 0.0;
-
-  } else
+  // check irreducibility
+  if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
@@ -246,8 +306,12 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   return Weight;
 }
 
-double propagator::Interaction(const momentum &TranQ, int VerOrder) {
+double propagator::Interaction(const momentum &TranQ, int VerOrder,
+                               double ExtQ) {
   double kQ = TranQ.norm();
+  if (DiagType == POLAR && IsEqual(kQ, ExtQ))
+    return 0.0;
+
   if (VerOrder < 0) {
     // Bare interaction
     if (kQ > 1.0e-8)
@@ -287,55 +351,52 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
 
 double propagator::CounterBubble(const momentum &K) {
   double Factor = Para.Lambda / (8.0 * PI * Para.Nf);
-  Factor *=
-      Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
+  // Factor *=
+  //     Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
+
+  double Ek = K.squaredNorm() - Para.Ef;
+  Factor *= -0.5 / (1.0 + cosh(Ek * Para.Beta));
+
+  // ASSERT_ALLWAYS(IsEqual())
   return Factor;
 }
 
-double diag::Index2Mom(const int &Index) {
-  return (Index + 0.5) / Para.ExtMomBinSize * Para.MaxExtMom;
-};
+double propagator::_Interp1D(double K, const weight1D &data) {
+  int idx0 = Para.KGrid.Floor(K);
+  int idx1 = idx0 + 1;
+  double K0 = Para.KGrid.Grid[idx0];
+  double K1 = Para.KGrid.Grid[idx1];
+  // cout << K << "=>" << idx0 << ": " << K0 << "  " << idx1 << ": " << K1 <<
+  // endl;
+  ASSERT(K0 <= K && K1 > K,
+         "Interpolate fails: " << K0 << "<" << K << "<" << K1);
+  return (data[idx0] * (K1 - K) + data[idx1] * (K - K0)) / (K1 - K0);
+}
+double propagator::_Interp2D(double K, double T, const weight2D &data) {
+  int Tidx0 = Para.TauGrid.Floor(T);
+  double dT0 = T - Para.TauGrid.Grid[Tidx0],
+         dT1 = Para.TauGrid.Grid[Tidx0 + 1] - T;
+  ASSERT(dT0 >= 0.0 && dT1 > 0.0,
+         "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
 
-int diag::Mom2Index(const double &K) {
-  return int(K / Para.MaxExtMom * Para.ExtMomBinSize);
-};
+  int Kidx0 = Para.KGrid.Floor(K);
+  int dK0 = K - Para.KGrid.Grid[Kidx0], dK1 = Para.KGrid.Grid[Kidx0 + 1] - K;
+  ASSERT(dK0 >= 0.0 && dK1 > 0.0,
+         "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
+
+  double d00 = data(Kidx0, Tidx0), d01 = data(Kidx0, Tidx0 + 1);
+  double d10 = data(Kidx0 + 1, Tidx0), d11 = data(Kidx0 + 1, Tidx0 + 1);
+
+  double g0 = d00 * dK1 + d10 * dK0;
+  double g1 = d01 * dK1 + d11 * dK0;
+  return (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
+}
 
 double diag::Angle3D(const momentum &K1, const momentum &K2) {
   // Returns the angle in radians between vectors 'K1' and 'K2'
   double dotp = K1.dot(K2);
   double Angle2D = dotp / K1.norm() / K2.norm();
   return Angle2D;
-}
-
-double diag::Index2Angle(const int &Index, const int &AngleNum) {
-  // Map index [0...AngleNum-1] to the theta range [0.0, 2*pi)
-  return (Index + 0.5) * 2.0 / AngleNum - 1.0;
-}
-
-int diag::Angle2Index(const double &Angle, const int &AngleNum) {
-  // Map theta range  [0.0, 2*pi) to index [0...AngleNum-1]
-  // double dAngle = 2.0 * PI / AngleNum;
-  // if (Angle >= 2.0 * PI - dAngle / 2.0 || Angle < dAngle / 2.0)
-  //   return 0;
-  // else
-  //   return int(Angle / dAngle + 0.5);
-  // if (Angle > 1.0 - EPS)
-  //   return AngleNum - 1;
-  // else {
-  double dAngle = 2.0 / AngleNum;
-  if (Angle > 1.0 - EPS)
-    return AngleNum - 1;
-  else
-    return int((Angle + 1.0) / dAngle);
-  // }
-}
-
-int diag::Tau2Index(const double &Tau) {
-  return int((Tau / Para.Beta) * Para.TauBinSize);
-}
-
-double diag::Index2Tau(const int &Index) {
-  return (Index + 0.5) * Para.Beta / Para.TauBinSize;
 }
 
 void diag::_TestAngle2D() {
@@ -370,27 +431,4 @@ void diag::_TestAngle2D() {
       abs(Angle3D(K1, K2) - 1.0) < 1.e-7,
       fmt::format("Angle between K1 and K2 are not 2.0*Pi! It is {:.13f}",
                   Angle3D(K1, K2)));
-}
-
-void diag::_TestAngleIndex() {
-  // Test Angle functions
-  int AngleNum = 8;
-  //   cout << Index2Angle(0, AngleNum) << endl;
-  ASSERT_ALLWAYS(abs(Index2Angle(0, AngleNum) - (-1.0 + 1.0 / AngleNum)) <
-                     1.0e-10,
-                 "Angle for index 0 should be -1^+!");
-
-  ASSERT_ALLWAYS(abs(Index2Angle(AngleNum - 1, AngleNum) -
-                     (1.0 - 1.0 / AngleNum)) < 1.0e-10,
-                 "Angle for index AngleNum should be 1.0^-!");
-
-  ASSERT_ALLWAYS(Angle2Index(1.0 - EPS, AngleNum) == AngleNum - 1,
-                 "cos(angle)=-1 should should be last element!");
-  // ASSERT_ALLWAYS(
-  //     Angle2Index(2.0 * PI * (1.0 - 0.5 / AngleNum) + EPS, AngleNum) == 0,
-  //     "Angle 2*pi-pi/AngleNum should have index 1!");
-
-  // ASSERT_ALLWAYS(Angle2Index(2.0 * PI * (1.0 - 0.5 / AngleNum) - EPS,
-  //                            AngleNum) == AngleNum - 1,
-  //                "Angle 2*pi-pi/AngleNum-0^+ should have index AngleNum!");
 }

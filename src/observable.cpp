@@ -1,3 +1,4 @@
+#define FMT_HEADER_ONLY
 #include "observable.h"
 #include "propagator.h"
 #include "utility/abort.h"
@@ -18,7 +19,7 @@ oneBodyObs::oneBodyObs() {
 
   // The zeroth order of polar, sigma and delta all have one external K and one
   // external Tau
-  PhyWeight = Para.ExtMomBinSize * Para.TauBinSize;
+  PhyWeight = Para.KGrid.Size * Para.TauGrid.Size;
 
   if (DiagType == POLAR) {
     Name = "polar";
@@ -30,14 +31,14 @@ oneBodyObs::oneBodyObs() {
     // do nothing
     return;
 
-  _Estimator.Initialize({Para.Order + 1, Para.ExtMomBinSize, Para.TauBinSize});
+  _Estimator.Initialize({Para.Order + 1, Para.KGrid.Size, Para.TauGrid.Size});
 }
 
 void oneBodyObs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
 void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
                          double Factor) {
-  ASSERT(KBin >= 0 && KBin < Para.ExtMomBinSize, "Kidx is out of range!");
-  ASSERT(TauBin >= 0 && TauBin < Para.TauBinSize, "TauIdx is out of range!");
+  ASSERT(KBin >= 0 && KBin < Para.KGrid.Size, "Kidx is out of range!");
+  ASSERT(TauBin >= 0 && TauBin < Para.TauGrid.Size, "TauIdx is out of range!");
 
   _Estimator(Order, KBin, TauBin) += Weight * Factor;
   _Estimator(0, KBin, TauBin) += Weight * Factor;
@@ -53,9 +54,11 @@ void oneBodyObs::Save() {
 
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
+    VerFile << "# KGrid: " << Para.KGrid.ToString() << endl;
+    VerFile << "# TauGrid: " << Para.TauGrid.ToString() << endl;
     for (int order = 0; order <= Para.Order; order++)
-      for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
-        for (int tindex = 0; tindex < Para.TauBinSize; ++tindex)
+      for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
+        for (int tindex = 0; tindex < Para.TauGrid.Size; ++tindex)
           VerFile << _Estimator(order, qindex, tindex) * PhyWeight << "  ";
     VerFile.close();
   } else {
@@ -69,11 +72,11 @@ void oneBodyObs::Save() {
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
     for (int order = 0; order <= Para.Order; order++)
-      for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
-        for (int tindex = 0; tindex < Para.TauBinSize; ++tindex)
+      for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
+        for (int tindex = 0; tindex < Para.TauGrid.Size; ++tindex)
           VerFile << order << "\t"
-                  << Para.ExtMomTable[qindex].norm() << "\t"
-                  << Para.ExtTauTable[tindex] << "\t"
+                  << Para.KGrid.Grid[qindex] << "\t"
+                  << Para.TauGrid.Grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
     VerFile.close();
   } else {
@@ -121,9 +124,10 @@ void oneBodyObs::Save(int channel) {
 
 ver4Obs::ver4Obs() {
   Normalization = 1.0e-10;
-  PhyWeight = Para.AngBinSize;
+  PhyWeight = Para.AngleGrid.Size;
   for (auto &estimator : _Estimator)
-    estimator.Initialize({Para.Order + 1, Para.AngBinSize, Para.ExtMomBinSize});
+    estimator.Initialize(
+        {Para.Order + 1, Para.AngleGrid.Size, Para.KGrid.Size});
 };
 
 void ver4Obs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
@@ -133,7 +137,7 @@ void ver4Obs::Measure(int Order, int QIndex, int AngleIndex,
 
   ASSERT(Order != 0, "Order must be >=1!");
 
-  ASSERT(AngleIndex >= 0 && AngleIndex < Para.AngBinSize,
+  ASSERT(AngleIndex >= 0 && AngleIndex < Para.AngleGrid.Size,
          "AngleIndex out of range!");
 
   for (int chan = 0; chan < 4; ++chan) {
@@ -153,11 +157,13 @@ void ver4Obs::Save() {
 
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
+    VerFile << "# KGrid: " << Para.KGrid.ToString() << endl;
+    VerFile << "# AngleGrid: " << Para.AngleGrid.ToString() << endl;
 
     for (int order = 0; order <= Para.Order; order++)
       for (int chan = 0; chan < 4; chan++)
-        for (int angle = 0; angle < Para.AngBinSize; ++angle)
-          for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
+        for (int angle = 0; angle < Para.AngleGrid.Size; ++angle)
+          for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
             for (int dir = 0; dir < 2; ++dir)
               VerFile << _Estimator[chan](order, angle, qindex)[dir] * PhyWeight
                       << "  ";
