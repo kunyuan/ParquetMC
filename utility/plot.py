@@ -4,6 +4,7 @@ import matplotlib as mat
 # mat.use("TkAgg")
 import matplotlib.pyplot as plt
 plt.switch_backend("TkAgg")
+# plt.switch_backend("Qt5Agg")
 
 
 mat.rcParams.update({'font.size': 16})

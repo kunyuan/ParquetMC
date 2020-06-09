@@ -1,7 +1,6 @@
 #ifndef grid_H
 #define grid_H
 
-#include <Eigen/Dense>
 #include <array>
 #include <string>
 #include <vector>
@@ -24,8 +23,6 @@ private:
   double _b;
 };
 
-// std::vector<double> TauGrid(double beta, int size, double scale);
-
 class tauGrid {
 public:
   int Size;
@@ -33,8 +30,6 @@ public:
   int Floor(double x); // return the index of a given value
   Eigen::VectorXd Grid;
   Eigen::VectorXd Weight;
-  // std::vector<double> Grid;
-  // std::vector<double> Weight;
   std::string ToString();
 
 private:
