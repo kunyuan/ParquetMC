@@ -121,7 +121,7 @@ void weight::Measure() {
                        ChanWeight, Factor);
     }
   }
-  else if (DiagType == diagram::DELTA){
+  else if (DiagType == DELTA){
     Factor /= Para.TauGrid.Weight[Var.CurrExtTauBin];
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);
@@ -150,7 +150,7 @@ void weight::Measure() {
 void weight::SaveToFile() {
   if (DiagType == GAMMA)
     GammaObs.Save();
-  else if (DiagType == diagram::DELTA){
+  else if (DiagType == DELTA){
     OneBodyObs.Save();
     for(int channel=0;channel<ChannelNum;channel++){
       ChannelObs[channel].Save(channel);

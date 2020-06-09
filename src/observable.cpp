@@ -95,8 +95,8 @@ void oneBodyObs::Save(int channel) {
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
     for (int order = 0; order <= Para.Order; order++)
-      for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
-        for (int tindex = 0; tindex < Para.TauBinSize; ++tindex)
+      for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
+        for (int tindex = 0; tindex < Para.TauGrid.Size; ++tindex)
           VerFile << _Estimator(order, qindex, tindex) * PhyWeight << "  ";
     VerFile.close();
   } else {
@@ -110,11 +110,11 @@ void oneBodyObs::Save(int channel) {
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
     for (int order = 0; order <= Para.Order; order++)
-      for (int qindex = 0; qindex < Para.ExtMomBinSize; ++qindex)
-        for (int tindex = 0; tindex < Para.TauBinSize; ++tindex)
+      for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
+        for (int tindex = 0; tindex < Para.TauGrid.Size; ++tindex)
           VerFile << order << "\t"
-                  << Para.ExtMomTable[qindex].norm() << "\t"
-                  << Para.ExtTauTable[tindex] << "\t"
+                  << Para.KGrid.Grid[qindex] << "\t"
+                  << Para.TauGrid.Grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
     VerFile.close();
   } else {
