@@ -1,0 +1,1 @@
+const double Beta = 10;
