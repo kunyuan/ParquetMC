@@ -20,6 +20,8 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
 
   Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
+  _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
+
   // if (BoldG && k < Para.KGrid.MaxK) {
   // double sigma = _Interp1D(k, _StaticSigma);
   // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
@@ -32,13 +34,13 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
 
 void propagator::LoadGreen() {
 
-  _StaticSigma.setZero(Para.KGrid.Size);
-  _DeltaG.setZero(Para.KGrid.Size, Para.TauGrid.Size);
+  _StaticSigma.setZero(Para.FermiKGrid.size);
+  _DeltaG.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
 
   ifstream File;
   File.open("dispersion.data", ios::in);
   if (File.is_open()) {
-    for (int k = 0; k < Para.KGrid.Size; ++k)
+    for (int k = 0; k < Para.FermiKGrid.size; ++k)
       File >> _StaticSigma[k];
   } else {
     LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
@@ -48,8 +50,8 @@ void propagator::LoadGreen() {
 
   File.open("green.data", ios::in);
   if (!File.is_open()) {
-    for (int k = 0; k < Para.KGrid.Size; ++k)
-      for (int t = 0; t < Para.KGrid.Size; ++t)
+    for (int k = 0; k < Para.FermiKGrid.size; ++k)
+      for (int t = 0; t < Para.FermiKGrid.size; ++t)
         File >> _DeltaG(k, t);
   } else {
     LOG_WARNING("Can not load Green weights! Initialze with zeros!\n");
@@ -162,26 +164,34 @@ double propagator::CounterBubble(const momentum &K) {
   return Factor;
 }
 
-double propagator::_Interp1D(double K, const weight1D &data) {
-  int idx0 = Para.KGrid.Floor(K);
+template <typename KGrid>
+double propagator::_Interp1D(const weight1D &data, const KGrid &kgrid,
+                             double K) {
+  int idx0 = kgrid.floor(K);
   int idx1 = idx0 + 1;
-  double K0 = Para.KGrid.Grid[idx0];
-  double K1 = Para.KGrid.Grid[idx1];
+  double K0 = kgrid.grid[idx0];
+  double K1 = kgrid.grid[idx1];
   // cout << K << "=>" << idx0 << ": " << K0 << "  " << idx1 << ": " << K1 <<
   // endl;
   ASSERT(K0 <= K && K1 > K,
          "Interpolate fails: " << K0 << "<" << K << "<" << K1);
   return (data[idx0] * (K1 - K) + data[idx1] * (K - K0)) / (K1 - K0);
 }
-double propagator::_Interp2D(double K, double T, const weight2D &data) {
-  int Tidx0 = Para.TauGrid.Floor(T);
-  double dT0 = T - Para.TauGrid.Grid[Tidx0],
-         dT1 = Para.TauGrid.Grid[Tidx0 + 1] - T;
+
+// template double progator::_Interp1D(const weight1D &data, double K,
+//                                     grid::FermiK kgrid);
+
+template <typename KGrid>
+double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
+                             double T) {
+  int Tidx0 = Para.TauGrid.floor(T);
+  double dT0 = T - Para.TauGrid.grid[Tidx0],
+         dT1 = Para.TauGrid.grid[Tidx0 + 1] - T;
   ASSERT(dT0 >= 0.0 && dT1 > 0.0,
          "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
 
-  int Kidx0 = Para.KGrid.Floor(K);
-  int dK0 = K - Para.KGrid.Grid[Kidx0], dK1 = Para.KGrid.Grid[Kidx0 + 1] - K;
+  int Kidx0 = kgrid.floor(K);
+  int dK0 = K - kgrid.grid[Kidx0], dK1 = kgrid.grid[Kidx0 + 1] - K;
   ASSERT(dK0 >= 0.0 && dK1 > 0.0,
          "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
 

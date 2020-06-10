@@ -19,26 +19,30 @@ oneBodyObs::oneBodyObs() {
 
   // The zeroth order of polar, sigma and delta all have one external K and one
   // external Tau
-  PhyWeight = Para.KGrid.Size * Para.TauGrid.Size;
-
   if (DiagType == POLAR) {
     Name = "polar";
+    ksize = Para.BoseKGrid.size;
   } else if (DiagType == SIGMA) {
     Name = "sigma";
+    ksize = Para.FermiKGrid.size;
   } else if (DiagType == DELTA) {
     Name = "delta";
+    ksize = Para.FermiKGrid.size;
   } else
-    // do nothing
-    return;
+    ABORT("not implemented!");
+  // do nothing
 
-  _Estimator.Initialize({Para.Order + 1, Para.KGrid.Size, Para.TauGrid.Size});
+  PhyWeight = ksize * Para.TauGrid.size;
+  _Estimator.Initialize({Para.Order + 1, ksize, Para.TauGrid.size});
+
+  return;
 }
 
 void oneBodyObs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
 void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
                          double Factor) {
-  ASSERT(KBin >= 0 && KBin < Para.KGrid.Size, "Kidx is out of range!");
-  ASSERT(TauBin >= 0 && TauBin < Para.TauGrid.Size, "TauIdx is out of range!");
+  ASSERT(KBin >= 0 && KBin < ksize, "Kidx is out of range!");
+  ASSERT(TauBin >= 0 && TauBin < Para.TauGrid.size, "TauIdx is out of range!");
 
   _Estimator(Order, KBin, TauBin) += Weight * Factor;
   _Estimator(0, KBin, TauBin) += Weight * Factor;
@@ -54,11 +58,16 @@ void oneBodyObs::Save() {
 
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
-    VerFile << "# KGrid: " << Para.KGrid.ToString() << endl;
-    VerFile << "# TauGrid: " << Para.TauGrid.ToString() << endl;
+
+    if (DiagType == POLAR)
+      VerFile << "# KGrid: " << Para.BoseKGrid.str() << endl;
+    else
+      VerFile << "# KGrid: " << Para.FermiKGrid.str() << endl;
+
+    VerFile << "# TauGrid: " << Para.TauGrid.str() << endl;
     for (int order = 0; order <= Para.Order; order++)
-      for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
-        for (int tindex = 0; tindex < Para.TauGrid.Size; ++tindex)
+      for (int qindex = 0; qindex < ksize; ++qindex)
+        for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
           VerFile << _Estimator(order, qindex, tindex) * PhyWeight << "  ";
     VerFile.close();
   } else {
@@ -68,10 +77,10 @@ void oneBodyObs::Save() {
 
 ver4Obs::ver4Obs() {
   Normalization = 1.0e-10;
-  PhyWeight = Para.AngleGrid.Size;
+  PhyWeight = Para.AngleGrid.size;
   for (auto &estimator : _Estimator)
     estimator.Initialize(
-        {Para.Order + 1, Para.AngleGrid.Size, Para.KGrid.Size});
+        {Para.Order + 1, Para.AngleGrid.size, Para.BoseKGrid.size});
 };
 
 void ver4Obs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
@@ -81,7 +90,7 @@ void ver4Obs::Measure(int Order, int QIndex, int AngleIndex,
 
   ASSERT(Order != 0, "Order must be >=1!");
 
-  ASSERT(AngleIndex >= 0 && AngleIndex < Para.AngleGrid.Size,
+  ASSERT(AngleIndex >= 0 && AngleIndex < Para.AngleGrid.size,
          "AngleIndex out of range!");
 
   for (int chan = 0; chan < 4; ++chan) {
@@ -101,13 +110,13 @@ void ver4Obs::Save() {
 
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
-    VerFile << "# KGrid: " << Para.KGrid.ToString() << endl;
-    VerFile << "# AngleGrid: " << Para.AngleGrid.ToString() << endl;
+    VerFile << "# KGrid: " << Para.BoseKGrid.str() << endl;
+    VerFile << "# AngleGrid: " << Para.AngleGrid.str() << endl;
 
     for (int order = 0; order <= Para.Order; order++)
       for (int chan = 0; chan < 4; chan++)
-        for (int angle = 0; angle < Para.AngleGrid.Size; ++angle)
-          for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
+        for (int angle = 0; angle < Para.AngleGrid.size; ++angle)
+          for (int qindex = 0; qindex < Para.BoseKGrid.size; ++qindex)
             for (int dir = 0; dir < 2; ++dir)
               VerFile << _Estimator[chan](order, angle, qindex)[dir] * PhyWeight
                       << "  ";

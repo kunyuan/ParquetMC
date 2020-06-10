@@ -61,6 +61,7 @@ private:
   double Normalization;
   tensor3<double> _Estimator;
   double PhyWeight;
+  int ksize;
 };
 
 } // namespace obs

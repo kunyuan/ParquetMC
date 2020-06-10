@@ -2,7 +2,7 @@
 #define FeynCalc_global_h
 
 #define FMT_HEADER_ONLY
-#include "grid.h"
+#include "lib/grid.h"
 #include "utility/utility.h"
 #include <Eigen/Dense>
 #include <array>
@@ -25,7 +25,7 @@ const int IsDynamic = false;
 const bool BoldG = false;
 
 const diagtype DiagType = POLAR;
-typedef kFermiGrid kGrid; // for sigma
+// typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 
 typedef Eigen::Matrix<double, D, 1> momentum; // momentum vector
@@ -53,9 +53,10 @@ struct parameter {
   int ReweightTimer; // time interval to reweight different orders
 
   // external variable tables
-  tauGrid TauGrid;
-  kGrid KGrid;
-  uniformGrid AngleGrid;
+  grid::Tau TauGrid;
+  grid::FermiK FermiKGrid;
+  grid::BoseK BoseKGrid;
+  grid::Uniform AngleGrid;
 };
 
 struct variable {

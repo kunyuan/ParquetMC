@@ -124,19 +124,19 @@ void markov::ChangeExtTau() {
   int OldTauBin = Var.CurrExtTauBin;
   double Prop = ShiftExtTau(OldTauBin, Var.CurrExtTauBin);
 
-  Var.Tau[ExtTauIdx] = Para.TauGrid.Grid[Var.CurrExtTauBin];
+  Var.Tau[ExtTauIdx] = Para.TauGrid.grid[Var.CurrExtTauBin];
 
   NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
 
-  double R = Prop * NewAbsWeight * Para.TauGrid.Weight[Var.CurrExtTauBin] /
-             Var.CurrAbsWeight / Para.TauGrid.Weight[OldTauBin];
+  double R = Prop * NewAbsWeight * Para.TauGrid.weight[Var.CurrExtTauBin] /
+             Var.CurrAbsWeight / Para.TauGrid.weight[OldTauBin];
 
   if (Random.urn() < R) {
     Accepted[CHANGE_EXTTAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.CurrExtTauBin = OldTauBin;
-    Var.Tau[ExtTauIdx] = Para.TauGrid.Grid[OldTauBin];
+    Var.Tau[ExtTauIdx] = Para.TauGrid.grid[OldTauBin];
   }
 };
 
@@ -208,7 +208,7 @@ void markov::ChangeExtMomentum() {
     OldAngBin = Var.CurrExtAngBin;
     Prop = ShiftExtLegK(OldAngBin, Var.CurrExtAngBin);
 
-    double theta = acos(Para.AngleGrid.Grid[Var.CurrExtAngBin]);
+    double theta = acos(Para.AngleGrid.grid[Var.CurrExtAngBin]);
     Var.LoopMom[INR][0] = Para.Kf * cos(theta);
     Var.LoopMom[INR][1] = Para.Kf * sin(theta);
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
@@ -217,7 +217,10 @@ void markov::ChangeExtMomentum() {
     // In Momentum
     OldExtMomBin = Var.CurrExtMomBin;
     Prop = ShiftExtTransferK(OldExtMomBin, Var.CurrExtMomBin);
-    Var.LoopMom[0][0] = Para.KGrid.Grid[Var.CurrExtMomBin];
+    if (DiagType == POLAR)
+      Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
+    else
+      Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
   }
 
   Proposed[CHANGE_EXTMOM][Var.CurrOrder]++;
@@ -235,7 +238,10 @@ void markov::ChangeExtMomentum() {
       Var.LoopMom[OUTR] = OldMom;
     } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
       Var.CurrExtMomBin = OldExtMomBin;
-      Var.LoopMom[0][0] = Para.KGrid.Grid[Var.CurrExtMomBin];
+      if (DiagType == POLAR)
+        Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
+      else
+        Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
     }
   }
 };
@@ -369,12 +375,15 @@ double markov::ShiftK(const momentum &OldMom, momentum &NewMom) {
 };
 
 double markov::ShiftExtTransferK(const int &OldExtMomBin, int &NewExtMomBin) {
-  NewExtMomBin = Random.irn(0, Para.KGrid.Size - 1);
+  if (DiagType == POLAR)
+    NewExtMomBin = Random.irn(0, Para.BoseKGrid.size - 1);
+  else
+    NewExtMomBin = Random.irn(0, Para.FermiKGrid.size - 1);
   return 1.0;
 };
 
 double markov::ShiftExtTau(const int &OldTauBin, int &NewTauBin) {
-  NewTauBin = Random.irn(0, Para.TauGrid.Size - 1);
+  NewTauBin = Random.irn(0, Para.TauGrid.size - 1);
   return 1.0;
 }
 
@@ -384,7 +393,7 @@ double markov::ShiftExtLegK(const int &OldExtMom, int &NewExtMom) {
   // NewExtMom[1] = Para.Kf * sin(Theta);
   // return 1.0;
 
-  NewExtMom = Random.irn(0, Para.AngleGrid.Size - 1);
+  NewExtMom = Random.irn(0, Para.AngleGrid.size - 1);
 
   // ASSERT_ALLWAYS(diag::Angle2Index(cos(theta), AngBinSize) == NewKBin,
   //                "Not matched, " << NewKBin << " vs "
