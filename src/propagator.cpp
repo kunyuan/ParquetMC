@@ -1,5 +1,6 @@
 #define FMT_HEADER_ONLY
 #include "propagator.h"
+#include "lib/green.h"
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
 #include <iostream>
@@ -11,51 +12,13 @@ using namespace Eigen;
 extern parameter Para;
 extern variable Var;
 
-double Fock(double k) {
-  // warning: this function only works for T=0!!!!
-  double l = sqrt(Para.Mass2 + Para.Lambda);
-  double kF = Para.Kf;
-  double fock = 1.0 + l / kF * atan((k - kF) / l);
-  fock -= l / kF * atan((k + kF) / l);
-  fock -= (l * l - k * k + kF * kF) / 4.0 / k / kF *
-          log((l * l + (k - kF) * (k - kF)) / (l * l + (k + kF) * (k + kF)));
-  fock *= (-2.0 * kF) / PI;
-
-  double shift = 1.0 - l / kF * atan(2.0 * kF / l);
-  shift -= l * l / 4.0 / kF / kF * log(l * l / (l * l + 4.0 * kF * kF));
-  shift *= (-2.0 * kF) / PI;
-
-  return fock - shift;
-  // return fock;
-}
-
 double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
-  return _BareGreen(Tau, K, Spin, GType);
-}
-
-double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
-                              int GType) {
-  // if tau is exactly zero, set tau=0^-
-  double green, Ek, kk, k;
-  if (Tau == 0.0)
-    Tau = -1.0e-12;
-
-  // equal time green's function
   if (GType == 1)
     Tau = -1.0e-12;
+  auto k = K.norm();
+  auto Ek = k * k - Para.Mu; // bare propagator
 
-  double s = 1.0;
-  if (Tau < 0.0) {
-    Tau += Para.Beta;
-    s = -s;
-  } else if (Tau >= Para.Beta) {
-    Tau -= Para.Beta;
-    s = -s;
-  }
-
-  k = K.norm();
-  Ek = k * k; // bare propagator
-  Ek += Fock(k);
+  Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
   // if (BoldG && k < Para.KGrid.MaxK) {
   // double sigma = _Interp1D(k, _StaticSigma);
@@ -64,23 +27,7 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
   //                            << " vs " << Fock(k));
   // Ek += -sigma;
   // }
-
-  double x = Para.Beta * (Ek - Para.Mu) / 2.0;
-  double y = 2.0 * Tau / Para.Beta - 1.0;
-  if (x > 100.0)
-    green = exp(-x * (y + 1.0));
-  else if (x < -100.0)
-    green = exp(x * (1.0 - y));
-  else
-    green = exp(-x * y) / (2.0 * cosh(x));
-
-  green *= s;
-
-  ASSERT(std::isnan(green) == false,
-         "Step:" << Var.Counter << ", Green is too large! Tau=" << Tau
-                 << ", Ek=" << Ek << ", Green=" << green << ", Mom=" << K);
-
-  return green;
+  return fermiGreen(Para.Beta, Tau, Ek);
 }
 
 void propagator::LoadGreen() {
@@ -109,8 +56,8 @@ void propagator::LoadGreen() {
     _DeltaG.setZero();
   }
   File.close();
-  for (int k = 0; k < Para.KGrid.Size; ++k)
-    cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
+  // for (int k = 0; k < Para.KGrid.Size; ++k)
+  //   cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
 }
 
 double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
@@ -156,7 +103,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   double kDiQ = (KInL - KOutL).norm();
   Weight[DIR] =
-      -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+      -8.0 * π * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
 
   if (DiagType == SIGMA && IsZero(kDiQ))
     Weight[DIR] = 0.0;
@@ -167,7 +114,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   double kExQ = (KInL - KOutR).norm();
   Weight[EX] =
-      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+      8.0 * π * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
 
   if (DiagType == SIGMA && IsZero(kExQ))
     Weight[EX] = 0.0;
@@ -190,21 +137,21 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
   if (VerOrder < 0) {
     // Bare interaction
     if (kQ > 1.0e-8)
-      return -8.0 * PI * Para.Charge2 / (kQ * kQ);
+      return -8.0 * π * Para.Charge2 / (kQ * kQ);
     else
       return 0.0;
   } else {
     // Order N shifted interaction
     double Weight =
-        -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+        -8.0 * π * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
     if (VerOrder > 0)
-      Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
+      Weight *= pow(Weight * Para.Lambda / 8.0 / π, VerOrder);
     return Weight;
   }
 }
 
 double propagator::CounterBubble(const momentum &K) {
-  double Factor = Para.Lambda / (8.0 * PI * Para.Nf);
+  double Factor = Para.Lambda / (8.0 * π * Para.Nf);
   // Factor *=
   //     Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
 

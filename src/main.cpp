@@ -163,7 +163,7 @@ void InitPara() {
   //// initialize the global parameter //////////////////////
   double Kf;
   if (D == 3) {
-    Kf = pow(9.0 * PI / 4.0, 1.0 / 3.0) / Para.Rs; // 3D
+    Kf = pow(9.0 * π / 4.0, 1.0 / 3.0) / Para.Rs; // 3D
   } else if (D == 2) {
     Kf = sqrt(2.0) / Para.Rs; // 2D
   } else {
@@ -172,7 +172,7 @@ void InitPara() {
   Para.Kf = Kf;
   Para.Ef = Kf * Kf;
   Para.Mu = Para.Ef;
-  Para.Nf = Kf / (4.0 * PI * PI) * SPIN;
+  Para.Nf = Kf / (4.0 * π * π) * SPIN;
   MaxK *= Kf;
 
   // scale all energy with E_F

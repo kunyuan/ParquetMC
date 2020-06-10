@@ -22,9 +22,9 @@ const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
 const int IsDynamic = false;
-const bool BoldG = true;
+const bool BoldG = false;
 
-const diagtype DiagType = SIGMA;
+const diagtype DiagType = POLAR;
 typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 
@@ -79,7 +79,7 @@ const double TM32 = 1.0 / (pow(2.0, 32));
 const double EPS = 1.0e-9;
 const int MAXINT = 2147483647;
 const int MININT = -2147483647;
-const double PI = 3.1415926535897932384626433832795;
+const double π = 3.1415926535897932384626433832795;
 const double MACHEPS = 2.22044604925031E-16; // Macheps + 1.0 > 1.0
 const double MAXREAL = 1.0e30;
 const double MINREAL = -1.0e30;

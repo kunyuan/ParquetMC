@@ -56,3 +56,5 @@ inlist
 *.vscode
 parameter
 *.pdf
+.rendered*
+*.cppimporthash

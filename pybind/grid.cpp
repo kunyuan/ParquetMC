@@ -1,4 +1,4 @@
-#include "grid.h"
+#include "../src/lib/grid.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
