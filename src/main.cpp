@@ -15,7 +15,6 @@ RandomFactory Random;
 parameter Para;        // global parameters
 diag::propagator Prop; // global progator
 variable Var;
-void InitPara(), InitVar();
 
 const string HelpStr = "Two parameters: PID Seed";
 

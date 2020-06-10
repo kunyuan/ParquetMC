@@ -110,9 +110,10 @@ void kFermiGrid::Initialize(double kf, double maxK, int size, double scale) {
   kFIdx = Size * log(kF) / (log(kF) + log(maxK - kF)) - 1;
   // cout << kFIdx << endl;
   double lambda = kF / scale / kFIdx;
-
+  cout<<Size<<"\t"<<kF<<"\t"<<maxK<<"\t"<<kFIdx<<"\n";
   // the last point of _Grid0 should not be kF!
   _Grid0.Initialize({0.0, kF}, {0.0, kFIdx * 1.0}, lambda, false);
+  
   // the first point of _Grid1 should be kF!
   _Grid1.Initialize({kF, maxK}, {kFIdx * 1.0, Size - 1.0}, lambda, true);
 
