@@ -35,7 +35,7 @@ propagator::propagator(){
 }
 
 void propagator::Initialize(){
-  _f = vector<double>(Para.TauGrid.Size * Para.KGrid.Size);
+  _f = vector<double>(Para.TauGrid.Size * Para.KGrid.Size * ChannelNum);
   _taulist = vector<double>(Para.TauGrid.Size);
   for(int i=0;i<Para.KGrid.Size;i++){
     _extMom.push_back(Para.KGrid.Grid[i]);
@@ -46,18 +46,20 @@ void propagator::Initialize(){
 
 void propagator::LoadF(){
   try {
-    string FileName = fmt::format("./f.dat");
-    ifstream VerFile;
-    VerFile.open(FileName, ios::in);
-    if (VerFile.is_open()) {
-      for (int tau = 0; tau < Para.TauGrid.Size; tau++){
-        VerFile >> _taulist.at(tau);
-      }
-      for (int tau =0; tau<Para.TauGrid.Size;tau++)
-        for (int qindex = 0; qindex<Para.KGrid.Size; qindex++){
-          VerFile >> _f.at(tau*Para.KGrid.Size+qindex);
+    for(int chan=0;chan<ChannelNum;chan++){      
+      string FileName = fmt::format("./f{0}.dat",chan);
+      ifstream VerFile;
+      VerFile.open(FileName, ios::in);
+      if (VerFile.is_open()) {
+        for (int tau = 0; tau < Para.TauGrid.Size; tau++){
+          VerFile >> _taulist.at(tau);
         }
-      VerFile.close();
+        for (int tau =0; tau<Para.TauGrid.Size;tau++)
+          for (int qindex = 0; qindex<Para.KGrid.Size; qindex++){
+            VerFile >> _f.at(chan*Para.TauGrid.Size*Para.KGrid.Size+tau*Para.KGrid.Size+qindex);
+          }
+        VerFile.close();
+      }
     }
   } catch (int e) {
     LOG_INFO("Can not load f file!");
@@ -185,14 +187,13 @@ void propagator::LoadGreen() {
     cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
 }
 
-
-double propagator::ExtrapF(double Tau, double K){
+double propagator::ExtrapF(double Tau, double K, int chan){
   try{
     int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
     int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
     t=Para.TauGrid.Size*Tau/Para.Beta;
 
-    return _f.at(t*Para.KGrid.Size+ExtQ);
+    return _f.at(chan*Para.TauGrid.Size*Para.KGrid.Size+t*Para.KGrid.Size+ExtQ);
   }
   catch (std::out_of_range){
     std::cout<<"Access F out of range!"<<endl;
@@ -200,7 +201,7 @@ double propagator::ExtrapF(double Tau, double K){
   }
 }
 
-double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
+double propagator::F(double Tau, const momentum &K, spin Spin, int GType, int chan) {
   if (Tau == 0.0)
     Tau = -1.0e-10;
 
@@ -210,7 +211,8 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
     Tau = Para.Beta + Tau;
     Sign *= -1.0;
   }
-  return ExtrapF(Tau,K.norm());
+
+  return Sign*ExtrapF(Tau,K.norm(),chan);
   return Sign*exp(-K.squaredNorm())*(Para.Beta-2*Tau);
   // double Ek = K.squaredNorm() - Para.Mu;
   // // return Sign * Tau * exp(-Ek * Tau) / 2.0 / (1 + cosh(Para.Beta * Ek));
@@ -285,7 +287,7 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
   } else {
     // Order N shifted interaction
     double Weight =
-        -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+      -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
     if (VerOrder > 0)
       Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
     return Weight;

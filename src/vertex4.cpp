@@ -51,6 +51,19 @@ void green::Evaluate(const momentum &_K, bool IsAnomal) {
   }
 }
 
+void green::Evaluate(const momentum &_K,int chan) {
+  int Size = _Tpair.size();
+  for (int i = 0; i < Size; ++i) {
+    auto &T = _Tpair[i];
+    {
+      // if (Var.CurrOrder == 2)
+      //   cout << T[IN] << ", " << T[OUT] << endl;
+
+      _Weight[i] = Prop.F(Var.Tau[T[OUT]] - Var.Tau[T[IN]], _K, UP, 0 ,chan);
+    }
+  }
+}
+
 void vertex4::Build(int level, int order, int loopIdx, int inTL,
                     const vector<channel> &chan, int side) {
   Level = level;

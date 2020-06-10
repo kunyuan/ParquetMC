@@ -16,7 +16,7 @@ public:
   propagator();
   void Initialize();
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
-  double F(double Tau, const momentum &K, spin Spin, int GType = 0);
+  double F(double Tau, const momentum &K, spin Spin, int GType = 0, int chan=0);
 
   verWeight Interaction(const momentum &KInL, const momentum &KOutL,
                         const momentum &KInR, const momentum &KOutR,
@@ -31,11 +31,12 @@ public:
   void LoadF();
   void TestF();
   void LoadGreen();
-  double ExtrapF(double Tau,double K);
-  
+
+
 
 
 private:
+  double ExtrapF(double Tau,double K, int chan=0);
   double _BareGreen(double Tau, const momentum &K, spin Spin, int GType = 0);
 
   double _Interp1D(double K, const weight1D &data);

@@ -58,7 +58,12 @@ void weight::Initialization() {
       if (order < 4)
         LOG_INFO(Delta[order].Vertex.ToString());
     }
+    // for(int channel=0;channel<ChannelNum;channel++){
+    //   LOG_INFO("Init Channel"<<channel);
+    //   ChannelObs.push_back(obs::oneBodyObs());
+    // }
   }
+  LOG_INFO("End of Init Weight");
 }
 
 double weight::Evaluate(int Order) {
@@ -115,7 +120,23 @@ void weight::Measure() {
       GammaObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtAngBin,
                        ChanWeight, Factor);
     }
-  } else {
+  }
+  else if (DiagType == DELTA){
+    Factor /= Para.TauGrid.Weight[Var.CurrExtTauBin];
+    if (Var.CurrOrder == 0)
+      OneBodyObs.Measure0(Factor);
+    else
+      OneBodyObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtTauBin,
+                         Evaluate(Var.CurrOrder), Factor);
+    for(int channel=0;channel<ChannelNum;channel++){
+      if (Var.CurrOrder == 0)
+        ChannelObs[channel].Measure0(Factor);
+      else
+        ChannelObs[channel].Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtTauBin,
+                                    Delta[Var.CurrOrder].Evaluate(channel), Factor);      
+    }
+  }
+  else {
     Factor /= Para.TauGrid.Weight[Var.CurrExtTauBin];
     // Polar, Sigma, Delta can be handled together
     if (Var.CurrOrder == 0)
@@ -129,6 +150,12 @@ void weight::Measure() {
 void weight::SaveToFile() {
   if (DiagType == GAMMA)
     GammaObs.Save();
+  else if (DiagType == DELTA){
+    OneBodyObs.Save();
+    for(int channel=0;channel<ChannelNum;channel++){
+      ChannelObs[channel].Save(channel);
+    }
+  }
   else
     OneBodyObs.Save();
 }
