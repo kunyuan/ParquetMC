@@ -1,7 +1,6 @@
 #ifndef grid_H
 #define grid_H
 
-#include <Eigen/Dense>
 #include <array>
 #include <string>
 #include <vector>

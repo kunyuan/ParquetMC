@@ -46,6 +46,11 @@ private:
   vector<double> _extMom;
   weight1D _StaticSigma;
   weight2D _DeltaG;
+  template <typename KGrid>
+  double _Interp1D(const weight1D &data, const KGrid &kgrid, double K);
+  template <typename KGrid>
+  double _Interp2D(const weight2D &data, const KGrid &kgrid, double K,
+                   double T);
 };
 
 double Angle3D(const momentum &K1, const momentum &K2);

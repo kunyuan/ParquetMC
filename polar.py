@@ -3,8 +3,8 @@ from utility.IO import *
 import utility.fourier as fourier
 from utility.plot import *
 
-XType = "Tau"
-# XType = "Mom"
+# XType = "Tau"
+XType = "Mom"
 OrderByOrder = False
 # Unit=1.0
 # 0: I, 1: T, 2: U, 3: S

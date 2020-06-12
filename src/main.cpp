@@ -1,4 +1,4 @@
-#include "grid.h"
+#include "lib/grid.h"
 #include "markov.h"
 #include "utility/timer.h"
 #include <iostream>
@@ -162,7 +162,7 @@ void InitPara() {
   //// initialize the global parameter //////////////////////
   double Kf;
   if (D == 3) {
-    Kf = pow(9.0 * PI / 4.0, 1.0 / 3.0) / Para.Rs; // 3D
+    Kf = pow(9.0 * π / 4.0, 1.0 / 3.0) / Para.Rs; // 3D
   } else if (D == 2) {
     Kf = sqrt(2.0) / Para.Rs; // 2D
   } else {
@@ -171,7 +171,7 @@ void InitPara() {
   Para.Kf = Kf;
   Para.Ef = Kf * Kf;
   Para.Mu = Para.Ef;
-  Para.Nf = Kf / (4.0 * PI * PI) * SPIN;
+  Para.Nf = Kf / (4.0 * π * π) * SPIN;
   MaxK *= Kf;
 
   // scale all energy with E_F
@@ -189,16 +189,11 @@ void InitPara() {
                           << "MessageTimer: " << Para.MessageTimer << "\n");
 
   // initialize grids
-  Para.TauGrid.Initialize(Para.Beta, TauSize, 6.0 / Para.Ef);
-  Para.AngleGrid.Initialize({-1.0, 1.0}, AngSize);
+  Para.TauGrid.build(Para.Beta, TauSize, 6.0 / Para.Ef);
+  Para.AngleGrid.build({-1.0, 1.0}, AngSize);
 
-  if (typeid(kGrid) == typeid(kFermiGrid)) {
-    // fermionic kGrid
-    Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2.0);
-  } else {
-    // bosonic kGrid
-    Para.KGrid.Initialize(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
-  }
+  Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2.0);
+  Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
 
   if (BoldG)
     Prop.LoadGreen();
@@ -223,7 +218,7 @@ void InitVar() {
 
   // Set the potential ExtTauBin
   Var.CurrExtTauBin = 0;
-  Var.Tau[MaxTauNum - 1] = Para.TauGrid.Grid[Var.CurrExtTauBin];
+  Var.Tau[MaxTauNum - 1] = Para.TauGrid.grid[Var.CurrExtTauBin];
 
   if (DiagType == GAMMA) {
     Var.CurrExtMomBin = 0;
@@ -233,7 +228,7 @@ void InitVar() {
     Var.LoopMom[OUTL][0] = Para.Kf;
 
     Var.CurrExtAngBin = 0;
-    double theta = acos(Para.AngleGrid.Grid[Var.CurrExtAngBin]);
+    double theta = acos(Para.AngleGrid.grid[Var.CurrExtAngBin]);
     Var.LoopMom[INR][0] = Para.Kf * cos(theta);
     Var.LoopMom[INR][1] = Para.Kf * sin(theta);
 
@@ -241,6 +236,9 @@ void InitVar() {
   } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
     Var.CurrExtMomBin = 0;
     Var.LoopMom[0].setZero();
-    Var.LoopMom[0][0] = Para.KGrid.Grid[Var.CurrExtMomBin];
+    if (DiagType == POLAR)
+      Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
+    else
+      Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
   }
 }

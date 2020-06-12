@@ -72,7 +72,7 @@ void delta::_ResetLastTidx(vertex4 &Vertex) {
 }
 
 double delta::Evaluate() {
-  double Factor = 1.0 / pow(2.0 * PI, D);
+  double Factor = 1.0 / pow(2.0 * π, D);
   // normalization
   if (Order == 0)
     return 1.0;

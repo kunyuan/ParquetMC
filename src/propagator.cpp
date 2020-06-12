@@ -1,5 +1,6 @@
 #define FMT_HEADER_ONLY
 #include "propagator.h"
+#include "lib/green.h"
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
 #include <iostream>
@@ -104,32 +105,14 @@ void propagator::TestF(){
 }
 
 double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
-  return _BareGreen(Tau, K, Spin, GType);
-}
-
-double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
-                              int GType) {
-  // if tau is exactly zero, set tau=0^-
-  double green, Ek, kk, k;
-  if (Tau == 0.0)
-    Tau = -1.0e-12;
-
-  // equal time green's function
   if (GType == 1)
     Tau = -1.0e-12;
+  auto k = K.norm();
+  auto Ek = k * k - Para.Mu; // bare propagator
 
-  double s = 1.0;
-  if (Tau < 0.0) {
-    Tau += Para.Beta;
-    s = -s;
-  } else if (Tau >= Para.Beta) {
-    Tau -= Para.Beta;
-    s = -s;
-  }
+  Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
-  k = K.norm();
-  Ek = k * k; // bare propagator
-  Ek += Fock(k);
+  _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
 
   // if (BoldG && k < Para.KGrid.MaxK) {
   // double sigma = _Interp1D(k, _StaticSigma);
@@ -138,34 +121,18 @@ double propagator::_BareGreen(double Tau, const momentum &K, spin Spin,
   //                            << " vs " << Fock(k));
   // Ek += -sigma;
   // }
-
-  double x = Para.Beta * (Ek - Para.Mu) / 2.0;
-  double y = 2.0 * Tau / Para.Beta - 1.0;
-  if (x > 100.0)
-    green = exp(-x * (y + 1.0));
-  else if (x < -100.0)
-    green = exp(x * (1.0 - y));
-  else
-    green = exp(-x * y) / (2.0 * cosh(x));
-
-  green *= s;
-
-  ASSERT(std::isnan(green) == false,
-         "Step:" << Var.Counter << ", Green is too large! Tau=" << Tau
-                 << ", Ek=" << Ek << ", Green=" << green << ", Mom=" << K);
-
-  return green;
+  return fermiGreen(Para.Beta, Tau, Ek);
 }
 
 void propagator::LoadGreen() {
 
-  _StaticSigma.setZero(Para.KGrid.Size);
-  _DeltaG.setZero(Para.KGrid.Size, Para.TauGrid.Size);
+  _StaticSigma.setZero(Para.FermiKGrid.size);
+  _DeltaG.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
 
   ifstream File;
   File.open("dispersion.data", ios::in);
   if (File.is_open()) {
-    for (int k = 0; k < Para.KGrid.Size; ++k)
+    for (int k = 0; k < Para.FermiKGrid.size; ++k)
       File >> _StaticSigma[k];
   } else {
     LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
@@ -175,16 +142,16 @@ void propagator::LoadGreen() {
 
   File.open("green.data", ios::in);
   if (!File.is_open()) {
-    for (int k = 0; k < Para.KGrid.Size; ++k)
-      for (int t = 0; t < Para.KGrid.Size; ++t)
+    for (int k = 0; k < Para.FermiKGrid.size; ++k)
+      for (int t = 0; t < Para.FermiKGrid.size; ++t)
         File >> _DeltaG(k, t);
   } else {
     LOG_WARNING("Can not load Green weights! Initialze with zeros!\n");
     _DeltaG.setZero();
   }
   File.close();
-  for (int k = 0; k < Para.KGrid.Size; ++k)
-    cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
+  // for (int k = 0; k < Para.KGrid.Size; ++k)
+  //   cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
 }
 
 double propagator::ExtrapF(double Tau, double K, int chan){
@@ -246,7 +213,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   double kDiQ = (KInL - KOutL).norm();
   Weight[DIR] =
-      -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+      -8.0 * π * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
 
   if (DiagType == SIGMA && IsZero(kDiQ))
     Weight[DIR] = 0.0;
@@ -257,7 +224,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   double kExQ = (KInL - KOutR).norm();
   Weight[EX] =
-      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+      8.0 * π * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
 
   if (DiagType == SIGMA && IsZero(kExQ))
     Weight[EX] = 0.0;
@@ -281,7 +248,7 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
   if (VerOrder < 0) {
     // Bare interaction
     if (kQ > 1.0e-8)
-      return -8.0 * PI * Para.Charge2 / (kQ * kQ);
+      return -8.0 * π * Para.Charge2 / (kQ * kQ);
     else
       return 0.0;
   } else {
@@ -289,13 +256,13 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
     double Weight =
       -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
     if (VerOrder > 0)
-      Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
+      Weight *= pow(Weight * Para.Lambda / 8.0 / π, VerOrder);
     return Weight;
   }
 }
 
 double propagator::CounterBubble(const momentum &K) {
-  double Factor = Para.Lambda / (8.0 * PI * Para.Nf);
+  double Factor = Para.Lambda / (8.0 * π * Para.Nf);
   // Factor *=
   //     Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
 
@@ -306,26 +273,34 @@ double propagator::CounterBubble(const momentum &K) {
   return Factor;
 }
 
-double propagator::_Interp1D(double K, const weight1D &data) {
-  int idx0 = Para.KGrid.Floor(K);
+template <typename KGrid>
+double propagator::_Interp1D(const weight1D &data, const KGrid &kgrid,
+                             double K) {
+  int idx0 = kgrid.floor(K);
   int idx1 = idx0 + 1;
-  double K0 = Para.KGrid.Grid[idx0];
-  double K1 = Para.KGrid.Grid[idx1];
+  double K0 = kgrid.grid[idx0];
+  double K1 = kgrid.grid[idx1];
   // cout << K << "=>" << idx0 << ": " << K0 << "  " << idx1 << ": " << K1 <<
   // endl;
   ASSERT(K0 <= K && K1 > K,
          "Interpolate fails: " << K0 << "<" << K << "<" << K1);
   return (data[idx0] * (K1 - K) + data[idx1] * (K - K0)) / (K1 - K0);
 }
-double propagator::_Interp2D(double K, double T, const weight2D &data) {
-  int Tidx0 = Para.TauGrid.Floor(T);
-  double dT0 = T - Para.TauGrid.Grid[Tidx0],
-         dT1 = Para.TauGrid.Grid[Tidx0 + 1] - T;
+
+// template double progator::_Interp1D(const weight1D &data, double K,
+//                                     grid::FermiK kgrid);
+
+template <typename KGrid>
+double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
+                             double T) {
+  int Tidx0 = Para.TauGrid.floor(T);
+  double dT0 = T - Para.TauGrid.grid[Tidx0],
+         dT1 = Para.TauGrid.grid[Tidx0 + 1] - T;
   ASSERT(dT0 >= 0.0 && dT1 > 0.0,
          "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
 
-  int Kidx0 = Para.KGrid.Floor(K);
-  int dK0 = K - Para.KGrid.Grid[Kidx0], dK1 = Para.KGrid.Grid[Kidx0 + 1] - K;
+  int Kidx0 = kgrid.floor(K);
+  int dK0 = K - kgrid.grid[Kidx0], dK1 = kgrid.grid[Kidx0 + 1] - K;
   ASSERT(dK0 >= 0.0 && dK1 > 0.0,
          "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
 
