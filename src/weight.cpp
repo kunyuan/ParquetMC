@@ -122,7 +122,7 @@ void weight::Measure() {
     }
   }
   else if (DiagType == DELTA){
-    Factor /= Para.TauGrid.Weight[Var.CurrExtTauBin];
+    Factor /= Para.TauGrid.weight[Var.CurrExtTauBin];
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);
     else
@@ -137,7 +137,7 @@ void weight::Measure() {
     }
   }
   else {
-    Factor /= Para.TauGrid.Weight[Var.CurrExtTauBin];
+    Factor /= Para.TauGrid.weight[Var.CurrExtTauBin];
     // Polar, Sigma, Delta can be handled together
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);

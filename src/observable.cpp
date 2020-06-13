@@ -81,11 +81,11 @@ void oneBodyObs::Save() {
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
     for (int order = 0; order <= Para.Order; order++)
-      for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
-        for (int tindex = 0; tindex < Para.TauGrid.Size; ++tindex)
+      for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
+        for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
           VerFile << order << "\t"
-                  << Para.KGrid.Grid[qindex] << "\t"
-                  << Para.TauGrid.Grid[tindex] << "\t"
+                  << Para.FermiKGrid.grid[qindex] << "\t"
+                  << Para.TauGrid.grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
     VerFile.close();
   } else {
@@ -104,8 +104,8 @@ void oneBodyObs::Save(int channel) {
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
     for (int order = 0; order <= Para.Order; order++)
-      for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
-        for (int tindex = 0; tindex < Para.TauGrid.Size; ++tindex)
+      for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
+        for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
           VerFile << _Estimator(order, qindex, tindex) * PhyWeight << "  ";
     VerFile.close();
   } else {
@@ -119,11 +119,11 @@ void oneBodyObs::Save(int channel) {
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
     for (int order = 0; order <= Para.Order; order++)
-      for (int qindex = 0; qindex < Para.KGrid.Size; ++qindex)
-        for (int tindex = 0; tindex < Para.TauGrid.Size; ++tindex)
+      for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
+        for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
           VerFile << order << "\t"
-                  << Para.KGrid.Grid[qindex] << "\t"
-                  << Para.TauGrid.Grid[tindex] << "\t"
+                  << Para.FermiKGrid.grid[qindex] << "\t"
+                  << Para.TauGrid.grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
     VerFile.close();
   } else {

@@ -8,6 +8,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from utility.IO import *
+import grid
 import psutil
 
 
@@ -98,11 +99,11 @@ omega_c=10000000.0 #float(line0.split(",")[-1])
 
 
 Para = param()
-Grid = grid(Para)
+ExtMomBin=BuildMomGrid(Para.MaxExtMom, MomGridSize)
+
 #Order = range(0, Para.Order+1)
 TauBin = Grid.TauGrid
 TauBinSize=len(TauBin)
-ExtMomBin = Grid.MomGrid
 FreqBin = (np.arange(TauBinSize)+0.5)*2*np.pi*Temp
 FreqBinSize=len(FreqBin)
 

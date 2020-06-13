@@ -7,8 +7,8 @@ import sys
 ##### Modify parameters here  ###############
 # Cluster="Rutgers"
 # Cluster="PBS"
-# Cluster = "local"
-Cluster = "condor"
+Cluster = "local"
+# Cluster = "condor"
 ############################################
 
 assert len(sys.argv) == 2, "Number of jobs is needed as a parameter!"
@@ -32,8 +32,8 @@ CreateFolder(homedir)
 
 os.system("cp {0} {1}".format(execute, homedir))
 os.system("cp {0} {1}".format("parameter", homedir))
-os.system("cp {0} {1}".format("green.data", homedir))
-os.system("cp {0} {1}".format("dispersion.data", homedir))
+#os.system("cp {0} {1}".format("green.data", homedir))
+#os.system("cp {0} {1}".format("dispersion.data", homedir))
 
 if Cluster != "Rutgers":
     outfilepath = os.path.join(homedir, "outfile")

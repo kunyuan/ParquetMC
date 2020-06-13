@@ -36,10 +36,10 @@ propagator::propagator(){
 }
 
 void propagator::Initialize(){
-  _f = vector<double>(Para.TauGrid.Size * Para.KGrid.Size * ChannelNum);
-  _taulist = vector<double>(Para.TauGrid.Size);
-  for(int i=0;i<Para.KGrid.Size;i++){
-    _extMom.push_back(Para.KGrid.Grid[i]);
+  _f = vector<double>(Para.TauGrid.size * Para.FermiKGrid.size * ChannelNum);
+  _taulist = vector<double>(Para.TauGrid.size);
+  for(int i=0;i<Para.FermiKGrid.size;i++){
+    _extMom.push_back(Para.FermiKGrid.grid[i]);
   }
   LoadF();
   TestF();
@@ -52,12 +52,12 @@ void propagator::LoadF(){
       ifstream VerFile;
       VerFile.open(FileName, ios::in);
       if (VerFile.is_open()) {
-        for (int tau = 0; tau < Para.TauGrid.Size; tau++){
+        for (int tau = 0; tau < Para.TauGrid.size; tau++){
           VerFile >> _taulist.at(tau);
         }
-        for (int tau =0; tau<Para.TauGrid.Size;tau++)
-          for (int qindex = 0; qindex<Para.KGrid.Size; qindex++){
-            VerFile >> _f.at(chan*Para.TauGrid.Size*Para.KGrid.Size+tau*Para.KGrid.Size+qindex);
+        for (int tau =0; tau<Para.TauGrid.size;tau++)
+          for (int qindex = 0; qindex<Para.FermiKGrid.size; qindex++){
+            VerFile >> _f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+tau*Para.FermiKGrid.size+qindex);
           }
         VerFile.close();
       }
@@ -76,16 +76,16 @@ void propagator::TestF(){
     ofstream VerFile;
     VerFile.open(FileName, ios::out);
     if (VerFile.is_open()) {
-      for (int tau = 0; tau < Para.TauGrid.Size; tau++){
+      for (int tau = 0; tau < Para.TauGrid.size; tau++){
         VerFile << _taulist.at(tau)<<"\n";
       }
       VerFile << "mombin\n";
-      for (int k = 0; k < Para.KGrid.Size; k++){
+      for (int k = 0; k < Para.FermiKGrid.size; k++){
         VerFile << _extMom.at(k)<<"\n";
       }
-      for (int tau =0; tau<Para.TauGrid.Size;tau++)
-        for (int qindex = 0; qindex<Para.KGrid.Size; qindex++){
-          VerFile << _f.at(tau*Para.KGrid.Size+qindex)<<"\t";
+      for (int tau =0; tau<Para.TauGrid.size;tau++)
+        for (int qindex = 0; qindex<Para.FermiKGrid.size; qindex++){
+          VerFile << _f.at(tau*Para.FermiKGrid.size+qindex)<<"\t";
         }
       VerFile<<"\n";
       //      VerFile << ExtrapF(0.5,0.5)<<"\t at 0.5 0.5\n";
@@ -114,10 +114,10 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
 
   _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
 
-  // if (BoldG && k < Para.KGrid.MaxK) {
+  // if (BoldG && k < Para.FermiKGrid.MaxK) {
   // double sigma = _Interp1D(k, _StaticSigma);
   // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
-  //                "fail at: " << Para.KGrid.Floor(k) << " , " << sigma
+  //                "fail at: " << Para.FermiKGrid.Floor(k) << " , " << sigma
   //                            << " vs " << Fock(k));
   // Ek += -sigma;
   // }
@@ -150,17 +150,17 @@ void propagator::LoadGreen() {
     _DeltaG.setZero();
   }
   File.close();
-  // for (int k = 0; k < Para.KGrid.Size; ++k)
-  //   cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
+  // for (int k = 0; k < Para.FermiKGrid.size; ++k)
+  //   cout << _StaticSigma[k] + Fock(Para.FermiKGrid.grid[k]) << endl;
 }
 
 double propagator::ExtrapF(double Tau, double K, int chan){
   try{
     int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
     int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
-    t=Para.TauGrid.Size*Tau/Para.Beta;
+    t=Para.TauGrid.size*Tau/Para.Beta;
 
-    return _f.at(chan*Para.TauGrid.Size*Para.KGrid.Size+t*Para.KGrid.Size+ExtQ);
+    return _f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ);
   }
   catch (std::out_of_range){
     std::cout<<"Access F out of range!"<<endl;

@@ -86,6 +86,7 @@ const double EPS = 1.0e-9;
 const int MAXINT = 2147483647;
 const int MININT = -2147483647;
 const double π = 3.1415926535897932384626433832795;
+const double PI = 3.1415926535897932384626433832795;
 const double MACHEPS = 2.22044604925031E-16; // Macheps + 1.0 > 1.0
 const double MAXREAL = 1.0e30;
 const double MINREAL = -1.0e30;
