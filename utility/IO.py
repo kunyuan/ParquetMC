@@ -106,7 +106,9 @@ def Estimate(Data, Weights, operation=None):
                   in zip(Data, Weights))
         return Avg, np.sqrt(Var/(len(Data)-1))
     else:
-        return Avg, Var*0.0
+        Var = sum((d/norm - Avg) ** 2*norm/Z for (d, norm)
+                  in zip(Data, Weights))
+        return Avg, 0.0*Var
 
 
 def LoadFile(Folder, FileName, shape=None):

@@ -119,6 +119,7 @@ int main(int argc, const char *argv[]) {
         }
       }
     }
+    if (Block==1) Markov.AdjustGroupReWeight();
   }
 
   Markov.PrintMCInfo();

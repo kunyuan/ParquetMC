@@ -446,7 +446,27 @@ markov::markov() {
   AdjustGroupReWeight();
 };
 
-void markov::AdjustGroupReWeight(){};
+void markov::AdjustGroupReWeight(){
+  Para.ReWeight[0]=1.0;
+  double mult=1;
+  for (int o = 1; o < Para.Order + 1; ++o){
+    double iacc=Accepted[INCREASE_ORDER][o-1];
+    double iprop=Proposed[INCREASE_ORDER][o-1];
+    double dacc=Accepted[DECREASE_ORDER][o];
+    double dprop=Proposed[DECREASE_ORDER][o];
+    double rate=(iacc+1)/(iprop+1)*(dprop+1)/(dacc+1);
+    Para.ReWeight[o]=Para.ReWeight[o]*mult/rate;
+    mult/=rate;
+  }
+  string Output = "";
+  Output = string(80, '=') + "\n";
+  Output += "New Reweight: ";
+  for (int i = 0; i < Para.Order+1; i++)
+    Output += fmt::sprintf("\t%f",Para.ReWeight[i] );
+
+  Output += "\nReweight updated!\n";
+  LOG_INFO(Output);
+}
 
 std::string markov::_DetailBalanceStr(Updates op) {
   string Output = string(80, '-') + "\n";

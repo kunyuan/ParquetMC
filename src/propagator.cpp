@@ -179,7 +179,7 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType, int ch
     Sign *= -1.0;
   }
 
-  return Sign*ExtrapF(Tau,K.norm(),chan);
+  //  return Sign*ExtrapF(Tau,K.norm(),chan);
   return Sign*exp(-K.squaredNorm())*(Para.Beta-2*Tau);
   // double Ek = K.squaredNorm() - Para.Mu;
   // // return Sign * Tau * exp(-Ek * Tau) / 2.0 / (1 + cosh(Para.Beta * Ek));
@@ -235,7 +235,6 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
-  Weight[EX] = 0.0;
   return Weight;
 }
 
