@@ -5,6 +5,7 @@
 //---------------------------------------------------------------------------
 
 #include "utility.h"
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -114,4 +115,16 @@ std::string &trim(std::string &s, const char *t) {
   s.erase(0, s.find_first_not_of(t));
   s.erase(s.find_last_not_of(t) + 1);
   return s;
+}
+
+stringstream GetLine(ifstream &File) {
+  string line;
+  while (true) {
+    getline(File, line);
+    line = trim(line);
+    if (line.size() > 0 && line[0] != '#') {
+      replace(line.begin(), line.end(), ',', ' ');
+      return stringstream(line);
+    }
+  }
 }

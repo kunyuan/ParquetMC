@@ -36,6 +36,7 @@
 *.dat
 *.pdf
 *.png
+TAGS
 
 infile/
 outfile/
@@ -56,3 +57,5 @@ inlist
 *.vscode
 parameter
 *.pdf
+.rendered*
+*.cppimporthash

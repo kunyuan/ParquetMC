@@ -1,4 +1,5 @@
 #include "weight.h"
+#include "diag/vertex4.h"
 #include "global.h"
 #include "utility/abort.h"
 #include "utility/fmt/format.h"
@@ -28,7 +29,7 @@ void weight::Initialization() {
                          order, // loopNum
                          4,     // loop index of the first internal K
                          0,     // tau index of the InTL leg
-                         Chan, RIGHT, false);
+                         Chan, RIGHT);
       if (order < 4)
         LOG_INFO(Gamma[order].ToString());
     }
@@ -57,7 +58,12 @@ void weight::Initialization() {
       if (order < 4)
         LOG_INFO(Delta[order].Vertex.ToString());
     }
+    // for(int channel=0;channel<ChannelNum;channel++){
+    //   LOG_INFO("Init Channel"<<channel);
+    //   ChannelObs.push_back(obs::oneBodyObs());
+    // }
   }
+  LOG_INFO("End of Init Weight");
 }
 
 double weight::Evaluate(int Order) {
@@ -65,7 +71,7 @@ double weight::Evaluate(int Order) {
     return 1.0;
 
   // higher order
-  if (DiagType == diagram::GAMMA) {
+  if (DiagType == diagtype::GAMMA) {
     Gamma[Order].Evaluate(Var.LoopMom[INL],  // KInL
                           Var.LoopMom[OUTL], // KOutL
                           Var.LoopMom[INR],  // KInR
@@ -75,17 +81,19 @@ double weight::Evaluate(int Order) {
     for (auto &w : ChanWeight)
       // collapse all channel to I
       ChanWeight[0] += w;
+    // cout << Order << ", " << ChanWeight[0][DIR] << ", " << ChanWeight[0][EX]
+    //      << endl;
     return ChanWeight[0][DIR] + ChanWeight[0][EX] / SPIN;
 
-  } else if (DiagType == diagram::POLAR) {
+  } else if (DiagType == diagtype::POLAR) {
     // polarization diagram
     double Weight = Polar[Order].Evaluate();
     return Weight;
-  } else if (DiagType == diagram::SIGMA) {
+  } else if (DiagType == diagtype::SIGMA) {
     // self-energy diagram
     double Weight = Sigma[Order].Evaluate();
     return Weight;
-  } else if (DiagType == diagram::DELTA) {
+  } else if (DiagType == diagtype::DELTA) {
     // self-energy diagram
     double Weight = Delta[Order].Evaluate();
     return Weight;
@@ -95,7 +103,7 @@ double weight::Evaluate(int Order) {
 void weight::Measure() {
   double Factor = 1.0 / (Var.CurrAbsWeight * Para.ReWeight[Var.CurrOrder]);
 
-  if (DiagType == diagram::GAMMA) {
+  if (DiagType == diagtype::GAMMA) {
     if (Var.CurrOrder == 0) {
       // order zero
       GammaObs.Measure0(Factor);
@@ -112,7 +120,24 @@ void weight::Measure() {
       GammaObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtAngBin,
                        ChanWeight, Factor);
     }
-  } else {
+  }
+  else if (DiagType == DELTA){
+    Factor /= Para.TauGrid.weight[Var.CurrExtTauBin];
+    if (Var.CurrOrder == 0)
+      OneBodyObs.Measure0(Factor);
+    else
+      OneBodyObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtTauBin,
+                         Evaluate(Var.CurrOrder), Factor);
+    for(int channel=0;channel<ChannelNum;channel++){
+      if (Var.CurrOrder == 0)
+        ChannelObs[channel].Measure0(Factor);
+      else
+        ChannelObs[channel].Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtTauBin,
+                                    Delta[Var.CurrOrder].Evaluate(channel), Factor);      
+    }
+  }
+  else {
+    Factor /= Para.TauGrid.weight[Var.CurrExtTauBin];
     // Polar, Sigma, Delta can be handled together
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);
@@ -123,8 +148,14 @@ void weight::Measure() {
 }
 
 void weight::SaveToFile() {
-  if (DiagType == diagram::GAMMA)
+  if (DiagType == GAMMA)
     GammaObs.Save();
+  else if (DiagType == DELTA){
+    OneBodyObs.Save();
+    for(int channel=0;channel<ChannelNum;channel++){
+      ChannelObs[channel].Save(channel);
+    }
+  }
   else
     OneBodyObs.Save();
 }

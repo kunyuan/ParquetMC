@@ -1,23 +1,20 @@
 from scipy import integrate
-from utility import *
-from grid import *
-
+from utility.IO import *
+from matplotlib import pyplot as plt
 XType = "Tau"
 # XType = "Mom"
 
+Number=3
+if len(sys.argv) ==2:
+    Number =  int(sys.argv[1])
+
 Para = param()
-Grid = grid(Para)
 Order = range(0, Para.Order+1)
-TauGrid = Grid.TauGrid
-MomGrid = Grid.MomGrid
-
-folder = "./Data"
-
-filename = "delta_pid[0-9]+.dat"
 
 shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
-
-Data, Norm, Step = LoadFile(folder, filename, shape)
+Data, Norm, Step, Grids = LoadFile("./Data", "delta_pid[0-9]+.dat", shape)
+TauGrid = Grids["TauGrid"]
+MomGrid = Grids["KGrid"]
 
 fig, ax = plt.subplots()
 
@@ -42,21 +39,21 @@ if(XType == "Mom"):
 
 elif(XType == "Tau"):
     N = 8
-    o = 2
+    o = Number
     for i in range(N):
-        q = i*Para.MomGridSize/N
+        q = i*Para.MomGridSize//N
         dataList = [d[o, q, :] for d in Data]
         Avg, Err = Estimate(dataList, Norm)
         if i == N/2:
-            print Avg[0], Err[0]
+            print( Avg[0], Err[0])
             for d, norm, step in zip(dataList, Norm, Step):
-                print d[0]/norm, norm, step
+                print (d[0]/norm, norm, step)
         ax.errorbar(TauGrid/Para.Beta, Avg, yerr=Err, fmt='o-',
-                    capthick=1, capsize=4, color=ColorList[i], label="k={0}".format(MomGrid[q]/Para.kF))
+                    capthick=1, capsize=2, markersize=2, label="k={0}".format(MomGrid[q]/Para.kF))
     ax.set_xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])
 
 
-plt.legend(loc=1, frameon=False, fontsize=size)
+plt.legend(loc=1, frameon=False)
 # plt.tight_layout()
 
 plt.show()

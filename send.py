@@ -32,9 +32,8 @@ CreateFolder(homedir)
 
 os.system("cp {0} {1}".format(execute, homedir))
 os.system("cp {0} {1}".format("parameter", homedir))
-
-os.system("python grid.py")
-os.system("cp {0} {1}".format("grid.data", homedir))
+#os.system("cp {0} {1}".format("green.data", homedir))
+#os.system("cp {0} {1}".format("dispersion.data", homedir))
 
 if Cluster != "Rutgers":
     outfilepath = os.path.join(homedir, "outfile")
@@ -48,11 +47,13 @@ for pid in PIDList:
     seed = random.randint(0, 2**31-1)
     # print pid, seed
     outfile = os.path.join(outfilepath, "_out{0}".format(pid))  # output files
+    errfile = os.path.join(outfilepath, "_err{0}".format(pid))  # errput files
+    
     jobfile = os.path.join(jobfilepath, "_job{0}.sh".format(pid))  # job files
 
     if Cluster == "local":
         os.chdir(homedir)
-        os.system("./{0} {1} {2} > {3} &".format(execute, pid, seed, outfile))
+        os.system("./{0} {1} {2} > {3} 2> {4} &".format(execute, pid, seed, outfile, errfile))
         os.chdir("..")
 
     elif Cluster == "condor":

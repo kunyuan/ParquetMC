@@ -1,3 +1,4 @@
+#define FMT_HEADER_ONLY
 #include "diagram.h"
 #include "utility/fmt/format.h"
 #include <iostream>
@@ -31,8 +32,8 @@ void sigma::Build(int order) {
     int Llopidx = 3; // ExtK: 0, G1: 1, G2: 2
     int Rlopidx = 3 + ol;
 
-    bub.LVer.Build(lvl, ol, Llopidx, LInTL, FULL, LEFT, false);
-    bub.RVer.Build(lvl, oR, Rlopidx, RInTL, F, RIGHT, false);
+    bub.LVer.Build(lvl, ol, Llopidx, LInTL, FULL, LEFT);
+    bub.RVer.Build(lvl, oR, Rlopidx, RInTL, F, RIGHT);
 
     for (int ol = 0; ol < bub.LVer.Tpair.size(); ++ol) {
       //   cout << ol << endl;
@@ -53,7 +54,7 @@ void sigma::Build(int order) {
 
 double sigma::Evaluate() {
   // normalization
-  double Factor = 1.0 / pow(2.0 * PI, D);
+  double Factor = 1.0 / pow(2.0 * π, D);
   if (Order == 0) {
     return 1.0;
   } else if (Order == 1) {
@@ -148,7 +149,7 @@ bool sigma::Test() {
   if (Order != 2)
     return false;
 
-  double Factor = 1.0 / pow(2.0 * PI, D);
+  double Factor = 1.0 / pow(2.0 * π, D);
   int ExtTauIdx = MaxTauNum - 1;
   momentum &ExtK = Var.LoopMom[0];
   momentum &K1 = Var.LoopMom[1];
@@ -173,6 +174,6 @@ bool sigma::Test() {
 
   //   cout << "DIR=" << Weight1 + 2 * Weight2 << ", EX=" << -Weight3 << endl;
   //   return Weight1 + 2 * Weight2;
-  cout << "Pass" << endl;
+  // cout << "Pass" << endl;
   return true;
 }

@@ -1,3 +1,4 @@
+#define FMT_HEADER_ONLY
 #include "diagram.h"
 #include "utility/fmt/format.h"
 #include <iostream>
@@ -8,6 +9,13 @@ using namespace std;
 extern parameter Para;
 extern variable Var;
 extern propagator Prop;
+
+double legendre(double xi, int channel){
+  if(channel==0) return 1;
+  if(channel==1) return xi;
+  if(channel==2) return 0.5*(3*xi*xi-1);
+  else return 0;
+}
 
 void delta::Build(int order) {
   ASSERT_ALLWAYS(order >= 0, "Polar order must be larger than 0!");
@@ -23,7 +31,7 @@ void delta::Build(int order) {
                Order - 1, // loopNum
                2,         // loop index of the first internal K of the vertex
                0,         // tau index of the InTL leg
-               Chan, RIGHT, false);
+               Chan, RIGHT);
   for (auto &t : Vertex.Tpair) {
     int idx = F.AddTidxPair({t[OUTL], t[OUTR]});
     Fidx.push_back(idx);
@@ -64,7 +72,7 @@ void delta::_ResetLastTidx(vertex4 &Vertex) {
 }
 
 double delta::Evaluate() {
-  double Factor = 1.0 / pow(2.0 * PI, D);
+  double Factor = 1.0 / pow(2.0 * π, D);
   // normalization
   if (Order == 0)
     return 1.0;
@@ -94,6 +102,41 @@ double delta::Evaluate() {
   // there is a symmetry factor -0.5
   // cout << "2: " << Weight * Factor * 0.5 << endl;
   return Weight * Factor * (-0.5);
+}
+
+double delta::Evaluate(int channel) {
+  double Factor = 1.0 / pow(2.0 * PI, D);
+  // normalization
+  if (Order == 0)
+    return 1.0;
+  else if (Order == 1) {
+    // bare interaction
+    double Weight = Prop.Interaction(Var.LoopMom[0] - Var.LoopMom[1], -1);
+    Weight *= Prop.F(-1.0e-8, Var.LoopMom[1], UP, 0,channel);
+    // cout << "1: " << Weight * Factor * 0.5 << endl;
+    double xi=Var.LoopMom[0].dot(Var.LoopMom[1])/Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
+    return Weight * Factor * legendre(xi,channel);
+  }
+
+  // loop order >=2
+  vertex4 &Ver4 = Vertex;
+  F.Evaluate(Var.LoopMom[1], channel);
+  // if (Var.CurrOrder == 2)
+  //   cout << Var.LoopMom[1].norm() << endl;
+
+  Vertex.Evaluate(Var.LoopMom[0], Var.LoopMom[1], -Var.LoopMom[0],
+                  -Var.LoopMom[1], false);
+
+  int Size = Vertex.Tpair.size();
+  double Weight = 0.0;
+  for (int i = 0; i < Size; ++i) {
+    auto &fidx = Fidx[i];
+    Weight += (Ver4.Weight[i][DIR] - Ver4.Weight[i][EX]) * F[fidx];
+  }
+  // there is a symmetry factor -0.5
+  // cout << "2: " << Weight * Factor * 0.5 << endl;
+  double xi=Var.LoopMom[0].dot(Var.LoopMom[1])/Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
+  return Weight * Factor * (-0.5) * legendre(xi,channel);
 }
 
 string delta::ToString() { return Vertex.ToString(""); }

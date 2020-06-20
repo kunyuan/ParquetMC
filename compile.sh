@@ -1,7 +1,8 @@
 #!/bin/bash
-#compiler=clang++
+
+compiler=clang++
 #compiler=icpc
-compiler=g++
+#compiler=g++
 #type=Debug
 type=Release
 mkdir build
@@ -15,5 +16,8 @@ if [ -n "$1" ]
   fi
 fi
 make -j
-make install
+#make install
 cd -
+
+g++ -I./lib -O3 -Wall -shared -std=c++11 -fPIC `python3 -m pybind11 --includes` ./src/lib/grid.cpp ./pybind/grid.cpp -o ./grid.so
+g++ -I./lib -O3 -Wall -shared -std=c++11 -fPIC `python3 -m pybind11 --includes` ./src/lib/green.cpp ./pybind/green.cpp -o ./green.so

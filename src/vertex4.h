@@ -29,6 +29,7 @@ public:
   // evaluate all weight with different T pairs and a given K
   void Evaluate(bool IsAnomal = false);
   void Evaluate(const momentum &K, bool IsAnomal = false);
+  void Evaluate(const momentum &K, int chan=0);// for delta in different channels
   int Size() { return _Tpair.size(); };
 
   vector<array<int, 2>> _Tpair;
@@ -40,12 +41,13 @@ struct bubble;
 class vertex4 {
 public:
   void Build(int Level, int Order, int LoopIdx, int InTIdx,
-             const vector<channel> &Channel, int Side, bool InBox);
+             const vector<channel> &Channel, int Side);
 
   vector<channel> Channel;      // list of channels except I
+  vector<channel> ChannelCT;    // list of counterterm channels except I
   vector<verWeight> ChanWeight; // the weight of each channel
 
-  array<green, 6> G;           // G for 0, T, U, S, TC and UC
+  array<green, 4> G;           // G for 0, T, U, S, TC and UC
   vector<array<int, 4>> Tpair; // external T list
   vector<verWeight> Weight;    // size: equal to T.size()
 
@@ -53,7 +55,6 @@ public:
 
   int TauNum() { return Order + 1; }
   int LoopNum() { return Order; }
-  bool InBox() { return _InBox; }
   void
   Evaluate(const momentum &KInL, const momentum &KOutL, const momentum &KInR,
            const momentum &KOutR,
@@ -68,7 +69,6 @@ private:
   int Order;
   int Tidx;
   int LoopIdx;
-  bool _InBox; // this Ver4 is a SUB-diagram within a box
 
   // vector<envelope> Envelope; // envelop diagrams
 
@@ -85,6 +85,9 @@ private:
   void _EvalUST(const momentum &KInL, const momentum &KOutL,
                 const momentum &KInR, const momentum &KOutR,
                 bool IsFast = false);
+  void _EvalUST_CT(const momentum &KInL, const momentum &KOutL,
+                   const momentum &KInR, const momentum &KOutR,
+                   bool IsFast = false);
   void _EvalI(const momentum &KInL, const momentum &KOutL, const momentum &KInR,
               const momentum &KOutR, bool IsFast = false);
 

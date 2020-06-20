@@ -4,6 +4,7 @@
 //  Created by Kun Chen on 1/21/19.
 //  Copyright (c) 2019 Kun Chen. All rights reserved.
 //
+#define FMT_HEADER_ONLY
 #include "markov.h"
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
@@ -114,7 +115,7 @@ void markov::ChangeOrder() {
 
 void markov::ChangeExtTau() {
   // Gamma diagram doesn't have ExtTau variable
-  if (DiagType == diagram::GAMMA)
+  if (DiagType == GAMMA)
     return;
 
   Proposed[CHANGE_EXTTAU][Var.CurrOrder]++;
@@ -123,18 +124,19 @@ void markov::ChangeExtTau() {
   int OldTauBin = Var.CurrExtTauBin;
   double Prop = ShiftExtTau(OldTauBin, Var.CurrExtTauBin);
 
-  Var.Tau[ExtTauIdx] = Para.ExtTauTable[Var.CurrExtTauBin];
+  Var.Tau[ExtTauIdx] = Para.TauGrid.grid[Var.CurrExtTauBin];
 
   NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
 
-  double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
+  double R = Prop * NewAbsWeight * Para.TauGrid.weight[Var.CurrExtTauBin] /
+             Var.CurrAbsWeight / Para.TauGrid.weight[OldTauBin];
 
   if (Random.urn() < R) {
     Accepted[CHANGE_EXTTAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.CurrExtTauBin = OldTauBin;
-    Var.Tau[ExtTauIdx] = Para.ExtTauTable[OldTauBin];
+    Var.Tau[ExtTauIdx] = Para.TauGrid.grid[OldTauBin];
   }
 };
 
@@ -206,7 +208,7 @@ void markov::ChangeExtMomentum() {
     OldAngBin = Var.CurrExtAngBin;
     Prop = ShiftExtLegK(OldAngBin, Var.CurrExtAngBin);
 
-    double theta = acos(Para.AngleTable[Var.CurrExtAngBin]);
+    double theta = acos(Para.AngleGrid.grid[Var.CurrExtAngBin]);
     Var.LoopMom[INR][0] = Para.Kf * cos(theta);
     Var.LoopMom[INR][1] = Para.Kf * sin(theta);
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
@@ -215,7 +217,10 @@ void markov::ChangeExtMomentum() {
     // In Momentum
     OldExtMomBin = Var.CurrExtMomBin;
     Prop = ShiftExtTransferK(OldExtMomBin, Var.CurrExtMomBin);
-    Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
+    if (DiagType == POLAR)
+      Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
+    else
+      Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
   }
 
   Proposed[CHANGE_EXTMOM][Var.CurrOrder]++;
@@ -233,7 +238,10 @@ void markov::ChangeExtMomentum() {
       Var.LoopMom[OUTR] = OldMom;
     } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
       Var.CurrExtMomBin = OldExtMomBin;
-      Var.LoopMom[0] = Para.ExtMomTable[Var.CurrExtMomBin];
+      if (DiagType == POLAR)
+        Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
+      else
+        Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
     }
   }
 };
@@ -277,25 +285,24 @@ double markov::GetNewK(momentum &NewMom) {
     return 0.0;
   }
   // Kf-dK<KAmp<Kf+dK
-  double Phi = 2.0 * PI * Random.urn();
+  double ϕ = 2.0 * π * Random.urn();
   if (D == 3) {
-    double Theta = PI * Random.urn();
-    if (Theta == 0.0)
+    double θ = π * Random.urn();
+    if (θ == 0.0)
       return 0.0;
-    double K_XY = KAmp * sin(Theta);
-    NewMom[0] = K_XY * cos(Phi);
-    NewMom[1] = K_XY * sin(Phi);
-    NewMom[D - 1] = KAmp * cos(Theta);
-    return 2.0 * dK                    // prop density of KAmp in [Kf-dK, Kf+dK)
-           * 2.0 * PI                  // prop density of Phi
-           * PI                        // prop density of Theta
-           * sin(Theta) * KAmp * KAmp; // Jacobian
+    NewMom[0] = KAmp * sin(θ) * cos(ϕ);
+    NewMom[1] = KAmp * sin(θ) * sin(ϕ);
+    NewMom[D - 1] = KAmp * cos(θ);
+    return 2.0 * dK                // prop density of KAmp in [Kf-dK, Kf+dK)
+           * 2.0 * π               // prop density of Phi
+           * π                     // prop density of Theta
+           * sin(θ) * KAmp * KAmp; // Jacobian
   } else if (D == 2) {
-    NewMom[0] = KAmp * cos(Phi);
-    NewMom[1] = KAmp * sin(Phi);
-    return 2.0 * dK   // prop density of KAmp in [Kf-dK, Kf+dK)
-           * 2.0 * PI // prop density of Phi
-           * KAmp;    // Jacobian
+    NewMom[0] = KAmp * cos(ϕ);
+    NewMom[1] = KAmp * sin(ϕ);
+    return 2.0 * dK  // prop density of KAmp in [Kf-dK, Kf+dK)
+           * 2.0 * π // prop density of Phi
+           * KAmp;   // Jacobian
   }
 
   //===== The simple way  =======================//
@@ -315,18 +322,15 @@ double markov::RemoveOldK(momentum &OldMom) {
   double dK = Para.Kf / 2.0;
   double KAmp = OldMom.norm();
   if (KAmp < Para.Kf - dK || KAmp > Para.Kf + dK)
-    // if (KAmp < Para.Kf - 1.5 * dK ||
-    //     (KAmp > Para.Kf - 0.5 * dK && KAmp < Para.Kf + 0.5 * dK) ||
-    //     KAmp > Para.Kf + 1.5 * dK)
     // Kf-dK<KAmp<Kf+dK
     return 0.0;
   if (D == 3) {
-    auto SinTheta = sqrt(OldMom[0] * OldMom[0] + OldMom[1] * OldMom[1]) / KAmp;
-    if (SinTheta < EPS)
+    auto Sinθ = sqrt(OldMom[0] * OldMom[0] + OldMom[1] * OldMom[1]) / KAmp;
+    if (Sinθ < EPS)
       return 0.0;
-    return 1.0 / (2.0 * dK * 2.0 * PI * PI * SinTheta * KAmp * KAmp);
+    return 1.0 / (2.0 * dK * 2.0 * π * π * Sinθ * KAmp * KAmp);
   } else if (D == 2) {
-    return 1.0 / (2.0 * dK * 2.0 * PI * KAmp);
+    return 1.0 / (2.0 * dK * 2.0 * π * KAmp);
   }
 
   //===== The simple way  =======================//
@@ -349,13 +353,12 @@ double markov::ShiftK(const momentum &OldMom, momentum &NewMom) {
     Prop = 1.0;
   } else if (x < 2.0 / 3) {
     double k = OldMom.norm();
-    if (k < 1.0e-9) {
+    if (k < 1.0e-12) {
       Prop = 0.0;
       NewMom = OldMom;
     } else {
       const double Lambda = 1.5;
-      double knew = k / Lambda + Random.urn() * (Lambda - 1.0 / Lambda) * k;
-      double Ratio = knew / k;
+      double Ratio = 1.0 / Lambda + Random.urn() * (Lambda - 1.0 / Lambda);
       for (int i = 0; i < D; i++)
         NewMom[i] = OldMom[i] * Ratio;
       if (D == 2)
@@ -363,44 +366,24 @@ double markov::ShiftK(const momentum &OldMom, momentum &NewMom) {
       else if (D == 3)
         Prop = Ratio;
     }
-
-    // if (isnan(Var.LoopMom[0][0]) || isnan(Var.LoopMom[0][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[1][0]) || isnan(Var.LoopMom[1][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[2][0]) || isnan(Var.LoopMom[2][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[3][0]) || isnan(Var.LoopMom[3][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[4][0]) || isnan(Var.LoopMom[4][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[5][0]) || isnan(Var.LoopMom[5][0])) {
-    //   cout << "Na" << endl;
-    // }
-    // if (isnan(Var.LoopMom[6][0]) || isnan(Var.LoopMom[6][0])) {
-    //   cout << "Na" << endl;
-    // }
   } else {
     for (int i = 0; i < D; i++)
       NewMom[i] = -OldMom[i];
     Prop = 1.0;
   }
-
   return Prop;
 };
 
 double markov::ShiftExtTransferK(const int &OldExtMomBin, int &NewExtMomBin) {
-  NewExtMomBin = Random.irn(0, Para.ExtMomBinSize - 1);
+  if (DiagType == POLAR)
+    NewExtMomBin = Random.irn(0, Para.BoseKGrid.size - 1);
+  else
+    NewExtMomBin = Random.irn(0, Para.FermiKGrid.size - 1);
   return 1.0;
 };
 
 double markov::ShiftExtTau(const int &OldTauBin, int &NewTauBin) {
-  NewTauBin = Random.irn(0, Para.TauBinSize - 1);
+  NewTauBin = Random.irn(0, Para.TauGrid.size - 1);
   return 1.0;
 }
 
@@ -410,7 +393,7 @@ double markov::ShiftExtLegK(const int &OldExtMom, int &NewExtMom) {
   // NewExtMom[1] = Para.Kf * sin(Theta);
   // return 1.0;
 
-  NewExtMom = Random.irn(0, Para.AngBinSize - 1);
+  NewExtMom = Random.irn(0, Para.AngleGrid.size - 1);
 
   // ASSERT_ALLWAYS(diag::Angle2Index(cos(theta), AngBinSize) == NewKBin,
   //                "Not matched, " << NewKBin << " vs "
@@ -463,7 +446,27 @@ markov::markov() {
   AdjustGroupReWeight();
 };
 
-void markov::AdjustGroupReWeight(){};
+void markov::AdjustGroupReWeight(){
+  Para.ReWeight[0]=1.0;
+  double mult=1;
+  for (int o = 1; o < Para.Order + 1; ++o){
+    double iacc=Accepted[INCREASE_ORDER][o-1];
+    double iprop=Proposed[INCREASE_ORDER][o-1];
+    double dacc=Accepted[DECREASE_ORDER][o];
+    double dprop=Proposed[DECREASE_ORDER][o];
+    double rate=(iacc+1)/(iprop+1)*(dprop+1)/(dacc+1);
+    Para.ReWeight[o]=Para.ReWeight[o]*mult/rate;
+    mult/=rate;
+  }
+  string Output = "";
+  Output = string(80, '=') + "\n";
+  Output += "New Reweight: ";
+  for (int i = 0; i < Para.Order+1; i++)
+    Output += fmt::sprintf("\t%f",Para.ReWeight[i] );
+
+  Output += "\nReweight updated!\n";
+  LOG_INFO(Output);
+}
 
 std::string markov::_DetailBalanceStr(Updates op) {
   string Output = string(80, '-') + "\n";

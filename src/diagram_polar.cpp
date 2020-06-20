@@ -1,3 +1,4 @@
+#define FMT_HEADER_ONLY
 #include "diagram.h"
 #include "utility/fmt/format.h"
 #include <iostream>
@@ -18,12 +19,16 @@ void polar::Build(int order) {
   // vertex is only needed for order>=2
   if (Order >= 2) {
     vector<channel> Chan = {I, T, U, S, TC, UC};
+    // vector<channel> Chan = {
+    //     T,
+    // };
     Vertex.Build(0,         // level
                  Order - 2, // loopNum
                  3,         // loop index of the first internal K of the vertex
                  1,         // tau index of the InTL leg
-                 Chan, RIGHT, false);
+                 Chan, RIGHT);
     for (auto &t : Vertex.Tpair) {
+      // cout << t[0] << ", " << t[1] << ", " << t[2] << ", " << t[3] << endl;
       int inL = G[INL].AddTidxPair({0, t[INL]});
       int outL = G[OUTL].AddTidxPair({t[OUTL], 0});
       int inR = G[INR].AddTidxPair({ExtTauIdx, t[INR]});
@@ -34,7 +39,7 @@ void polar::Build(int order) {
 };
 
 double polar::Evaluate() {
-  double Factor = 1.0 / pow(2.0 * PI, D);
+  double Factor = 1.0 / pow(2.0 * π, D);
   // normalization
   if (Order == 0)
     return 1.0;
