@@ -69,6 +69,7 @@ int main(int argc, const char *argv[]) {
 
     for (int i = 0; i < 1000000; i++) {
       Var.Counter++;
+      Markov.Count();
 
       double x = Random.urn();
       if (x < 1.0 / 5.0) {

@@ -85,6 +85,8 @@ int Tau::floor(double x) const {
     return _coeff1.floor(x);
   else if (x >= grid[size - 2])
     return size - 2;
+  else if (x>= grid[size/2-1] && x<grid[size/2])
+    return size/2-1;
   else
     return 0; // x<Grid[1]
 };
