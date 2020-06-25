@@ -203,7 +203,7 @@ void Uniform::build(std::array<double, 2> bounds, int _size) {
 };
 int Uniform::floor(double x) const {
   if (x <= grid[size - 2])
-    return (lowerBound - x) / delta;
+    return (x - lowerBound ) / delta;
   else
     return size - 2; // x>grid[size-2]
 };
