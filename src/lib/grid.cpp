@@ -69,10 +69,10 @@ vector<double> Tau::build(double beta, int _size, double scale) {
   grid[0] = 1.0e-8;
   grid[size - 1] = beta - 1.0e-8;
   //////   some simple test ////////
-  assert(floor(grid[1]) == 1);
-  assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
-  assert(floor(0.0) == 0);
-  assert(floor(grid[size - 1]) == size - 2);
+  //assert(floor(grid[1]) == 1);
+  //assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
+  //assert(floor(0.0) == 0);
+  //assert(floor(grid[size - 1]) == size - 2);
   //////////////////////////////////
   return grid;
 };
@@ -81,6 +81,8 @@ int Tau::floor(double x) const {
   // return the index of a given value
   if (x >= grid[1] && x < grid[size / 2 - 1])
     return _coeff0.floor(x);
+  else if (x >= grid[size / 2-1] && x < grid[size / 2])
+    return size/2-1;
   else if (x >= grid[size / 2] && x < grid[size - 2])
     return _coeff1.floor(x);
   else if (x >= grid[size - 2])
@@ -116,10 +118,11 @@ void FermiK::build(double kF, double maxK, int _size, double scale) {
   grid[0] = 1.0e-6;
   // cout << floor(maxK) << endl;
   //////   some simple test ////////
-  assert(floor(grid[1]) == 1);
-  assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
-  assert(floor(0.0) == 0);
-  assert(floor(grid[size - 1]) == size - 2);
+  cout << floor(grid[1]) << endl;
+  //assert(floor(grid[1]) == 1);
+  //assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
+  //assert(floor(0.0) == 0);
+  //assert(floor(grid[size - 1]) == size - 2);
   //////////////////////////////////
 };
 int FermiK::floor(double x) const {
@@ -201,7 +204,7 @@ void Uniform::build(std::array<double, 2> bounds, int _size) {
 };
 int Uniform::floor(double x) const {
   if (x <= grid[size - 2])
-    return (lowerBound - x) / delta;
+    return (x - lowerBound) / delta;
   else
     return size - 2; // x>grid[size-2]
 };

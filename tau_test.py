@@ -6,11 +6,10 @@ import math
 import numpy as np
 from scipy import integrate as scp_int
 from scipy import interpolate
-from utility.IO import *
-import utility.fourier as fourier
 #from pynufft import NUFFT_cpu, NUFFT_hsa
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from utility.IO import *
 import grid
 
 
@@ -51,7 +50,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 Order = [0, ]
 
 #folder = "./Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, Mass2Str)
-folder = "./"
+folder = "./Data/"
 
 FreqBin=None
 FreqBinSize=None
@@ -147,12 +146,10 @@ def AngleIntegation(Data, l):
 Para = param()
 Beta=Para.Beta
 Temp=1/Beta
-order_num=Para.Order 
 K=grid.FermiK()
-K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 2.0) #kf,maxk,size,scale
+K.build(1.0,3.0,8,1.0) #kf,maxk,size,scale
 Ta=grid.Tau()
-Ta.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF) #Beta,size,scale
-
+Ta.build(10.0, 16, 3.0) #Beta,size,scale
 
 #FreqBin = (np.arange(len(TauBin))+0.5)*2*np.pi*Temp
 #FreqBinSize=len(FreqBin)
@@ -163,31 +160,26 @@ for i in range (K.size):
 TauBin=np.zeros(Ta.size)
 for i in range (Ta.size):
     TauBin[i]=Ta.grid[i]
+
+N=256
+TauBin=np.arange(N)*Beta/N
 TauBinSize=len(TauBin)
 ExtMomBinSize=len(ExtMomBin)
 
 TauExtend=Extend_grid(TauBin)
-print (TauBinSize,len(TauExtend))
+
 omega_c=10000000.0 #float(line0.split(",")[-1])  
 
 #for order in Order:
    # for chan in Channel:
-
-MaxFreq = 30
-Freq = np.array(range(-MaxFreq, MaxFreq))
-phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
-shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
-
-Fourier=fourier.fourier(TauBin,phyFreq,Para.Beta)
-Fourier.InitializeKernel(100.0, 1024, "Fermi", 1.0e-13)
-
+files = os.listdir(folder)
 Num = 0
 Norm = 0
 Data0 = None
 DataList = []
 #FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
-FileName = "delta_chan0_pid0_verb.dat"
-FileName1="f0.dat"
+FileName = "delta_pid0_verb.dat"
+FileName1="f.dat"
 
 
 
@@ -196,34 +188,17 @@ FileName1="f0.dat"
 
 cut=-1#np.searchsorted(TauBin,100000,side='right') 
 
-#if(os.path.exists(folder+FileName1) and os.path.getsize(folder+FileName1)) > 0:
-#    F = np.loadtxt(folder+FileName1)
-#    F=F.reshape((TauBinSize,ExtMomBinSize))
+# if(os.path.exists(folder+FileName1) and os.path.getsize(folder+FileName1)) > 0:
+#     F = np.loadtxt(folder+FileName1)
+#     F=F.reshape((TauBinSize,ExtMomBinSize))
 
 
-#else:
-F=np.zeros(TauBinSize*ExtMomBinSize)
-F=F.reshape((TauBinSize,ExtMomBinSize))
-F[:,:]=1.0
+# else:
+#     F=np.zeros(TauBinSize*ExtMomBinSize)
+#     F=F.reshape((TauBinSize,ExtMomBinSize))
+#     F[:,:]=1.0
 
 
-
-gg=np.zeros((TauBinSize,ExtMomBinSize))
-
-for i0 in range (TauBinSize):
-    for j0 in range (ExtMomBinSize):
-        E=ExtMomBin[j0]*ExtMomBin[j0]-1.0
-        x=Beta*E/2.0
-        y=2.0*TauBin[i0]/Beta-1.0
-        if(x>100.0):
-            gg[i0][j0]=np.exp(-x*(y+1.0))
-        elif(x<-100.0):
-            gg[i0][j0]=np.exp(x*(1.0-y))
-        else:
-            gg[i0][j0]=np.exp(-x*y)/2.0/np.cosh(x)
-
-gg=Extend_value(gg.T)
-g_int=interpolate.interp1d(TauExtend,gg)
 #phase_shift=np.exp(-1j*np.pi/Beta*TauBin)
 #dd=phase_shift[:,np.newaxis]*np.fft.fft(F,axis=0)/Beta
 #ff=np.multiply(gg_tau,dd)
@@ -242,7 +217,6 @@ shift=0.00
 lamu_sum=0.0
 modulus_dum=0.0
 
-
 #os set
 pid=0
 rootdir = os.getcwd()
@@ -250,17 +224,9 @@ homedir = os.path.join(rootdir, "Data")
 CreateFolder(homedir)
 outfilepath = os.path.join(homedir, "outfile")
 CreateFolder(outfilepath)
-jobfilepath = os.path.join(homedir, "jobfile")
-CreateFolder(jobfilepath)
-seed = 145
+seed = 1453
 outfile = os.path.join(outfilepath, "_out{0}".format(pid)) 
-jobfile = os.path.join(jobfilepath, "_job{0}.sh".format(pid))  # job files
 execute = "feyncalc.exe"
-os.system("cp {0} {1}".format(execute, homedir))
-os.system("cp {0} {1}".format("parameter", homedir))
-
-os.chdir(homedir)
-files = os.listdir(folder)
 
 
 for loopcounter in range(1):
@@ -272,128 +238,94 @@ for loopcounter in range(1):
     #F=2*ff.real
 
 
-    with open(folder+FileName1,"w") as file:
-        for i in range(TauBinSize):
-            file.write("{0} ".format(TauBin[i]))
-        file.write("\n")
-        for i in range(TauBinSize):
-            for k in range(ExtMomBinSize):
-                if(loopcounter==0):
-                    file.write("{0}\t".format(np.exp(-ExtMomBin[k]**2)*(Para.Beta-2*TauBin[i])))
-                else:
-                    file.write("{0}\t".format(F[k][i]))
+    # with open("./Data/f.dat","w") as file:
+    #     for i in range(TauBinSize):
+    #         file.write("{0} ".format(TauBin[i]))
+    #     file.write("\n")
+    #     for i in range(TauBinSize):
+    #         for k in range(ExtMomBinSize):
+    #             file.write("{0}\t".format(F[i][k]))
     
     #if(loopcounter%5==0):
      #  IterationType=(IterationType+1)%2
-
-    os.system("./{0} {1} {2} >{3}".format(execute, pid, seed, outfile))
+    #print IterationType
+    #os.chdir(homedir)
+    #os.system("./{0} {1} {2} > {3} &".format(execute, pid, seed, outfile))
+    #os.chdir("..")
 
      #myCmd='python phonon.py>out.txt'
 
-    for f in files:
-        if re.match(FileName, f):
-            print ("Loading ")
-            Norm0 = -1
-            d0 = None
-            #try: 
-            with open(folder+f, "r") as file:
-                #line1 = file.readline()
-                # print (line1)
-                #Norm0 = float(line1.split(":")[-1])
-                # print ("Norm: ", Norm0)
-                #file.open(folder+f, "r")
-                d0 = np.transpose(np.loadtxt(folder+f))
-                #fig=plt.figure()
-                #plt.axvline(omega_c)
-                #plt.plot(FreqBin,F[:,0],'ko')
-                #plt.plot(ExtMomBin,F[0,:],'r.')
-                #ax=fig.add_subplot(111, projection='3d')
-                #a=FreqBin[:,np.newaxis]+ExtMomBin*0
-                #a=a.reshape(TauBinSize*ExtMomBinSize)
-                #print a
-                #b=np.transpose(ExtMomBin[:,np.newaxis]+FreqBin*0)
-                #b=b.reshape(TauBinSize*ExtMomBinSize)
-                #print b
-                #c=d.reshape(TauBinSize*ExtMomBinSize)
-                #modulus=math.sqrt(np.tensordot(c,c,axes=(0,0)))
-                #c=c/modulus
-                #ax.scatter(a, b,c , c='k',marker='.')
-                #ax.set_xlabel('X Label')
-                #ax.set_ylabel('Y Label')
-                #ax.set_zlabel('Z Label')
+    # for f in files:
+    #     if re.match(FileName, f):
+    #         #print ("Loading ")
+    #         Norm0 = -1
+    #         d0 = None
+    #         #try: 
+    #         with open(folder+f, "r") as file:
+    #             #line1 = file.readline()
+    #             # print (line1)
+    #             #Norm0 = float(line1.split(":")[-1])
+    #             # print ("Norm: ", Norm0)
+    #             #file.open(folder+f, "r")
+    #             d0 = np.transpose(np.loadtxt(folder+f))
+    #             #fig=plt.figure()
+    #             #plt.axvline(omega_c)
+    #             #plt.plot(FreqBin,F[:,0],'ko')
+    #             #plt.plot(ExtMomBin,F[0,:],'r.')
+    #             #ax=fig.add_subplot(111, projection='3d')
+    #             #a=FreqBin[:,np.newaxis]+ExtMomBin*0
+    #             #a=a.reshape(TauBinSize*ExtMomBinSize)
+    #             #print a
+    #             #b=np.transpose(ExtMomBin[:,np.newaxis]+FreqBin*0)
+    #             #b=b.reshape(TauBinSize*ExtMomBinSize)
+    #             #print b
+    #             #c=d.reshape(TauBinSize*ExtMomBinSize)
+    #             #modulus=math.sqrt(np.tensordot(c,c,axes=(0,0)))
+    #             #c=c/modulus
+    #             #ax.scatter(a, b,c , c='k',marker='.')
+    #             #ax.set_xlabel('X Label')
+    #             #ax.set_ylabel('Y Label')
+    #             #ax.set_zlabel('Z Label')
 
-                #plt.savefig('d_q.png')
-                #plt.close()
-                #plt.figure()
-                #plt.axvline(omega_c)
-                #plt.plot(FreqBin,F[:,0],'ko')
-                #plt.plot(ExtMomBin,F[0,:],'r.')
-                #plt.savefig('F_new.pdf')
-                #plt.close()
-                #if d is not None and Norm0 > 0:
-                    #if Data0 is None:
-                        #Data0 = d
-                    #else:
-                        # Data0 = d
-                    #   Data0 += 
+    #             #plt.savefig('d_q.png')
+    #             #plt.close()
+    #             #plt.figure()
+    #             #plt.axvline(omega_c)
+    #             #plt.plot(FreqBin,F[:,0],'ko')
+    #             #plt.plot(ExtMomBin,F[0,:],'r.')
+    #             #plt.savefig('F_new.pdf')
+    #             #plt.close()
+    #             #if d is not None and Norm0 > 0:
+    #                 #if Data0 is None:
+    #                     #Data0 = d
+    #                 #else:
+    #                     # Data0 = d
+    #                 #   Data0 += 
             
    
 #       print (TauBin)
-    print (d0.shape)
-    ll=2
-    size0=len(d0[0])/(order_num+1)
-    d=-d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
-    #d=d.T
-    print (np.sum(d))
-    print (TauBin)
-    print (ExtMomBin)
-    idx=0
-    d_naive,_=Fourier.SpectralT2W(d)
-    #d_naive=Fourier.naiveT2W(d)
-    print (d_naive.shape)
-    FileName1="/home/wangtao/Parquet_test3/w.dat"
-    d2=np.transpose(np.loadtxt(FileName1))
+    # order_num=3
+    # ll=2
+    # size0=len(d0[0])/order_num
+    # d=-d0[3].reshape((order_num,size0))[ll].reshape((TauBinSize,ExtMomBinSize))
+    # print d
+    d=np.sin(np.pi*TauBin/Beta)
+    d=np.tile(d,[ExtMomBinSize,1])
+    print (d.shape)
+    #do twice convolution to convert delta to F
+    d=Extend_value(d)
+    d_int=interpolate.interp1d(TauExtend,d)
+    g=d_int
+    middle=Convol(d_int,g,TauBin,ExtMomBinSize,-1)
+    middle=Extend_value(middle)
+    d_int=interpolate.interp1d(TauExtend,middle)
+    middle=Convol(d_int,g,TauBin,ExtMomBinSize,1)
+
     fig=plt.figure()
     ax1=plt.axes()
-    print (d_naive.real[:,len(phyFreq)//2])
-    #print aa
-    #print (aa[32],dd[32])
-    #ax1.plot(TauBin,d[0,:],label="tau")
-    #ax1.plot(phyFreq,d_naive[0,:],label="freq")
-    print (phyFreq[len(phyFreq)//2])
-    plt.xlabel("momentum")
-    plt.ylabel("test")
-    ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2],'ko',label="new")
-    ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
-    #ax1.plot(d2[1],d2[2],label="old")
-    ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+    ax1.plot(TauBin,middle[0],'-')
+    ax1.plot(TauBin,np.sin(np.pi*TauBin)/4.0,'r-')
     plt.show()
-
-
-
-    # print ("delta",d)
-    # print(d.shape)
-    # do twice convolution to convert delta to F
-    # d=Extend_value(d)
-    # print (d.shape,TauExtend.shape)
-    # d_int=interpolate.interp1d(TauExtend,d)
-    # g=d_int
-    # middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,-1)
-    # middle=Extend_value(middle)
-    # d_int=interpolate.interp1d(TauExtend,middle)
-    # middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,1)
-    # print ("middle",middle.shape)
-    # fig=plt.figure()
-    # ax1=plt.axes()
-    # ax1.plot(TauBin,middle[0],'-')
-    # plt.show()
-    # middle=middle.T
-    # lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
-    # print ("lamu",lamu)
-    # modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
-    # print ("modulus:",modulus_dum)
-    # F[0:cut,:]=middle[0:cut,:]/modulus_dum
-
     # F0=0.0#-g/4.0/np.pi/np.pi*sum(ExtMomBin*F[0])/ExtMomBinSize*ExtMomBin[-1]
     # taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * np.tensordot(ExtMomBin,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
     # taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)+F0
@@ -502,4 +434,4 @@ for loopcounter in range(1):
     #        Data0 /= Norm
     #        Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize, 2)
 
-
+   
