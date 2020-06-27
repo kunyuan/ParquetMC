@@ -30,6 +30,7 @@ public:
   void ChangeExtTau();
   void ChangeOrder();
   void ChangeScale();
+  void Count();
 
 private:
   double NewAbsWeight;
@@ -49,6 +50,7 @@ private:
   std::string UpdatesName[MCUpdates];
   double Accepted[MCUpdates][MaxOrder + 1];
   double Proposed[MCUpdates][MaxOrder + 1];
+  double Counter[MaxOrder+1];
 
   enum Updates {
     INCREASE_ORDER = 0,

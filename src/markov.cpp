@@ -442,22 +442,27 @@ markov::markov() {
 
   InitialArray(&Accepted[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
   InitialArray(&Proposed[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
+  InitialArray(&Counter[0], 0.0, MaxOrder+1);
 
   AdjustGroupReWeight();
 };
 
 void markov::AdjustGroupReWeight(){
-  Para.ReWeight[0]=1.0;
-  double mult=1;
+  // double mult=Proposed[DECREASE_ORDER][1]/(Accepted[DECREASE_ORDER][1]+1)/Para.ReWeight[0];
+  // Para.ReWeight[0]=Proposed[DECREASE_ORDER][1]/(Accepted[DECREASE_ORDER][1]+1);
+  // for (int o = 1; o < Para.Order + 1; ++o){
+  //   double iacc=Accepted[INCREASE_ORDER][o-1];
+  //   double iprop=Proposed[INCREASE_ORDER][o-1];
+  //   double dacc=Accepted[DECREASE_ORDER][o];
+  //   double dprop=Proposed[DECREASE_ORDER][o];
+  //   double rate=(iacc+1)/(iprop+1)*(dprop+1)/(dacc+1);
+  //   Para.ReWeight[o]=Para.ReWeight[o]*mult/rate;
+  //   mult/=rate;
+  // }
   for (int o = 1; o < Para.Order + 1; ++o){
-    double iacc=Accepted[INCREASE_ORDER][o-1];
-    double iprop=Proposed[INCREASE_ORDER][o-1];
-    double dacc=Accepted[DECREASE_ORDER][o];
-    double dprop=Proposed[DECREASE_ORDER][o];
-    double rate=(iacc+1)/(iprop+1)*(dprop+1)/(dacc+1);
-    Para.ReWeight[o]=Para.ReWeight[o]*mult/rate;
-    mult/=rate;
+    Para.ReWeight[o]=Para.ReWeight[o]*(Counter[0]+1)/(Counter[o]+1);
   }
+
   string Output = "";
   Output = string(80, '=') + "\n";
   Output += "New Reweight: ";
@@ -521,4 +526,8 @@ void markov::PrintDeBugMCInfo() {
   msg += "\n";
 
   LOG_INFO(msg);
+}
+
+void markov::Count(){
+  Counter[Var.CurrOrder]++;
 }
