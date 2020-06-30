@@ -46,6 +46,11 @@ void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
 
   _Estimator(Order, KBin, TauBin) += Weight * Factor;
   _Estimator(0, KBin, TauBin) += Weight * Factor;
+  if(std::isnan(_Estimator(Order, KBin, TauBin))||std::isnan(_Estimator(0, KBin, TauBin))){
+    cout<<Weight<<"\t"<<Factor<<"\n"
+        <<Order<<"\t"<<Para.TauGrid.grid[TauBin]<<"\t"<<Para.FermiKGrid.grid[KBin]<<endl;
+    throw 10;
+  }
 }
 
 void oneBodyObs::Save() {
@@ -83,10 +88,12 @@ void oneBodyObs::Save() {
     for (int order = 0; order <= Para.Order; order++)
       for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
         for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
-          VerFile << order << "\t"
+          {VerFile << order << "\t"
                   << Para.FermiKGrid.grid[qindex] << "\t"
                   << Para.TauGrid.grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
+           
+          }
     VerFile.close();
   } else {
     LOG_WARNING(Name << " for PID " << Para.PID << " fails to save!");
@@ -121,10 +128,15 @@ void oneBodyObs::Save(int channel) {
     for (int order = 0; order <= Para.Order; order++)
       for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
         for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
-          VerFile << order << "\t"
+          {VerFile << order << "\t"
                   << Para.FermiKGrid.grid[qindex] << "\t"
                   << Para.TauGrid.grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
+            // if(std::isnan(_Estimator(order, qindex, tindex))){
+              
+            //   throw 10;
+            // }
+          }
     VerFile.close();
   } else {
     LOG_WARNING(Name << " for PID " << Para.PID << " fails to save!");

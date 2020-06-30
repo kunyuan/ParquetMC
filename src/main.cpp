@@ -23,7 +23,7 @@ int main(int argc, const char *argv[]) {
   Para.PID = atoi(argv[1]);
   Para.Seed = atoi(argv[2]);
 
-  //// initialize the global log configuration   /////////////
+   //// initialize the global log configuration   /////////////
   string LogFile = "_" + to_string(Para.PID) + ".log";
   LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
 
@@ -120,7 +120,9 @@ int main(int argc, const char *argv[]) {
         }
       }
     }
-    if (Block==1) Markov.AdjustGroupReWeight();
+    if (Block==1){
+      Markov.AdjustGroupReWeight();
+    }
   }
 
   Markov.PrintMCInfo();
@@ -191,9 +193,8 @@ void InitPara() {
                           << "MessageTimer: " << Para.MessageTimer << "\n");
 
   // initialize grids
-  Para.TauGrid.build(Para.Beta, TauSize, 6.0 / Para.Ef);
+  Para.TauGrid.build(Para.Beta, TauSize, 6.0/Para.Ef);
   Para.AngleGrid.build({-1.0, 1.0}, AngSize);
-
   Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2.0);
   Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
 

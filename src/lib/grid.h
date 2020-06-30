@@ -76,6 +76,7 @@ public:
   int size;
   double delta;
   double lowerBound;
+  vector<double> weight;
   vector<double> grid;
   void build(std::array<double, 2> bounds, int _size);
   int floor(double x) const;

@@ -45,7 +45,7 @@ elif(XType == "Tau"):
         dataList = [d[o, q, :] for d in Data]
         Avg, Err = Estimate(dataList, Norm)
         if i == N/2:
-            print( Avg[0], Err[0])
+            print (Avg[0], Err[0])
             for d, norm, step in zip(dataList, Norm, Step):
                 print (d[0]/norm, norm, step)
         ax.errorbar(TauGrid/Para.Beta, Avg, yerr=Err, fmt='o-',

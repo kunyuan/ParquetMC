@@ -462,7 +462,6 @@ void markov::AdjustGroupReWeight(){
   for (int o = 1; o < Para.Order + 1; ++o){
     Para.ReWeight[o]=Para.ReWeight[o]*(Counter[0]+1)/(Counter[o]+1);
   }
-
   string Output = "";
   Output = string(80, '=') + "\n";
   Output += "New Reweight: ";
