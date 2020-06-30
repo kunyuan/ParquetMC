@@ -149,9 +149,9 @@ Beta=Para.Beta
 Temp=1/Beta
 order_num=Para.Order 
 K=grid.FermiK()
-K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 2.0) #kf,maxk,size,scale
+K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 8) #kf,maxk,size,scale
 Ta=grid.Tau()
-Ta.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF) #Beta,size,scale
+Ta.build(Para.Beta, Para.TauGridSize, 12.0/Para.EF) #Beta,size,scale
 
 
 #FreqBin = (np.arange(len(TauBin))+0.5)*2*np.pi*Temp
@@ -252,7 +252,7 @@ outfilepath = os.path.join(homedir, "outfile")
 CreateFolder(outfilepath)
 jobfilepath = os.path.join(homedir, "jobfile")
 CreateFolder(jobfilepath)
-seed = 145
+seed = 1453
 outfile = os.path.join(outfilepath, "_out{0}".format(pid)) 
 jobfile = os.path.join(jobfilepath, "_job{0}.sh".format(pid))  # job files
 execute = "feyncalc.exe"
@@ -351,7 +351,7 @@ for loopcounter in range(1):
     d_naive,_=Fourier.SpectralT2W(d)
     #d_naive=Fourier.naiveT2W(d)
     print (d_naive.shape)
-    FileName1="/home/wangtao/Parquet_test3/w.dat"
+    FileName1="../Gapfunction_0.txt"
     d2=np.transpose(np.loadtxt(FileName1))
     fig=plt.figure()
     ax1=plt.axes()
@@ -363,9 +363,9 @@ for loopcounter in range(1):
     print (phyFreq[len(phyFreq)//2])
     plt.xlabel("momentum")
     plt.ylabel("test")
-    ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2],'ko',label="new")
+    ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2],'k-',label="new")
     ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
-    #ax1.plot(d2[1],d2[2],label="old")
+    ax1.plot(d2[0],d2[2],label="old")
     ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
     plt.show()
 

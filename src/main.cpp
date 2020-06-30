@@ -193,9 +193,9 @@ void InitPara() {
                           << "MessageTimer: " << Para.MessageTimer << "\n");
 
   // initialize grids
-  Para.TauGrid.build(Para.Beta, TauSize, 6.0/Para.Ef);
+  Para.TauGrid.build(Para.Beta, TauSize, 12.0/Para.Ef);
   Para.AngleGrid.build({-1.0, 1.0}, AngSize);
-  Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2.0);
+  Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 8);
   Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
 
   if (BoldG)
