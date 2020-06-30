@@ -112,8 +112,8 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
 
   Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
-  _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
-
+  // _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
+  _Interp1D<grid::Uniform>(_StaticSigma, Para.FermiKGrid, k);
   // if (BoldG && k < Para.FermiKGrid.MaxK) {
   // double sigma = _Interp1D(k, _StaticSigma);
   // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
@@ -161,17 +161,28 @@ double propagator::ExtrapF(double Tau, double K, int chan){
     int ExtQ=Para.FermiKGrid.floor(K);
     int t=Para.TauGrid.floor(Tau);
     double f1=_f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ);
-    // return f1;
-     if(ExtQ==Para.FermiKGrid.size-1){
-       return f1;
-     }
-     else{
-      double f0=_f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ+1);
-      double q0=Para.FermiKGrid.grid[ExtQ+1];
-      double q1=Para.FermiKGrid.grid[ExtQ];
-      f1=f1+(f0-f1)/(q0-q1)*(K-q1);
-      return f1;
-     }
+     return f1;
+     // if(ExtQ==Para.FermiKGrid.size-1){
+     //   return f1;
+     // }
+     // else{
+     //  double f0=_f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ+1);
+     //  double q0=Para.FermiKGrid.grid[ExtQ+1];
+     //  double q1=Para.FermiKGrid.grid[ExtQ];
+     //  f1=f1+(f0-f1)/(q0-q1)*(K-q1);
+     //  return f1;
+     // }
+
+     // if(t==Para.TauGrid.size-1){
+     //   return f1;
+     // }
+     // else{
+     //   double f0=_f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+(t+1)*Para.FermiKGrid.size+ExtQ);
+     //   double t0=Para.TauGrid.grid[t+1];
+     //   double t1=Para.TauGrid.grid[t];
+     //   f1=f1+(f0-f1)/(t0-t1)*(Tau-t1);
+     //   return f1;
+     // }
   }
   catch (std::out_of_range){
     std::cout<<"Access F out of range!"<<endl;
@@ -190,7 +201,7 @@ double propagator::F(double Tau, const momentum &K, spin Spin, int GType, int ch
     Sign *= -1.0;
   }
 
-  return Sign*ExtrapF(Tau,K.norm(),chan);
+   return Sign*ExtrapF(Tau,K.norm(),chan);
   //return Sign*exp(-K.squaredNorm())*(Para.Beta-2*Tau);
   // double Ek = K.squaredNorm() - Para.Mu;
   // // return Sign * Tau * exp(-Ek * Tau) / 2.0 / (1 + cosh(Para.Beta * Ek));

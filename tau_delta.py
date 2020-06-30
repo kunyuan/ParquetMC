@@ -145,14 +145,19 @@ def AngleIntegation(Data, l):
 # print ExtMomBin
 
 Para = param()
+EPS= 1.0e-9
 Beta=Para.Beta
 Temp=1/Beta
 order_num=Para.Order 
-K=grid.FermiK()
-K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 2.0) #kf,maxk,size,scale
-Ta=grid.Tau()
-Ta.build(Para.Beta, Para.TauGridSize, 1.0/Para.EF) #Beta,size,scale
+# K=grid.FermiK()
+# K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 2.0) #kf,maxk,size,scale
+# Ta=grid.Tau()
+# Ta.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF) #Beta,size,scale
 
+K=grid.Uniform()
+K.build([EPS,Para.MaxExtMom],Para.MomGridSize) #kf,maxk,size,scale
+Ta=grid.Uniform()
+Ta.build([EPS,Para.Beta], Para.TauGridSize) #Beta,size,scale
 
 #FreqBin = (np.arange(len(TauBin))+0.5)*2*np.pi*Temp
 #FreqBinSize=len(FreqBin)
@@ -344,9 +349,10 @@ for loopcounter in range(1):
     size0=len(d0[0])/(order_num+1)
     d=-d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
     #d=d.T
-    print (np.sum(d))
-    print (TauBin)
-    print (ExtMomBin)
+    # print (np.sum(d))
+    # print (d)
+    # print (TauBin)
+    # print (ExtMomBin)
     idx=0
     d_naive,_=Fourier.SpectralT2W(d)
     #d_naive=Fourier.naiveT2W(d)
@@ -355,16 +361,17 @@ for loopcounter in range(1):
     d2=np.transpose(np.loadtxt(FileName1))
     fig=plt.figure()
     ax1=plt.axes()
-    print (d_naive.real[:,len(phyFreq)//2])
+    label=len(phyFreq)//2-1
+    print (d_naive.real[:,label])
     #print aa
     #print (aa[32],dd[32])
     #ax1.plot(TauBin,d[0,:],label="tau")
     #ax1.plot(phyFreq,d_naive[0,:],label="freq")
-    print (phyFreq[len(phyFreq)//2])
+    print (phyFreq[label])
     plt.xlabel("momentum")
     plt.ylabel("test")
-    ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2],'k-',label="new")
-    ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
+    ax1.plot(ExtMomBin,d_naive.real[:,label],'k.',label="new")
+    #ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
     ax1.plot(d2[0],d2[2],label="old")
     ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
     plt.show()
