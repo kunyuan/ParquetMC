@@ -56,7 +56,7 @@ public:
                double Factor); // all tau variables
   void Save();
   void Save(int);
-
+  void Check();
 private:
   std::string Name;
   int channel; // channel s=0,p=1,d=2 ...

@@ -38,7 +38,23 @@ oneBodyObs::oneBodyObs() {
   return;
 }
 
-void oneBodyObs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
+void oneBodyObs::Check() {
+  for (int order = 0; order <= Para.Order; order++)
+    for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
+      for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
+        {
+          if(!std::isfinite(_Estimator(order, qindex, tindex))){
+            throw std::invalid_argument("Estimator is nan");
+          }
+        }
+}
+
+void oneBodyObs::Measure0(double Factor) { Normalization += 1.0 * Factor;
+  if(!std::isfinite(Normalization)){
+    cout<<Normalization<<endl;
+    throw std::invalid_argument("Measure0 nan");
+  }
+}
 void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
                          double Factor) {
   ASSERT(KBin >= 0 && KBin < ksize, "Kidx is out of range!");
@@ -46,10 +62,19 @@ void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
 
   _Estimator(Order, KBin, TauBin) += Weight * Factor;
   _Estimator(0, KBin, TauBin) += Weight * Factor;
-  if(std::isnan(_Estimator(Order, KBin, TauBin))||std::isnan(_Estimator(0, KBin, TauBin))){
+  if(!std::isfinite(Weight)){
+      throw std::invalid_argument("Weight nan");
+  }    
+  
+    if(!std::isfinite(Factor)){
+      throw std::invalid_argument("Factor nan");
+    }       
+  
+  if(!std::isfinite(_Estimator(Order, KBin, TauBin))||!std::isfinite(_Estimator(0, KBin, TauBin))){
     cout<<Weight<<"\t"<<Factor<<"\n"
         <<Order<<"\t"<<Para.TauGrid.grid[TauBin]<<"\t"<<Para.FermiKGrid.grid[KBin]<<endl;
-    throw 10;
+    throw std::invalid_argument("Measure nan");
+         
   }
 }
 
@@ -128,14 +153,15 @@ void oneBodyObs::Save(int channel) {
     for (int order = 0; order <= Para.Order; order++)
       for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
         for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
-          {VerFile << order << "\t"
+          {
+            VerFile << order << "\t"
                   << Para.FermiKGrid.grid[qindex] << "\t"
                   << Para.TauGrid.grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
-            // if(std::isnan(_Estimator(order, qindex, tindex))){
+            if(!std::isfinite( _Estimator(order,qindex,tindex))){
               
-            //   throw 10;
-            // }
+                           throw std::invalid_argument("Save");
+            }
           }
     VerFile.close();
   } else {

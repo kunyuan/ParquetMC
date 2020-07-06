@@ -149,9 +149,9 @@ Beta=Para.Beta
 Temp=1/Beta
 order_num=Para.Order 
 K=grid.FermiK()
-K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 8) #kf,maxk,size,scale
+K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 2) #kf,maxk,size,scale
 Ta=grid.Tau()
-Ta.build(Para.Beta, Para.TauGridSize, 12.0/Para.EF) #Beta,size,scale
+Ta.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF) #Beta,size,scale
 
 
 #FreqBin = (np.arange(len(TauBin))+0.5)*2*np.pi*Temp
@@ -173,7 +173,7 @@ omega_c=10000000.0 #float(line0.split(",")[-1])
 #for order in Order:
    # for chan in Channel:
 
-MaxFreq = 30
+MaxFreq = 200
 Freq = np.array(range(-MaxFreq, MaxFreq))
 phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
@@ -262,10 +262,10 @@ os.system("cp {0} {1}".format("parameter", homedir))
 os.chdir(homedir)
 files = os.listdir(folder)
 
+max=10
+for loopcounter in range(max):
 
-for loopcounter in range(1):
-
-
+    seed = loopcounter+2
     #phase_shift=np.exp(-1j*np.pi/Beta*TauBin)
     #dd=phase_shift[:,np.newaxis]*np.fft.fft(F,axis=0)/Beta
     #ff=np.multiply(gg_tau,dd)
@@ -279,15 +279,17 @@ for loopcounter in range(1):
         for i in range(TauBinSize):
             for k in range(ExtMomBinSize):
                 if(loopcounter==0):
+                    F[i][k]=np.exp(-ExtMomBin[k]**2)*np.sin(np.pi*TauBin[i]/Beta) #(Para.Beta-2*TauBin[i])
                     file.write("{0}\t".format(np.exp(-ExtMomBin[k]**2)*(Para.Beta-2*TauBin[i])))
                 else:
-                    file.write("{0}\t".format(F[k][i]))
+                    file.write("{0}\t".format(F[i][k]))
     
     #if(loopcounter%5==0):
      #  IterationType=(IterationType+1)%2
 
-    os.system("./{0} {1} {2} >{3}".format(execute, pid, seed, outfile))
-
+    a=os.system("./{0} {1} {2} >{3}".format(execute, pid, seed, outfile))
+    if(a!=0):
+         raise ValueError ("c++ stopped unexpected")
      #myCmd='python phonon.py>out.txt'
 
     for f in files:
@@ -342,62 +344,109 @@ for loopcounter in range(1):
     print (d0.shape)
     ll=2
     size0=len(d0[0])/(order_num+1)
-    d=-d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
-    #d=d.T
-    print (np.sum(d))
-    print (TauBin)
-    print (ExtMomBin)
-    idx=0
-    d_naive,_=Fourier.SpectralT2W(d)
-    #d_naive=Fourier.naiveT2W(d)
-    print (d_naive.shape)
-    FileName1="../Gapfunction_0.txt"
-    d2=np.transpose(np.loadtxt(FileName1))
-    fig=plt.figure()
-    ax1=plt.axes()
-    print (d_naive.real[:,len(phyFreq)//2])
-    #print aa
-    #print (aa[32],dd[32])
-    #ax1.plot(TauBin,d[0,:],label="tau")
-    #ax1.plot(phyFreq,d_naive[0,:],label="freq")
-    print (phyFreq[len(phyFreq)//2])
-    plt.xlabel("momentum")
-    plt.ylabel("test")
-    ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2],'k-',label="new")
-    ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
-    ax1.plot(d2[0],d2[2],label="old")
-    ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
-    plt.show()
+    mom_test=d0[1].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize)).T[0]
+    tau_test=d0[2].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))[0]
+    d=d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
+    #d=d*0
+    print ("sum_delta",np.sum(d))
+    if(np.isnan(np.sum(d))):
+        raise ValueError ("delta has nan")
+    F0=0.0#-g/4.0/np.pi/np.pi*sum(ExtMomBin*F[0])/ExtMomBinSize*ExtMomBin[-1]
+    #print(F)
+    #p_square=ExtMomBin**2
+    #print (p_square)
+    #print  (scp_int.simps(p_square[np.newaxis,:]*F,ExtMomBin))
+    taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2)[np.newaxis,:]*F,ExtMomBin)
+    #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
+    taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
+    d=d+taudep[np.newaxis,:]
+    
+    # # banch mark
+    # print ("Tau",TauBin)
+    # print ("Tau_test",tau_test)
+    # print ("mom",ExtMomBin)
+    # print("mom_test",mom_test)
+    # idx=0
+    if(loopcounter==max-1):
+        d_naive,_=Fourier.SpectralT2W(d)
+        #d_naive=Fourier.naiveT2W(d)
+        print (d_naive.shape)
+        FileName1="/home/wangtao/Final_result/BCS_symmetric1/Gapfunction_4.txt"
+        with open(FileName1, "r") as file:
+             d2=np.transpose(np.loadtxt(FileName1))
+             Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
+             mom_compare=d2[0].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+             value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+        fig=plt.figure()
+        ax1=plt.axes()
+        kf_lbl_1=np.searchsorted(ExtMomBin,5.0)
+        kf_lbl_2=np.searchsorted(mom_compare,5.0)
+        print (d_naive.real[:,len(phyFreq)//2])
+        #ax1.plot(TauBin,d[0,:],label="tau")
+        #ax1.plot(phyFreq,d_naive[0,:],label="freq")
+        print (phyFreq[len(phyFreq)//2])
+        plt.xlabel("momentum")
+        plt.ylabel("test")
+        ratio=(d_naive.real[:,len(phyFreq)//2]*ExtMomBin)[kf_lbl_1]/value_compare[kf_lbl_2]
+        ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2]*ExtMomBin,'k-',label="new")
+        #ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
+        ax1.plot(mom_compare,ratio*value_compare,label="old")
+        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+        plt.savefig('delta.png')
+        plt.close()
 
 
-
-    # print ("delta",d)
-    # print(d.shape)
     # do twice convolution to convert delta to F
-    # d=Extend_value(d)
-    # print (d.shape,TauExtend.shape)
-    # d_int=interpolate.interp1d(TauExtend,d)
-    # g=d_int
-    # middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,-1)
-    # middle=Extend_value(middle)
-    # d_int=interpolate.interp1d(TauExtend,middle)
-    # middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,1)
-    # print ("middle",middle.shape)
+    # # test function d=2/(freq^2)*GG at T=1.0
+    # for i in range(TauBinSize):
+    #     for k in range(ExtMomBinSize):
+    #         d[k][i]=0.5-TauBin[i]
+    # print (np.sum(d))
+    # d_compare=np.zeros((ExtMomBinSize,len(phyFreq)))
+    # for i in range(len(phyFreq)):
+    #     for k in range(ExtMomBinSize):
+    #         E=ExtMomBin[k]*ExtMomBin[k]-1.0
+    #         d_compare[k][i]=1.0/(phyFreq[i]*phyFreq[i]+E*E)*2/(phyFreq[i]*phyFreq[i])
+            
+
+    d=Extend_value(d)
+    print (d.shape,TauExtend.shape)
+    d_int=interpolate.interp1d(TauExtend,d)
+    middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,-1)
+    middle=Extend_value(middle)
+    d_int=interpolate.interp1d(TauExtend,middle)
+    middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,1)
+    print ("middle",middle.shape)
+    print ("sum_F",np.sum(middle))
+    # # test double convolution
     # fig=plt.figure()
     # ax1=plt.axes()
     # ax1.plot(TauBin,middle[0],'-')
     # plt.show()
-    # middle=middle.T
-    # lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
-    # print ("lamu",lamu)
-    # modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
-    # print ("modulus:",modulus_dum)
-    # F[0:cut,:]=middle[0:cut,:]/modulus_dum
+    # d_naive,_=Fourier.SpectralT2W(middle)
+    # #d_naive=Fourier.naiveT2W(d)
+    # fig=plt.figure()
+    # ax1=plt.axes()
+    # test_label=-1
+    # print (d_naive.real[:,len(phyFreq)//2])
+    # #ax1.plot(TauBin,d[0,:],label="tau")
+    # ax1.plot(phyFreq,d_naive[test_label,:],'ko',label="freq")
+    # ax1.plot(phyFreq,d_compare[test_label,:],label="freq_analy")
+    # print (phyFreq[len(phyFreq)//2])
+    # plt.xlabel("momentum")
+    # plt.ylabel("test")
+    # #ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2],'k-',label="new")
+    # ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+    # plt.show()    
 
-    # F0=0.0#-g/4.0/np.pi/np.pi*sum(ExtMomBin*F[0])/ExtMomBinSize*ExtMomBin[-1]
-    # taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * np.tensordot(ExtMomBin,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
-    # taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)+F0
-    # d+=np.tensordot(taudep,ExtMomBin,axes=0)
+    middle=middle.T 
+  
+    lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
+    print ("lamu",lamu)
+    modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
+    print ("modulus:",modulus_dum)
+    F[0:cut,:]=middle[0:cut,:]/modulus_dum
+   
     
     #test=np.sin((Beta*FreqBin-np.pi)/TauBinSize)
 # print (test)

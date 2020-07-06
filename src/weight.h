@@ -24,7 +24,7 @@ public:
 
   void Benchmark(int LoopNum, int Step);
   void Test();
-
+  void Check();
   diag::vertex4 Gamma[MaxOrder];
   obs::ver4Obs GammaObs;
 

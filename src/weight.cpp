@@ -13,7 +13,12 @@ using namespace std;
 extern parameter Para;        // global parameters
 extern variable Var;          // global MC variables
 extern diag::propagator Prop; // global progator
-
+void weight::Check() {
+  OneBodyObs.Check();
+  for(int i=0;i<ChannelNum;i++){
+    ChannelObs[i].Check();
+  }
+}
 void weight::Initialization() {
   array<momentum *, 4> ExtLegK;
 
@@ -123,6 +128,13 @@ void weight::Measure() {
   }
   else if (DiagType == DELTA){
     Factor /= Para.TauGrid.weight[Var.CurrExtTauBin];
+    if(!std::isfinite(Factor)){
+      cout<<"Weight Measure:"<<Factor<<endl;
+      cout<<"Var.CurrAbsWeight:"<<Var.CurrAbsWeight<<endl;
+      cout<<"Para.ReWeight[Var.CurrOrder]:"<<Para.ReWeight[Var.CurrOrder]<<endl;
+      cout<<" Para.TauGrid.weight[Var.CurrExtTauBin]:"<< Para.TauGrid.weight[Var.CurrExtTauBin]<<endl;
+      throw std::invalid_argument("Factor nan");
+    }       
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);
     else

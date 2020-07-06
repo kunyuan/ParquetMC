@@ -19,6 +19,7 @@ variable Var;
 const string HelpStr = "Two parameters: PID Seed";
 
 int main(int argc, const char *argv[]) {
+ 
   // take two parameters: PID and Seed
   Para.PID = atoi(argv[1]);
   Para.Seed = atoi(argv[2]);
@@ -70,28 +71,36 @@ int main(int argc, const char *argv[]) {
     for (int i = 0; i < 1000000; i++) {
       Var.Counter++;
       Markov.Count();
+      //      Markov.Weight.Check();
 
       double x = Random.urn();
-      if (x < 1.0 / 5.0) {
-        Markov.ChangeOrder();
-      } else if (x < 2.0 / 5.0) {
-        Markov.ChangeMomentum();
-      } else if (x < 3.0 / 5.0) {
-        Markov.ChangeExtMomentum();
-      } else if (x < 4.0 / 5.0) {
-        Markov.ChangeTau();
-      } else if (x < 5.0 / 5.0) {
-        Markov.ChangeExtTau();
+      try{
+        if (x < 1.0 / 5.0) {
+          Markov.ChangeOrder();
+        } else if (x < 2.0 / 5.0) {
+          Markov.ChangeMomentum();
+        } else if (x < 3.0 / 5.0) {
+          Markov.ChangeExtMomentum();
+        } else if (x < 4.0 / 5.0) {
+          Markov.ChangeTau();
+        } else if (x < 5.0 / 5.0) {
+          Markov.ChangeExtTau();
+        }
+      }catch (const std::invalid_argument& ia){
+        cout<<Block<<"\t"<<i<<endl;
+        throw ia;
       }
-
       // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << ", "
       //      << Var.LoopMom[0][2] << endl;
       // Markov.Weight.Test();
 
       if (i % 8 == 0)
         // fast operations
-        Markov.Weight.Measure();
-
+        try{ 
+          Markov.Weight.Measure();
+        }catch (const std::invalid_argument& ia){
+          cout<<"WARNING:"<<Var.CurrOrder<<"\t"<<Var.CurrAbsWeight<<"\t"<<Para.TauGrid.grid[Var.CurrExtMomBin]<<"\t"<<Para.FermiKGrid.grid[Var.CurrExtMomBin]<<endl;
+        }
       if (i % 1000 == 0) {
         // slow operations
         if (PrinterTimer.check(Para.PrinterTimer)) {
@@ -108,7 +117,7 @@ int main(int argc, const char *argv[]) {
         }
 
         if (ReweightTimer.check(Para.ReweightTimer)) {
-          Markov.AdjustGroupReWeight();
+          // Markov.AdjustGroupReWeight();
           Para.ReweightTimer *= 1.5;
         }
 
@@ -120,7 +129,7 @@ int main(int argc, const char *argv[]) {
         }
       }
     }
-    if (Block==1){
+    if (Block%100==1){
       Markov.AdjustGroupReWeight();
     }
   }
@@ -193,9 +202,9 @@ void InitPara() {
                           << "MessageTimer: " << Para.MessageTimer << "\n");
 
   // initialize grids
-  Para.TauGrid.build(Para.Beta, TauSize, 12.0/Para.Ef);
+  Para.TauGrid.build(Para.Beta, TauSize, 6.0/Para.Ef);
   Para.AngleGrid.build({-1.0, 1.0}, AngSize);
-  Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 8);
+  Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2);
   Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
 
   if (BoldG)

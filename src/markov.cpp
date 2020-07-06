@@ -110,6 +110,10 @@ void markov::ChangeOrder() {
     Var.CurrOrder = NewOrder;
     Var.CurrAbsWeight = NewAbsWeight;
   }
+  if(Var.CurrAbsWeight<1e-307){
+    throw std::invalid_argument("change order Weight 0");
+  }    
+
   return;
 };
 
@@ -138,6 +142,9 @@ void markov::ChangeExtTau() {
     Var.CurrExtTauBin = OldTauBin;
     Var.Tau[ExtTauIdx] = Para.TauGrid.grid[OldTauBin];
   }
+  if(Var.CurrAbsWeight<1e-307){
+    throw std::invalid_argument("change extau Weight 0");
+  }    
 };
 
 void markov::ChangeTau() {
@@ -167,6 +174,9 @@ void markov::ChangeTau() {
   } else {
     Var.Tau[TauIndex] = CurrTau;
   }
+  if(Var.CurrAbsWeight<1e-307){
+    throw std::invalid_argument("change tau Weight 0");
+  }    
 };
 
 void markov::ChangeMomentum() {
@@ -174,7 +184,7 @@ void markov::ChangeMomentum() {
     return;
   double Prop;
   static momentum CurrMom;
-
+  double old;
   int LoopIndex =
       Random.irn(FirstInterLoopIdx(), LastInterLoopIdx(Var.CurrOrder));
 
@@ -188,13 +198,20 @@ void markov::ChangeMomentum() {
 
   NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
-
+  
   if (Random.urn() < R) {
+    old=Var.CurrAbsWeight;
     Accepted[CHANGE_MOM][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.LoopMom[LoopIndex] = CurrMom;
   }
+  if(Var.CurrAbsWeight<1e-300){
+    string output=fmt::format("change_mom:{0:e}\t{1:e}\t{2:e}\t{3:e}",R,old,Var.CurrAbsWeight,Prop);
+    cout<<output<<endl;
+    throw std::invalid_argument("change mom Weight 0");
+  }
+    
 };
 
 void markov::ChangeExtMomentum() {
@@ -244,6 +261,9 @@ void markov::ChangeExtMomentum() {
         Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
     }
   }
+  if(Var.CurrAbsWeight<1e-307){
+    throw std::invalid_argument("change ExtMom Weight 0");
+  }    
 };
 
 double markov::GetNewTau(double &NewTau) {

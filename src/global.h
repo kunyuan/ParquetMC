@@ -8,6 +8,7 @@
 #include <array>
 #include <math.h>
 #include <vector>
+#include <exception>
 
 // comment to turn on all assert
 // #define NDEBUG
