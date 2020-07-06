@@ -196,6 +196,11 @@ void Uniform::build(std::array<double, 2> bounds, int _size) {
   grid.resize(size);
   lowerBound = bounds[0];
   delta = (bounds[1] - bounds[0]) / (size - 1);
+
+  weight.resize(size);
+  for (auto &w : weight)
+    w = 1.0;
+
   for (int i = 0; i < size; ++i)
     grid[i] = i * delta + lowerBound;
 
