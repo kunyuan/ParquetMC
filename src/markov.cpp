@@ -443,7 +443,7 @@ markov::markov() {
   InitialArray(&Accepted[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
   InitialArray(&Proposed[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
   InitialArray(&Counter[0], 0.0, MaxOrder+1);
-
+  InitialArray(&WeightHist[0], 0.0, 100);
   AdjustGroupReWeight();
 };
 
@@ -529,4 +529,20 @@ void markov::PrintDeBugMCInfo() {
 
 void markov::Count(){
   Counter[Var.CurrOrder]++;
+}
+
+void markov::WeightCount(){
+  double lgweight=log10(Var.CurrAbsWeight)/10+40;
+  int i=lgweight;
+  WeightHist[i]++;
+}
+
+void markov::PrintWeightHist(){
+  string msg;
+  msg = string("WeightHist:\n");
+  for(int i=0;i<100;i++){
+    msg += fmt::format("{0}\t{1}\n", i-40, WeightHist[i]);
+  }
+  msg += string("End\n");
+  LOG_INFO(msg);
 }

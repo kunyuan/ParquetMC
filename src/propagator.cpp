@@ -110,7 +110,7 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
   auto k = K.norm();
   auto Ek = k * k - Para.Mu; // bare propagator
 
-  Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
+  //  Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
   _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
 
@@ -246,7 +246,6 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
-  Weight[EX] = 0.0;
   return Weight;
 }
 
