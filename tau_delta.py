@@ -145,6 +145,7 @@ def AngleIntegation(Data, l):
 # print ExtMomBin
 
 Para = param()
+EPS= 1.0e-9
 Beta=Para.Beta
 Temp=1/Beta
 order_num=Para.Order 
@@ -152,7 +153,6 @@ K=grid.FermiK()
 K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 2) #kf,maxk,size,scale
 Ta=grid.Tau()
 Ta.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF) #Beta,size,scale
-
 
 #FreqBin = (np.arange(len(TauBin))+0.5)*2*np.pi*Temp
 #FreqBinSize=len(FreqBin)

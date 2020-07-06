@@ -59,9 +59,14 @@ struct parameter {
   int ReweightTimer; // time interval to reweight different orders
 
   // external variable tables
-  grid::Tau TauGrid;
-  grid::FermiK FermiKGrid;
-  grid::BoseK BoseKGrid;
+
+  /* grid::Tau TauGrid; */
+  /* grid::FermiK FermiKGrid; */
+  /* grid::BoseK BoseKGrid; */
+ 
+  grid::Uniform TauGrid;
+  grid::Uniform FermiKGrid;
+  grid::Uniform BoseKGrid;
   grid::Uniform AngleGrid;
 };
 

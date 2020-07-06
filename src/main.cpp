@@ -73,6 +73,7 @@ int main(int argc, const char *argv[]) {
       Markov.Count();
       //      Markov.Weight.Check();
 
+      Markov.WeightCount();
       double x = Random.urn();
       try{
         if (x < 1.0 / 5.0) {
@@ -135,6 +136,7 @@ int main(int argc, const char *argv[]) {
   }
 
   Markov.PrintMCInfo();
+  Markov.PrintWeightHist();
   Interrupt.Delay(); // the process can not be killed in saving
   Markov.Weight.SaveToFile();
   Interrupt.Resume(); // after this point, the process can be killed

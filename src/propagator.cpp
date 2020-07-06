@@ -114,6 +114,7 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
 
   _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
 
+  //_Interp1D<grid::Uniform>(_StaticSigma, Para.FermiKGrid, k);
   // if (BoldG && k < Para.FermiKGrid.MaxK) {
   // double sigma = _Interp1D(k, _StaticSigma);
   // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
@@ -246,7 +247,6 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
-  Weight[EX] = 0.0;
   return Weight;
 }
 
