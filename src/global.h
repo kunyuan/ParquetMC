@@ -67,7 +67,7 @@ struct parameter {
   //grid::Uniform TauGrid;
   //grid::Uniform FermiKGrid;
   //grid::Uniform BoseKGrid;
-  //grid::Uniform AngleGrid;
+  grid::Uniform AngleGrid;
 };
 
 struct variable {

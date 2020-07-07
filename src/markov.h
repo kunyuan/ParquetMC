@@ -15,7 +15,7 @@ const int MCUpdates = 6;
 class markov {
 public:
   markov();
-
+  bool DEBUG=false;
   diag::weight Weight; // Weight handler
 
   // information printer

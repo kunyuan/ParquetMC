@@ -157,22 +157,26 @@ void propagator::LoadGreen() {
 
 double propagator::ExtrapF(double Tau, double K, int chan){
   try{
+    if(K>Para.FermiKGrid.grid[Para.FermiKGrid.size-1]){
+      return 0;
+    }
     //int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
     //int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
     int ExtQ=Para.FermiKGrid.floor(K);
     int t=Para.TauGrid.floor(Tau);
     double f1=_f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ);
+  
     return f1;
-    if(ExtQ==Para.FermiKGrid.size-1){
-      return f1;
-    }
-    else{
-      double f0=_f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ+1);
-      double q0=Para.FermiKGrid.grid[ExtQ+1];
-      double q1=Para.FermiKGrid.grid[ExtQ];
-      f1=f1+(f0-f1)/(q0-q1)*(K-q1);
-      return f1;
-    }
+    // if(ExtQ==Para.FermiKGrid.size-1){
+    //   return 0;
+    // }
+    // else{
+    //   double f0=_f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ+1);
+    //   double q0=Para.FermiKGrid.grid[ExtQ+1];
+    //   double q1=Para.FermiKGrid.grid[ExtQ];
+    //   f1=f1+(f0-f1)/(q0-q1)*(K-q1);
+    //   return f1;
+    // }
   }
   catch (std::out_of_range){
     std::cout<<"Access F out of range!"<<endl;

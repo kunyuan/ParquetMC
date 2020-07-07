@@ -64,6 +64,10 @@ int main(int argc, const char *argv[]) {
   //////////////////////////////////////////////////////
 
   LOG_INFO("Start simulation ...");
+
+  for(int i=0;i<Para.TauGrid.size;i++){
+    cout<<Para.TauGrid.weight[i]<<"\t"<<Para.TauGrid.grid[i]<<endl;
+  }
   int Block = 0;
   while (Block < Para.TotalStep) {
     Block++;
@@ -73,7 +77,9 @@ int main(int argc, const char *argv[]) {
       Markov.Count();
       //      Markov.Weight.Check();
 
-      Markov.WeightCount();
+      if(Block==62)Markov.DEBUG=true;
+      if(Block==63)Markov.DEBUG=false;
+
       double x = Random.urn();
       try{
         if (x < 1.0 / 5.0) {
@@ -89,6 +95,7 @@ int main(int argc, const char *argv[]) {
         }
       }catch (const std::invalid_argument& ia){
         cout<<Block<<"\t"<<i<<endl;
+        Markov.PrintWeightHist();
         throw ia;
       }
       // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << ", "

@@ -106,9 +106,11 @@ void markov::ChangeOrder() {
              Para.ReWeight[Var.CurrOrder];
 
   if (Random.urn() < R) {
+    //  if (DEBUG)WeightCount();
     Accepted[Name][Var.CurrOrder]++;
     Var.CurrOrder = NewOrder;
     Var.CurrAbsWeight = NewAbsWeight;
+   
   }
   if(Var.CurrAbsWeight<1e-307){
     throw std::invalid_argument("change order Weight 0");
@@ -136,6 +138,7 @@ void markov::ChangeExtTau() {
              Var.CurrAbsWeight / Para.TauGrid.weight[OldTauBin];
 
   if (Random.urn() < R) {
+    //if(DEBUG)WeightCount();
     Accepted[CHANGE_EXTTAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
@@ -169,6 +172,7 @@ void markov::ChangeTau() {
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
+    //  if(DEBUG)WeightCount();
     Accepted[CHANGE_TAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
@@ -200,13 +204,22 @@ void markov::ChangeMomentum() {
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
   
   if (Random.urn() < R) {
+    if(DEBUG&&NewAbsWeight/Var.CurrAbsWeight<1) {  
+      WeightCount();
+      cout<<"currmom:"<<CurrMom.norm()<<endl;
+      cout<<"newmom:"<< Var.LoopMom[LoopIndex].norm()<<"\t"
+          <<"extmom:"<< Var.LoopMom[0].norm()<<"\t"
+          <<"extmom:"<< Var.LoopMom[1].norm()<<"\t"
+          <<"tau:"<< Para.TauGrid.grid[Var.CurrExtTauBin]<<"\t"
+          <<endl;
+    }
     old=Var.CurrAbsWeight;
     Accepted[CHANGE_MOM][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.LoopMom[LoopIndex] = CurrMom;
   }
-  if(Var.CurrAbsWeight<1e-300){
+  if(Var.CurrAbsWeight<1e-307){
     string output=fmt::format("change_mom:{0:e}\t{1:e}\t{2:e}\t{3:e}",R,old,Var.CurrAbsWeight,Prop);
     cout<<output<<endl;
     throw std::invalid_argument("change mom Weight 0");
@@ -246,6 +259,7 @@ void markov::ChangeExtMomentum() {
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
+    // if(DEBUG)WeightCount();
     Accepted[CHANGE_EXTMOM][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
@@ -552,7 +566,7 @@ void markov::Count(){
 }
 
 void markov::WeightCount(){
-  double lgweight=log10(Var.CurrAbsWeight)/10+40;
+  double lgweight=log10(NewAbsWeight/Var.CurrAbsWeight)+40;
   int i=lgweight;
   WeightHist[i]++;
 }

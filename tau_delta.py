@@ -262,7 +262,7 @@ os.system("cp {0} {1}".format("parameter", homedir))
 os.chdir(homedir)
 files = os.listdir(folder)
 
-max=10
+max=2
 for loopcounter in range(max):
 
     seed = loopcounter+2
