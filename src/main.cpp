@@ -65,9 +65,7 @@ int main(int argc, const char *argv[]) {
 
   LOG_INFO("Start simulation ...");
 
-  for(int i=0;i<Para.TauGrid.size;i++){
-    cout<<Para.TauGrid.weight[i]<<"\t"<<Para.TauGrid.grid[i]<<endl;
-  }
+ 
   int Block = 0;
   while (Block < Para.TotalStep) {
     Block++;
@@ -77,9 +75,7 @@ int main(int argc, const char *argv[]) {
       Markov.Count();
       //      Markov.Weight.Check();
 
-      if(Block==62)Markov.DEBUG=true;
-      if(Block==63)Markov.DEBUG=false;
-
+    
       double x = Random.urn();
       try{
         if (x < 1.0 / 5.0) {
@@ -94,8 +90,6 @@ int main(int argc, const char *argv[]) {
           Markov.ChangeExtTau();
         }
       }catch (const std::invalid_argument& ia){
-        cout<<Block<<"\t"<<i<<endl;
-        Markov.PrintWeightHist();
         throw ia;
       }
       // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << ", "
@@ -104,11 +98,8 @@ int main(int argc, const char *argv[]) {
 
       if (i % 8 == 0)
         // fast operations
-        try{ 
-          Markov.Weight.Measure();
-        }catch (const std::invalid_argument& ia){
-          cout<<"WARNING:"<<Var.CurrOrder<<"\t"<<Var.CurrAbsWeight<<"\t"<<Para.TauGrid.grid[Var.CurrExtMomBin]<<"\t"<<Para.FermiKGrid.grid[Var.CurrExtMomBin]<<endl;
-        }
+        Markov.Weight.Measure();
+     
       if (i % 1000 == 0) {
         // slow operations
         if (PrinterTimer.check(Para.PrinterTimer)) {
@@ -143,7 +134,6 @@ int main(int argc, const char *argv[]) {
   }
 
   Markov.PrintMCInfo();
-  Markov.PrintWeightHist();
   Interrupt.Delay(); // the process can not be killed in saving
   Markov.Weight.SaveToFile();
   Interrupt.Resume(); // after this point, the process can be killed

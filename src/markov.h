@@ -15,7 +15,6 @@ const int MCUpdates = 6;
 class markov {
 public:
   markov();
-  bool DEBUG=false;
   diag::weight Weight; // Weight handler
 
   // information printer
@@ -31,8 +30,8 @@ public:
   void ChangeOrder();
   void ChangeScale();
   void Count();
-  void WeightCount();
-  void PrintWeightHist();
+ 
+  
 private:
   double NewAbsWeight;
 
@@ -52,7 +51,7 @@ private:
   double Accepted[MCUpdates][MaxOrder + 1];
   double Proposed[MCUpdates][MaxOrder + 1];
   double Counter[MaxOrder+1];
-  double WeightHist[100];
+ 
 
   enum Updates {
     INCREASE_ORDER = 0,

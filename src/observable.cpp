@@ -49,12 +49,7 @@ void oneBodyObs::Check() {
         }
 }
 
-void oneBodyObs::Measure0(double Factor) { Normalization += 1.0 * Factor;
-  if(!std::isfinite(Normalization)){
-    cout<<Normalization<<endl;
-    throw std::invalid_argument("Measure0 nan");
-  }
-}
+void oneBodyObs::Measure0(double Factor) { Normalization += 1.0 * Factor;}
 void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
                          double Factor) {
   ASSERT(KBin >= 0 && KBin < ksize, "Kidx is out of range!");
@@ -62,20 +57,7 @@ void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
 
   _Estimator(Order, KBin, TauBin) += Weight * Factor;
   _Estimator(0, KBin, TauBin) += Weight * Factor;
-  if(!std::isfinite(Weight)){
-      throw std::invalid_argument("Weight nan");
-  }    
-  
-    if(!std::isfinite(Factor)){
-      throw std::invalid_argument("Factor nan");
-    }       
-  
-  if(!std::isfinite(_Estimator(Order, KBin, TauBin))||!std::isfinite(_Estimator(0, KBin, TauBin))){
-    cout<<Weight<<"\t"<<Factor<<"\n"
-        <<Order<<"\t"<<Para.TauGrid.grid[TauBin]<<"\t"<<Para.FermiKGrid.grid[KBin]<<endl;
-    throw std::invalid_argument("Measure nan");
-         
-  }
+
 }
 
 void oneBodyObs::Save() {
@@ -158,10 +140,7 @@ void oneBodyObs::Save(int channel) {
                   << Para.FermiKGrid.grid[qindex] << "\t"
                   << Para.TauGrid.grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
-            if(!std::isfinite( _Estimator(order,qindex,tindex))){
-              
-                           throw std::invalid_argument("Save");
-            }
+          
           }
     VerFile.close();
   } else {

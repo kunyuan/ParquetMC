@@ -262,7 +262,7 @@ os.system("cp {0} {1}".format("parameter", homedir))
 os.chdir(homedir)
 files = os.listdir(folder)
 
-max=2
+max=9
 for loopcounter in range(max):
 
     seed = loopcounter+2
@@ -371,7 +371,7 @@ for loopcounter in range(max):
         d_naive,_=Fourier.SpectralT2W(d)
         #d_naive=Fourier.naiveT2W(d)
         print (d_naive.shape)
-        FileName1="/home/wangtao/Final_result/BCS_symmetric1/Gapfunction_4.txt"
+        FileName1="/home/wangtao/Final_result/BCS_symmetric1/Gapfunction_6.txt"
         with open(FileName1, "r") as file:
              d2=np.transpose(np.loadtxt(FileName1))
              Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
@@ -379,8 +379,8 @@ for loopcounter in range(max):
              value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
         fig=plt.figure()
         ax1=plt.axes()
-        kf_lbl_1=np.searchsorted(ExtMomBin,5.0)
-        kf_lbl_2=np.searchsorted(mom_compare,5.0)
+        kf_lbl_1=np.searchsorted(ExtMomBin,1.2)
+        kf_lbl_2=np.searchsorted(mom_compare,1.2)
         print (d_naive.real[:,len(phyFreq)//2])
         #ax1.plot(TauBin,d[0,:],label="tau")
         #ax1.plot(phyFreq,d_naive[0,:],label="freq")
