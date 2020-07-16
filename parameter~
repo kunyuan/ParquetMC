@@ -1,8 +1,8 @@
 #Order, Beta,  rs, Mass2, Lambda, charge2,  Dim, Spin  TotalStep(1e6)
-  3,    1.0 ,  1.91916,  1.0,    0.0,    1.0,     3,    2,      20
+  1,    75 ,  1.0,  0.0,    1.4,    1.0,     3,    2,      200
 
 #TauGrid, MomGrid, AngGrid, MaxExtMom(*kF) 
-  256,     128,      256,       6.0
+  64,     64,      64,      8.0
 
 #Print, Save, ReWeight, Message, Collection /time interval (in Sec.)
    10,   10,     30,       10,      10

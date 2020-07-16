@@ -52,7 +52,7 @@ elif(XType == "Tau"):
                     capthick=1, capsize=2, markersize=2, label="k={0}".format(MomGrid[q]/Para.kF))
     ax.set_xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])
 
-
+print([ Estimate([d[o,0,:] for d in Data],Norm)[0].max() for o in [1,2,3,4] ])
 plt.legend(loc=1, frameon=False)
 # plt.tight_layout()
 

@@ -93,6 +93,8 @@ def Convol(ff,gg,Tau0,Size,swit):
     for tau in Tau0:
         if(swit==-1):
             convol=scp_int.simps(ff(tau-Tau0)*gg(Tau0),Tau0)
+        elif(swit==0):
+            convol=scp_int.simps(ff(tau-Tau0)*gg(-Tau0),Tau0)
         else:
             convol=scp_int.simps(ff(tau+Tau0)*gg(Tau0),Tau0)
         result[i]=convol
@@ -224,6 +226,9 @@ for i0 in range (TauBinSize):
 
 gg=Extend_value(gg.T)
 g_int=interpolate.interp1d(TauExtend,gg)
+
+gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,0)
+
 #phase_shift=np.exp(-1j*np.pi/Beta*TauBin)
 #dd=phase_shift[:,np.newaxis]*np.fft.fft(F,axis=0)/Beta
 #ff=np.multiply(gg_tau,dd)
@@ -262,7 +267,7 @@ os.system("cp {0} {1}".format("parameter", homedir))
 os.chdir(homedir)
 files = os.listdir(folder)
 
-max=9
+max=30
 for loopcounter in range(max):
 
     seed = loopcounter+2
@@ -342,12 +347,19 @@ for loopcounter in range(max):
    
 #       print (TauBin)
     print (d0.shape)
-    ll=2
+    ll=1
     size0=len(d0[0])/(order_num+1)
     mom_test=d0[1].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize)).T[0]
     tau_test=d0[2].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))[0]
     d=d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
-    #d=d*0
+    d=d*0
+    for ll in range(2,order_num+1):
+        d+=d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
+    # d=d*0
+    d_o1=d0[3].reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
+
+    d=-d
+    d_o1=-d_o1
     print ("sum_delta",np.sum(d))
     if(np.isnan(np.sum(d))):
         raise ValueError ("delta has nan")
@@ -359,7 +371,7 @@ for loopcounter in range(max):
     taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2)[np.newaxis,:]*F,ExtMomBin)
     #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
     taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
-    d=d+taudep[np.newaxis,:]
+    #d=d+taudep[np.newaxis,:]
     
     # # banch mark
     # print ("Tau",TauBin)
@@ -367,33 +379,7 @@ for loopcounter in range(max):
     # print ("mom",ExtMomBin)
     # print("mom_test",mom_test)
     # idx=0
-    if(loopcounter==max-1):
-        d_naive,_=Fourier.SpectralT2W(d)
-        #d_naive=Fourier.naiveT2W(d)
-        print (d_naive.shape)
-        FileName1="/home/wangtao/Final_result/BCS_symmetric1/Gapfunction_6.txt"
-        with open(FileName1, "r") as file:
-             d2=np.transpose(np.loadtxt(FileName1))
-             Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
-             mom_compare=d2[0].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
-             value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
-        fig=plt.figure()
-        ax1=plt.axes()
-        kf_lbl_1=np.searchsorted(ExtMomBin,1.2)
-        kf_lbl_2=np.searchsorted(mom_compare,1.2)
-        print (d_naive.real[:,len(phyFreq)//2])
-        #ax1.plot(TauBin,d[0,:],label="tau")
-        #ax1.plot(phyFreq,d_naive[0,:],label="freq")
-        print (phyFreq[len(phyFreq)//2])
-        plt.xlabel("momentum")
-        plt.ylabel("test")
-        ratio=(d_naive.real[:,len(phyFreq)//2]*ExtMomBin)[kf_lbl_1]/value_compare[kf_lbl_2]
-        ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2]*ExtMomBin,'k-',label="new")
-        #ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
-        ax1.plot(mom_compare,ratio*value_compare,label="old")
-        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
-        plt.savefig('delta.png')
-        plt.close()
+
 
 
     # do twice convolution to convert delta to F
@@ -416,6 +402,9 @@ for loopcounter in range(max):
     middle=Extend_value(middle)
     d_int=interpolate.interp1d(TauExtend,middle)
     middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,1)
+
+    middle=middle+d_o1*gggg
+
     print ("middle",middle.shape)
     print ("sum_F",np.sum(middle))
     # # test double convolution
@@ -440,13 +429,48 @@ for loopcounter in range(max):
     # plt.show()    
 
     middle=middle.T 
-  
+
+    shift=1.0
     lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
     print ("lamu",lamu)
+    middle[0:cut,:]=middle[0:cut,:]+shift*F[0:cut,:]
     modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
     print ("modulus:",modulus_dum)
     F[0:cut,:]=middle[0:cut,:]/modulus_dum
-   
+
+    if(loopcounter%5==1):
+        fff=F.T
+        d_naive,_=Fourier.SpectralT2W(fff)
+        #d_naive=Fourier.naiveT2W(d)
+        print (d_naive.shape)
+        FileName2="../Gapfunction_0.txt"
+        with open(FileName2, "r") as file:
+             d2=np.transpose(np.loadtxt(FileName2))
+             Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
+             mom_compare=d2[0].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+             value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+        fig=plt.figure()
+        ax1=plt.axes()
+        kf_lbl_1=np.searchsorted(ExtMomBin,1.2)
+        kf_lbl_2=np.searchsorted(mom_compare,1.2)
+        print (d_naive.real[:,len(phyFreq)//2])
+        # ax1.plot(TauBin,d[0,:],label="tau")
+        # ax1.plot(phyFreq,d_naive[0,:],label="freq")
+        print (phyFreq[len(phyFreq)//2])
+        plt.xlabel("momentum")
+        plt.ylabel("test")
+        ratio=(d_naive.real[:,len(phyFreq)//2]*ExtMomBin)[kf_lbl_1]/value_compare[kf_lbl_2]
+        #ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2]*ExtMomBin,'k-',label="new")
+        #ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
+        #ax1.plot(mom_compare,ratio*value_compare,label="old")
+        ax1.plot(TauBin/TauBin[-1],fff[0,:]/fff[0,:].max(),label="tau")
+        ax1.plot(phyFreq/phyFreq[-1],d_naive[0,:]/d_naive[0,:].max(),label="freq")
+        d_naive_mom=d_naive.real[:,len(phyFreq)//2]*ExtMomBin
+        ax1.plot(ExtMomBin/ExtMomBin[-1],d_naive_mom/d_naive_mom.max(),'k-',label="new")
+        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+        plt.savefig('delta.png')
+        plt.close()
+
     
     #test=np.sin((Beta*FreqBin-np.pi)/TauBinSize)
 # print (test)
