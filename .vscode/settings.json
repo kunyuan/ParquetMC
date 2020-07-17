@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "ostream": "cpp",
+        "*.tcc": "cpp",
+        "chrono": "cpp",
+        "cmath": "cpp",
+        "iosfwd": "cpp"
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/src",
+    "python.pythonPath": "/home/kun/anaconda2/envs/mypython3/bin/python"
+}

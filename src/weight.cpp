@@ -66,9 +66,17 @@ ver::weightMatrix weight::Evaluate(int LoopNum, int Channel) {
       double Factor = 1.0 / pow(2.0 * PI, D * LoopNum);
 
       //////// Measure Scattering amplitude ////////////////////
-      for (auto &w : Root.Weight) {
-        Weight(DIR) += w(DIR) * Factor;
-        Weight(EX) += w(EX) * Factor;
+      // for (auto &w : Root.Weight) {
+      //   Weight(DIR) += w(DIR);
+      //   Weight(EX) += w(EX);
+      // }
+      for (int ti = 0; ti < Root.Weight.size(); ti++) {
+        auto &Tidx = Root.T[ti];
+        double dTau = Var.Tau[Tidx[INL]] - Var.Tau[Tidx[OUTL]] +
+                      Var.Tau[Tidx[INR]] - Var.Tau[Tidx[OUTR]];
+        double Const = Factor * cos(2.0 * PI / Para.Beta * dTau);
+        Weight(DIR) += Root.Weight[ti](DIR) * Const;
+        Weight(EX) += Root.Weight[ti](EX) * Const;
       }
 
       /////// Measure Landau Parameters  /////////////////////////
@@ -143,6 +151,7 @@ void weight::ChanUST(dse::ver4 &Ver4) {
         // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
         // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
         // double x=
+
         double Factor = exp(-DirQ * DirQ / (Para.Delta * Para.Kf * Para.Kf));
         bubble.ProjFactor[T] = Factor;
         bubble.ProjFactor[U] = Factor;
@@ -190,7 +199,13 @@ void weight::ChanUST(dse::ver4 &Ver4) {
       Vertex4(RVer);
 
       for (auto &map : pair.Map) {
-        Weight = pair.SymFactor * bubble.ProjFactor[pair.Channel];
+        auto &T4 = Ver4.T[map.Tidx];
+        double dTau = Var.Tau[T4[INL]] - Var.Tau[T4[OUTL]] + Var.Tau[T4[INR]] -
+                      Var.Tau[T4[OUTR]];
+        double Const =
+            bubble.ProjFactor[pair.Channel] * cos(2.0 * PI / Para.Beta * dTau);
+
+        Weight = pair.SymFactor * Const;
         Weight *= G[0](map.G0T) * G[pair.Channel](map.GT);
         auto &CWeight = Ver4.Weight[map.Tidx];
         auto &LWeight = LVer.Weight[map.LVerTidx];
