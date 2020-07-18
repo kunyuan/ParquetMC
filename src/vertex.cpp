@@ -444,6 +444,12 @@ double ver::Angle3D(const momentum &K1, const momentum &K2) {
 double ver::Index2Angle(const int &Index, const int &AngleNum) {
   // Map index [0...AngleNum-1] to the theta range [0.0, 2*pi)
   return (Index + 0.5) * 2.0 / AngleNum - 1.0;
+  // if (Index == 0)
+  //   return -1.0 + 1.0e-6;
+  // else if (Index == AngleNum - 1)
+  //   return 1.0 - 1.0e-6;
+  // else
+  //   return Index * 2.0 / (AngleNum - 1) - 1.0;
 }
 
 int ver::Angle2Index(const double &Angle, const int &AngleNum) {
@@ -456,9 +462,14 @@ int ver::Angle2Index(const double &Angle, const int &AngleNum) {
   // if (Angle > 1.0 - EPS)
   //   return AngleNum - 1;
   // else {
-  double dAngle = 2.0 / AngleNum;
-  return int((Angle + 1.0) / dAngle);
-  // }
+  double dAngle = 2.0 / (AngleNum - 1);
+  return int((Angle + 1.0 + EPS) / dAngle);
+  // if (Angle >= -1.0 && Angle < -1.0 + dAngle)
+  //   return 0;
+  // else if (Angle <= 1.0 && Angle >= 1.0 - dAngle)
+  //   return AngleNum - 1;
+  // else
+  //   return int((Angle + 1.0) / dAngle);
 }
 
 double ver::Index2Scale(const int &Index) {
