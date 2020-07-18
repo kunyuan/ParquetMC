@@ -3,6 +3,7 @@ from utility.IO import *
 import time
 import traceback
 import numpy as np
+import sys
 
 SleepTime = 5
 IsIrreducible = False
@@ -28,8 +29,8 @@ shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 
 def SpinMapping(Data):
     d = np.copy(Data)
-    d[..., 0] += d[..., 1]/SpinIndex
-    d[..., 1] /= SpinIndex
+    d[..., 0] += d[..., 1]/Para.Spin
+    d[..., 1] /= Para.Spin
     return d
 
 
@@ -57,17 +58,15 @@ while True:
         Data, Norm, Step, Grid = LoadFile(
             "./Data", "vertex_pid[0-9]+.dat", shape)
 
-        print(Data[0].shape)
-
         AngGrid = Grid["AngleGrid"]
         MomGrid = Grid["KGrid"]
 
-        DataAngle, ErrAngle = Estimate(DataList, NormList)
+        DataAngle, ErrAngle = Estimate(Data, Norm)
         print("Write Weight file.")
         with open("weight.data", "w") as file:
             for chan in Channel:
-                for angle in range(AngGridSize):
-                    for qidx in range(MomGridSize):
+                for angle in range(Para.AngGridSize):
+                    for qidx in range(Para.MomGridSize):
                         for Dir in range(2):
                             file.write("{0} ".format(
                                 DataAngle[0, chan, angle, qidx, Dir]))
@@ -79,7 +78,7 @@ while True:
         #         Data[(0, 1)][0, 1], Data[(0, 1)][0, 1], Data[(0, 2)][0, 1], Data[(0, 3)][0, 1]))
 
         # Keep the ExtMom=0 elements only, and average the angle
-        DataList = [np.average(d[:, :, :, 0, :], axis=2) for d in DataList]
+        DataList = [np.average(d[:, :, :, 0, :], axis=2) for d in Data]
         # DataList = [d[:, :, 0, 0, :] for d in DataList]
 
         # construct bare interaction
@@ -107,7 +106,7 @@ while True:
             DataAllList = [np.sum(d, axis=0) for d in DataAllList]
             # map DIR, EX to As, Aa
             DataAllList = [SpinMapping(d) for d in DataAllList]
-            Data, Err = Estimate(DataAllList, NormList)
+            Data, Err = Estimate(DataAllList, Norm)
             Data += Bare  # I channel has a bare part
             PrintInfo("Sum", Data, Err)
 

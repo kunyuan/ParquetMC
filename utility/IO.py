@@ -132,7 +132,7 @@ def LoadFile(Folder, FileName, shape=None):
                     1, "size of Data and Norm must be the same!"
 
                 if shape == None:
-                    Data.append(np.loadtxt(f))
+                    Data.append(np.loadtxt(f, dtype=float))
                 else:
                     Data.append(np.loadtxt(f).reshape(shape))
 
