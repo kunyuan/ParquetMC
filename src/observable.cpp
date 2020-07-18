@@ -29,7 +29,8 @@ oneBodyObs::oneBodyObs() {
     Name = "delta";
     ksize = Para.FermiKGrid.size;
   } else
-    ABORT("not implemented!");
+    return;
+  // ABORT("not implemented!");
   // do nothing
 
   PhyWeight = ksize * Para.TauGrid.size;
@@ -112,6 +113,9 @@ void ver4Obs::Save() {
     VerFile << "# Norm: " << Normalization << endl;
     VerFile << "# KGrid: " << Para.BoseKGrid.str() << endl;
     VerFile << "# AngleGrid: " << Para.AngleGrid.str() << endl;
+
+    // cout << "Size: " << Para.Order << ", " << Para.AngleGrid.size << ", "
+    //      << Para.BoseKGrid.size << endl;
 
     for (int order = 0; order <= Para.Order; order++)
       for (int chan = 0; chan < 4; chan++)

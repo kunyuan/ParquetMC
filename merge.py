@@ -1,9 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+from utility.IO import *
 import time
-from color import *
-from utility import *
-from grid import *
 import traceback
+import numpy as np
 
 SleepTime = 5
 IsIrreducible = False
@@ -18,15 +17,13 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 Order = range(Para.Order+1)
 # Order = [0, 1, 2, 3, ]
 
-folder = "./Beta{0}_rs{1}_lambda{2}/".format(
-    int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
 
-filename = "vertex_pid[0-9]+.dat"
+# folder = "./Beta{0}_rs{1}_lambda{2}/".format(
+#     int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
 
-shape = (Para.Order+1, 4, AngGridSize, MomGridSize, 2)
+# filename = "vertex_pid[0-9]+.dat"
 
-AngGrid = BuildAngleGrid(AngGridSize)
-MomGrid = BuildMomGrid(Para.MaxExtMom, MomGridSize)
+shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 
 
 def SpinMapping(Data):
@@ -45,11 +42,11 @@ def PrintInfo(Channel, Data, DataErr):
 
     # print Data.shape, DataErr.shape
 
-    print "{0}     Q/kF,    Data,    Error".format(Channel)
-    print "As: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        MomGrid[0], Data[0], DataErr[0])
-    print "Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        MomGrid[0], Data[1], DataErr[1])
+    print("{0}     Q/kF,    Data,    Error".format(Channel))
+    print("As: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+        MomGrid[0], Data[0], DataErr[0]))
+    print("Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+        MomGrid[0], Data[1], DataErr[1]))
 
 
 while True:
@@ -57,10 +54,16 @@ while True:
     time.sleep(SleepTime)
 
     try:
-        DataList, NormList, Step = LoadFile(folder, filename, shape)
+        Data, Norm, Step, Grid = LoadFile(
+            "./Data", "vertex_pid[0-9]+.dat", shape)
+
+        print(Data[0].shape)
+
+        AngGrid = Grid["AngleGrid"]
+        MomGrid = Grid["KGrid"]
 
         DataAngle, ErrAngle = Estimate(DataList, NormList)
-        print "Write Weight file."
+        print("Write Weight file.")
         with open("weight.data", "w") as file:
             for chan in Channel:
                 for angle in range(AngGridSize):
@@ -96,7 +99,7 @@ while True:
         # Bare *= 0.0
         # print Bare
         for o in Order[1:]:
-            print green("Order {0}".format(o))
+            print(green("Order {0}".format(o)))
 
             # sum all orders
             DataAllList = [np.sum(d[1:o+1, ...], axis=0) for d in DataList]
@@ -117,13 +120,13 @@ while True:
         #     PrintInfo("Sum", qData, qDataErr)
         #     # print "\n"
 
-        print "\n"
+        print("\n")
         flag = np.array([step/1000000 >= Para.TotalStep for step in Step])
         if np.all(flag == True):
-            print "End of Simulation!"
+            print("End of Simulation!")
             sys.exit(0)
 
     except Exception as e:
-        print e
+        print(e)
         traceback.print_exc()
         pass
