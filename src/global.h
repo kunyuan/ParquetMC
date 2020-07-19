@@ -15,8 +15,8 @@
 enum diagtype { GAMMA, SIGMA, POLAR, DELTA };
 
 ///////////  Global Constants ////////////////////
-const int D = 3;        // dimensions, 2 or 3
-const int SPIN = 2;     // spin index
+const int D = 2;        // dimensions, 2 or 3
+const int SPIN = 1;     // spin index
 const int MaxOrder = 9; // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
@@ -24,7 +24,7 @@ const int MaxMomNum = MaxOrder + 3;
 const int IsDynamic = false;
 const bool BoldG = false;
 
-const diagtype DiagType = GAMMA;
+const diagtype DiagType = POLAR;
 // typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 

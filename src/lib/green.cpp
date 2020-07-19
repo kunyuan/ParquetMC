@@ -40,7 +40,7 @@ double fockYukawa(double k, double kF, double mass, bool shift) {
     double shift = 1.0 - l / kF * atan(2.0 * kF / l);
     shift -= l * l / 4.0 / kF / kF * log(l * l / (l * l + 4.0 * kF * kF));
     shift *= (-2.0 * kF) / M_PI;
-    fock = -shift;
+    fock -= shift;
   }
 
   assert(isfinite(fock));

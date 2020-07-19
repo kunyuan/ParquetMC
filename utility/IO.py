@@ -58,8 +58,7 @@ class param:
             self.Nf = self.kF/4.0/np.pi**2*self.Spin
         elif self.Dim == 2:
             self.kF = np.sqrt(2.0)/self.Rs  # 2D
-            print(f"Not Implemented for Dimension {self.Dim}")
-            sys.exit(0)
+            self.Nf = 1.0/4.0/np.pi*self.Spin
         else:
             print(f"Not Implemented for Dimension {self.Dim}")
             sys.exit(0)
