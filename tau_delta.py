@@ -175,7 +175,7 @@ omega_c=10000000.0 #float(line0.split(",")[-1])
 #for order in Order:
    # for chan in Channel:
 
-MaxFreq = 200
+MaxFreq = 10
 Freq = np.array(range(-MaxFreq, MaxFreq))
 phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
@@ -196,7 +196,7 @@ FileName1="f0.dat"
 #initialize F
 
 
-cut=-1#np.searchsorted(TauBin,100000,side='right') 
+cut=TauBinSize+1#np.searchsorted(TauBin,100000,side='right') 
 
 #if(os.path.exists(folder+FileName1) and os.path.getsize(folder+FileName1)) > 0:
 #    F = np.loadtxt(folder+FileName1)
@@ -214,7 +214,7 @@ gg=np.zeros((TauBinSize,ExtMomBinSize))
 
 for i0 in range (TauBinSize):
     for j0 in range (ExtMomBinSize):
-        E=ExtMomBin[j0]*ExtMomBin[j0]-1.0
+        E=ExtMomBin[j0]*ExtMomBin[j0]-Para.EF
         x=Beta*E/2.0
         y=2.0*TauBin[i0]/Beta-1.0
         if(x>100.0):
@@ -227,7 +227,9 @@ for i0 in range (TauBinSize):
 gg=Extend_value(gg.T)
 g_int=interpolate.interp1d(TauExtend,gg)
 
-gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,0)
+gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
+
+print(gggg,Convol(g_int,g_int,TauBin,ExtMomBinSize,-1))
 
 #phase_shift=np.exp(-1j*np.pi/Beta*TauBin)
 #dd=phase_shift[:,np.newaxis]*np.fft.fft(F,axis=0)/Beta
@@ -267,7 +269,7 @@ os.system("cp {0} {1}".format("parameter", homedir))
 os.chdir(homedir)
 files = os.listdir(folder)
 
-max=30
+max=50
 for loopcounter in range(max):
 
     seed = loopcounter+2
@@ -284,8 +286,8 @@ for loopcounter in range(max):
         for i in range(TauBinSize):
             for k in range(ExtMomBinSize):
                 if(loopcounter==0):
-                    F[i][k]=np.exp(-ExtMomBin[k]**2)*np.sin(np.pi*TauBin[i]/Beta) #(Para.Beta-2*TauBin[i])
-                    file.write("{0}\t".format(np.exp(-ExtMomBin[k]**2)*(Para.Beta-2*TauBin[i])))
+                    F[i][k]=np.exp(-ExtMomBin[k]**2)*(Para.Beta-2*TauBin[i])
+                    file.write("{0}\t".format(F[i][k]))
                 else:
                     file.write("{0}\t".format(F[i][k]))
     
@@ -354,12 +356,14 @@ for loopcounter in range(max):
     d=d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
     d=d*0
     for ll in range(2,order_num+1):
-        d+=d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
+        d=d+d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
     # d=d*0
-    d_o1=d0[3].reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
+    d_o1=+d0[3].reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
 
-    d=-d
-    d_o1=-d_o1
+    #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
+    d=d
+    d_o1=d_o1
+    print ("sum_delta0",np.sum(d_o1))
     print ("sum_delta",np.sum(d))
     if(np.isnan(np.sum(d))):
         raise ValueError ("delta has nan")
@@ -394,17 +398,17 @@ for loopcounter in range(max):
     #         E=ExtMomBin[k]*ExtMomBin[k]-1.0
     #         d_compare[k][i]=1.0/(phyFreq[i]*phyFreq[i]+E*E)*2/(phyFreq[i]*phyFreq[i])
             
-
+    dout=d
     d=Extend_value(d)
     print (d.shape,TauExtend.shape)
     d_int=interpolate.interp1d(TauExtend,d)
-    middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,-1)
+    middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,1)
     middle=Extend_value(middle)
     d_int=interpolate.interp1d(TauExtend,middle)
-    middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,1)
+    middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,-1)
 
     middle=middle+d_o1*gggg
-
+#    middle=d_o1*gggg
     print ("middle",middle.shape)
     print ("sum_F",np.sum(middle))
     # # test double convolution
@@ -438,12 +442,12 @@ for loopcounter in range(max):
     print ("modulus:",modulus_dum)
     F[0:cut,:]=middle[0:cut,:]/modulus_dum
 
-    if(loopcounter%5==1):
+    if(loopcounter%5==0):
         fff=F.T
         d_naive,_=Fourier.SpectralT2W(fff)
         #d_naive=Fourier.naiveT2W(d)
         print (d_naive.shape)
-        FileName2="../Gapfunction_0.txt"
+        FileName2="../Gapfunction_6.txt"
         with open(FileName2, "r") as file:
              d2=np.transpose(np.loadtxt(FileName2))
              Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
@@ -462,11 +466,16 @@ for loopcounter in range(max):
         ratio=(d_naive.real[:,len(phyFreq)//2]*ExtMomBin)[kf_lbl_1]/value_compare[kf_lbl_2]
         #ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2]*ExtMomBin,'k-',label="new")
         #ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
-        #ax1.plot(mom_compare,ratio*value_compare,label="old")
-        ax1.plot(TauBin/TauBin[-1],fff[0,:]/fff[0,:].max(),label="tau")
-        ax1.plot(phyFreq/phyFreq[-1],d_naive[0,:]/d_naive[0,:].max(),label="freq")
+        d_old_mom=ratio*value_compare
+        #ax1.plot(mom_compare,d_old_mom,label="old")
+        pidx=0
+        #ax1.plot(TauBin/TauBin[-1],fff[pidx,:]/np.abs(fff[pidx,:]).max(),label="tau")
+        lines=6
+        for i in range(lines):
+            pidx=len(ExtMomBin)//lines*i
+            ax1.plot(phyFreq,d_naive.real[pidx,:],label="freq,f={0}".format(ExtMomBin[pidx]))
         d_naive_mom=d_naive.real[:,len(phyFreq)//2]*ExtMomBin
-        ax1.plot(ExtMomBin/ExtMomBin[-1],d_naive_mom/d_naive_mom.max(),'k-',label="new")
+        #ax1.plot(ExtMomBin,d_naive_mom,'k-',label="new")
         ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
         plt.savefig('delta.png')
         plt.close()

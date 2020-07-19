@@ -128,7 +128,7 @@ int main(int argc, const char *argv[]) {
         }
       }
     }
-    if (Block%100==1){
+    if (Block%10==1){
       Markov.AdjustGroupReWeight();
     }
   }

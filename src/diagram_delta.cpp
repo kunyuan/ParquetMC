@@ -80,12 +80,12 @@ double delta::Evaluate() {
   else if (Order == 1) {
     // bare interaction
     double Weight = Prop.Interaction(Var.LoopMom[0] + Var.LoopMom[1], -1);
-    Weight *= Prop.F(-1.0e-8, Var.LoopMom[1], UP, 0);
+    Weight *= Prop.F(1.0e-8, Var.LoopMom[1], UP, 0);
     // cout << "1: " << Weight * Factor * 0.5 << endl;
     result= Weight * Factor;
    
     // if(result<1e-300){
-    //   string output=fmt::format("change_mom:{0:e}\t{1:e}",Prop.Interaction(Var.LoopMom[0] + Var.LoopMom[1], -1),Prop.F(-1.0e-8, Var.LoopMom[1], UP, 0));
+    //   string output=fmt::format("change_mom:{0:e}\t{1:e}",Prop.Interaction(Var.LoopMom[0] + Var.LoopMom[1], -1),Prop.F(1.0e-8, Var.LoopMom[1], UP, 0));
     //   cout<<output<<endl;
     //   throw std::invalid_argument("delta eval order 1");
     // }
@@ -109,7 +109,7 @@ double delta::Evaluate() {
   }
   // there is a symmetry factor -0.5
   // cout << "2: " << Weight * Factor * 0.5 << endl;
-  result= Weight * Factor * (-0.5);
+  result= Weight * Factor * (0.5);
 
   // if(result<1e-300){
   //     throw std::invalid_argument("delta Eval order 2");
@@ -126,7 +126,7 @@ double delta::Evaluate(int channel) {
   else if (Order == 1) {
     // bare interaction
     double Weight = Prop.Interaction(Var.LoopMom[0] - Var.LoopMom[1], -1);
-    Weight *= Prop.F(-1.0e-8, Var.LoopMom[1], UP, 0,channel);
+    Weight *= Prop.F(1.0e-8, Var.LoopMom[1], UP, 0,channel);
     // cout << "1: " << Weight * Factor * 0.5 << endl;
     double xi=Var.LoopMom[0].dot(Var.LoopMom[1])/Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
     result= Weight * Factor * legendre(xi,channel);
@@ -153,7 +153,7 @@ double delta::Evaluate(int channel) {
   // there is a symmetry factor -0.5
   // cout << "2: " << Weight * Factor * 0.5 << endl;
   double xi=Var.LoopMom[0].dot(Var.LoopMom[1])/Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
-  result= Weight * Factor * (-0.5) * legendre(xi,channel);
+  result= Weight * Factor * (0.5) * legendre(xi,channel);
   // if(!std::isfinite(result)){
   //   throw std::invalid_argument("delta_evaluate nan");
   // }
