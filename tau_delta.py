@@ -65,7 +65,7 @@ Data = {}  # key: (order, channel)
 DataWithAngle = {}  # key: (order, channel)
 DataErr = {}  # key: (order, channel)
 
-Omega=3.0
+Omega=0.5
 g=2.0
 kF = 1.0
 #Nf = kF/2.0/np.pi**2
@@ -141,7 +141,7 @@ def AngleIntegation(Data, l):
 #     line4 = file.readline()
 #     if ExtMomBin is None:
 #         ExtMomBin = np.fromstring(
-#             line4, sep=' ')
+#             line4, sep=' ')n
 #         ExtMomBinSize = len(ExtMomBin)
 #         ExtMomBin /= kF   
 # print ExtMomBin
@@ -175,7 +175,7 @@ omega_c=10000000.0 #float(line0.split(",")[-1])
 #for order in Order:
    # for chan in Channel:
 
-MaxFreq = 10
+MaxFreq = 15
 Freq = np.array(range(-MaxFreq, MaxFreq))
 phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
@@ -227,9 +227,9 @@ for i0 in range (TauBinSize):
 gg=Extend_value(gg.T)
 g_int=interpolate.interp1d(TauExtend,gg)
 
-gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
+#print(TauBin,np.diff(TauExtend),TauBin.dtype)
 
-print(gggg,Convol(g_int,g_int,TauBin,ExtMomBinSize,-1))
+gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
 
 #phase_shift=np.exp(-1j*np.pi/Beta*TauBin)
 #dd=phase_shift[:,np.newaxis]*np.fft.fft(F,axis=0)/Beta
@@ -375,7 +375,7 @@ for loopcounter in range(max):
     taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2)[np.newaxis,:]*F,ExtMomBin)
     #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
     taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
-    #d=d+taudep[np.newaxis,:]
+    d=d+taudep[np.newaxis,:]
     
     # # banch mark
     # print ("Tau",TauBin)
@@ -434,7 +434,7 @@ for loopcounter in range(max):
 
     middle=middle.T 
 
-    shift=1.0
+    shift=0.0
     lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
     print ("lamu",lamu)
     middle[0:cut,:]=middle[0:cut,:]+shift*F[0:cut,:]
@@ -443,6 +443,7 @@ for loopcounter in range(max):
     F[0:cut,:]=middle[0:cut,:]/modulus_dum
 
     if(loopcounter%5==0):
+        print ("plotting")
         fff=F.T
         d_naive,_=Fourier.SpectralT2W(fff)
         #d_naive=Fourier.naiveT2W(d)
@@ -457,10 +458,10 @@ for loopcounter in range(max):
         ax1=plt.axes()
         kf_lbl_1=np.searchsorted(ExtMomBin,1.2)
         kf_lbl_2=np.searchsorted(mom_compare,1.2)
-        print (d_naive.real[:,len(phyFreq)//2])
+        #print (d_naive.real[:,len(phyFreq)//2])
         # ax1.plot(TauBin,d[0,:],label="tau")
         # ax1.plot(phyFreq,d_naive[0,:],label="freq")
-        print (phyFreq[len(phyFreq)//2])
+        #print (phyFreq[len(phyFreq)//2])
         plt.xlabel("momentum")
         plt.ylabel("test")
         ratio=(d_naive.real[:,len(phyFreq)//2]*ExtMomBin)[kf_lbl_1]/value_compare[kf_lbl_2]
@@ -470,15 +471,40 @@ for loopcounter in range(max):
         #ax1.plot(mom_compare,d_old_mom,label="old")
         pidx=0
         #ax1.plot(TauBin/TauBin[-1],fff[pidx,:]/np.abs(fff[pidx,:]).max(),label="tau")
-        lines=6
+        lines=8
         for i in range(lines):
             pidx=len(ExtMomBin)//lines*i
-            ax1.plot(phyFreq,d_naive.real[pidx,:],label="freq,f={0}".format(ExtMomBin[pidx]))
+            ax1.plot(phyFreq,d_naive.real[pidx,:],label="mom,q={0}".format(ExtMomBin[pidx]))
         d_naive_mom=d_naive.real[:,len(phyFreq)//2]*ExtMomBin
         #ax1.plot(ExtMomBin,d_naive_mom,'k-',label="new")
         ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
-        plt.savefig('delta.png')
+        plt.savefig('deltafreq.pdf')
         plt.close()
+        fig=plt.figure()
+        ax1=plt.axes()
+        lines=8
+        for i in range(lines):
+            pidx=len(ExtMomBin)//lines*i
+            ax1.plot(TauBin,fff[pidx,:],label="tau,q={0}".format(ExtMomBin[pidx]))
+        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+        plt.savefig("deltatau.pdf")
+        fig=plt.figure()
+        ax1=plt.axes()
+        for i in range(lines):
+            fidx=len(phyFreq)//2//lines*i+len(phyFreq)//2
+            ax1.plot(ExtMomBin,d_naive.real[:,fidx],label="f={0}".format(phyFreq[fidx]))
+        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+        plt.savefig('deltamom.pdf')
+        plt.close()
+        fig=plt.figure()
+        ax1=plt.axes()
+        for i in range(lines):
+            tidx=len(TauBin)//2//lines*i
+            ax1.plot(ExtMomBin,fff[:,tidx],label="t={0}".format(TauBin[tidx]))
+        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+        plt.savefig('deltatmom.pdf')
+        plt.close()
+
 
     
     #test=np.sin((Beta*FreqBin-np.pi)/TauBinSize)
