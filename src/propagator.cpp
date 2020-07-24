@@ -76,19 +76,23 @@ void propagator::TestF(){
     ofstream VerFile;
     VerFile.open(FileName, ios::out);
     if (VerFile.is_open()) {
-      for (int tau = 0; tau < Para.TauGrid.size; tau++){
-        VerFile << _taulist.at(tau)<<"\n";
-      }
-      VerFile << "mombin\n";
-      for (int k = 0; k < Para.FermiKGrid.size; k++){
-        VerFile << _extMom.at(k)<<"\n";
-      }
+      // for (int tau = 0; tau < Para.TauGrid.size; tau++){
+      //   VerFile << _taulist.at(tau)<<"\n";
+      // }
+      // VerFile << "mombin\n";
+      // for (int k = 0; k < Para.FermiKGrid.size; k++){
+      //   VerFile << _extMom.at(k)<<"\n";
+      // }
       for (int tau =0; tau<Para.TauGrid.size;tau++)
         for (int qindex = 0; qindex<Para.FermiKGrid.size; qindex++){
-          VerFile << _f.at(tau*Para.FermiKGrid.size+qindex)<<"\t";
+          VerFile << Para.TauGrid.grid[tau] <<"\t"
+                  << Para.FermiKGrid.grid[qindex] <<"\t"
+                  << _f.at(tau*Para.FermiKGrid.size+qindex) <<"\n";
         }
       VerFile<<"\n";
-      //      VerFile << ExtrapF(0.5,0.5)<<"\t at 0.5 0.5\n";
+      VerFile << ExtrapF(0.5,0.5,0)<<"\t at 0.5 0.5\n";
+      VerFile << ExtrapF(10,0.7,0)<<"\t at 10 0.7\n";
+      VerFile << ExtrapF(10,100,0)<<"\t at 10 100\n";
       VerFile.close();
     }
   } catch (int e) {
@@ -162,9 +166,10 @@ double propagator::ExtrapF(double Tau, double K, int chan){
     }
     //int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
     //int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
-    int ExtQ=Para.FermiKGrid.floor(K);
-    int t=Para.TauGrid.floor(Tau);
-    double f1=_f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ);
+    //int ExtQ=Para.FermiKGrid.floor(K);
+    //int t=Para.TauGrid.floor(Tau);
+    double f1=_InterpF(_f,K,Tau,chan);
+    // _f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ);
   
     return f1;
     // if(ExtQ==Para.FermiKGrid.size-1){
@@ -248,7 +253,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // check irreducibility
   if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
-  Weight[EX] = 0.0;
+   Weight[EX] = 0.0;
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
   return Weight;
@@ -262,10 +267,16 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
 
   if (VerOrder < 0) {
     // Bare interaction
-    if (kQ > 1.0e-8)
-      //return -8.0 * π * Para.Charge2 / (kQ * kQ);
-      return -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
-    else
+    if (kQ > 1.0e-8){
+      double Weight0= 8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+      double Weight=Weight0;
+      for(int i=1;i<Para.Order;i++){
+          Weight += Weight0 * pow(Weight0 * Para.Lambda / 8.0 / π, i);
+      }
+      return -Weight;
+    //  return -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+    }
+     else
       return 0.0;
   } else {
     // Order N shifted interaction
@@ -323,6 +334,32 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
   double d00 = data(Kidx0, Tidx0), d01 = data(Kidx0, Tidx0 + 1);
   double d10 = data(Kidx0 + 1, Tidx0), d11 = data(Kidx0 + 1, Tidx0 + 1);
 
+  double g0 = d00 * dK1 + d10 * dK0;
+  double g1 = d01 * dK1 + d11 * dK0;
+  return (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
+}
+
+double propagator::_InterpF(const vector<double> &data, double K,
+                            double T, int chan) {
+  int Tidx0 = Para.TauGrid.floor(T);
+  double dT0 = T - Para.TauGrid.grid[Tidx0],
+    dT1 = Para.TauGrid.grid[Tidx0 + 1] - T;
+  ASSERT(dT0 >= 0.0 && dT1 > 0.0,
+         "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
+  ASSERT(Tidx0<Para.TauGrid.size-1,
+         "Interpolate fails: " <<"Tidx exceeds grid");
+  int Kidx0 = Para.FermiKGrid.floor(K);
+  double dK0 = K - Para.FermiKGrid.grid[Kidx0], dK1 = Para.FermiKGrid.grid[Kidx0 + 1] - K;
+  ASSERT(dK0 >= 0.0 && dK1 > 0.0,
+         "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
+  ASSERT(Kidx0<Para.FermiKGrid.size-1,
+         "Interpolate fails: " <<"Kidx exceeds grid");
+  double d00 = data.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+Tidx0*Para.FermiKGrid.size+Kidx0);
+  double d01 = data.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+(Tidx0+1)*Para.FermiKGrid.size+Kidx0);
+  double d10 = data.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+Tidx0*Para.FermiKGrid.size+Kidx0+1);
+  double d11 = data.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+(Tidx0+1)*Para.FermiKGrid.size+Kidx0+1);
+  //std::cout<<d00<<"\t"<<d01<<"\t"<<d10<<"\t"<<d11<<"\t"<<dK0<<"\t"<<dK1<<"\t"<<dT0<<"\t"<<dT1
+  //      <<"\t"<<K<<"\t"<< Para.FermiKGrid.grid[Kidx0]<<"\t"<< Para.FermiKGrid.grid[Kidx0+1]<<endl;
   double g0 = d00 * dK1 + d10 * dK0;
   double g1 = d01 * dK1 + d11 * dK0;
   return (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);

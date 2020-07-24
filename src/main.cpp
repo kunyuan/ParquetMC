@@ -40,6 +40,9 @@ int main(int argc, const char *argv[]) {
 
   InitPara(); // initialize global parameters
   Prop.Initialize();
+
+  //Prop.TestF();
+  //return 0;
   markov Markov;
   InterruptHandler Interrupt;
 
