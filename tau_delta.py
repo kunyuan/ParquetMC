@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import grid
 
-
+plt.style.use(['science','grid'])
 #rs = None
 #Lambda = None
 #Mass2 = None
@@ -65,7 +65,7 @@ Data = {}  # key: (order, channel)
 DataWithAngle = {}  # key: (order, channel)
 DataErr = {}  # key: (order, channel)
 
-Omega=0.5
+Omega=3.0
 g=2.0
 kF = 1.0
 #Nf = kF/2.0/np.pi**2
@@ -269,7 +269,13 @@ os.system("cp {0} {1}".format("parameter", homedir))
 os.chdir(homedir)
 files = os.listdir(folder)
 
-max=50
+max=81
+Nprint=9
+
+newresultlist=[]
+for i in range(Nprint):
+    newresultlist.append(i)
+
 for loopcounter in range(max):
 
     seed = loopcounter+2
@@ -362,7 +368,7 @@ for loopcounter in range(max):
 
     #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
     d=d
-    d_o1=d_o1
+    d_o1=d_o1*0
     print ("sum_delta0",np.sum(d_o1))
     print ("sum_delta",np.sum(d))
     if(np.isnan(np.sum(d))):
@@ -399,6 +405,8 @@ for loopcounter in range(max):
     #         d_compare[k][i]=1.0/(phyFreq[i]*phyFreq[i]+E*E)*2/(phyFreq[i]*phyFreq[i])
             
     dout=d
+    newresultlist[loopcounter%Nprint]=dout
+
     d=Extend_value(d)
     print (d.shape,TauExtend.shape)
     d_int=interpolate.interp1d(TauExtend,d)
@@ -442,7 +450,7 @@ for loopcounter in range(max):
     print ("modulus:",modulus_dum)
     F[0:cut,:]=middle[0:cut,:]/modulus_dum
 
-    if(loopcounter%5==0):
+    if(loopcounter%(Nprint+1)==(Nprint)):
         print ("plotting")
         fff=F.T
         d_naive,_=Fourier.SpectralT2W(fff)
@@ -456,8 +464,8 @@ for loopcounter in range(max):
              value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
         fig=plt.figure()
         ax1=plt.axes()
-        kf_lbl_1=np.searchsorted(ExtMomBin,1.2)
-        kf_lbl_2=np.searchsorted(mom_compare,1.2)
+        kf_lbl_1=np.searchsorted(ExtMomBin,Para.kF)
+        kf_lbl_2=np.searchsorted(mom_compare,Para.kF)
         #print (d_naive.real[:,len(phyFreq)//2])
         # ax1.plot(TauBin,d[0,:],label="tau")
         # ax1.plot(phyFreq,d_naive[0,:],label="freq")
@@ -471,13 +479,13 @@ for loopcounter in range(max):
         #ax1.plot(mom_compare,d_old_mom,label="old")
         pidx=0
         #ax1.plot(TauBin/TauBin[-1],fff[pidx,:]/np.abs(fff[pidx,:]).max(),label="tau")
-        lines=8
+        lines=6
         for i in range(lines):
             pidx=len(ExtMomBin)//lines*i
-            ax1.plot(phyFreq,d_naive.real[pidx,:],label="mom,q={0}".format(ExtMomBin[pidx]))
+            ax1.plot(phyFreq,d_naive.real[pidx,:],label="mom,q={0:.3f}".format(ExtMomBin[pidx]))
         d_naive_mom=d_naive.real[:,len(phyFreq)//2]*ExtMomBin
         #ax1.plot(ExtMomBin,d_naive_mom,'k-',label="new")
-        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+        ax1.legend()
         plt.savefig('deltafreq.pdf')
         plt.close()
         fig=plt.figure()
@@ -485,26 +493,47 @@ for loopcounter in range(max):
         lines=8
         for i in range(lines):
             pidx=len(ExtMomBin)//lines*i
-            ax1.plot(TauBin,fff[pidx,:],label="tau,q={0}".format(ExtMomBin[pidx]))
-        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+            ax1.plot(TauBin,fff[pidx,:],label="tau,q={0:.3f}".format(ExtMomBin[pidx]))
+        ax1.legend()
         plt.savefig("deltatau.pdf")
         fig=plt.figure()
         ax1=plt.axes()
         for i in range(lines):
             fidx=len(phyFreq)//2//lines*i+len(phyFreq)//2
-            ax1.plot(ExtMomBin,d_naive.real[:,fidx],label="f={0}".format(phyFreq[fidx]))
-        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+            ax1.plot(ExtMomBin,d_naive.real[:,fidx],label="f={0:.3f}".format(phyFreq[fidx]))
+        ax1.legend()
         plt.savefig('deltamom.pdf')
         plt.close()
         fig=plt.figure()
         ax1=plt.axes()
         for i in range(lines):
             tidx=len(TauBin)//2//lines*i
-            ax1.plot(ExtMomBin,fff[:,tidx],label="t={0}".format(TauBin[tidx]))
-        ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+            ax1.plot(ExtMomBin,fff[:,tidx],label="t={0:.3f}".format(TauBin[tidx]))
+        ax1.legend()
         plt.savefig('deltatmom.pdf')
         plt.close()
 
+        newresulttran=[]
+        
+        for i in newresultlist:
+            d_naive,_=Fourier.SpectralT2W(i)
+            newresulttran.append(d_naive.real[:,len(phyFreq)//2])
+        newresulttran=np.array(newresulttran)
+        #d_avg, d_err= np.mean(newresulttran,axis=0),np.std(newresulttran,axis=0)
+        d_avg,d_err=Estimate(newresulttran,np.ones(len(newresulttran)))
+        value_compare=value_compare/mom_compare
+        ratio=d_avg[kf_lbl_1]/value_compare[kf_lbl_2]
+        d_old_mom=ratio*value_compare
+
+        fig, ax = plt.subplots()
+        ax.plot(mom_compare/Para.kF,d_old_mom,"g-",label="old",lw=0.5)
+        ax.errorbar(ExtMomBin/Para.kF,d_avg,yerr=d_err,fmt="b.",label="new",
+                    capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+        ax.legend()
+        ax.set(xlabel="momentum ($k_F$)")
+        ax.set(ylabel="$\Delta$ at $\omega=\pi T$")
+        ax.autoscale(tight=True)
+        fig.savefig("compare.pdf")
 
     
     #test=np.sin((Beta*FreqBin-np.pi)/TauBinSize)

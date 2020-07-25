@@ -248,6 +248,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // check irreducibility
   if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
+  Weight[EX] = 0.0;
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
   return Weight;
