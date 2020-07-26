@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import grid
 
-
+plt.style.use(['science','grid'])
 #rs = None
 #Lambda = None
 #Mass2 = None
@@ -214,7 +214,7 @@ omega_c=10000000.0 #float(line0.split(",")[-1])
 #for order in Order:
    # for chan in Channel:
 
-MaxFreq = 10
+MaxFreq = 15
 Freq = np.array(range(-MaxFreq, MaxFreq))
 phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
@@ -265,9 +265,9 @@ for i0 in range (TauBinSize):
 gg=Extend_value(gg.T)
 g_int=interpolate.interp1d(TauExtend,gg)
 
-gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
+#print(TauBin,np.diff(TauExtend),TauBin.dtype)
 
-print(gggg,Convol(g_int,g_int,TauBin,ExtMomBinSize,-1))
+gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
 
 
 IterationType=1

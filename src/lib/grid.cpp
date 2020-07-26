@@ -53,7 +53,7 @@ vector<double> Tau::build(double beta, int _size, double scale) {
   size = _size;
   assert(size > 2);
   assert(size % 2 == 0);
-  double lambda = beta / scale / (_size / 2.0);
+  double lambda = 1.0 / scale / (_size / 2.0);
 
   _coeff0.init({0.0, beta / 2.0}, {0.0, size / 2 - 0.5}, lambda, true);
   array<int, 2> range0 = {0, size / 2};
@@ -68,6 +68,8 @@ vector<double> Tau::build(double beta, int _size, double scale) {
 
   grid[0] = 1.0e-8;
   grid[size - 1] = beta - 1.0e-8;
+  // grid[0] = 1.0e-3*grid[1];
+  // grid[size - 1] = beta - grid[0];
   //////   some simple test ////////
   //assert(floor(grid[1]) == 1);
   //assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
