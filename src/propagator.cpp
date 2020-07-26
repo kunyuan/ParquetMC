@@ -42,7 +42,7 @@ void propagator::Initialize(){
     _extMom.push_back(Para.FermiKGrid.grid[i]);
   }
   LoadF();
-  TestF();
+  //TestF();
 }
 
 void propagator::LoadF(){

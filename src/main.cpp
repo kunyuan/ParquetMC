@@ -41,8 +41,7 @@ int main(int argc, const char *argv[]) {
   InitPara(); // initialize global parameters
   Prop.Initialize();
 
-  //Prop.TestF();
-  //return 0;
+   //return 0;
   markov Markov;
   InterruptHandler Interrupt;
 
@@ -113,27 +112,37 @@ int main(int argc, const char *argv[]) {
         }
 
         if (SaveFileTimer.check(Para.SaveFileTimer)) {
-          Interrupt.Delay(); // the process can not be killed in saving
-          Markov.Weight.SaveToFile();
-          Interrupt.Resume(); // after this point, the process can be killed
+          try{
+            Interrupt.Delay(); // the process can not be killed in saving
+            Markov.Weight.SaveToFile();
+            Interrupt.Resume(); // after this point, the process can be killed
+          }catch (const std::invalid_argument& ia){
+            throw ia;
+          }
+
         }
 
         if (ReweightTimer.check(Para.ReweightTimer)) {
-          // Markov.AdjustGroupReWeight();
+           Markov.AdjustGroupReWeight();
           Para.ReweightTimer *= 1.5;
         }
 
         if (MessageTimer.check(Para.MessageTimer)) {
           LOG_INFO("Loading Weight...")
+          try{
           if (BoldG)
             Prop.LoadGreen();
+          Prop.LoadF();
+          }catch (const std::invalid_argument& ia){
+            throw ia;
+          }
           // Markov.Weight.LoadFile();
         }
       }
     }
-    if (Block%10==1){
-      Markov.AdjustGroupReWeight();
-    }
+    // if (Block%10==1){
+    //   Markov.AdjustGroupReWeight();
+    // }
   }
 
   Markov.PrintMCInfo();

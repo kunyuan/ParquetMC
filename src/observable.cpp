@@ -115,8 +115,8 @@ void oneBodyObs::Save(int channel) {
 
   if (VerFile.is_open()) {
 
-    VerFile << "# Counter: " << Var.Counter << endl;
-    VerFile << "# Norm: " << Normalization << endl;
+    //VerFile << "Counter: " << Var.Counter << endl;
+    VerFile << "Norm: " << Normalization << endl;
     for (int order = 0; order <= Para.Order; order++)
       for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
         for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
