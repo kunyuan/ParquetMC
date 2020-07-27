@@ -175,7 +175,7 @@ omega_c=10000000.0 #float(line0.split(",")[-1])
 #for order in Order:
    # for chan in Channel:
 
-MaxFreq = 15
+MaxFreq = 50
 Freq = np.array(range(-MaxFreq, MaxFreq))
 phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
@@ -270,11 +270,13 @@ os.chdir(homedir)
 files = os.listdir(folder)
 
 max=81
-Nprint=9
+Nprint=7
 
 newresultlist=[]
+eigenlist=[]
 for i in range(Nprint):
     newresultlist.append(i)
+    eigenlist.append(i)
 
 for loopcounter in range(max):
 
@@ -445,12 +447,16 @@ for loopcounter in range(max):
     shift=0.0
     lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
     print ("lamu",lamu)
+    eigenlist[loopcounter%Nprint]=lamu
+
     middle[0:cut,:]=middle[0:cut,:]+shift*F[0:cut,:]
     modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
     print ("modulus:",modulus_dum)
     F[0:cut,:]=middle[0:cut,:]/modulus_dum
 
     if(loopcounter%(Nprint+1)==(Nprint)):
+        print ("combined lamu:")
+        print (np.mean(np.array(eigenlist)),np.std(np.array(eigenlist))/(len(eigenlist)-1))
         print ("plotting")
         fff=F.T
         d_naive,_=Fourier.SpectralT2W(fff)
@@ -466,6 +472,8 @@ for loopcounter in range(max):
         ax1=plt.axes()
         kf_lbl_1=np.searchsorted(ExtMomBin,Para.kF)
         kf_lbl_2=np.searchsorted(mom_compare,Para.kF)
+        with open(FileName2,"r") as file:
+            value_compare2=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare))[kf_lbl_2]
         #print (d_naive.real[:,len(phyFreq)//2])
         # ax1.plot(TauBin,d[0,:],label="tau")
         # ax1.plot(phyFreq,d_naive[0,:],label="freq")
@@ -514,16 +522,23 @@ for loopcounter in range(max):
         plt.close()
 
         newresulttran=[]
-        
+        newresulttran2=[]
         for i in newresultlist:
             d_naive,_=Fourier.SpectralT2W(i)
             newresulttran.append(d_naive.real[:,len(phyFreq)//2])
-        newresulttran=np.array(newresulttran)
+            newresulttran2.append(d_naive.real[kf_lbl_1,len(phyFreq)//2:])
+        newresulttran=np.array(newresulttran*ExtMomBin)
+        newresulttran2=np.array(newresulttran2)
         #d_avg, d_err= np.mean(newresulttran,axis=0),np.std(newresulttran,axis=0)
         d_avg,d_err=Estimate(newresulttran,np.ones(len(newresulttran)))
-        value_compare=value_compare/mom_compare
-        ratio=d_avg[kf_lbl_1]/value_compare[kf_lbl_2]
+        d_avg2,d_err2=Estimate(newresulttran2,np.ones(len(newresulttran2)))
+        value_compare=value_compare
+        value_compare2=value_compare2
+        #ratio=d_avg[kf_lbl_1]/value_compare[kf_lbl_2]
+        ratio=sum(d_avg[:-1]*np.diff(ExtMomBin))/sum(value_compare[:-1]*np.diff(mom_compare))
+        #ratio=scp_int.simps(d_avg,ExtMomBin)/scp_int.simps(value_compare,mom_compare)
         d_old_mom=ratio*value_compare
+        d_old_freq=ratio*value_compare2
 
         fig, ax = plt.subplots()
         ax.plot(mom_compare/Para.kF,d_old_mom,"g-",label="old",lw=0.5)
@@ -531,9 +546,23 @@ for loopcounter in range(max):
                     capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
         ax.legend()
         ax.set(xlabel="momentum ($k_F$)")
-        ax.set(ylabel="$\Delta$ at $\omega=\pi T$")
+        ax.set(ylabel="$q\Delta$ at $\omega=\pi T$")
         ax.autoscale(tight=True)
-        fig.savefig("compare.pdf")
+        fig.savefig("comparemom.pdf")
+        fig.close()
+
+        fig, ax = plt.subplots()
+        PiT=np.pi/Para.Beta
+        ax.plot(Freq_compare/PiT,d_old_freq,"g-",label="old",lw=0.5)
+        ax.errorbar(phyFreq[len(phyFreq)//2:]/PiT,d_avg2,yerr=d_err2,fmt="b.",label="new",
+                    capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+        ax.legend()
+        ax.set(xlabel="frequency ($\pi T$)")
+        ax.set(ylabel="$\Delta$ at $k_F$")
+        ax.autoscale(tight=True)
+        fig.savefig("comparefreq.pdf")
+
+        fig.close()
 
     
     #test=np.sin((Beta*FreqBin-np.pi)/TauBinSize)

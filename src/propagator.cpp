@@ -162,9 +162,10 @@ double propagator::ExtrapF(double Tau, double K, int chan){
     }
     //int ExtQ=std::upper_bound(_extMom.begin(),_extMom.end()-1,K)-_extMom.begin();
     //int t=std::upper_bound(_taulist.begin(),_taulist.end()-1,Tau)-_taulist.begin();
-    int ExtQ=Para.FermiKGrid.floor(K);
-    int t=Para.TauGrid.floor(Tau);
-    double f1=_f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ);
+    //int ExtQ=Para.FermiKGrid.floor(K);
+    //int t=Para.TauGrid.floor(Tau);
+    double f1=_InterpF(_f,K,Tau,chan);
+    // _f.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+t*Para.FermiKGrid.size+ExtQ);
   
     return f1;
     // if(ExtQ==Para.FermiKGrid.size-1){
@@ -324,6 +325,32 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
   double d00 = data(Kidx0, Tidx0), d01 = data(Kidx0, Tidx0 + 1);
   double d10 = data(Kidx0 + 1, Tidx0), d11 = data(Kidx0 + 1, Tidx0 + 1);
 
+  double g0 = d00 * dK1 + d10 * dK0;
+  double g1 = d01 * dK1 + d11 * dK0;
+  return (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
+}
+
+double propagator::_InterpF(const vector<double> &data, double K,
+                            double T, int chan) {
+  int Tidx0 = Para.TauGrid.floor(T);
+  double dT0 = T - Para.TauGrid.grid[Tidx0],
+    dT1 = Para.TauGrid.grid[Tidx0 + 1] - T;
+  ASSERT(dT0 >= 0.0 && dT1 > 0.0,
+         "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
+  ASSERT(Tidx0<Para.TauGrid.size-1,
+         "Interpolate fails: " <<"Tidx exceeds grid");
+  int Kidx0 = Para.FermiKGrid.floor(K);
+  double dK0 = K - Para.FermiKGrid.grid[Kidx0], dK1 = Para.FermiKGrid.grid[Kidx0 + 1] - K;
+  ASSERT(dK0 >= 0.0 && dK1 > 0.0,
+         "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
+  ASSERT(Kidx0<Para.FermiKGrid.size-1,
+         "Interpolate fails: " <<"Kidx exceeds grid");
+  double d00 = data.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+Tidx0*Para.FermiKGrid.size+Kidx0);
+  double d01 = data.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+(Tidx0+1)*Para.FermiKGrid.size+Kidx0);
+  double d10 = data.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+Tidx0*Para.FermiKGrid.size+Kidx0+1);
+  double d11 = data.at(chan*Para.TauGrid.size*Para.FermiKGrid.size+(Tidx0+1)*Para.FermiKGrid.size+Kidx0+1);
+  //std::cout<<d00<<"\t"<<d01<<"\t"<<d10<<"\t"<<d11<<"\t"<<dK0<<"\t"<<dK1<<"\t"<<dT0<<"\t"<<dT1
+  //      <<"\t"<<K<<"\t"<< Para.FermiKGrid.grid[Kidx0]<<"\t"<< Para.FermiKGrid.grid[Kidx0+1]<<endl;
   double g0 = d00 * dK1 + d10 * dK0;
   double g1 = d01 * dK1 + d11 * dK0;
   return (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
