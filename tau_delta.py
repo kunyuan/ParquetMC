@@ -3,6 +3,8 @@ import sys
 import re
 import glob
 import math
+import time
+import traceback
 import numpy as np
 from scipy import integrate as scp_int
 from scipy import interpolate
@@ -121,31 +123,134 @@ def AngleIntegation(Data, l):
     return Result/2.0
     # return Result
 
+def Plot_Everything(Data):
+    d_naive,_=Fourier.SpectralT2W(Data)
+    #d_naive=Fourier.naiveT2W(d)
+    print (d_naive.shape)
+    FileName2="../Gapfunction_6.txt"
+    with open(FileName2, "r") as file:
+        d2=np.transpose(np.loadtxt(FileName2))
+        Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
+        mom_compare=d2[0].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+        value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+        fig=plt.figure()
+        ax1=plt.axes()
+        kf_lbl_1=np.searchsorted(ExtMomBin,1.2)
+        kf_lbl_2=np.searchsorted(mom_compare,1.2)
+    print (phyFreq[len(phyFreq)//2])
+    plt.xlabel("frequency")
+    plt.ylabel("F")
+    ratio=(d_naive.real[:,len(phyFreq)//2]*ExtMomBin)[kf_lbl_1]/value_compare[kf_lbl_2]
+    d_old_mom=ratio*value_compare
+    ax1.plot(mom_compare,d_old_mom,label="old")
+    pidx=0
+    lines=6
+    # for i in range(lines):
+    #     pidx=len(ExtMomBin)//lines*i
+    #     ax1.plot(phyFreq,d_naive.real[pidx,:],label="mom,q={0}".format(ExtMomBin[pidx]))
+    #     d_naive_mom=d_naive.real[:,len(phyFreq)//2]*ExtMomBin
+    d_naive_mom=d_naive.real[:,len(phyFreq)//2]*ExtMomBin
+    ax1.plot(ExtMomBin,d_naive_mom,label="new")
+    ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+    plt.savefig('delta.png')
+    plt.close()
+    fig=plt.figure()
+    ax1=plt.axes()
+    plt.xlabel("tau")
+    plt.ylabel("F")
+    pidx=0
+    lines=6
+    for i in range(lines):
+        pidx=len(ExtMomBin)//lines*i
+        ax1.plot(TauBin,Data[pidx,:],label="mom={0}".format(ExtMomBin[pidx]))
+    ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+    plt.savefig('delta_T(t){0}.png'.format(loopcounter//5))
+    plt.close()
+    fig=plt.figure()
+    ax1=plt.axes()
+    plt.xlabel("momentum")
+    plt.ylabel("F")
+    pidx=0
+    lines=6
+    for i in range(lines):
+        pidx=len(TauBin)//lines*i
+        ax1.plot(ExtMomBin,Data[:,pidx],label="tau={0}".format(TauBin[pidx]))
+    ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+    plt.savefig('delta_T(q){0}.png'.format(loopcounter//5))
+    plt.close()
 
-# with open("Data/grid.data","r") as file:
-#     file.readline()
-#     line2 = file.readline()
-#     if TauBin is None:
-#         TauBin = np.fromstring(
-#             line2, sep=' ')
-#         TauBinSize = len(TauBin)
-#         print (TauBinSize)
-#     #line3 = file.readline()
-#     #if AngleBin is None:
-#     #    AngleBin = np.fromstring(
-#       line3.split(":")[1], sep=' ')
-#     #    AngleBinSize = len(AngleBin)
-#     #    print (AngleBinSize)
-#     file.readline()
-#     file.readline()
-#     line4 = file.readline()
-#     if ExtMomBin is None:
-#         ExtMomBin = np.fromstring(
-#             line4, sep=' ')n
-#         ExtMomBinSize = len(ExtMomBin)
-#         ExtMomBin /= kF   
-# print ExtMomBin
+def Plot_Errorbar(Data,td):
+    print(Data)
+    print(Data[0])
+    newresultlist=[]
+    for dd0 in Data:
+        size0=len(dd0)/(order_num+1)
+        print(dd0,len(dd0))
+        dd=dd0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
+        dd=dd*0
+        for ll in range(2,order_num+1):
+            dd=dd+dd0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
+        dd=dd+td
+        newresultlist.append(dd)
+    FileName2="../Gapfunction_6.txt"
+    with open(FileName2, "r") as file:
+        d2=np.transpose(np.loadtxt(FileName2))
+        Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
+        mom_compare=d2[0].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+        value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+    kf_lbl_1=np.searchsorted(ExtMomBin,Para.kF)
+    kf_lbl_2=np.searchsorted(mom_compare,Para.kF)
+    with open(FileName2,"r") as file:
+        value_compare2=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare))[kf_lbl_2]
 
+    newresulttran=[]
+    newresulttran2=[]
+    for i in newresultlist:
+        d_naive,_=Fourier.SpectralT2W(i)
+        newresulttran.append(d_naive.real[:,len(phyFreq)//2])
+        newresulttran2.append(d_naive.real[kf_lbl_1,len(phyFreq)//2:])
+    newresulttran=np.array(newresulttran*ExtMomBin)
+    newresulttran2=np.array(newresulttran2)
+    #d_avg, d_err= np.mean(newresulttran,axis=0),np.std(newresulttran,axis=0)
+    d_avg,d_err=Estimate(newresulttran,np.ones(len(newresulttran)))
+    d_avg2,d_err2=Estimate(newresulttran2,np.ones(len(newresulttran2)))
+    value_compare=value_compare
+    value_compare2=value_compare2
+    #ratio=d_avg[kf_lbl_1]/value_compare[kf_lbl_2]
+    #ratio=sum(d_avg[:-1]*np.diff(ExtMomBin))/sum(value_compare[:-1]*np.diff(mom_compare))
+    ratio=scp_int.simps(d_avg,ExtMomBin)/scp_int.simps(value_compare,mom_compare)
+    d_old_mom=ratio*value_compare
+    d_old_freq=ratio*value_compare2
+
+    fig, ax = plt.subplots()
+    ax.plot(mom_compare/Para.kF,d_old_mom,"g-",label="old",lw=0.5)
+    ax.errorbar(ExtMomBin/Para.kF,d_avg,yerr=d_err,fmt="b.",label="new",
+                capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+    ax.legend()
+    ax.set(xlabel="momentum ($k_F$)")
+    ax.set(ylabel="$q\Delta$ at $\omega=\pi T$")
+    ax.autoscale(tight=True)
+    fig.savefig("comparemom.pdf")
+    plt.close()
+
+    fig, ax = plt.subplots()
+    PiT=np.pi/Para.Beta
+    ax.plot(Freq_compare/PiT,d_old_freq,"g-",label="old",lw=0.5)
+    ax.errorbar(phyFreq[len(phyFreq)//2:]/PiT,d_avg2,yerr=d_err2,fmt="b.",label="new",
+                capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+    ax.legend()
+    ax.set(xlabel="frequency ($\pi T$)")
+    ax.set(ylabel="$\Delta$ at $k_F$")
+    ax.autoscale(tight=True)
+    fig.savefig("comparefreq.pdf")
+
+    plt.close()
+    
+
+
+
+assert len(sys.argv) == 2, "Please specify: 0.restart or 1.continue"
+If_read = int(sys.argv[1])
 Para = param()
 EPS= 1.0e-9
 Beta=Para.Beta
@@ -188,8 +293,7 @@ Norm = 0
 Data0 = None
 DataList = []
 #FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
-FileName = "delta_chan0_pid0_verb.dat"
-FileName1="f0.dat"
+
 
 
 
@@ -231,16 +335,6 @@ g_int=interpolate.interp1d(TauExtend,gg)
 
 gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
 
-#phase_shift=np.exp(-1j*np.pi/Beta*TauBin)
-#dd=phase_shift[:,np.newaxis]*np.fft.fft(F,axis=0)/Beta
-#ff=np.multiply(gg_tau,dd)
-#F=2*ff.real
-
-
-
-#modulus=math.sqrt(np.tensordot(F[0:cut,:],F[0:cut,:],axes=([0,1],[0,1])))
-#F[0:cut,:]=F[0:cut,:]/modulus
-
 
 IterationType=1
 loopcounter=0
@@ -251,318 +345,176 @@ modulus_dum=0.0
 
 
 #os set
-pid=0
+Duplicate=4
+SleepTime=30
 rootdir = os.getcwd()
 homedir = os.path.join(rootdir, "Data")
-CreateFolder(homedir)
-outfilepath = os.path.join(homedir, "outfile")
-CreateFolder(outfilepath)
-jobfilepath = os.path.join(homedir, "jobfile")
-CreateFolder(jobfilepath)
-seed = 1453
-outfile = os.path.join(outfilepath, "_out{0}".format(pid)) 
-jobfile = os.path.join(jobfilepath, "_job{0}.sh".format(pid))  # job files
-execute = "feyncalc.exe"
-os.system("cp {0} {1}".format(execute, homedir))
-os.system("cp {0} {1}".format("parameter", homedir))
-
+myCmd='python send.py {0}'.format(Duplicate)
+os.system(myCmd)
 os.chdir(homedir)
 files = os.listdir(folder)
 
-max=81
-Nprint=7
+FileName = "delta_chan0_pid[0-{0}].dat".format(Duplicate-1)
+FileName1= "f0.dat"
 
-newresultlist=[]
-eigenlist=[]
-for i in range(Nprint):
-    newresultlist.append(i)
-    eigenlist.append(i)
-
-for loopcounter in range(max):
-
-    seed = loopcounter+2
-    #phase_shift=np.exp(-1j*np.pi/Beta*TauBin)
-    #dd=phase_shift[:,np.newaxis]*np.fft.fft(F,axis=0)/Beta
-    #ff=np.multiply(gg_tau,dd)
-    #F=2*ff.real
-
-
+if(If_read==0):
     with open(folder+FileName1,"w") as file:
         for i in range(TauBinSize):
-            file.write("{0} ".format(TauBin[i]))
-        file.write("\n")
-        for i in range(TauBinSize):
             for k in range(ExtMomBinSize):
-                if(loopcounter==0):
-                    F[i][k]=np.exp(-ExtMomBin[k]**2)*(Para.Beta-2*TauBin[i])
-                    file.write("{0}\t".format(F[i][k]))
-                else:
+                F[i][k]=np.exp(-ExtMomBin[k]**2)*(Para.Beta-2*TauBin[i])
+                file.write("{0}\t".format(F[i][k]))
+else:
+    print("Continue with exist f.dat")
+    with open(folder+FileName1,"r"): 
+        F=np.loadtxt(folder+FileName1,skiprows=1)
+        F=F.reshape(TauBinSize,ExtMomBinSize)
+ #       print(F.shape)
+
+     
+
+
+while True:
+
+    time.sleep(SleepTime)
+
+    try:
+        with open(folder+FileName1,"w") as file:
+            for i in range(TauBinSize):
+                file.write("{0} ".format(TauBin[i]))
+            file.write("\n")
+            for i in range(TauBinSize):
+                for k in range(ExtMomBinSize):
                     file.write("{0}\t".format(F[i][k]))
     
-    #if(loopcounter%5==0):
-     #  IterationType=(IterationType+1)%2
+            #if(loopcounter%5==0):
+            #  IterationType=(IterationType+1)%2
 
-    a=os.system("./{0} {1} {2} >{3}".format(execute, pid, seed, outfile))
-    if(a!=0):
-         raise ValueError ("c++ stopped unexpected")
-     #myCmd='python phonon.py>out.txt'
+        Norm0 = 0
+        d0 = None
+        err0 = None
+        d0s = []
+        dd0s=[]
+        Norm0s =[]
+        for f in files:
+            if re.match(FileName, f):
+                with open(folder+f, "r") as file:
+                    line0=file.readline()
+                    print (line0.split(" ")[-1])
+                    Norm0s.append(float(line0.split(" ")[-1]))
+                    line1=file.readline()
+                    print (len(line1.split(" ")))
+                    print ("Loading ")
+                    d0s.append(np.loadtxt(folder+f,skiprows=1))
+        print(d0s[0].shape)
+        d0,err0 = Estimate(d0s,Norm0s)
+        print (d0,d0s[0].shape)
+        ll=1
+        size0=len(d0)/(order_num+1)
+       # mom_test=d0[1].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize)).T[0]
+       # tau_test=d0[2].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))[0]
+        d=d0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
+        d=d*0
+        err=d*0
+        for ll in range(2,order_num+1):
+            d=d+d0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
+            err=err+err0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))**2
+            # d=d*0
+        err=np.sqrt(err)
+        d_o1=+d0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
+        err_o1=err0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
 
-    for f in files:
-        if re.match(FileName, f):
-            print ("Loading ")
-            Norm0 = -1
-            d0 = None
-            #try: 
-            with open(folder+f, "r") as file:
-                #line1 = file.readline()
-                # print (line1)
-                #Norm0 = float(line1.split(":")[-1])
-                # print ("Norm: ", Norm0)
-                #file.open(folder+f, "r")
-                d0 = np.transpose(np.loadtxt(folder+f))
-                #fig=plt.figure()
-                #plt.axvline(omega_c)
-                #plt.plot(FreqBin,F[:,0],'ko')
-                #plt.plot(ExtMomBin,F[0,:],'r.')
-                #ax=fig.add_subplot(111, projection='3d')
-                #a=FreqBin[:,np.newaxis]+ExtMomBin*0
-                #a=a.reshape(TauBinSize*ExtMomBinSize)
-                #print a
-                #b=np.transpose(ExtMomBin[:,np.newaxis]+FreqBin*0)
-                #b=b.reshape(TauBinSize*ExtMomBinSize)
-                #print b
-                #c=d.reshape(TauBinSize*ExtMomBinSize)
-                #modulus=math.sqrt(np.tensordot(c,c,axes=(0,0)))
-                #c=c/modulus
-                #ax.scatter(a, b,c , c='k',marker='.')
-                #ax.set_xlabel('X Label')
-                #ax.set_ylabel('Y Label')
-                #ax.set_zlabel('Z Label')
+        #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
+        d=d
+        d_o1=d_o1*0
+        #print ("sum_delta0",np.sum(d_o1))
+        #print ("sum_delta",np.sum(d))
+        if(np.isnan(np.sum(d))):
+            raise ValueError ("delta has nan")
+        F0=0.0#-g/4.0/np.pi/np.pi*sum(ExtMomBin*F[0])/ExtMomBinSize*ExtMomBin[-1]
+        #print(F)
+        #p_square=ExtMomBin**2
+        #print (p_square)
+        #print  (scp_int.simps(p_square[np.newaxis,:]*F,ExtMomBin))
+        taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2)[np.newaxis,:]*F,ExtMomBin)
+        #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
+        taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
+        d=d+taudep[np.newaxis,:]
+        #Plot_Everything(d)
 
-                #plt.savefig('d_q.png')
-                #plt.close()
-                #plt.figure()
-                #plt.axvline(omega_c)
-                #plt.plot(FreqBin,F[:,0],'ko')
-                #plt.plot(ExtMomBin,F[0,:],'r.')
-                #plt.savefig('F_new.pdf')
-                #plt.close()
-                #if d is not None and Norm0 > 0:
-                    #if Data0 is None:
-                        #Data0 = d
-                    #else:
-                        # Data0 = d
-                    #   Data0 += 
-            
-   
-#       print (TauBin)
-    print (d0.shape)
-    ll=1
-    size0=len(d0[0])/(order_num+1)
-    mom_test=d0[1].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize)).T[0]
-    tau_test=d0[2].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))[0]
-    d=d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
-    d=d*0
-    for ll in range(2,order_num+1):
-        d=d+d0[3].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
-    # d=d*0
-    d_o1=+d0[3].reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
+        Plot_Errorbar([d0s[i]/Norm0s[i] for i in range(len(d0s))],taudep[np.newaxis,:])
 
-    #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
-    d=d
-    d_o1=d_o1*0
-    print ("sum_delta0",np.sum(d_o1))
-    print ("sum_delta",np.sum(d))
-    if(np.isnan(np.sum(d))):
-        raise ValueError ("delta has nan")
-    F0=0.0#-g/4.0/np.pi/np.pi*sum(ExtMomBin*F[0])/ExtMomBinSize*ExtMomBin[-1]
-    #print(F)
-    #p_square=ExtMomBin**2
-    #print (p_square)
-    #print  (scp_int.simps(p_square[np.newaxis,:]*F,ExtMomBin))
-    taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2)[np.newaxis,:]*F,ExtMomBin)
-    #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
-    taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
-    d=d+taudep[np.newaxis,:]
-    
-    # # banch mark
-    # print ("Tau",TauBin)
-    # print ("Tau_test",tau_test)
-    # print ("mom",ExtMomBin)
-    # print("mom_test",mom_test)
-    # idx=0
+        # # banch mark
+        # print ("Tau",TauBin)
+        # print ("Tau_test",tau_test)
+        # print ("mom",ExtMomBin)
+        # print("mom_test",mom_test)
+        # idx=0
 
 
 
-    # do twice convolution to convert delta to F
-    # # test function d=2/(freq^2)*GG at T=1.0
-    # for i in range(TauBinSize):
-    #     for k in range(ExtMomBinSize):
-    #         d[k][i]=0.5-TauBin[i]
-    # print (np.sum(d))
-    # d_compare=np.zeros((ExtMomBinSize,len(phyFreq)))
-    # for i in range(len(phyFreq)):
-    #     for k in range(ExtMomBinSize):
-    #         E=ExtMomBin[k]*ExtMomBin[k]-1.0
-    #         d_compare[k][i]=1.0/(phyFreq[i]*phyFreq[i]+E*E)*2/(phyFreq[i]*phyFreq[i])
-            
-    dout=d
-    newresultlist[loopcounter%Nprint]=dout
+        # do twice convolution to convert delta to F
+        # # test function d=2/(freq^2)*GG at T=1.0
+        # for i in range(TauBinSize):
+        #     for k in range(ExtMomBinSize):
+        #         d[k][i]=0.5-TauBin[i]
+        # print (np.sum(d))
+        # d_compare=np.zeros((ExtMomBinSize,len(phyFreq)))
+        # for i in range(len(phyFreq)):
+        #     for k in range(ExtMomBinSize):
+        #         E=ExtMomBin[k]*ExtMomBin[k]-1.0
+        #         d_compare[k][i]=1.0/(phyFreq[i]*phyFreq[i]+E*E)*2/(phyFreq[i]*phyFreq[i])
 
-    d=Extend_value(d)
-    print (d.shape,TauExtend.shape)
-    d_int=interpolate.interp1d(TauExtend,d)
-    middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,1)
-    middle=Extend_value(middle)
-    d_int=interpolate.interp1d(TauExtend,middle)
-    middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,-1)
+        dout=d
+        d=Extend_value(d)
+        print (d.shape,TauExtend.shape)
+        d_int=interpolate.interp1d(TauExtend,d)
+        middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,1)
+        middle=Extend_value(middle)
+        d_int=interpolate.interp1d(TauExtend,middle)
+        middle=Convol(d_int,g_int,TauBin,ExtMomBinSize,-1)
 
-    middle=middle+d_o1*gggg
-#    middle=d_o1*gggg
-    print ("middle",middle.shape)
-    print ("sum_F",np.sum(middle))
-    # # test double convolution
-    # fig=plt.figure()
-    # ax1=plt.axes()
-    # ax1.plot(TauBin,middle[0],'-')
-    # plt.show()
-    # d_naive,_=Fourier.SpectralT2W(middle)
-    # #d_naive=Fourier.naiveT2W(d)
-    # fig=plt.figure()
-    # ax1=plt.axes()
-    # test_label=-1
-    # print (d_naive.real[:,len(phyFreq)//2])
-    # #ax1.plot(TauBin,d[0,:],label="tau")
-    # ax1.plot(phyFreq,d_naive[test_label,:],'ko',label="freq")
-    # ax1.plot(phyFreq,d_compare[test_label,:],label="freq_analy")
-    # print (phyFreq[len(phyFreq)//2])
-    # plt.xlabel("momentum")
-    # plt.ylabel("test")
-    # #ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2],'k-',label="new")
-    # ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
-    # plt.show()    
+        middle=middle+d_o1*gggg
+        #print ("middle",middle.shape)
+        #print ("sum_F",np.sum(middle))
+        # # test double convolution
+        # fig=plt.figure()
+        # ax1=plt.axes()
+        # ax1.plot(TauBin,middle[0],'-')
+        # plt.show()
+        # d_naive,_=Fourier.SpectralT2W(middle)
+        # #d_naive=Fourier.naiveT2W(d)
+        # fig=plt.figure()
+        # ax1=plt.axes()
+        # test_label=-1
+        # print (d_naive.real[:,len(phyFreq)//2])
+        # #ax1.plot(TauBin,d[0,:],label="tau")
+        # ax1.plot(phyFreq,d_naive[test_label,:],'ko',label="freq")
+        # ax1.plot(phyFreq,d_compare[test_label,:],label="freq_analy")
+        # print (phyFreq[len(phyFreq)//2])
+        # plt.xlabel("momentum")
+        # plt.ylabel("test")
+        # #ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2],'k-',label="new")
+        # ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
+        # plt.show()    
 
-    middle=middle.T 
+        middle=middle.T 
 
-    shift=0.0
-    lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
-    print ("lamu",lamu)
-    eigenlist[loopcounter%Nprint]=lamu
+        shift=0.0
+        lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
+        print ("lamu",lamu)
+        middle[0:cut,:]=middle[0:cut,:]+shift*F[0:cut,:]
+        modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
+        print ("modulus:",modulus_dum)
+        F[0:cut,:]=middle[0:cut,:]/modulus_dum
+        with open("lamu.txt","a+") as file:
+            file.write("{0} \n".format(lamu))
 
-    middle[0:cut,:]=middle[0:cut,:]+shift*F[0:cut,:]
-    modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
-    print ("modulus:",modulus_dum)
-    F[0:cut,:]=middle[0:cut,:]/modulus_dum
+    except Exception as e:
+        print (e)
+        traceback.print_exc()
+        pass
 
-    if(loopcounter%(Nprint+1)==(Nprint)):
-        print ("combined lamu:")
-        print (np.mean(np.array(eigenlist)),np.std(np.array(eigenlist))/(len(eigenlist)-1))
-        print ("plotting")
-        fff=F.T
-        d_naive,_=Fourier.SpectralT2W(fff)
-        #d_naive=Fourier.naiveT2W(d)
-        print (d_naive.shape)
-        FileName2="../Gapfunction_6.txt"
-        with open(FileName2, "r") as file:
-             d2=np.transpose(np.loadtxt(FileName2))
-             Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
-             mom_compare=d2[0].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
-             value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
-        fig=plt.figure()
-        ax1=plt.axes()
-        kf_lbl_1=np.searchsorted(ExtMomBin,Para.kF)
-        kf_lbl_2=np.searchsorted(mom_compare,Para.kF)
-        with open(FileName2,"r") as file:
-            value_compare2=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare))[kf_lbl_2]
-        #print (d_naive.real[:,len(phyFreq)//2])
-        # ax1.plot(TauBin,d[0,:],label="tau")
-        # ax1.plot(phyFreq,d_naive[0,:],label="freq")
-        #print (phyFreq[len(phyFreq)//2])
-        plt.xlabel("momentum")
-        plt.ylabel("test")
-        ratio=(d_naive.real[:,len(phyFreq)//2]*ExtMomBin)[kf_lbl_1]/value_compare[kf_lbl_2]
-        #ax1.plot(ExtMomBin,d_naive.real[:,len(phyFreq)//2]*ExtMomBin,'k-',label="new")
-        #ax1.plot(ExtMomBin,0*ExtMomBin,'ro',label="grid")
-        d_old_mom=ratio*value_compare
-        #ax1.plot(mom_compare,d_old_mom,label="old")
-        pidx=0
-        #ax1.plot(TauBin/TauBin[-1],fff[pidx,:]/np.abs(fff[pidx,:]).max(),label="tau")
-        lines=6
-        for i in range(lines):
-            pidx=len(ExtMomBin)//lines*i
-            ax1.plot(phyFreq,d_naive.real[pidx,:],label="mom,q={0:.3f}".format(ExtMomBin[pidx]))
-        d_naive_mom=d_naive.real[:,len(phyFreq)//2]*ExtMomBin
-        #ax1.plot(ExtMomBin,d_naive_mom,'k-',label="new")
-        ax1.legend()
-        plt.savefig('deltafreq.pdf')
-        plt.close()
-        fig=plt.figure()
-        ax1=plt.axes()
-        lines=8
-        for i in range(lines):
-            pidx=len(ExtMomBin)//lines*i
-            ax1.plot(TauBin,fff[pidx,:],label="tau,q={0:.3f}".format(ExtMomBin[pidx]))
-        ax1.legend()
-        plt.savefig("deltatau.pdf")
-        fig=plt.figure()
-        ax1=plt.axes()
-        for i in range(lines):
-            fidx=len(phyFreq)//2//lines*i+len(phyFreq)//2
-            ax1.plot(ExtMomBin,d_naive.real[:,fidx],label="f={0:.3f}".format(phyFreq[fidx]))
-        ax1.legend()
-        plt.savefig('deltamom.pdf')
-        plt.close()
-        fig=plt.figure()
-        ax1=plt.axes()
-        for i in range(lines):
-            tidx=len(TauBin)//2//lines*i
-            ax1.plot(ExtMomBin,fff[:,tidx],label="t={0:.3f}".format(TauBin[tidx]))
-        ax1.legend()
-        plt.savefig('deltatmom.pdf')
-        plt.close()
-
-        newresulttran=[]
-        newresulttran2=[]
-        for i in newresultlist:
-            d_naive,_=Fourier.SpectralT2W(i)
-            newresulttran.append(d_naive.real[:,len(phyFreq)//2])
-            newresulttran2.append(d_naive.real[kf_lbl_1,len(phyFreq)//2:])
-        newresulttran=np.array(newresulttran*ExtMomBin)
-        newresulttran2=np.array(newresulttran2)
-        #d_avg, d_err= np.mean(newresulttran,axis=0),np.std(newresulttran,axis=0)
-        d_avg,d_err=Estimate(newresulttran,np.ones(len(newresulttran)))
-        d_avg2,d_err2=Estimate(newresulttran2,np.ones(len(newresulttran2)))
-        value_compare=value_compare
-        value_compare2=value_compare2
-        #ratio=d_avg[kf_lbl_1]/value_compare[kf_lbl_2]
-        ratio=sum(d_avg[:-1]*np.diff(ExtMomBin))/sum(value_compare[:-1]*np.diff(mom_compare))
-        #ratio=scp_int.simps(d_avg,ExtMomBin)/scp_int.simps(value_compare,mom_compare)
-        d_old_mom=ratio*value_compare
-        d_old_freq=ratio*value_compare2
-
-        fig, ax = plt.subplots()
-        ax.plot(mom_compare/Para.kF,d_old_mom,"g-",label="old",lw=0.5)
-        ax.errorbar(ExtMomBin/Para.kF,d_avg,yerr=d_err,fmt="b.",label="new",
-                    capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
-        ax.legend()
-        ax.set(xlabel="momentum ($k_F$)")
-        ax.set(ylabel="$q\Delta$ at $\omega=\pi T$")
-        ax.autoscale(tight=True)
-        fig.savefig("comparemom.pdf")
-        fig.close()
-
-        fig, ax = plt.subplots()
-        PiT=np.pi/Para.Beta
-        ax.plot(Freq_compare/PiT,d_old_freq,"g-",label="old",lw=0.5)
-        ax.errorbar(phyFreq[len(phyFreq)//2:]/PiT,d_avg2,yerr=d_err2,fmt="b.",label="new",
-                    capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
-        ax.legend()
-        ax.set(xlabel="frequency ($\pi T$)")
-        ax.set(ylabel="$\Delta$ at $k_F$")
-        ax.autoscale(tight=True)
-        fig.savefig("comparefreq.pdf")
-
-        fig.close()
+            # fff=F.T
 
     
     #test=np.sin((Beta*FreqBin-np.pi)/TauBinSize)
@@ -582,8 +534,7 @@ for loopcounter in range(max):
     #     modulus_dum=math.sqrt(np.tensordot(d[0:cut,:],d[0:cut,:],axes=([0,1],[0,1])))
     #     F[0:cut,:]=d[0:cut,:]/modulus_dum  
 
-    # with open("lamu.txt","a+") as file:
-    # 	file.write("{0} \n".format(lamu_sum/10.0))
+  
 
 
 

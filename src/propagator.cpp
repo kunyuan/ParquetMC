@@ -42,7 +42,7 @@ void propagator::Initialize(){
     _extMom.push_back(Para.FermiKGrid.grid[i]);
   }
   LoadF();
-  TestF();
+  //TestF();
 }
 
 void propagator::LoadF(){
@@ -76,19 +76,23 @@ void propagator::TestF(){
     ofstream VerFile;
     VerFile.open(FileName, ios::out);
     if (VerFile.is_open()) {
-      for (int tau = 0; tau < Para.TauGrid.size; tau++){
-        VerFile << _taulist.at(tau)<<"\n";
-      }
-      VerFile << "mombin\n";
-      for (int k = 0; k < Para.FermiKGrid.size; k++){
-        VerFile << _extMom.at(k)<<"\n";
-      }
+      // for (int tau = 0; tau < Para.TauGrid.size; tau++){
+      //   VerFile << _taulist.at(tau)<<"\n";
+      // }
+      // VerFile << "mombin\n";
+      // for (int k = 0; k < Para.FermiKGrid.size; k++){
+      //   VerFile << _extMom.at(k)<<"\n";
+      // }
       for (int tau =0; tau<Para.TauGrid.size;tau++)
         for (int qindex = 0; qindex<Para.FermiKGrid.size; qindex++){
-          VerFile << _f.at(tau*Para.FermiKGrid.size+qindex)<<"\t";
+          VerFile << Para.TauGrid.grid[tau] <<"\t"
+                  << Para.FermiKGrid.grid[qindex] <<"\t"
+                  << _f.at(tau*Para.FermiKGrid.size+qindex) <<"\n";
         }
       VerFile<<"\n";
-      //      VerFile << ExtrapF(0.5,0.5)<<"\t at 0.5 0.5\n";
+      VerFile << ExtrapF(0.5,0.5,0)<<"\t at 0.5 0.5\n";
+      VerFile << ExtrapF(10,0.7,0)<<"\t at 10 0.7\n";
+      VerFile << ExtrapF(10,100,0)<<"\t at 10 100\n";
       VerFile.close();
     }
   } catch (int e) {
@@ -249,7 +253,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // check irreducibility
   if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
-  Weight[EX] = 0.0;
+   Weight[EX] = 0.0;
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
   return Weight;
@@ -263,11 +267,16 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
 
   if (VerOrder < 0) {
     // Bare interaction
-    if (kQ > 1.0e-8)
-      //return -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Lambda);
-      return -8.0 * π * Para.Charge2 / (kQ * kQ+Para.Mass2);
-      //return -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
-    else
+    if (kQ > 1.0e-8){
+      double Weight0= 8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+      double Weight=Weight0;
+      for(int i=1;i<Para.Order;i++){
+          Weight += Weight0 * pow(Weight0 * Para.Lambda / 8.0 / π, i);
+      }
+      return -Weight;
+    //  return -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+    }
+     else
       return 0.0;
   } else {
     // Order N shifted interaction
