@@ -18,12 +18,6 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 Order = range(Para.Order+1)
 # Order = [0, 1, 2, 3, ]
 
-
-# folder = "./Beta{0}_rs{1}_lambda{2}/".format(
-#     int(Para.Beta*Para.EF), Para.Rs, Para.Mass2)
-
-# filename = "vertex_pid[0-9]+.dat"
-
 shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 
 

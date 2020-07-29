@@ -116,7 +116,6 @@ void ver4Obs::Save() {
 
     // cout << "Size: " << Para.Order << ", " << Para.AngleGrid.size << ", "
     //      << Para.BoseKGrid.size << endl;
-    // VerFile << -1.11111 << "  ";
 
     for (int order = 0; order <= Para.Order; order++)
       for (int chan = 0; chan < 4; chan++)
@@ -126,7 +125,6 @@ void ver4Obs::Save() {
               VerFile << _Estimator[chan](order, angle, qindex)[dir] * PhyWeight
                       << "  ";
             }
-    // VerFile << -2.2222 << "  ";
     VerFile.close();
   } else
     LOG_WARNING("Vertex4 for PID " << Para.PID << " fails to save!");
