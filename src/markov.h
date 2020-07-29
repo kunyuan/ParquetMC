@@ -30,7 +30,7 @@ public:
   void ChangeOrder();
   void ChangeScale();
   void Count();
- 
+  void Reset();
   
 private:
   double NewAbsWeight;

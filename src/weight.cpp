@@ -19,6 +19,12 @@ void weight::Check() {
     ChannelObs[i].Check();
   }
 }
+void weight::Reset(){
+  OneBodyObs.Reset();
+  for(int i=0;i<ChannelNum;i++){
+    ChannelObs[i].Reset();
+  } 
+}
 void weight::Initialization() {
   array<momentum *, 4> ExtLegK;
 

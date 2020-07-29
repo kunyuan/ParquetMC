@@ -132,7 +132,10 @@ int main(int argc, const char *argv[]) {
           try{
           if (BoldG)
             Prop.LoadGreen();
-          Prop.LoadF();
+          if(Prop.LoadF()){
+            //    Markov.Reset();
+            //Var.Counter=0;
+          }
           }catch (const std::invalid_argument& ia){
             throw ia;
           }

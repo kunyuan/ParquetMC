@@ -38,6 +38,13 @@ oneBodyObs::oneBodyObs() {
   return;
 }
 
+void oneBodyObs::Reset(){
+  Normalization = 1.0e-10;
+  _Estimator.Initialize({Para.Order + 1, ksize, Para.TauGrid.size});
+  return;
+
+}
+
 void oneBodyObs::Check() {
   for (int order = 0; order <= Para.Order; order++)
     for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
@@ -154,7 +161,15 @@ ver4Obs::ver4Obs() {
   for (auto &estimator : _Estimator)
     estimator.Initialize(
         {Para.Order + 1, Para.AngleGrid.size, Para.BoseKGrid.size});
-};
+}
+
+void ver4Obs::Reset() {
+  Normalization = 1.0e-10;
+  for (auto &estimator : _Estimator)
+    estimator.Initialize(
+                         {Para.Order + 1, Para.AngleGrid.size, Para.BoseKGrid.size});
+}
+
 
 void ver4Obs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
 

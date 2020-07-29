@@ -456,6 +456,16 @@ markov::markov() {
   AdjustGroupReWeight();
 };
 
+void markov::Reset(){
+  //Weight.Initialization();
+  Weight.Reset();
+  InitialArray(&Accepted[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
+  InitialArray(&Proposed[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
+  InitialArray(&Counter[0], 0.0, MaxOrder+1);
+
+}
+
+
 void markov::AdjustGroupReWeight(){
   // double mult=Proposed[DECREASE_ORDER][1]/(Accepted[DECREASE_ORDER][1]+1)/Para.ReWeight[0];
   // Para.ReWeight[0]=Proposed[DECREASE_ORDER][1]/(Accepted[DECREASE_ORDER][1]+1);

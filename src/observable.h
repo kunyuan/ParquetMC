@@ -40,6 +40,7 @@ public:
   void Measure0(double Factor);
   void Measure(int Order, int QIndex, int AngIdx,
                const std::vector<verWeight> &Weight, double Factor);
+  void Reset();
   void Save();
 
 private:
@@ -54,6 +55,7 @@ public:
   void Measure0(double Factor);
   void Measure(int Order, int KBin, int TauBin, double Weight,
                double Factor); // all tau variables
+  void Reset();
   void Save();
   void Save(int);
   void Check();

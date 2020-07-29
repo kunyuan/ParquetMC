@@ -28,7 +28,7 @@ public:
 
   double CounterBubble(const momentum &K);
 
-  void LoadF();
+  bool LoadF();
   void TestF();
   void LoadGreen();
 
@@ -41,6 +41,7 @@ private:
 
   double _Interp1D(double K, const weight1D &data);
   double _Interp2D(double K, double tau, const weight2D &data);
+  int loopcounter;
   vector<double> _f;
   vector<double> _taulist;
   vector<double> _extMom;

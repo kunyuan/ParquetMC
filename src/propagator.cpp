@@ -36,6 +36,7 @@ propagator::propagator(){
 }
 
 void propagator::Initialize(){
+  loopcounter=0;
   _f = vector<double>(Para.TauGrid.size * Para.FermiKGrid.size * ChannelNum);
   _taulist = vector<double>(Para.TauGrid.size);
   for(int i=0;i<Para.FermiKGrid.size;i++){
@@ -45,15 +46,17 @@ void propagator::Initialize(){
   //TestF();
 }
 
-void propagator::LoadF(){
+bool propagator::LoadF(){
+  int loopcounter_new=-1;
   try {
-    for(int chan=0;chan<ChannelNum;chan++){      
+     for(int chan=0;chan<ChannelNum;chan++){      
       string FileName = fmt::format("./f{0}.dat",chan);
       ifstream VerFile;
       VerFile.open(FileName, ios::in);
       if (VerFile.is_open()) {
-        for (int tau = 0; tau < Para.TauGrid.size; tau++){
-          VerFile >> _taulist.at(tau);
+        VerFile >> loopcounter_new;
+        if(loopcounter_new==loopcounter){
+          return false;
         }
         for (int tau =0; tau<Para.TauGrid.size;tau++)
           for (int qindex = 0; qindex<Para.FermiKGrid.size; qindex++){
@@ -67,7 +70,8 @@ void propagator::LoadF(){
     throw ;
   }
   // load F from file, and store
-  return;
+  loopcounter=loopcounter_new;
+  return true;
 }
 
 void propagator::TestF(){
@@ -252,7 +256,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   // check irreducibility
   if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
-    Weight[EX] = 0.0;
+      Weight[EX] = 0.0;
    Weight[EX] = 0.0;
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
@@ -274,7 +278,7 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
           Weight += Weight0 * pow(Weight0 * Para.Lambda / 8.0 / π, i);
       }
       return -Weight;
-    //  return -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+      //return -8.0 * PI * Para.Charge2 / (kQ * kQ);
     }
      else
       return 0.0;

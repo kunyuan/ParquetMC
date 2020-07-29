@@ -123,7 +123,7 @@ def AngleIntegation(Data, l):
     return Result/2.0
     # return Result
 
-def Plot_Everything(Data):
+def Plot_Everything(Data,loopcounter):
     d_naive,_=Fourier.SpectralT2W(Data)
     #d_naive=Fourier.naiveT2W(d)
     print (d_naive.shape)
@@ -178,6 +178,7 @@ def Plot_Everything(Data):
     ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
     plt.savefig('delta_T(q){0}.png'.format(loopcounter//5))
     plt.close()
+    loopcounter+=5
 
 
 
@@ -206,7 +207,7 @@ for i in range (Ta.size):
     TauBin[i]=Ta.grid[i]
 TauBinSize=len(TauBin)
 ExtMomBinSize=len(ExtMomBin)
-
+print ("TauBIn",TauBin)
 TauExtend=Extend_grid(TauBin)
 print (TauBinSize,len(TauExtend))
 omega_c=10000000.0 #float(line0.split(",")[-1])  
@@ -271,15 +272,15 @@ print(gggg,Convol(g_int,g_int,TauBin,ExtMomBinSize,-1))
 
 
 IterationType=1
-loopcounter=0
 lamu=0
 shift=0.00
 lamu_sum=0.0
 modulus_dum=0.0
 
 
+
 #os set
-Duplicate=4
+Duplicate=3
 SleepTime=100
 rootdir = os.getcwd()
 homedir = os.path.join(rootdir, "Data")
@@ -291,39 +292,33 @@ files = os.listdir(folder)
 FileName = "delta_chan0_pid[0-{0}].dat".format(Duplicate-1)
 FileName1= "f0.dat"
 
+loopcounter=0
 if(If_read==0):
     with open(folder+FileName1,"w") as file:
+        file.write("{0} ".format(loopcounter))
+        file.write("\n")
         for i in range(TauBinSize):
             for k in range(ExtMomBinSize):
-                F[i][k]=np.exp(-ExtMomBin[k]**2)*(Para.Beta-2*TauBin[i])
+                F[i][k]=(Para.Beta-2*TauBin[i])
                 file.write("{0}\t".format(F[i][k]))
+    
 else:
     print("Continue with exist f.dat")
-    with open(folder+FileName1,"r"): 
+    with open(folder+FileName1,"r"):
         F=np.loadtxt(folder+FileName1,skiprows=1)
         F=F.reshape(TauBinSize,ExtMomBinSize)
  #       print(F.shape)
-
-     
-
 
 while True:
 
     time.sleep(SleepTime)
 
     try:
-        with open(folder+FileName1,"w") as file:
-            for i in range(TauBinSize):
-                file.write("{0} ".format(TauBin[i]))
-            file.write("\n")
-            for i in range(TauBinSize):
-                for k in range(ExtMomBinSize):
-                    file.write("{0}\t".format(F[i][k]))
     
             #if(loopcounter%5==0):
             #  IterationType=(IterationType+1)%2
 
-        Norm0 = 0
+        Norm0 = 0.0
         d0 = None
         for f in files:
             if re.match(FileName, f):
@@ -349,9 +344,9 @@ while True:
         d=d*0
         for ll in range(2,order_num+1):
             d=d+d0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
-            # d=d*0
-        d_o1=+d0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
-
+        d_o1=+np.average(d0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize)),axis=-1)
+        d_o1=d_o1[:,np.newaxis]+0*d
+        #print(d_o1.shape,d_o1)
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
         d=d
         d_o1=d_o1*0
@@ -368,7 +363,7 @@ while True:
         #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
         taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
         d=d+taudep[np.newaxis,:]
-        Plot_Everything(d)
+        Plot_Everything(d,loopcounter)
 
         # # banch mark
         # print ("Tau",TauBin)
@@ -391,7 +386,6 @@ while True:
         #         E=ExtMomBin[k]*ExtMomBin[k]-1.0
         #         d_compare[k][i]=1.0/(phyFreq[i]*phyFreq[i]+E*E)*2/(phyFreq[i]*phyFreq[i])
 
-        dout=d
         d=Extend_value(d)
         print (d.shape,TauExtend.shape)
         d_int=interpolate.interp1d(TauExtend,d)
@@ -425,17 +419,26 @@ while True:
         # plt.show()    
 
         middle=middle.T 
-
         shift=0.0
         lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
         print ("lamu",lamu)
         middle[0:cut,:]=middle[0:cut,:]+shift*F[0:cut,:]
         modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
         print ("modulus:",modulus_dum)
+        print(np.sign(lamu))
         F[0:cut,:]=middle[0:cut,:]/modulus_dum
+
+        loopcounter += 1
+        with open(folder+FileName1,"w") as file:
+            file.write("{0} ".format(loopcounter))
+            file.write("\n")
+            for i in range(TauBinSize):
+                for k in range(ExtMomBinSize):
+                    file.write("{0}\t".format(F[i][k]))
+
+        #Plot_Everything(F.T,loopcounter)
         with open("lamu.txt","a+") as file:
             file.write("{0} \n".format(lamu))
-
     except Exception as e:
         print (e)
         traceback.print_exc()
