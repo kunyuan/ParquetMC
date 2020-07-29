@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import grid
 
-
+plt.style.use(['science','grid'])
 #rs = None
 #Lambda = None
 #Mass2 = None
@@ -180,7 +180,73 @@ def Plot_Everything(Data,loopcounter):
     plt.close()
     loopcounter+=5
 
+def Plot_Errorbar(Data,td):
+    print(Data)
+    print(Data[0])
+    newresultlist=[]
+    for dd0 in Data:
+        size0=len(dd0)/(order_num+1)
+        print(dd0,len(dd0))
+        dd=dd0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
+        dd=dd*0
+        for ll in range(2,order_num+1):
+            dd=dd+dd0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
+        dd=dd+td
+        newresultlist.append(dd)
+    FileName2="../Gapfunction_6.txt"
+    with open(FileName2, "r") as file:
+        d2=np.transpose(np.loadtxt(FileName2))
+        Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
+        mom_compare=d2[0].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+        value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
+    kf_lbl_1=np.searchsorted(ExtMomBin,Para.kF)
+    kf_lbl_2=np.searchsorted(mom_compare,Para.kF)
+    with open(FileName2,"r") as file:
+        value_compare2=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare))[kf_lbl_2]
 
+    newresulttran=[]
+    newresulttran2=[]
+    for i in newresultlist:
+        d_naive,_=Fourier.SpectralT2W(i)
+        newresulttran.append(d_naive.real[:,len(phyFreq)//2])
+        newresulttran2.append(d_naive.real[kf_lbl_1,len(phyFreq)//2:])
+    newresulttran=np.array(newresulttran*ExtMomBin)
+    newresulttran2=np.array(newresulttran2)
+    #d_avg, d_err= np.mean(newresulttran,axis=0),np.std(newresulttran,axis=0)
+    d_avg,d_err=Estimate(newresulttran,np.ones(len(newresulttran)))
+    d_avg2,d_err2=Estimate(newresulttran2,np.ones(len(newresulttran2)))
+    value_compare=value_compare
+    value_compare2=value_compare2
+    #ratio=d_avg[kf_lbl_1]/value_compare[kf_lbl_2]
+    #ratio=sum(d_avg[:-1]*np.diff(ExtMomBin))/sum(value_compare[:-1]*np.diff(mom_compare))
+    ratio=scp_int.simps(d_avg,ExtMomBin)/scp_int.simps(value_compare,mom_compare)
+    d_old_mom=ratio*value_compare
+    d_old_freq=ratio*value_compare2
+
+    fig, ax = plt.subplots()
+    ax.plot(mom_compare/Para.kF,d_old_mom,"g-",label="old",lw=0.5)
+    ax.errorbar(ExtMomBin/Para.kF,d_avg,yerr=d_err,fmt="b.",label="new",
+                capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+    ax.legend()
+    ax.set(xlabel="momentum ($k_F$)")
+    ax.set(ylabel="$q\Delta$ at $\omega=\pi T$")
+    ax.autoscale(tight=True)
+    fig.savefig("comparemom.pdf")
+    plt.close()
+
+    fig, ax = plt.subplots()
+    PiT=np.pi/Para.Beta
+    ax.plot(Freq_compare/PiT,d_old_freq,"g-",label="old",lw=0.5)
+    ax.errorbar(phyFreq[len(phyFreq)//2:]/PiT,d_avg2,yerr=d_err2,fmt="b.",label="new",
+                capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+    ax.legend()
+    ax.set(xlabel="frequency ($\pi T$)")
+    ax.set(ylabel="$\Delta$ at $k_F$")
+    ax.autoscale(tight=True)
+    fig.savefig("comparefreq.pdf")
+
+    plt.close()
+    
 
 
 
@@ -215,7 +281,7 @@ omega_c=10000000.0 #float(line0.split(",")[-1])
 #for order in Order:
    # for chan in Channel:
 
-MaxFreq = 10
+MaxFreq = 50
 Freq = np.array(range(-MaxFreq, MaxFreq))
 phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
@@ -266,9 +332,9 @@ for i0 in range (TauBinSize):
 gg=Extend_value(gg.T)
 g_int=interpolate.interp1d(TauExtend,gg)
 
-gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
+#print(TauBin,np.diff(TauExtend),TauBin.dtype)
 
-print(gggg,Convol(g_int,g_int,TauBin,ExtMomBinSize,-1))
+gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
 
 
 IterationType=1
@@ -280,8 +346,13 @@ modulus_dum=0.0
 
 
 #os set
+<<<<<<< HEAD
 Duplicate=3
 SleepTime=100
+=======
+Duplicate=4
+SleepTime=30
+>>>>>>> 6d7fd4f8f65180190830695f7472300c798fa15b
 rootdir = os.getcwd()
 homedir = os.path.join(rootdir, "Data")
 myCmd='python send.py {0}'.format(Duplicate)
@@ -320,33 +391,39 @@ while True:
 
         Norm0 = 0.0
         d0 = None
+        err0 = None
+        d0s = []
+        dd0s=[]
+        Norm0s =[]
         for f in files:
             if re.match(FileName, f):
                 with open(folder+f, "r") as file:
                     line0=file.readline()
                     print (line0.split(" ")[-1])
-                    Norm0 += float(line0.split(" ")[-1])
+                    Norm0s.append(float(line0.split(" ")[-1]))
                     line1=file.readline()
                     print (len(line1.split(" ")))
                     print ("Loading ")
-                    if d0 is None:
-                        d0 = np.loadtxt(folder+f,skiprows=1)
-                    else:
-                        d0 += np.loadtxt(folder+f,skiprows=1)
-                
-        d0=d0/Norm0
-        print (d0)
+                    d0s.append(np.loadtxt(folder+f,skiprows=1))
+        print(d0s[0].shape)
+        d0,err0 = Estimate(d0s,Norm0s)
+        print (d0,d0s[0].shape)
         ll=1
         size0=len(d0)/(order_num+1)
        # mom_test=d0[1].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize)).T[0]
        # tau_test=d0[2].reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))[0]
         d=d0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
         d=d*0
+        err=d*0
         for ll in range(2,order_num+1):
             d=d+d0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
+            err=err+err0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))**2
+            # d=d*0
+        err=np.sqrt(err)
         d_o1=+np.average(d0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize)),axis=-1)
         d_o1=d_o1[:,np.newaxis]+0*d
-        #print(d_o1.shape,d_o1)
+        err_o1=err0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
+
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
         d=d
         d_o1=d_o1*0
@@ -364,6 +441,9 @@ while True:
         taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
         d=d+taudep[np.newaxis,:]
         Plot_Everything(d,loopcounter)
+        #Plot_Everything(d)
+
+        Plot_Errorbar([d0s[i]/Norm0s[i] for i in range(len(d0s))],taudep[np.newaxis,:])
 
         # # banch mark
         # print ("Tau",TauBin)

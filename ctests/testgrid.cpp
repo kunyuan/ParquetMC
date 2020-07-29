@@ -34,9 +34,9 @@ int testUniform(){
 }
 
 int testTau(){
-  double beta=10;
+  double beta=40;
   grid::Tau tau;
-  tau.build(beta,8,0.2*beta);
+  tau.build(beta,64,6.0/4.0);
 
   std::cout<<"start testing tau grid"<<std::endl;
   std::cout<<"grid:"<<std::endl;
