@@ -40,7 +40,7 @@ oneBodyObs::oneBodyObs() {
 
 void oneBodyObs::Reset(){
   Normalization = 1.0e-10;
-  _Estimator.Initialize({Para.Order + 1, ksize, Para.TauGrid.size});
+  _Estimator.Reset();
   return;
 
 }

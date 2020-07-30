@@ -133,8 +133,8 @@ int main(int argc, const char *argv[]) {
           if (BoldG)
             Prop.LoadGreen();
           if(Prop.LoadF()){
-            // Markov.Reset();
-            // Var.Counter=0;
+              Markov.Reset();
+             Var.Counter=0;
             // InitPara(); // initialize global parameters
             // Prop.Initialize();
             // Markov.Reset();

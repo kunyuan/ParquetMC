@@ -29,6 +29,11 @@ public:
     return _Estimator[X * Index0 + Y * Index1 + Z];
   };
 
+  void Reset(){
+    for (int i = 0; i < Size; ++i)
+      _Estimator[i] *= 0.0; // set all elements to zero
+  }
+
 private:
   T *_Estimator;
   int Index0, Index1, Size;
