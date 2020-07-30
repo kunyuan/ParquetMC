@@ -133,8 +133,17 @@ int main(int argc, const char *argv[]) {
           if (BoldG)
             Prop.LoadGreen();
           if(Prop.LoadF()){
-            //    Markov.Reset();
-            //Var.Counter=0;
+            // Markov.Reset();
+            // Var.Counter=0;
+            // InitPara(); // initialize global parameters
+            // Prop.Initialize();
+            // Markov.Reset();
+
+            // LOG_INFO("Loading Weight ...")
+            //   Markov.Weight.LoadFile();
+            // InitVar(); // initialize MC variables
+            // Var.CurrAbsWeight = fabs(Markov.Weight.Evaluate(Var.CurrOrder));
+
           }
           }catch (const std::invalid_argument& ia){
             throw ia;

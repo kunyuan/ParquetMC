@@ -53,7 +53,7 @@ vector<double> Tau::build(double beta, int _size, double scale) {
   size = _size;
   assert(size > 2);
   assert(size % 2 == 0);
-  double lambda = 40.0/ scale / (_size / 2.0);
+  double lambda = 20.0/ scale / (_size / 2.0);
 
   _coeff0.init({0.0, beta / 2.0}, {0.0, size / 2 - 0.5}, lambda, true);
   array<int, 2> range0 = {0, size / 2};

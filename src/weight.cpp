@@ -23,7 +23,23 @@ void weight::Reset(){
   OneBodyObs.Reset();
   for(int i=0;i<ChannelNum;i++){
     ChannelObs[i].Reset();
-  } 
+  }
+  /*
+  if (DiagType == DELTA) {
+    ////////////////////////// Delta /////////////////////////
+    for (int order = 1; order <= Para.Order; order++) {
+      LOG_INFO("Generating order " << order);
+      Delta[order].Build(order);
+      if (order < 4)
+        LOG_INFO(Delta[order].Vertex.ToString());
+    }
+    // for(int channel=0;channel<ChannelNum;channel++){
+    //   LOG_INFO("Init Channel"<<channel);
+    //   ChannelObs.push_back(obs::oneBodyObs());
+    // }
+  }
+  LOG_INFO("End of Init Weight");
+  */
 }
 void weight::Initialization() {
   array<momentum *, 4> ExtLegK;

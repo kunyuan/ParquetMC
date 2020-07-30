@@ -181,12 +181,12 @@ def Plot_Everything(Data,loopcounter):
     loopcounter+=5
 
 def Plot_Errorbar(Data,td):
-    print(Data)
-    print(Data[0])
+    #print(Data)
+    #print(Data[0])
     newresultlist=[]
     for dd0 in Data:
         size0=len(dd0)/(order_num+1)
-        print(dd0,len(dd0))
+        #print(dd0,len(dd0))
         dd=dd0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
         dd=dd*0
         for ll in range(2,order_num+1):
@@ -313,6 +313,8 @@ F=np.zeros(TauBinSize*ExtMomBinSize)
 F=F.reshape((TauBinSize,ExtMomBinSize))
 F[:,:]=1.0
 
+F_accumulate=np.zeros(TauBinSize*ExtMomBinSize)
+F_accumulate=F.reshape((TauBinSize,ExtMomBinSize))*0.0
 
 
 gg=np.zeros((TauBinSize,ExtMomBinSize))
@@ -346,13 +348,11 @@ modulus_dum=0.0
 
 
 #os set
-<<<<<<< HEAD
-Duplicate=3
-SleepTime=100
-=======
 Duplicate=4
-SleepTime=30
->>>>>>> 6d7fd4f8f65180190830695f7472300c798fa15b
+SleepTime=71
+WaitTime=5
+ThermoSteps=5
+
 rootdir = os.getcwd()
 homedir = os.path.join(rootdir, "Data")
 myCmd='python send.py {0}'.format(Duplicate)
@@ -380,10 +380,9 @@ else:
         F=F.reshape(TauBinSize,ExtMomBinSize)
  #       print(F.shape)
 
+time.sleep(SleepTime)
 while True:
-
-    time.sleep(SleepTime)
-
+    time.sleep(WaitTime)
     try:
     
             #if(loopcounter%5==0):
@@ -422,11 +421,12 @@ while True:
         err=np.sqrt(err)
         d_o1=+np.average(d0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize)),axis=-1)
         d_o1=d_o1[:,np.newaxis]+0*d
-        err_o1=err0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
+        err_o1=+np.average(err0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize)),axis=-1)
+        err_o1=err_o1[:,np.newaxis]+0*d
 
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
         d=d
-        d_o1=d_o1*0
+        d_o1=d_o1
         #print ("sum_delta0",np.sum(d_o1))
         #print ("sum_delta",np.sum(d))
         if(np.isnan(np.sum(d))):
@@ -439,11 +439,11 @@ while True:
         taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2)[np.newaxis,:]*F,ExtMomBin)
         #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
         taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
-        d=d+taudep[np.newaxis,:]
+        #d=d+taudep[np.newaxis,:]
         Plot_Everything(d,loopcounter)
         #Plot_Everything(d)
 
-        Plot_Errorbar([d0s[i]/Norm0s[i] for i in range(len(d0s))],taudep[np.newaxis,:])
+        #Plot_Errorbar([d0s[i]/Norm0s[i] for i in range(len(d0s))],taudep[np.newaxis,:])
 
         # # banch mark
         # print ("Tau",TauBin)
@@ -506,19 +506,30 @@ while True:
         modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
         print ("modulus:",modulus_dum)
         print(np.sign(lamu))
-        F[0:cut,:]=middle[0:cut,:]/modulus_dum
+        if loopcounter<ThermoSteps:
+            F[0:cut,:]=middle[0:cut,:]/modulus_dum
+        else:
+            print(math.sqrt(np.tensordot(F_accumulate[0:cut,:],F_accumulate[0:cut,:],axes=([0,1],[0,1]))))
+            F_accumulate[0:cut,:]+=middle[0:cut,:]/modulus_dum
+            F[0:cut,:]=F_accumulate/(loopcounter-ThermoSteps+1.0)
+            print(math.sqrt(np.tensordot(F_accumulate[0:cut,:],F_accumulate[0:cut,:],axes=([0,1],[0,1]))))
 
         loopcounter += 1
+
+
         with open(folder+FileName1,"w") as file:
             file.write("{0} ".format(loopcounter))
             file.write("\n")
             for i in range(TauBinSize):
                 for k in range(ExtMomBinSize):
                     file.write("{0}\t".format(F[i][k]))
+                    #file.write("{0}\t".format(Para.Beta-2*TauBin[i]))
 
         #Plot_Everything(F.T,loopcounter)
         with open("lamu.txt","a+") as file:
             file.write("{0} \n".format(lamu))
+
+        time.sleep(SleepTime)
     except Exception as e:
         print (e)
         traceback.print_exc()
