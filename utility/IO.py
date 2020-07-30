@@ -74,7 +74,7 @@ class param:
             f"TauSize={self.TauGridSize}, MomSize={self.MomGridSize}, AngleSize={self.AngGridSize}, MaxExtMom={self.MaxExtMom}")
 
         print(yellow("Timer Information:"))
-        print("Print={self.PrintTimer}, Save={self.SaveTimer}, ReWeight={self.ReWeightTimer}, Message={self.MessageTimer}, Collection={self.CollectionTimer}")
+        print(f"Print={self.PrintTimer}, Save={self.SaveTimer}, ReWeight={self.ReWeightTimer}, Message={self.MessageTimer}, Collection={self.CollectionTimer}")
 
 # def Estimate(Data, Weights, axis=0):
 #     """ Return Mean and Error  with given weights"""

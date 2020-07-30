@@ -88,6 +88,7 @@ while True:
         # print "ExBare: ", AngleIntegation(ExBare, 0)
         Bare[1] = np.average(ExBare)
         Bare = SpinMapping(Bare)
+        # print(Bare*Para.Nf)
 
         # Bare *= 0.0
         # print Bare
