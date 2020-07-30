@@ -52,18 +52,23 @@ def SpinMapping(Data):
     return d
 
 
+def Bare(angle, Lambda):
+
+    Bare = np.zeros([Para.AngGridSize, 2])
+    if IsIrreducible == False:
+        Bare[:, 0] += -8.0*np.pi/(Para.Mass2+Lambda)*Para.Nf
+    Bare[:, 1] += +8.0 * np.pi / \
+        ((2.0*Para.kF*np.sin(angle/2.0))**2+Para.Mass2+Lambda)*Para.Nf
+    Bare = SpinMapping(Bare)
+    return Bare
+
+
 fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
 
-Bare = np.zeros([Para.AngGridSize, 2])
-if IsIrreducible == False:
-    Bare[:, 0] += -8.0*np.pi/(Para.Mass2+Para.Lambda)*Para.Nf
-Bare[:, 1] += +8.0 * np.pi / \
-    ((2.0*Para.kF*np.sin(Angle/2.0))**2+Para.Mass2+Para.Lambda)*Para.Nf
 
-Bare = SpinMapping(Bare)
-
-ax1.plot(Angle, -Bare[:, 0], '-', c='y', label="$u_s$")
-ax2.plot(Angle, -Bare[:, 1], '-', c='y', label="$u_a$")
+bare = Bare(Angle, 0.0)
+ax1.plot(Angle, -bare[:, 0], '-', c='y', label="$u_s$")
+ax2.plot(Angle, -bare[:, 1], '-', c='y', label="$u_a$")
 
 
 Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
@@ -85,9 +90,10 @@ for chan in Channel:
 
 data = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
 avg, err = Estimate(data, Norm)
-ax1.errorbar(Angle, -(avg[:, 0]+Bare[:, 0]), yerr=err[:, 0], fmt='-',
+bareLambda = Bare(Angle, Para.Lambda)
+ax1.errorbar(Angle, -(avg[:, 0]+bareLambda[:, 0]), yerr=err[:, 0], fmt='-',
              capthick=1, capsize=4, c='k', label=f"$A_s$")
-ax2.errorbar(Angle, -(avg[:, 1]+Bare[:, 1]), yerr=err[:, 1], fmt='-',
+ax2.errorbar(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1], fmt='-',
              capthick=1, capsize=4, c='k', label=f"$A_a$")
 
 ax1.set_xlim([0.0, np.pi])
