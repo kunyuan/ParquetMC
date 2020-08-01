@@ -168,3 +168,100 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
     }
   }
 }
+
+void vertex4::_EvalI(const momentum &KInL, const momentum &KOutL,
+                     const momentum &KInR, const momentum &KOutR,
+                     bool IsFast = false) {
+  if (Order != 3)
+    return;
+
+  momentum &K0 = Var.LoopMom[LoopIdx];
+  momentum &K1 = Var.LoopMom[LoopIdx + 1];
+  momentum &K2 = Var.LoopMom[LoopIdx + 2];
+  momentum K3 = K0 + K1 - KInL;
+  momentum K4 = K1 + K2 - KOutL;
+  momentum K5 = K0 + KInR - K2;
+  momentum K6 = K1 + K2 - KOutR;
+  momentum K7 = K2 + KOutR - K0;
+  momentum K8 = K2 + KOutL - K0;
+
+  double T0 = Var.Tau[Tidx];
+  double T1 = Var.Tau[Tidx + 1];
+  double T2 = Var.Tau[Tidx + 2];
+  double T3 = Var.Tau[Tidx + 3];
+
+  double G1 = Prop.Green(T1 - T0, K1, UP);
+  double G2 = Prop.Green(T1 - T2, K2, UP);
+  double G3 = Prop.Green(T0 - T3, K3, UP);
+  double G4 = Prop.Green(T3 - T1, K4, UP);
+  double G5 = Prop.Green(T3 - T2, K5, UP);
+  double G6 = Prop.Green(T3 - T1, K6, UP);
+  double G7 = Prop.Green(T2 - T3, K7, UP);
+  double G8 = Prop.Green(T2 - T3, K8, UP);
+
+  verWeight ver0 = Prop.Interaction(KInL, K1, K3, K0);
+  verWeight ver1 = Prop.Interaction(K1, KOutL, K2, K4);
+  verWeight ver2 = Prop.Interaction(K1, KOutR, K2, K6);
+  verWeight ver3 = Prop.Interaction(K0, K2, KInR, K5);
+  verWeight ver4 = Prop.Interaction(K0, K2, K7, KOutR);
+  verWeight ver5 = Prop.Interaction(K0, K2, K8, KOutL);
+  verWeight ver6 = Prop.Interaction(K4, K3, K5, KOutR);
+  verWeight ver7 = Prop.Interaction(K6, K3, K5, KOutL);
+  verWeight ver8 = Prop.Interaction(K4, K3, KInR, K7);
+  verWeight ver9 = Prop.Interaction(K6, K3, KInR, K8);
+
+  double Weight = 0.0;
+  double ComWeight = 0.0;
+  for (auto &map : Env.Map) {
+    auto &SubVer = Env.Ver;
+    auto &GT = map.GT;
+    auto &G = Env.G;
+    ComWeight = G[0].Weight * G[1].Weight * G[2].Weight * G[3].Weight;
+    // cout << "G: " << ComWeight << endl;
+    ComWeight *= SubVer[0].Weight[map.LDVerTidx];
+    // cout << "Ver: " << SubVer[0].Weight[map.LDVerT] << endl;
+    // cout << "T: " << map.LDVerT << endl;
+
+    Weight = Env.SymFactor[0] * ComWeight;
+    Weight *= SubVer[1].Weight[map.LUVerTidx];
+    Weight *= SubVer[3].Weight[map.RDVerTidx];
+    Weight *= SubVer[6].Weight[map.RUVerTidx];
+    Weight *= G[4].Weight * G[5].Weight;
+    Ver4.Weight[map.Tidx[0]] += Weight;
+
+    Weight = Env.SymFactor[1] * ComWeight;
+    Weight *= SubVer[2].Weight[map.LUVerTidx];
+    Weight *= SubVer[3].Weight[map.RDVerTidx];
+    Weight *= SubVer[7].Weight[map.RUVerTidx];
+    Weight *= G[6].Weight * G[5].Weight;
+    Ver4.Weight[map.Tidx[1]] += Weight;
+    // cout << Weight << endl;
+
+    Weight = Env.SymFactor[2] * ComWeight;
+    Weight *= SubVer[1].Weight[map.LUVerTidx];
+    Weight *= SubVer[4].Weight[map.RDVerTidx];
+    Weight *= SubVer[8].Weight[map.RUVerTidx];
+    Weight *= G[4].Weight * G[7].Weight;
+    Ver4.Weight[map.Tidx[2]] += Weight;
+    // cout << Weight << endl;
+
+    Weight = Env.SymFactor[3] * ComWeight;
+    Weight *= SubVer[2].Weight[map.LUVerTidx];
+    Weight *= SubVer[5].Weight[map.RDVerTidx];
+    Weight *= SubVer[9].Weight[map.RUVerTidx];
+    Weight *= G[6].Weight * G[8].Weight;
+    Ver4.Weight[map.Tidx[3]] += Weight;
+    // cout << Weight << endl;
+
+    // if (map.LDVerT == 0 && map.LUVerT == 0 && map.RDVerT == 0 &&
+    //     map.RUVerT == 0) {
+    // cout << "Com: " << ComWeight << endl;
+    // cout << "G[4]: " << G[4](GT[4]) << endl;
+    // cout << "G[5]: " << G[5](GT[5]) << endl;
+    // cout << SubVer[1].Weight[map.LUVerT] << endl;
+    // cout << SubVer[3].Weight[map.RDVerT] << endl;
+    // cout << SubVer[6].Weight[map.RUVerT] << endl;
+    // cout << "First: " << Weight << endl;
+    // }
+  }
+}
