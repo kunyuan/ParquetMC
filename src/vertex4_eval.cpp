@@ -66,7 +66,7 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
   // for vertex4 with one or more loops
   verWeight W;
   double GWeight, ProjFactor;
-  double Factor = 1.0 / pow(2.0 * π, D);
+  double Factor = 1.0 / pow(2.0 * PI, D);
 
   for (auto &b : _UST) {
     // cout << "before, " << b.Channel << ", " << b.Map.size() << endl;
@@ -123,7 +123,7 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         int t = map[VERT];
         double dTau = Var.Tau[Tpair[t][INL]] - Var.Tau[Tpair[t][OUTL]];
         dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
-        ChanWeight[ChanMap[chan]] += W * GWeight * cos(π / Para.Beta * dTau);
+        ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
         // ChanWeight[ChanMap[chan]] += W * GWeight;
       }
     }
@@ -134,7 +134,7 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
                           const momentum &KInR, const momentum &KOutR,
                           bool IsFast) {
   if (ChannelCT.size() > 0) {
-    double Factor = 1.0 / pow(2.0 * π, D);
+    double Factor = 1.0 / pow(2.0 * PI, D);
     // cout << weight << endl;
     // ProjFactor = SymFactor[chan] * Factor;
     // cout << Tpair[0][0] << ", " << Tpair[0][1] << Tpair[0][2] << Tpair[0][3]

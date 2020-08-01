@@ -105,7 +105,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   double kDiQ = (KInL - KOutL).norm();
   Weight[DIR] =
-      -8.0 * π * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+      -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
 
   if (DiagType == SIGMA && IsZero(kDiQ))
     Weight[DIR] = 0.0;
@@ -116,7 +116,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   double kExQ = (KInL - KOutR).norm();
   Weight[EX] =
-      8.0 * π * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
 
   if (DiagType == SIGMA && IsZero(kExQ))
     Weight[EX] = 0.0;
@@ -139,21 +139,21 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
   if (VerOrder < 0) {
     // Bare interaction
     if (kQ > 1.0e-8)
-      return -8.0 * π * Para.Charge2 / (kQ * kQ);
+      return -8.0 * PI * Para.Charge2 / (kQ * kQ);
     else
       return 0.0;
   } else {
     // Order N shifted interaction
     double Weight =
-        -8.0 * π * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+        -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
     if (VerOrder > 0)
-      Weight *= pow(Weight * Para.Lambda / 8.0 / π, VerOrder);
+      Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
     return Weight;
   }
 }
 
 double propagator::CounterBubble(const momentum &K) {
-  double Factor = Para.Lambda / (8.0 * π * Para.Nf);
+  double Factor = Para.Lambda / (8.0 * PI * Para.Nf);
   // Factor *=
   //     Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
 

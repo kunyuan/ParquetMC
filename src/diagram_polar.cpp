@@ -39,7 +39,7 @@ void polar::Build(int order) {
 };
 
 double polar::Evaluate() {
-  double Factor = 1.0 / pow(2.0 * π, D);
+  double Factor = 1.0 / pow(2.0 * PI, D);
   // normalization
   if (Order == 0)
     return 1.0;

@@ -54,7 +54,7 @@ void sigma::Build(int order) {
 
 double sigma::Evaluate() {
   // normalization
-  double Factor = 1.0 / pow(2.0 * π, D);
+  double Factor = 1.0 / pow(2.0 * PI, D);
   if (Order == 0) {
     return 1.0;
   } else if (Order == 1) {
@@ -149,7 +149,7 @@ bool sigma::Test() {
   if (Order != 2)
     return false;
 
-  double Factor = 1.0 / pow(2.0 * π, D);
+  double Factor = 1.0 / pow(2.0 * PI, D);
   int ExtTauIdx = MaxTauNum - 1;
   momentum &ExtK = Var.LoopMom[0];
   momentum &K1 = Var.LoopMom[1];
