@@ -123,8 +123,7 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         int t = map[VERT];
         double dTau = Var.Tau[Tpair[t][INL]] - Var.Tau[Tpair[t][OUTL]];
         dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
-        ChanWeight[ChanMap[chan]] +=
-            W * GWeight * cos(2.0 * π / Para.Beta * dTau);
+        ChanWeight[ChanMap[chan]] += W * GWeight * cos(π / Para.Beta * dTau);
         // ChanWeight[ChanMap[chan]] += W * GWeight;
       }
     }
