@@ -26,8 +26,7 @@ void vertex4::Evaluate(const momentum &KInL, const momentum &KOutL,
 
   _EvalUST(KInL, KOutL, KInR, KOutR, IsFast);
   _EvalUST_CT(KInL, KOutL, KInR, KOutR, IsFast);
-  // if (Ver4.LoopNum >= 3)
-  //   _EvalI(KInL, KOutL, KInR, KOutR, IsFast);
+  _EvalI(KInL, KOutL, KInR, KOutR, IsFast);
   return;
 }
 
@@ -170,8 +169,8 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
 }
 
 void vertex4::_EvalI(const momentum &KInL, const momentum &KOutL,
-                     const momentum &KInR, const momentum &KOutR,
-                     bool IsFast = false) {
+                     const momentum &KInR, const momentum &KOutR, bool IsFast) {
+  // only loop 3 has envolope diagrams
   if (Order != 3)
     return;
 
@@ -190,6 +189,7 @@ void vertex4::_EvalI(const momentum &KInL, const momentum &KOutL,
   double T2 = Var.Tau[Tidx + 2];
   double T3 = Var.Tau[Tidx + 3];
 
+  double G0 = Prop.Green(T2 - T0, K0, UP);
   double G1 = Prop.Green(T1 - T0, K1, UP);
   double G2 = Prop.Green(T1 - T2, K2, UP);
   double G3 = Prop.Green(T0 - T3, K3, UP);
@@ -199,69 +199,115 @@ void vertex4::_EvalI(const momentum &KInL, const momentum &KOutL,
   double G7 = Prop.Green(T2 - T3, K7, UP);
   double G8 = Prop.Green(T2 - T3, K8, UP);
 
-  verWeight ver0 = Prop.Interaction(KInL, K1, K3, K0);
-  verWeight ver1 = Prop.Interaction(K1, KOutL, K2, K4);
-  verWeight ver2 = Prop.Interaction(K1, KOutR, K2, K6);
-  verWeight ver3 = Prop.Interaction(K0, K2, KInR, K5);
-  verWeight ver4 = Prop.Interaction(K0, K2, K7, KOutR);
-  verWeight ver5 = Prop.Interaction(K0, K2, K8, KOutL);
-  verWeight ver6 = Prop.Interaction(K4, K3, K5, KOutR);
-  verWeight ver7 = Prop.Interaction(K6, K3, K5, KOutL);
-  verWeight ver8 = Prop.Interaction(K4, K3, KInR, K7);
-  verWeight ver9 = Prop.Interaction(K6, K3, KInR, K8);
+  verWeight v0 = Prop.Interaction(KInL, K1, K3, K0);
+  verWeight v1 = Prop.Interaction(K1, KOutL, K2, K4);
+  verWeight v2 = Prop.Interaction(K1, KOutR, K2, K6);
+  verWeight v3 = Prop.Interaction(K0, K2, KInR, K5);
+  verWeight v4 = Prop.Interaction(K0, K2, K7, KOutR);
+  verWeight v5 = Prop.Interaction(K0, K2, K8, KOutL);
+  verWeight v6 = Prop.Interaction(K4, K3, K5, KOutR);
+  verWeight v7 = Prop.Interaction(K6, K3, K5, KOutL);
+  verWeight v8 = Prop.Interaction(K4, K3, KInR, K7);
+  verWeight v9 = Prop.Interaction(K6, K3, KInR, K8);
 
-  double Weight = 0.0;
-  double ComWeight = 0.0;
-  for (auto &map : Env.Map) {
-    auto &SubVer = Env.Ver;
-    auto &GT = map.GT;
-    auto &G = Env.G;
-    ComWeight = G[0].Weight * G[1].Weight * G[2].Weight * G[3].Weight;
-    // cout << "G: " << ComWeight << endl;
-    ComWeight *= SubVer[0].Weight[map.LDVerTidx];
-    // cout << "Ver: " << SubVer[0].Weight[map.LDVerT] << endl;
-    // cout << "T: " << map.LDVerT << endl;
+  // auto &Ver0 = Weight[_EnvolpeVerIdx[0]];
+  // auto &Ver1 = Weight[_EnvolpeVerIdx[1]];
+  // auto &Ver2 = Weight[_EnvolpeVerIdx[2]];
+  // auto &Ver3 = Weight[_EnvolpeVerIdx[3]];
 
-    Weight = Env.SymFactor[0] * ComWeight;
-    Weight *= SubVer[1].Weight[map.LUVerTidx];
-    Weight *= SubVer[3].Weight[map.RDVerTidx];
-    Weight *= SubVer[6].Weight[map.RUVerTidx];
-    Weight *= G[4].Weight * G[5].Weight;
-    Ver4.Weight[map.Tidx[0]] += Weight;
+  double Factor = 1.0 / pow(2.0 * PI, 3.0 * D);
+  verWeight VerWeight;
 
-    Weight = Env.SymFactor[1] * ComWeight;
-    Weight *= SubVer[2].Weight[map.LUVerTidx];
-    Weight *= SubVer[3].Weight[map.RDVerTidx];
-    Weight *= SubVer[7].Weight[map.RUVerTidx];
-    Weight *= G[6].Weight * G[5].Weight;
-    Ver4.Weight[map.Tidx[1]] += Weight;
-    // cout << Weight << endl;
+  // Diagram 1
+  double GWeight = G0 * G1 * G2 * G3 * G4 * G5;
+  VerWeight = (-1.0) * Factor * GWeight * _Envolope12(v0, v1, v3, v6, false);
+  if (IsFast && Level == 0)
+    ChanWeight[I] += VerWeight * cos(PI / Para.Beta * (T0 - T1 + T2 - T3));
+  else
+    Weight[_EnvolpeVerIdx[0]] += VerWeight;
 
-    Weight = Env.SymFactor[2] * ComWeight;
-    Weight *= SubVer[1].Weight[map.LUVerTidx];
-    Weight *= SubVer[4].Weight[map.RDVerTidx];
-    Weight *= SubVer[8].Weight[map.RUVerTidx];
-    Weight *= G[4].Weight * G[7].Weight;
-    Ver4.Weight[map.Tidx[2]] += Weight;
-    // cout << Weight << endl;
+  // Diagram 2
+  GWeight = G0 * G1 * G2 * G3 * G5 * G6;
+  VerWeight = (+1.0) * Factor * GWeight * _Envolope12(v0, v2, v3, v7, true);
+  if (IsFast && Level == 0)
+    ChanWeight[I] += VerWeight * cos(PI / Para.Beta * (T0 - T3 + T2 - T1));
+  else
+    Weight[_EnvolpeVerIdx[1]] += VerWeight;
 
-    Weight = Env.SymFactor[3] * ComWeight;
-    Weight *= SubVer[2].Weight[map.LUVerTidx];
-    Weight *= SubVer[5].Weight[map.RDVerTidx];
-    Weight *= SubVer[9].Weight[map.RUVerTidx];
-    Weight *= G[6].Weight * G[8].Weight;
-    Ver4.Weight[map.Tidx[3]] += Weight;
-    // cout << Weight << endl;
+  // Diagram 3
+  GWeight = G0 * G1 * G2 * G3 * G4 * G7;
+  VerWeight = (-1.0) * Factor * GWeight * _Envolope34(v0, v1, v4, v8, false);
+  if (IsFast && Level == 0)
+    ChanWeight[I] += VerWeight * cos(PI / Para.Beta * (T0 - T1 + T3 - T2));
+  else
+    Weight[_EnvolpeVerIdx[2]] += VerWeight;
 
-    // if (map.LDVerT == 0 && map.LUVerT == 0 && map.RDVerT == 0 &&
-    //     map.RUVerT == 0) {
-    // cout << "Com: " << ComWeight << endl;
-    // cout << "G[4]: " << G[4](GT[4]) << endl;
-    // cout << "G[5]: " << G[5](GT[5]) << endl;
-    // cout << SubVer[1].Weight[map.LUVerT] << endl;
-    // cout << SubVer[3].Weight[map.RDVerT] << endl;
-    // cout << SubVer[6].Weight[map.RUVerT] << endl;
-    // cout << "First: " << Weight << endl;
-    // }
+  // Diagram 4
+  GWeight = G0 * G1 * G2 * G3 * G6 * G8;
+  VerWeight = (+1.0) * Factor * GWeight * _Envolope34(v0, v2, v5, v9, true);
+  if (IsFast && Level == 0)
+    ChanWeight[I] += VerWeight * cos(PI / Para.Beta * (T0 - T2 + T3 - T1));
+  else
+    Weight[_EnvolpeVerIdx[3]] += VerWeight;
+}
+
+verWeight vertex4::_Envolope12(const verWeight &iL, const verWeight &oL,
+                               const verWeight &iR, const verWeight &oR,
+                               bool isexchange) {
+  verWeight W = {0.0, 0.0};
+  int S = SPIN;
+  double iLd = iL[DIR], iLe = iL[EX];
+  double oLd = oL[DIR], oLe = oL[EX];
+  double iRd = iR[DIR], iRe = iR[EX];
+  double oRd = oR[DIR], oRe = oR[EX];
+  // diagram 11, 12, 13, 14
+  W[DIR] += iLd * oLd * (S * (iRd * oRd + iRe * oRe) + iRe * oRd + iRd * oRe);
+  // diagram 21,31, 41
+  W[DIR] += (iLd * oLe + iLe * oLd + S * iLe * oLe) * iRd * oRd;
+  // diagram 32, 43
+  W[DIR] += iLe * oLd * iRe * oRe + iLe * oLe * iRd * oRe;
+
+  // diagram 22, 23, 24
+  W[EX] += iLd * oLe * (S * iRe * oRe + iRd * oRe + iRe * oRd);
+  // diagram 33, 34
+  W[EX] += iLe * oLd * (iRd * oRe + iRe * oRd);
+  // diagram 42, 44
+  W[EX] += iLe * oLe * (iRe * oRe + S * iRe * oRd);
+  if (isexchange) {
+    double temp = W[DIR];
+    W[DIR] = W[EX];
+    W[EX] = temp;
   }
+  return W;
+}
+
+verWeight vertex4::_Envolope34(const verWeight &iL, const verWeight &oL,
+                               const verWeight &iR, const verWeight &oR,
+                               bool isexchange) {
+  verWeight W = {0.0, 0.0};
+  int S = SPIN;
+  double iLd = iL[DIR], iLe = iL[EX];
+  double oLd = oL[DIR], oLe = oL[EX];
+  double iRd = iR[DIR], iRe = iR[EX];
+  double oRd = oR[DIR], oRe = oR[EX];
+
+  // diagram 11, 12, 13, 14
+  W[DIR] += iLd * oLd * (S * (iRd * oRd + iRe * oRe) + iRe * oRd + iRd * oRe);
+  // diagram 21,31, 41
+  W[DIR] += (iLd * oLe + iLe * oLd + S * iLe * oLe) * iRd * oRd;
+  // diagram 22, 43
+  W[DIR] += iLd * oLe * iRe * oRe + iLe * oLe * iRd * oRe;
+
+  // diagram 23, 24
+  W[EX] += iLd * oLe * (iRd * oRe + iRe * oRd);
+  // diagram 32, 33, 34
+  W[EX] += iLe * oLd * (S * iRe * oRe + iRd * oRe + iRe * oRd);
+  // diagram 42, 44
+  W[EX] += iLe * oLe * (iRe * oRe + S * iRe * oRd);
+  if (isexchange) {
+    double temp = W[DIR];
+    W[DIR] = W[EX];
+    W[EX] = temp;
+  }
+  return W;
 }
