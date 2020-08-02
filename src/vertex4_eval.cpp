@@ -1,4 +1,5 @@
 #include "vertex4.h"
+#include <algorithm>
 #include <iostream>
 
 using namespace std;
@@ -210,11 +211,6 @@ void vertex4::_EvalI(const momentum &KInL, const momentum &KOutL,
   verWeight v8 = Prop.Interaction(K4, K3, KInR, K7);
   verWeight v9 = Prop.Interaction(K6, K3, KInR, K8);
 
-  // auto &Ver0 = Weight[_EnvolpeVerIdx[0]];
-  // auto &Ver1 = Weight[_EnvolpeVerIdx[1]];
-  // auto &Ver2 = Weight[_EnvolpeVerIdx[2]];
-  // auto &Ver3 = Weight[_EnvolpeVerIdx[3]];
-
   double Factor = 1.0 / pow(2.0 * PI, 3.0 * D);
   verWeight VerWeight;
 
@@ -274,10 +270,12 @@ verWeight vertex4::_Envolope12(const verWeight &iL, const verWeight &oL,
   // diagram 42, 44
   W[EX] += iLe * oLe * (iRe * oRe + S * iRe * oRd);
   if (isexchange) {
-    double temp = W[DIR];
-    W[DIR] = W[EX];
-    W[EX] = temp;
+    swap(W[DIR], W[EX]);
+    // double temp = W[DIR];
+    // W[DIR] = W[EX];
+    // W[EX] = temp;
   }
+  // swap(W[DIR], W[EX]);
   return W;
 }
 
@@ -305,9 +303,10 @@ verWeight vertex4::_Envolope34(const verWeight &iL, const verWeight &oL,
   // diagram 42, 44
   W[EX] += iLe * oLe * (iRe * oRe + S * iRe * oRd);
   if (isexchange) {
-    double temp = W[DIR];
-    W[DIR] = W[EX];
-    W[EX] = temp;
+    swap(W[DIR], W[EX]);
+    // double temp = W[DIR];
+    // W[DIR] = W[EX];
+    // W[EX] = temp;
   }
   return W;
 }
