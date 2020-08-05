@@ -1,6 +1,7 @@
 #include "lib/grid.h"
 #include "markov.h"
 #include "utility/timer.h"
+#include "assist/testcode.h"
 #include <iostream>
 #include <math.h>
 
@@ -39,6 +40,8 @@ int main(int argc, const char *argv[]) {
   Random.Reset(Para.Seed);
 
   InitPara(); // initialize global parameters
+
+  testcode::TestCode();
 
   markov Markov;
   InterruptHandler Interrupt;
