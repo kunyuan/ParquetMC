@@ -25,8 +25,8 @@ AngGrid = Grid["AngleGrid"]
 MomGrid = Grid["KGrid"]
 Angle = np.arccos(AngGrid)
 
-print(AngGrid)
-print(Angle)
+# print(AngGrid)
+# print(Angle)
 
 
 def PrintInfo(Channel, Data, DataErr):

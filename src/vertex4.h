@@ -50,7 +50,8 @@ public:
   vector<array<int, 4>> Tpair; // external T list
   vector<verWeight> Weight;    // size: equal to T.size()
 
-  vector<bubble> _UST; // bubble diagrams
+  vector<bubble> _UST;        // bubble diagrams
+  vector<int> _EnvolpeVerIdx; // weight idx of the envolope diagrams
 
   int TauNum() { return Order + 1; }
   int LoopNum() { return Order; }
@@ -89,6 +90,12 @@ private:
                    bool IsFast = false);
   void _EvalI(const momentum &KInL, const momentum &KOutL, const momentum &KInR,
               const momentum &KOutR, bool IsFast = false);
+  verWeight _Envolope12(const verWeight &iL, const verWeight &oL,
+                        const verWeight &iR, const verWeight &oR,
+                        bool isexchange);
+  verWeight _Envolope34(const verWeight &iL, const verWeight &oL,
+                        const verWeight &iR, const verWeight &oR,
+                        bool isexchange);
 
   void _TestOneLoopGamma();
   verWeight _GetWeight(int Order, vector<channel> Channel);

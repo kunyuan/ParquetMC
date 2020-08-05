@@ -81,7 +81,17 @@ void vertex4::Build(int level, int order, int loopIdx, int inTL,
         }
       } else if (c == I) {
         // I channel
-        Channel.push_back(c);
+        if (LoopNum() == 3) {
+          _EnvolpeVerIdx.clear();
+          _EnvolpeVerIdx.push_back(
+              _AddTidxPair({Tidx, Tidx + 1, Tidx + 2, Tidx + 3}));
+          _EnvolpeVerIdx.push_back(
+              _AddTidxPair({Tidx, Tidx + 3, Tidx + 2, Tidx + 1}));
+          _EnvolpeVerIdx.push_back(
+              _AddTidxPair({Tidx, Tidx + 1, Tidx + 3, Tidx + 2}));
+          _EnvolpeVerIdx.push_back(
+              _AddTidxPair({Tidx, Tidx + 2, Tidx + 3, Tidx + 1}));
+        }
       }
     }
   }

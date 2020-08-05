@@ -19,7 +19,7 @@ void vertex4::_TestOneLoopGamma() {
   momentum InR = Var.LoopMom[INR];
   momentum OutR = Var.LoopMom[OUTR];
   momentum K0 = Var.LoopMom[4];
-  double Factor = 1.0 / pow(2.0 * π, D);
+  double Factor = 1.0 / pow(2.0 * PI, D);
   double dTau, GWeight, GWeightInBox;
   verWeight Weight, CWeight, RefWeight, TestWeight;
 
@@ -38,7 +38,7 @@ void vertex4::_TestOneLoopGamma() {
   Weight *= Factor * SymFactor[T];
 
   CWeight[DIR] = GWeightInBox * LVer[DIR] * RVer[DIR] * Para.Lambda /
-                 (8.0 * π) / Para.Nf * SPIN;
+                 (8.0 * PI) / Para.Nf * SPIN;
   CWeight[EX] = 0.0;
   // cout << CWeight[DIR] << endl;
   CWeight *= Factor * SymFactor[T];
@@ -79,7 +79,7 @@ void vertex4::_TestOneLoopGamma() {
                    LVer[DIR] * RVer[EX];
   TestWeight *= GWeight;
   TestWeight[EX] -= GWeightInBox * LVer[DIR] * RVer[DIR] * Para.Lambda /
-                    (8.0 * π) / Para.Nf * SPIN;
+                    (8.0 * PI) / Para.Nf * SPIN;
   TestWeight *= Factor * SymFactor[U];
 
   Weight = _GetWeight(1, {U, UC});
@@ -88,7 +88,7 @@ void vertex4::_TestOneLoopGamma() {
     cout << fmt::format("G: {}", GWeight * Factor) << endl;
     cout << fmt::format(
                 "GInBox: {}, sep: {}, {}",
-                GWeightInBox * Factor * Para.Lambda / (8.0 * π) / Para.Nf,
+                GWeightInBox * Factor * Para.Lambda / (8.0 * PI) / Para.Nf,
                 Prop.Green(dTau, K0, UP, 0), Prop.Green(-dTau, K0, UP, 0))
          << endl;
     cout << fmt::format("LVer: {}, {}", LVer[DIR], LVer[EX]) << endl;
@@ -109,7 +109,7 @@ void vertex4::_TestOneLoopGamma() {
   TestWeight[DIR] = LVer[EX] * RVer[DIR] + LVer[DIR] * RVer[EX];
   TestWeight[EX] = LVer[DIR] * RVer[DIR] + LVer[EX] * RVer[EX];
   TestWeight *= GWeight;
-  TestWeight *= Factor * SymFactor[S] * cos(2.0 * π / Para.Beta * dTau * 2.0);
+  TestWeight *= Factor * SymFactor[S] * cos(PI / Para.Beta * dTau * 2.0);
   // TestWeight *= Factor * SymFactor[S];
 
   //   cout << "Calculate S chanel" << endl;

@@ -285,24 +285,24 @@ double markov::GetNewK(momentum &NewMom) {
     return 0.0;
   }
   // Kf-dK<KAmp<Kf+dK
-  double ϕ = 2.0 * π * Random.urn();
+  double phi = 2.0 * PI * Random.urn();
   if (D == 3) {
-    double θ = π * Random.urn();
-    if (θ == 0.0)
+    double theta = PI * Random.urn();
+    if (theta == 0.0)
       return 0.0;
-    NewMom[0] = KAmp * sin(θ) * cos(ϕ);
-    NewMom[1] = KAmp * sin(θ) * sin(ϕ);
-    NewMom[D - 1] = KAmp * cos(θ);
-    return 2.0 * dK                // prop density of KAmp in [Kf-dK, Kf+dK)
-           * 2.0 * π               // prop density of Phi
-           * π                     // prop density of Theta
-           * sin(θ) * KAmp * KAmp; // Jacobian
+    NewMom[0] = KAmp * sin(theta) * cos(phi);
+    NewMom[1] = KAmp * sin(theta) * sin(phi);
+    NewMom[D - 1] = KAmp * cos(theta);
+    return 2.0 * dK                    // prop density of KAmp in [Kf-dK, Kf+dK)
+           * 2.0 * PI                  // prop density of Phi
+           * PI                        // prop density of Theta
+           * sin(theta) * KAmp * KAmp; // Jacobian
   } else if (D == 2) {
-    NewMom[0] = KAmp * cos(ϕ);
-    NewMom[1] = KAmp * sin(ϕ);
-    return 2.0 * dK  // prop density of KAmp in [Kf-dK, Kf+dK)
-           * 2.0 * π // prop density of Phi
-           * KAmp;   // Jacobian
+    NewMom[0] = KAmp * cos(phi);
+    NewMom[1] = KAmp * sin(phi);
+    return 2.0 * dK   // prop density of KAmp in [Kf-dK, Kf+dK)
+           * 2.0 * PI // prop density of Phi
+           * KAmp;    // Jacobian
   }
 
   //===== The simple way  =======================//
@@ -325,12 +325,12 @@ double markov::RemoveOldK(momentum &OldMom) {
     // Kf-dK<KAmp<Kf+dK
     return 0.0;
   if (D == 3) {
-    auto Sinθ = sqrt(OldMom[0] * OldMom[0] + OldMom[1] * OldMom[1]) / KAmp;
-    if (Sinθ < EPS)
+    auto SinTheta = sqrt(OldMom[0] * OldMom[0] + OldMom[1] * OldMom[1]) / KAmp;
+    if (SinTheta < EPS)
       return 0.0;
-    return 1.0 / (2.0 * dK * 2.0 * π * π * Sinθ * KAmp * KAmp);
+    return 1.0 / (2.0 * dK * 2.0 * PI * PI * SinTheta * KAmp * KAmp);
   } else if (D == 2) {
-    return 1.0 / (2.0 * dK * 2.0 * π * KAmp);
+    return 1.0 / (2.0 * dK * 2.0 * PI * KAmp);
   }
 
   //===== The simple way  =======================//
