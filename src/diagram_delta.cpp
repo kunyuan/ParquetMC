@@ -17,6 +17,17 @@ double legendre(double xi, int channel){
   else return 0;
 }
 
+double epsilon(double p){
+  double E=abs(p*p-Para.Ef);
+  // // if(E<=EPS){
+  // //   return 4/Para.Beta;
+  // // }
+  // double result= E*(2+2*cosh(Para.Beta*E))/sinh(Para.Beta*E);
+  // if(!std::isfinite(result)) return 4/Para.Beta;
+  // return result;
+  return 1.0;//4*E*Para.Beta+EPS;
+}
+
 void delta::Build(int order) {
   ASSERT_ALLWAYS(order >= 0, "Polar order must be larger than 0!");
   Order = order;
@@ -89,14 +100,7 @@ double delta::Evaluate() {
     //   cout<<output<<endl;
     //   throw std::invalid_argument("delta eval order 1");
     // }
-
-    if(Var.LoopMom[1].norm()>EPS){
-      return result*Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
-    }
-    else{
-      return 0;
-    }
-
+    return result*epsilon(Var.LoopMom[0].norm())/epsilon(Var.LoopMom[1].norm());
   }
 
   // loop order >=2
@@ -121,13 +125,7 @@ double delta::Evaluate() {
   // if(result<1e-300){
   //     throw std::invalid_argument("delta Eval order 2");
   // }
-  if(Var.LoopMom[1].norm()>EPS){
-    return result*Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
-  }
-  else{
-    return 0;
-  }
- 
+  return result*epsilon(Var.LoopMom[0].norm())/epsilon(Var.LoopMom[1].norm());
 }
 
 double delta::Evaluate(int channel) {
@@ -146,12 +144,7 @@ double delta::Evaluate(int channel) {
     // if(!std::isfinite(result)){
     //   throw std::invalid_argument("delta_evaluate nan");
     // }
-    if(Var.LoopMom[1].norm()>EPS){
-      return result*Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
-    }
-    else{
-      return 0;
-    }
+    return result*epsilon(Var.LoopMom[0].norm())/epsilon(Var.LoopMom[1].norm());
   }
   // loop order >=2
   vertex4 &Ver4 = Vertex;
@@ -175,12 +168,7 @@ double delta::Evaluate(int channel) {
   // if(!std::isfinite(result)){
   //   throw std::invalid_argument("delta_evaluate nan");
   // }
-  if(Var.LoopMom[1].norm()>EPS){
-    return result*Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
-  }
-  else{
-    return 0;
-  }
+  return result*epsilon(Var.LoopMom[0].norm())/epsilon(Var.LoopMom[1].norm());
 }
 
 string delta::ToString() { return Vertex.ToString(""); }
