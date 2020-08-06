@@ -123,11 +123,12 @@ def AngleIntegation(Data, l):
     return Result/2.0
     # return Result
 
-def Plot_Everything(Data,loopcounter):
-    d_naive,_=Fourier.SpectralT2W(Data)
+def Plot_Everything(Data,MomBin,loopcounter,name):
+    #d_naive,_=Fourier.SpectralT2W(Data)
     #d_naive=Fourier.naiveT2W(d)
+    d_naive=Data
     print (d_naive.shape)
-    FileName2="../Gapfunction_6.txt"
+    FileName2="../Gapfunction_0.txt"
     with open(FileName2, "r") as file:
         d2=np.transpose(np.loadtxt(FileName2))
         Freq_compare=d2[1][:len([i for i in d2[0] if i==d2[0][0]])]
@@ -135,24 +136,25 @@ def Plot_Everything(Data,loopcounter):
         value_compare=d2[2].reshape(len(d2[0])//len(Freq_compare),len(Freq_compare)).T[0]
         fig=plt.figure()
         ax1=plt.axes()
-        kf_lbl_1=np.searchsorted(ExtMomBin,1.2)
+        kf_lbl_1=np.searchsorted(MomBin,1.0)
         kf_lbl_2=np.searchsorted(mom_compare,1.2)
     print (phyFreq[len(phyFreq)//2])
     plt.xlabel("frequency")
     plt.ylabel("F")
-    ratio=(d_naive.real[:,len(phyFreq)//2]*ExtMomBin)[kf_lbl_1]/value_compare[kf_lbl_2]
+    #ratio=(d_naive.real[:,len(phyFreq)//2])[kf_lbl_1]/value_compare[kf_lbl_2]
+    ratio=d_naive.real[kf_lbl_1,0]/value_compare[kf_lbl_2]
     d_old_mom=ratio*value_compare
     ax1.plot(mom_compare,d_old_mom,label="old")
     pidx=0
     lines=6
     # for i in range(lines):
-    #     pidx=len(ExtMomBin)//lines*i
-    #     ax1.plot(phyFreq,d_naive.real[pidx,:],label="mom,q={0}".format(ExtMomBin[pidx]))
-    #     d_naive_mom=d_naive.real[:,len(phyFreq)//2]*ExtMomBin
-    d_naive_mom=d_naive.real[:,len(phyFreq)//2]*ExtMomBin
-    ax1.plot(ExtMomBin,d_naive_mom,label="new")
+    #     pidx=len(MomBin)//lines*i
+    #     ax1.plot(phyFreq,d_naive.real[pidx,:],label="mom,q={0}".format(MomBin[pidx]))
+    #     d_naive_mom=d_naive.real[:,len(phyFreq)//2]*MomBin
+    d_naive_mom=d_naive.real[:,len(phyFreq)//2]#*MomBin
+    ax1.plot(MomBin,d_naive_mom,label="new")
     ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
-    plt.savefig('delta.png')
+    plt.savefig(name+'.png')
     plt.close()
     fig=plt.figure()
     ax1=plt.axes()
@@ -161,10 +163,10 @@ def Plot_Everything(Data,loopcounter):
     pidx=0
     lines=6
     for i in range(lines):
-        pidx=len(ExtMomBin)//lines*i
-        ax1.plot(TauBin,Data[pidx,:],label="mom={0}".format(ExtMomBin[pidx]))
+        pidx=len(MomBin)//lines*i
+        ax1.plot(TauBin,Data[pidx,:],label="mom={0}".format(MomBin[pidx]))
     ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
-    plt.savefig('delta_T(t){0}.png'.format(loopcounter//5))
+    plt.savefig((name+'_T(t){0}.png').format(loopcounter//5))
     plt.close()
     fig=plt.figure()
     ax1=plt.axes()
@@ -174,12 +176,11 @@ def Plot_Everything(Data,loopcounter):
     lines=6
     for i in range(lines):
         pidx=len(TauBin)//lines*i
-        ax1.plot(ExtMomBin,Data[:,pidx],label="tau={0}".format(TauBin[pidx]))
+        ax1.plot(MomBin,Data[:,pidx],label="tau={0}".format(TauBin[pidx]))
     ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
-    plt.savefig('delta_T(q){0}.png'.format(loopcounter//5))
+    plt.savefig((name+'_T(q){0}.png').format(loopcounter//5))
     plt.close()
-    loopcounter+=5
-
+  
 def Plot_Errorbar(Data,td):
     #print(Data)
     #print(Data[0])
@@ -300,9 +301,14 @@ DataList = []
 
 #initialize F
 
+q_cut=0.1*Para.kF
 
-cut=TauBinSize+1#np.searchsorted(TauBin,100000,side='right') 
+cut_left=0 #np.searchsorted(ExtMomBin,Para.kF-q_cut,side='right') 
+cut_right=ExtMomBinSize #np.searchsorted(ExtMomBin,Para.kF+q_cut,side='right')
+cut_left_plt=np.searchsorted(ExtMomBin,Para.kF-5*q_cut,side='right') 
+cut_right_plt=np.searchsorted(ExtMomBin,Para.kF+5*q_cut,side='right')
 
+#print (Para.kF,ExtMomBin[cut_left],ExtMomBin[cut_right])
 #if(os.path.exists(folder+FileName1) and os.path.getsize(folder+FileName1)) > 0:
 #    F = np.loadtxt(folder+FileName1)
 #    F=F.reshape((TauBinSize,ExtMomBinSize))
@@ -312,7 +318,7 @@ cut=TauBinSize+1#np.searchsorted(TauBin,100000,side='right')
 F=np.zeros(TauBinSize*ExtMomBinSize)
 F=F.reshape((TauBinSize,ExtMomBinSize))
 F[:,:]=1.0
-
+lamu_accumulate=0.0
 F_accumulate=np.zeros(TauBinSize*ExtMomBinSize)
 F_accumulate=F.reshape((TauBinSize,ExtMomBinSize))*0.0
 
@@ -337,7 +343,7 @@ g_int=interpolate.interp1d(TauExtend,gg)
 #print(TauBin,np.diff(TauExtend),TauBin.dtype)
 
 gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
-
+#Plot_Everything(gggg,0)
 
 IterationType=1
 lamu=0
@@ -348,10 +354,10 @@ modulus_dum=0.0
 
 
 #os set
-Duplicate=4
+Duplicate=3
 SleepTime=71
 WaitTime=5
-ThermoSteps=5
+ThermoSteps=20
 
 rootdir = os.getcwd()
 homedir = os.path.join(rootdir, "Data")
@@ -364,6 +370,8 @@ FileName = "delta_chan0_pid[0-{0}].dat".format(Duplicate-1)
 FileName1= "f0.dat"
 
 loopcounter=0
+high_mom_counter=0
+low_mom_counter=0
 if(If_read==0):
     with open(folder+FileName1,"w") as file:
         file.write("{0} ".format(loopcounter))
@@ -385,9 +393,6 @@ while True:
     time.sleep(WaitTime)
     try:
     
-            #if(loopcounter%5==0):
-            #  IterationType=(IterationType+1)%2
-
         Norm0 = 0.0
         d0 = None
         err0 = None
@@ -425,8 +430,8 @@ while True:
         err_o1=err_o1[:,np.newaxis]+0*d
 
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
-        d=d
-        d_o1=0*d_o1
+        d=0*d
+        d_o1=d_o1
         #print ("sum_delta0",np.sum(d_o1))
         #print ("sum_delta",np.sum(d))
         if(np.isnan(np.sum(d))):
@@ -436,14 +441,22 @@ while True:
         #p_square=ExtMomBin**2
         #print (p_square)
         #print  (scp_int.simps(p_square[np.newaxis,:]*F,ExtMomBin))
-        taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2)[np.newaxis,:]*F,ExtMomBin)
+
+        # taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2)[np.newaxis,:]*F,ExtMomBin)
+        # #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
+        # taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
+        # d=d+taudep[np.newaxis,:]
+
+        taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps(ExtMomBin[np.newaxis,:]*F,ExtMomBin)
         #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
         taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
-        d=d+taudep[np.newaxis,:]
-        Plot_Everything(d,loopcounter)
+        #d=d+np.tensordot(ExtMomBin,taudep,axes=0)
+
+        #Plot_Everything(d[cut_left_plt:cut_right_plt,:],ExtMomBin[cut_left_plt:cut_right_plt],0)
+        #Plot_Everything(d_o1,ExtMomBin,0,"delta")
         #Plot_Everything(d)
 
-        Plot_Errorbar([d0s[i]/Norm0s[i] for i in range(len(d0s))],taudep[np.newaxis,:])
+        #Plot_Errorbar([d0s[i]/Norm0s[i] for i in range(len(d0s))],taudep[np.newaxis,:])
 
         # # banch mark
         # print ("Tau",TauBin)
@@ -499,24 +512,42 @@ while True:
         # plt.show()    
 
         middle=middle.T 
-        shift=0.0
-        lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
-        print ("lamu",lamu)
-        middle[0:cut,:]=middle[0:cut,:]+shift*F[0:cut,:]
-        modulus_dum=math.sqrt(np.tensordot(middle[0:cut,:],middle[0:cut,:],axes=([0,1],[0,1])))
-        print ("modulus:",modulus_dum)
-        print(np.sign(lamu))
-        if loopcounter<ThermoSteps:
-            F[0:cut,:]=middle[0:cut,:]/modulus_dum
-        else:
-            print(math.sqrt(np.tensordot(F_accumulate[0:cut,:],F_accumulate[0:cut,:],axes=([0,1],[0,1]))))
-            F_accumulate[0:cut,:]+=middle[0:cut,:]/modulus_dum
-            F[0:cut,:]=F_accumulate/(loopcounter-ThermoSteps+1.0)
-            print(math.sqrt(np.tensordot(F_accumulate[0:cut,:],F_accumulate[0:cut,:],axes=([0,1],[0,1]))))
+        shift=2.0
+            
+        if(IterationType==0):
+            F[:,0:cut_left]=middle[:,0:cut_left]
+            F[:,cut_right:ExtMomBinSize]=middle[:,cut_right:ExtMomBinSize]
+        elif(IterationType==1):
+            lamu=np.tensordot(middle[:,cut_left:cut_right],F[:,cut_left:cut_right],axes=([0,1],[0,1]))
+            middle[:,cut_left:cut_right]=middle[:,cut_left:cut_right]+shift*F[:,cut_left:cut_right]
+            modulus_dum=math.sqrt(np.tensordot(middle[:,cut_left:cut_right],middle[:,cut_left:cut_right],axes=([0,1],[0,1])))
+            print ("middle",middle[:,cut_left:cut_right])
+            F[:,cut_left:cut_right]=middle[:,cut_left:cut_right]/modulus_dum
+            print ("modulus:",modulus_dum)
+
+       # if loopcounter>ThermoSteps:
+       
+        if loopcounter<-1:
+            if(IterationType==0):
+                high_mom_counter += 1
+                F_accumulate[:,0:cut_left] += F[:,0:cut_left]
+                F_accumulate[:,cut_right:ExtMomBinSize] += F[:,cut_right:ExtMomBinSize]
+                F[:,0:cut_left]=F_accumulate[:,0:cut_left]/high_mom_counter
+                F[:,cut_right:ExtMomBinSize]=F_accumulate[:,cut_right:ExtMomBinSize]/high_mom_counter
+            elif(IterationType==1):
+                low_mom_counter += 1
+                F_accumulate[:,cut_left:cut_right] += F[:,cut_left:cut_right]
+                lamu_accumulate += lamu
+                lamu = lamu_accumulate/low_mom_counter
+                modulus_dum=math.sqrt(np.tensordot(F_accumulate[:,cut_left:cut_right],F_accumulate[:,cut_left:cut_right],axes=([0,1],[0,1])))
+                F[:,cut_left:cut_right] = F_accumulate[:,cut_left:cut_right]/modulus_dum  
 
         loopcounter += 1
-
-
+        #if(loopcounter%5==0):
+        #    IterationType=(IterationType+1)%2
+        print ("$$$$iterationtype=",IterationType)
+    
+        print ("lamu",lamu)
         with open(folder+FileName1,"w") as file:
             file.write("{0} ".format(loopcounter))
             file.write("\n")
@@ -525,7 +556,8 @@ while True:
                     file.write("{0}\t".format(F[i][k]))
                     #file.write("{0}\t".format(Para.Beta-2*TauBin[i]))
 
-        #Plot_Everything(F.T,loopcounter)
+        #Plot_Everything(F.T[cut_left_plt:cut_right_plt,:],ExtMomBin[cut_left_plt:cut_right_plt],0)       
+        #Plot_Everything(F.T,0)
         with open("lamu.txt","a+") as file:
             file.write("{0} \n".format(lamu))
 

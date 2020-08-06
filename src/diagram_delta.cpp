@@ -89,7 +89,14 @@ double delta::Evaluate() {
     //   cout<<output<<endl;
     //   throw std::invalid_argument("delta eval order 1");
     // }
-    return result;
+
+    if(Var.LoopMom[1].norm()>EPS){
+      return result*Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
+    }
+    else{
+      return 0;
+    }
+
   }
 
   // loop order >=2
@@ -114,7 +121,13 @@ double delta::Evaluate() {
   // if(result<1e-300){
   //     throw std::invalid_argument("delta Eval order 2");
   // }
-  return result;
+  if(Var.LoopMom[1].norm()>EPS){
+    return result*Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
+  }
+  else{
+    return 0;
+  }
+ 
 }
 
 double delta::Evaluate(int channel) {
@@ -133,7 +146,12 @@ double delta::Evaluate(int channel) {
     // if(!std::isfinite(result)){
     //   throw std::invalid_argument("delta_evaluate nan");
     // }
-    return result;
+    if(Var.LoopMom[1].norm()>EPS){
+      return result*Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
+    }
+    else{
+      return 0;
+    }
   }
   // loop order >=2
   vertex4 &Ver4 = Vertex;
@@ -157,7 +175,12 @@ double delta::Evaluate(int channel) {
   // if(!std::isfinite(result)){
   //   throw std::invalid_argument("delta_evaluate nan");
   // }
-  return result;
+  if(Var.LoopMom[1].norm()>EPS){
+    return result*Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
+  }
+  else{
+    return 0;
+  }
 }
 
 string delta::ToString() { return Vertex.ToString(""); }
