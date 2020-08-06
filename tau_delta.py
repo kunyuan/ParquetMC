@@ -67,9 +67,23 @@ Data = {}  # key: (order, channel)
 DataWithAngle = {}  # key: (order, channel)
 DataErr = {}  # key: (order, channel)
 
-Omega=3.0
-g=2.0
-kF = 1.0
+assert len(sys.argv) == 2, "Please specify: 0.restart or 1.continue"
+If_read = int(sys.argv[1])
+Para = param()
+EPS= 1.0e-9
+Beta=Para.Beta
+Temp=1/Beta
+order_num=Para.Order 
+K=grid.FermiK()
+K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 2) #kf,maxk,size,scale
+Ta=grid.Tau()
+Ta.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF) #Beta,size,scale
+
+def epsilon(p):
+    #E=np.abs(p**2-Para.EF)+0.0001/Para.Beta
+    #return E*(2+2*np.cosh(E*Para.Beta))/np.sinh(E*Para.Beta)
+    return p*0+1.0#4*Para.Beta*np.abs(p**2-Para.EF)+EPS
+
 #Nf = kF/2.0/np.pi**2
 #Bubble = 0.0971916  # 3D, Beta=10, rs=1
 #Step = None
@@ -164,7 +178,7 @@ def Plot_Everything(Data,loopcounter):
         pidx=len(ExtMomBin)//lines*i
         ax1.plot(TauBin,Data[pidx,:],label="mom={0}".format(ExtMomBin[pidx]))
     ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
-    plt.savefig('delta_T(t){0}.png'.format(loopcounter//5))
+    plt.savefig('delta_T(t){0}.png'.format(loopcounter))
     plt.close()
     fig=plt.figure()
     ax1=plt.axes()
@@ -176,22 +190,78 @@ def Plot_Everything(Data,loopcounter):
         pidx=len(TauBin)//lines*i
         ax1.plot(ExtMomBin,Data[:,pidx],label="tau={0}".format(TauBin[pidx]))
     ax1.legend(loc=[0.7,0.7], shadow=False,fontsize=10)
-    plt.savefig('delta_T(q){0}.png'.format(loopcounter//5))
+    plt.savefig('delta_T(q){0}.png'.format(loopcounter))
     plt.close()
-    loopcounter+=5
 
-def Plot_Errorbar(Data,td):
+def Plot_F(F):
+    print("plotting f")
+    fff=F.T#/epsilon(ExtMomBin)[:,np.newaxis]
+    d_naive,_=Fourier.SpectralT2W(fff)
+    lines=6
+    q_cut=ExtMomBinSize//8
+
+    fig, ax = plt.subplots()
+    for i in range(lines):
+        pidx=len(ExtMomBin)//lines*i
+        ax.plot(TauBin,fff[pidx,:],label="q={0:.3f}".format(ExtMomBin[pidx]))
+    ax.legend(bbox_to_anchor=(1.05,1))
+    ax.set(xlabel="Tau($E_F$)")
+    ax.set(ylabel="$F$")
+    ax.autoscale(tight=True)
+    fig.savefig("f_tq.pdf")
+    plt.close()
+
+    fig, ax = plt.subplots()
+    for i in range(lines):
+        tidx=len(TauBin)//2//lines*i
+        ax.plot(ExtMomBin[q_cut:-q_cut]/Para.kF,fff[q_cut:-q_cut,tidx],label="t={0:.3f}".format(TauBin[tidx]))
+    ax.legend(bbox_to_anchor=(1.05,1))
+    ax.set(xlabel="Momentum($k_F$)")
+    ax.set(ylabel="$F$")
+    ax.autoscale(tight=True)
+    fig.savefig("f_qt.pdf")
+    plt.close()
+
+
+    fig, ax = plt.subplots()
+    freq0=len(phyFreq)//2
+    for i in range(lines):
+        pidx=len(ExtMomBin)//lines*i
+        ax.plot(phyFreq[freq0:]/np.pi*Para.Beta,d_naive.real[pidx,freq0:],label="q={0:.3f}".format(ExtMomBin[pidx]))
+    ax.legend(bbox_to_anchor=(1.05,1))
+    ax.set(xlabel="Frequency ($\pi T$)")
+    ax.set(ylabel="$F$")
+    ax.autoscale(tight=True)
+    fig.savefig("f_wq.pdf")
+    plt.close()
+
+    fig, ax = plt.subplots()
+    for i in range(lines):
+        fidx=len(phyFreq)//2//lines*i+len(phyFreq)//2
+        ax.plot(ExtMomBin[q_cut:-q_cut]/Para.kF,d_naive.real[q_cut:-q_cut,fidx],label="$\omega$={0:.3f}".format(phyFreq[fidx]))
+    ax.legend(bbox_to_anchor=(1.05,1))
+    ax.set(xlabel="Momentum ($k_F$)")
+    ax.set(ylabel="$F$")
+    ax.autoscale(tight=True)
+    fig.savefig("f_qw.pdf")
+    plt.close()
+    print("done")
+
+
+def Plot_Errorbar(Data,Err,td):
     #print(Data)
     #print(Data[0])
     newresultlist=[]
-    for dd0 in Data:
+    for i in range(len(Data)):
+        dd0=Data[i]
+        Norm0=Norm0s[i]
         size0=len(dd0)/(order_num+1)
         #print(dd0,len(dd0))
         dd=dd0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize))
         dd=dd*0
         for ll in range(2,order_num+1):
             dd=dd+dd0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))
-        dd=dd+td
+        dd=dd+td*Norm0
         newresultlist.append(dd)
     FileName2="../Gapfunction_6.txt"
     with open(FileName2, "r") as file:
@@ -210,11 +280,11 @@ def Plot_Errorbar(Data,td):
         d_naive,_=Fourier.SpectralT2W(i)
         newresulttran.append(d_naive.real[:,len(phyFreq)//2])
         newresulttran2.append(d_naive.real[kf_lbl_1,len(phyFreq)//2:])
-    newresulttran=np.array(newresulttran*ExtMomBin)
+    newresulttran=np.array(newresulttran*ExtMomBin/epsilon(ExtMomBin))
     newresulttran2=np.array(newresulttran2)
     #d_avg, d_err= np.mean(newresulttran,axis=0),np.std(newresulttran,axis=0)
-    d_avg,d_err=Estimate(newresulttran,np.ones(len(newresulttran)))
-    d_avg2,d_err2=Estimate(newresulttran2,np.ones(len(newresulttran2)))
+    d_avg,d_err=Estimate(newresulttran,np.array(Norm0s))
+    d_avg2,d_err2=Estimate(newresulttran2,np.array(Norm0s))
     value_compare=value_compare
     value_compare2=value_compare2
     #ratio=d_avg[kf_lbl_1]/value_compare[kf_lbl_2]
@@ -250,17 +320,11 @@ def Plot_Errorbar(Data,td):
 
 
 
-assert len(sys.argv) == 2, "Please specify: 0.restart or 1.continue"
-If_read = int(sys.argv[1])
-Para = param()
-EPS= 1.0e-9
-Beta=Para.Beta
-Temp=1/Beta
-order_num=Para.Order 
-K=grid.FermiK()
-K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 2) #kf,maxk,size,scale
-Ta=grid.Tau()
-Ta.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF) #Beta,size,scale
+
+Omega=3.0#0.1*Para.EF
+g=2.0
+kF = 1.0
+
 
 #FreqBin = (np.arange(len(TauBin))+0.5)*2*np.pi*Temp
 #FreqBinSize=len(FreqBin)
@@ -274,6 +338,8 @@ for i in range (Ta.size):
 TauBinSize=len(TauBin)
 ExtMomBinSize=len(ExtMomBin)
 print ("TauBIn",TauBin)
+print ("MomBin",ExtMomBin)
+print("epsilon",epsilon(ExtMomBin))
 TauExtend=Extend_grid(TauBin)
 print (TauBinSize,len(TauExtend))
 omega_c=10000000.0 #float(line0.split(",")[-1])  
@@ -339,6 +405,9 @@ g_int=interpolate.interp1d(TauExtend,gg)
 gggg=Convol(g_int,g_int,TauBin,ExtMomBinSize,1)
 
 
+
+#print(gggg.shape)
+
 IterationType=1
 lamu=0
 shift=0.00
@@ -370,7 +439,8 @@ if(If_read==0):
         file.write("\n")
         for i in range(TauBinSize):
             for k in range(ExtMomBinSize):
-                F[i][k]=(Para.Beta-2*TauBin[i])
+                E=np.abs(ExtMomBin[k]**2-Para.EF)
+                F[i][k]=(Para.Beta-2*TauBin[i])#/(E+4/Para.Beta)
                 file.write("{0}\t".format(F[i][k]))
     
 else:
@@ -378,7 +448,7 @@ else:
     with open(folder+FileName1,"r"):
         F=np.loadtxt(folder+FileName1,skiprows=1)
         F=F.reshape(TauBinSize,ExtMomBinSize)
- #       print(F.shape)
+#print(F.shape)
 
 time.sleep(SleepTime)
 while True:
@@ -426,7 +496,7 @@ while True:
 
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
         d=d
-        d_o1=0*d_o1
+        d_o1=d_o1*0
         #print ("sum_delta0",np.sum(d_o1))
         #print ("sum_delta",np.sum(d))
         if(np.isnan(np.sum(d))):
@@ -436,14 +506,15 @@ while True:
         #p_square=ExtMomBin**2
         #print (p_square)
         #print  (scp_int.simps(p_square[np.newaxis,:]*F,ExtMomBin))
-        taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2)[np.newaxis,:]*F,ExtMomBin)
+        taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
         #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
         taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
-        d=d+taudep[np.newaxis,:]
-        Plot_Everything(d,loopcounter)
-        #Plot_Everything(d)
+        d=d+np.tensordot(epsilon(ExtMomBin),taudep,axes=0)
+        print(epsilon(ExtMomBin))
+        #Plot_Everything(d,loopcounter)
 
-        Plot_Errorbar([d0s[i]/Norm0s[i] for i in range(len(d0s))],taudep[np.newaxis,:])
+        
+        Plot_Errorbar(d0s,Norm0s,np.tensordot(epsilon(ExtMomBin),taudep,axes=0))
 
         # # banch mark
         # print ("Tau",TauBin)
@@ -499,7 +570,7 @@ while True:
         # plt.show()    
 
         middle=middle.T 
-        shift=0.0
+        shift=2.0
         lamu=np.tensordot(middle[0:cut,:],F[0:cut,:],axes=([0,1],[0,1]))
         print ("lamu",lamu)
         middle[0:cut,:]=middle[0:cut,:]+shift*F[0:cut,:]
@@ -513,6 +584,10 @@ while True:
             F_accumulate[0:cut,:]+=middle[0:cut,:]/modulus_dum
             F[0:cut,:]=F_accumulate/(loopcounter-ThermoSteps+1.0)
             print(math.sqrt(np.tensordot(F_accumulate[0:cut,:],F_accumulate[0:cut,:],axes=([0,1],[0,1]))))
+
+        Plot_F(F)
+        # if(loopcounter<2):
+        #     Plot_F(gggg.T)
 
         loopcounter += 1
 
