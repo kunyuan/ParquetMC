@@ -263,7 +263,52 @@ def Plot_Errorbar(Data,td):
     fig.savefig("comparefreq.pdf")
 
     plt.close()
-    
+
+def Plot_F(F,F_err):
+    print("plotting f")
+    fff=F.T#/epsilon(ExtMomBin)[:,np.newaxis]
+    f_err=F_err.T
+    d_naive,_=Fourier.SpectralT2W(fff)
+    lines=6
+    cutf_dum=0.9
+    q_cut1=np.searchsorted(ExtMomBin,(1.0-q_cut)*Para.kF,side='right') 
+    q_cut2=np.searchsorted(ExtMomBin,(1.0+q_cut)*Para.kF,side='right') 
+    fig, ax = plt.subplots()
+    for i in range(lines):
+        pidx=len(ExtMomBin)//lines*i
+  #      ax.plot(TauBin,fff[pidx,:],label="q={0:.2e}".format(ExtMomBin[pidx]))
+        ax.errorbar(TauBin,fff[pidx,:],yerr=f_err[pidx,:],fmt=".-",label="q={0:.2e}".format(ExtMomBin[pidx]), capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+    ax.legend(bbox_to_anchor=(0.55,0.55),fontsize=6)
+    ax.set(xlabel="Tau($E_F$)")
+    ax.set(ylabel="$F$")
+    #ax.autoscale(tight=True)
+    fig.savefig("f_tq.pdf")
+    plt.close()
+
+    fig, ax = plt.subplots()
+    for i in range(lines):
+        tidx=len(TauBin)//2//lines*i
+        #ax.plot(ExtMomBin[q_cut1:q_cut2]/Para.kF,fff[q_cut1:q_cut2,tidx],label="t={0:.2e}".format(TauBin[tidx]))
+        ax.errorbar(ExtMomBin[q_cut1:q_cut2]/Para.kF,fff[q_cut1:q_cut2,tidx],yerr=f_err[q_cut1:q_cut2,tidx],fmt=".-",label="t={0:.2e}".format(TauBin[tidx]),capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+    ax.legend(bbox_to_anchor=(0.60,0.88),fontsize=6.0)
+    ax.set(xlabel="Momentum($k_F$)")
+    ax.set(ylabel="$F$")
+    #ax.autoscale(tight=True)
+    fig.savefig("f_qt.pdf")
+    plt.close()
+
+
+    fig, ax = plt.subplots()
+    freq0=len(phyFreq)//2
+    for i in range(lines):
+        pidx=len(ExtMomBin)//lines*i
+        ax.plot(phyFreq[freq0:]/np.pi*Para.Beta,d_naive.real[pidx,freq0:],label="q={0:.2e}".format(ExtMomBin[pidx]))
+    ax.legend(bbox_to_anchor=(1.05,1))
+    ax.set(xlabel="Frequency ($\pi T$)")
+    ax.set(ylabel="$F$")
+    ax.autoscale(tight=True)
+    fig.savefig("f_wq.pdf")
+    plt.close()
 
 
 
@@ -332,7 +377,11 @@ F=F.reshape((TauBinSize,ExtMomBinSize))
 F[:,:]=1.0
 lamu_accumulate=0.0
 F_accumulate=np.zeros(TauBinSize*ExtMomBinSize)
-F_accumulate=F.reshape((TauBinSize,ExtMomBinSize))*0.0
+F_accumulate=F_accumulate.reshape((TauBinSize,ExtMomBinSize))
+block_size=4
+F_blocks=np.zeros(block_size*TauBinSize*ExtMomBinSize)
+F_blocks=F_blocks.reshape((block_size,TauBinSize,ExtMomBinSize))
+F_errors=0*F_accumulate
 
 
 gg=np.zeros((TauBinSize,ExtMomBinSize))
@@ -369,8 +418,8 @@ modulus_dum=0.0
 
 
 #os set
-Duplicate=3
-SleepTime=71
+Duplicate=4
+SleepTime=75
 WaitTime=5
 ThermoSteps=20
 
@@ -387,6 +436,7 @@ FileName1= "f0.dat"
 loopcounter=0
 high_mom_counter=0
 low_mom_counter=0
+low_block_counter=np.zeros((block_size))
 if(If_read==0):
     with open(folder+FileName1,"w") as file:
         file.write("{0} ".format(loopcounter))
@@ -440,13 +490,13 @@ while True:
             err=err+err0.reshape((int(order_num+1),int(size0)))[ll].reshape((ExtMomBinSize,TauBinSize))**2
             # d=d*0
         err=np.sqrt(err)
-        d_o1=+np.average(d0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize)),axis=-1)
+        d_o1=np.average(d0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize)),axis=-1)
         d_o1=d_o1[:,np.newaxis]+0*d
         err_o1=+np.average(err0.reshape((int(order_num+1),int(size0)))[1].reshape((ExtMomBinSize,TauBinSize)),axis=-1)
         err_o1=err_o1[:,np.newaxis]+0*d
 
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
-        d=0*d
+        d=d
         d_o1=d_o1
         #print ("sum_delta0",np.sum(d_o1))
         #print ("sum_delta",np.sum(d))
@@ -460,7 +510,7 @@ while True:
         taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
         #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
         taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
-        d=d+np.tensordot(epsilon(ExtMomBin),taudep,axes=0)
+        #d=d+np.tensordot(epsilon(ExtMomBin),taudep,axes=0)
         print(epsilon(ExtMomBin))
         #Plot_Everything(d,loopcounter)
 
@@ -544,17 +594,26 @@ while True:
                 F[:,0:cut_left]=F_accumulate[:,0:cut_left]/high_mom_counter
                 F[:,cut_right:ExtMomBinSize]=F_accumulate[:,cut_right:ExtMomBinSize]/high_mom_counter
             elif(IterationType==1):
-                low_mom_counter += 1
                 F_accumulate[:,cut_left:cut_right] += F[:,cut_left:cut_right]
+                F_blocks[low_mom_counter%block_size,:,cut_left:cut_right] += F[:,cut_left:cut_right]
+                low_block_counter[low_mom_counter%block_size] += 1
                 lamu_accumulate += lamu
-                lamu = lamu_accumulate/low_mom_counter
+                lamu = lamu_accumulate/(low_mom_counter+1)
                 modulus_dum=math.sqrt(np.tensordot(F_accumulate[:,cut_left:cut_right],F_accumulate[:,cut_left:cut_right],axes=([0,1],[0,1])))
-                F[:,cut_left:cut_right] = F_accumulate[:,cut_left:cut_right]/modulus_dum  
-
-        Plot_F(F)
+                F[:,cut_left:cut_right] = F_accumulate[:,cut_left:cut_right]/modulus_dum
+                if(low_mom_counter%block_size==block_size-1):
+                    F_errors=0*F_errors
+                    for ll in range (block_size):
+                        F_errors += (F_blocks[ll,:,cut_left:cut_right]*block_size/modulus_dum-F[:,cut_left:cut_right])**2
+                        print("check block counter",low_block_counter[ll])
+                    F_errors=F_errors/block_size
+                    F_errors=np.sqrt(F_errors)
+                    print (F_errors)
+                    #Plot_F(F,F_errors)
+                low_mom_counter += 1
         # if(loopcounter<2):
         #     Plot_F(gggg.T)
-
+        Plot_F(F,F_errors)
         loopcounter += 1
         #if(loopcounter%5==0):
         #    IterationType=(IterationType+1)%2

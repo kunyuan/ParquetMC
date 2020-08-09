@@ -90,7 +90,7 @@ double delta::Evaluate() {
     return 1.0;
   else if (Order == 1) {
     // bare interaction
-    double Weight = Prop.Interaction(Var.LoopMom[0] + Var.LoopMom[1], -1);
+    double Weight = Prop.Interaction(Var.LoopMom[0] - Var.LoopMom[1], -1);
     Weight *= Prop.F(1.0e-8, Var.LoopMom[1], UP, 0);
     // cout << "1: " << Weight * Factor * 0.5 << endl;
     result= Weight * Factor;
@@ -117,6 +117,8 @@ double delta::Evaluate() {
   for (int i = 0; i < Size; ++i) {
     auto &fidx = Fidx[i];
     Weight += (Ver4.Weight[i][DIR] - Ver4.Weight[i][EX]) * F[fidx];
+    //Weight += (Ver4.Weight[i][DIR]) * F[fidx];
+
   }
   // there is a symmetry factor -0.5
   // cout << "2: " << Weight * Factor * 0.5 << endl;
@@ -160,6 +162,7 @@ double delta::Evaluate(int channel) {
   for (int i = 0; i < Size; ++i) {
     auto &fidx = Fidx[i];
     Weight += (Ver4.Weight[i][DIR] - Ver4.Weight[i][EX]) * F[fidx];
+    //Weight += (Ver4.Weight[i][DIR]) * F[fidx];
   }
   // there is a symmetry factor -0.5
   // cout << "2: " << Weight * Factor * 0.5 << endl;
