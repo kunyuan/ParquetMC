@@ -310,7 +310,70 @@ def Plot_F(F,F_err):
     fig.savefig("f_wq.pdf")
     plt.close()
 
+def Plot_D(fff):
+    print("plotting d")
+    #fff=F.T#/epsilon(ExtMomBin)[:,np.newaxis]
+    d_naive,_=Fourier.SpectralT2W(fff)
+    lines=6
+    cutf_dum=0.9
+    q_cut1=0
+    q_cut2=ExtMomBinSize 
+    fig, ax = plt.subplots()
+    for i in range(lines):
+        pidx=len(ExtMomBin)//lines*i
+        ax.plot(TauBin,fff[pidx,:],label="q={0:.2e}".format(ExtMomBin[pidx]))
+   #     ax.errorbar(TauBin,fff[pidx,:],yerr=f_err[pidx,:],fmt=".-",label="q={0:.2e}".format(ExtMomBin[pidx]), capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+    ax.legend(bbox_to_anchor=(0.55,0.55),fontsize=6)
+    ax.set(xlabel="Tau($E_F$)")
+    ax.set(ylabel="$\Delta$")
+    #ax.autoscale(tight=True)
+    fig.savefig("d_tq.pdf")
+    plt.close()
 
+    fig, ax = plt.subplots()
+    for i in range(lines):
+        tidx=len(TauBin)//2//lines*i
+        ax.plot(ExtMomBin[q_cut1:q_cut2]/Para.kF,fff[q_cut1:q_cut2,tidx],label="t={0:.2e}".format(TauBin[tidx]))
+        #ax.errorbar(ExtMomBin[q_cut1:q_cut2]/Para.kF,fff[q_cut1:q_cut2,tidx],yerr=f_err[q_cut1:q_cut2,tidx],fmt=".-",label="t={0:.2e}".format(TauBin[tidx]),capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+    ax.legend(bbox_to_anchor=(0.80,0.88),fontsize=6.0)
+    ax.set(xlabel="Momentum($k_F$)")
+    ax.set(ylabel="$\Delta$")
+    #ax.autoscale(tight=True)
+    fig.savefig("d_qt.pdf")
+    plt.close()
+
+
+    fig, ax = plt.subplots()
+    freq0=len(phyFreq)//2
+    for i in range(lines):
+        pidx=len(ExtMomBin)//lines*i
+        ax.plot(phyFreq[freq0:]/np.pi*Para.Beta,d_naive.real[pidx,freq0:],label="q={0:.2e}".format(ExtMomBin[pidx]))
+    ax.legend(bbox_to_anchor=(0.9,0.9),fontsize=6.0)
+    ax.set(xlabel="Frequency ($\pi T$)")
+    ax.set(ylabel="$\Delta$")
+    ax.autoscale(tight=True)
+    fig.savefig("d_wq.pdf")
+    plt.close()
+
+def Plot_D_o1(fff):
+    print("plotting do1")
+    #fff=F.T#/epsilon(ExtMomBin)[:,np.newaxis]
+    d_naive,_=Fourier.SpectralT2W(fff)
+    lines=6
+    cutf_dum=0.9
+    q_cut1=0
+    q_cut2=ExtMomBinSize
+    fig, ax = plt.subplots()
+
+    tidx=0
+    ax.plot(ExtMomBin[q_cut1:q_cut2]/Para.kF,fff[q_cut1:q_cut2,tidx],label="t={0:.2e}".format(TauBin[tidx]))
+        #ax.errorbar(ExtMomBin[q_cut1:q_cut2]/Para.kF,fff[q_cut1:q_cut2,tidx],yerr=f_err[q_cut1:q_cut2,tidx],fmt=".-",label="t={0:.2e}".format(TauBin[tidx]),capthick=0.1,capsize=0.5,markersize=0.3,elinewidth=0.2,barsabove=True,ecolor="k")
+    #ax.legend(bbox_to_anchor=(0.60,0.88),fontsize=6.0)
+    ax.set(xlabel="Momentum($k_F$)")
+    ax.set(ylabel="$\Delta_0$")
+    #ax.autoscale(tight=True)
+    fig.savefig("do1_qt.pdf")
+    plt.close()
 
 
 Omega=3.0#0.1*Para.EF
@@ -419,7 +482,7 @@ modulus_dum=0.0
 
 #os set
 Duplicate=4
-SleepTime=75
+SleepTime=7200
 WaitTime=5
 ThermoSteps=20
 
@@ -443,8 +506,7 @@ if(If_read==0):
         file.write("\n")
         for i in range(TauBinSize):
             for k in range(ExtMomBinSize):
-                E=np.abs(ExtMomBin[k]**2-Para.EF)
-                F[i][k]=(Para.Beta-2*TauBin[i])#/(E+4/Para.Beta)
+                F[i][k]=gggg[k][i]
                 file.write("{0}\t".format(F[i][k]))
     
 else:
@@ -496,8 +558,8 @@ while True:
         err_o1=err_o1[:,np.newaxis]+0*d
 
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
-        d=d
-        d_o1=d_o1
+        d=-d
+        d_o1=-d_o1
         #print ("sum_delta0",np.sum(d_o1))
         #print ("sum_delta",np.sum(d))
         if(np.isnan(np.sum(d))):
@@ -512,8 +574,8 @@ while True:
         taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
         #d=d+np.tensordot(epsilon(ExtMomBin),taudep,axes=0)
         print(epsilon(ExtMomBin))
-        #Plot_Everything(d,loopcounter)
-
+        Plot_D(d)
+        Plot_D_o1(d_o1)
         
         #Plot_Errorbar(d0s,Norm0s,np.tensordot(epsilon(ExtMomBin),taudep,axes=0))
 
@@ -571,7 +633,7 @@ while True:
         # plt.show()    
 
         middle=middle.T 
-        shift=2.0
+        shift=0.0
             
         if(IterationType==0):
             F[:,0:cut_left]=middle[:,0:cut_left]
