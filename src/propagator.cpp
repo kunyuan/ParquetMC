@@ -277,8 +277,8 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
       for(int i=1;i<Para.Order;i++){
           Weight += Weight0 * pow(Weight0 * Para.Lambda / 8.0 / π, i);
       }
-      return -Weight;
-      //return -8.0 * PI * Para.Charge2 / (kQ * kQ);
+      //return -Weight;
+      return -8.0 * PI * Para.Charge2 / (kQ * kQ+2.0);
     }
      else
       return 0.0;

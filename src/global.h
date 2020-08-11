@@ -22,7 +22,7 @@ const int MaxOrder = 9; // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
-const int ChannelNum = 3;
+const int ChannelNum = 1;
 // MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
 
 

@@ -342,19 +342,6 @@ def Plot_D(fff):
     fig.savefig("d_qt.pdf")
     plt.close()
 
-
-    fig, ax = plt.subplots()
-    freq0=len(phyFreq)//2
-    for i in range(lines):
-        pidx=len(ExtMomBin)//lines*i
-        ax.plot(phyFreq[freq0:]/np.pi*Para.Beta,d_naive.real[pidx,freq0:],label="q={0:.2e}".format(ExtMomBin[pidx]))
-    ax.legend(bbox_to_anchor=(0.9,0.9),fontsize=6.0)
-    ax.set(xlabel="Frequency ($\pi T$)")
-    ax.set(ylabel="$\Delta$")
-    ax.autoscale(tight=True)
-    fig.savefig("d_wq.pdf")
-    plt.close()
-
 def Plot_D_o1(fff):
     print("plotting do1")
     #fff=F.T#/epsilon(ExtMomBin)[:,np.newaxis]
@@ -373,6 +360,40 @@ def Plot_D_o1(fff):
     ax.set(ylabel="$\Delta_0$")
     #ax.autoscale(tight=True)
     fig.savefig("do1_qt.pdf")
+    plt.close()
+
+def Plot_Dfreq(fff,fff_o1):
+    print("plotting dfreq")
+    #fff=F.T#/epsilon(ExtMomBin)[:,np.newaxis]
+    d_naive,_=Fourier.SpectralT2W(fff)
+    lines=6
+    cutf_dum=0.9
+    q_cut1=0
+    q_cut2=ExtMomBinSize
+    d_freq=d_naive.real+np.mean(fff_o1,axis=1)[:,np.newaxis]
+
+    fig, ax = plt.subplots()
+    freq0=len(phyFreq)//2
+    for i in range(lines):
+        pidx=len(ExtMomBin)//lines*i
+        ax.plot(phyFreq[freq0:]/np.pi*Para.Beta,d_freq[pidx,freq0:],label="$q/k_F={0:.2e}$".format(ExtMomBin[pidx]/Para.kF))
+    ax.legend(bbox_to_anchor=(0.6,0.7),fontsize=4.0)
+    ax.set(xlabel="Frequency ($\pi T$)")
+    ax.set(ylabel="$\Delta$")
+    ax.autoscale(tight=True)
+    fig.savefig("d_wq.pdf")
+    plt.close()
+
+    fig, ax = plt.subplots()
+    freq0=len(phyFreq)//2
+    for i in range(lines):
+        fidx=freq0+len(phyFreq)//(2*lines)*i
+        ax.plot(ExtMomBin[q_cut1:q_cut2]/Para.kF,d_freq[q_cut1:q_cut2,fidx],label="$\omega/(\pi T)={0:.2e}$".format(phyFreq[fidx]/np.pi*Para.Beta))
+    ax.legend(bbox_to_anchor=(0.9,0.9),fontsize=6.0)
+    ax.set(xlabel="Momentum ($k_F$)")
+    ax.set(ylabel="$\Delta$")
+    ax.autoscale(tight=True)
+    fig.savefig("d_qw.pdf")
     plt.close()
 
 
@@ -482,9 +503,9 @@ modulus_dum=0.0
 
 #os set
 Duplicate=4
-SleepTime=7200
+SleepTime=3000
 WaitTime=5
-ThermoSteps=20
+ThermoSteps=10
 
 rootdir = os.getcwd()
 homedir = os.path.join(rootdir, "Data")
@@ -558,8 +579,8 @@ while True:
         err_o1=err_o1[:,np.newaxis]+0*d
 
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
-        d=-d
-        d_o1=-d_o1
+        d=d
+        d_o1=d_o1
         #print ("sum_delta0",np.sum(d_o1))
         #print ("sum_delta",np.sum(d))
         if(np.isnan(np.sum(d))):
@@ -576,6 +597,7 @@ while True:
         print(epsilon(ExtMomBin))
         Plot_D(d)
         Plot_D_o1(d_o1)
+        Plot_Dfreq(d,d_o1)
         
         #Plot_Errorbar(d0s,Norm0s,np.tensordot(epsilon(ExtMomBin),taudep,axes=0))
 
@@ -648,7 +670,8 @@ while True:
 
        # if loopcounter>ThermoSteps:
        
-        if loopcounter<-1:
+        #if loopcounter<-1:
+        if loopcounter>-1:
             if(IterationType==0):
                 high_mom_counter += 1
                 F_accumulate[:,0:cut_left] += F[:,0:cut_left]
