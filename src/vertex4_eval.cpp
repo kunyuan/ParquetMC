@@ -38,6 +38,9 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
   if (DiagType == POLAR)
     Weight[0] =
         Prop.Interaction(KInL, KOutL, KInR, KOutR, Var.LoopMom[0].norm());
+  else if (DiagType == SIGMA)
+    Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR,
+                                 (Var.LoopMom[0] - Var.LoopMom[1]).norm());
   else
     Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
   return;

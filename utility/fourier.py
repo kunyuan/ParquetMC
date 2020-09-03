@@ -90,7 +90,8 @@ class fourier:
         for i, freq in enumerate(self.WnGrid):
             phase = np.exp(-1j*self.uTauGrid*freq)
             dw = dataT[..., :]*phase
-            dataW[..., i] = integrate.trapz(dw[..., :], self.uTauGrid)
+            # dataW[..., i] = integrate.trapz(dw[..., :], self.uTauGrid)
+            dataW[..., i] = integrate.simps(dw[..., :], self.uTauGrid)
             # SigmaW[i] = integrate.simps(dw, self.TauGrid)
         return dataW
 

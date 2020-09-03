@@ -81,7 +81,8 @@ double sigma::Evaluate() {
     b.RVer.Evaluate(G2.K, G3.K, G1.K, Var.LoopMom[0], false);
 
     // cout << "left: " << b.LVer.Weight[DIR] << ", " << b.LVer.Weight[EX] <<
-    // endl; cout << "righ: " << b.RVer.Weight[DIR] << ", " << b.RVer.Weight[EX]
+    // endl; cout << "righ: " << b.RVer.Weight[DIR] << ", " <<
+    // b.RVer.Weight[EX]
     // << endl;
 
     for (auto &map : b.Map) {

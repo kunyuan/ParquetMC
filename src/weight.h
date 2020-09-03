@@ -29,7 +29,8 @@ public:
   obs::ver4Obs GammaObs;
 
   diag::polar Polar[MaxOrder];
-  diag::sigma Sigma[MaxOrder];
+  // diag::sigma Sigma[MaxOrder];
+  diag::sigma2 Sigma[MaxOrder];
   diag::delta Delta[MaxOrder];
   obs::oneBodyObs OneBodyObs;
 

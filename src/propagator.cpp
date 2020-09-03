@@ -18,16 +18,17 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
   auto k = K.norm();
   auto Ek = k * k - Para.Mu; // bare propagator
 
-  // Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
+  Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
   // _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
 
-  // if (BoldG && k < Para.KGrid.MaxK) {
-  // double sigma = _Interp1D(k, _StaticSigma);
-  // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
-  //                "fail at: " << Para.KGrid.Floor(k) << " , " << sigma
-  //                            << " vs " << Fock(k));
-  // Ek += -sigma;
+  // if (BoldG && k < Para.FermiKGrid.MaxK) {
+  //   double sigma = _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
+  //   double fock = fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2),
+  //   true); ASSERT_ALLWAYS(abs(sigma + fock) < 6.0e-4,
+  //                  "fail at: " << Para.FermiKGrid.floor(k) << " , " << sigma
+  //                              << " vs " << fock);
+  //   Ek += -sigma;
   // }
   return fermiGreen(Para.Beta, Tau, Ek);
 }
@@ -114,6 +115,9 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   if (DiagType == POLAR && IsEqual(kDiQ, ExtQ))
     Weight[DIR] = 0.0;
 
+  if (DiagType == SIGMA && IsEqual(kDiQ, ExtQ))
+    Weight[DIR] = 0.0;
+
   double kExQ = (KInL - KOutR).norm();
   Weight[EX] =
       8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
@@ -125,8 +129,12 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
 
+  if (DiagType == SIGMA && IsEqual(kExQ, ExtQ))
+    Weight[EX] = 0.0;
+
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
+  // Weight[DIR] = 0.0;
   return Weight;
 }
 

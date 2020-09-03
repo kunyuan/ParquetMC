@@ -68,8 +68,11 @@ vector<double> Tau::build(double beta, int _size, double scale) {
 
   grid[0] = 1.0e-8;
   grid[size - 1] = beta - 1.0e-8;
+  // cout << floor(grid[1]) << endl;
+  // cout << _coeff0.floor(grid[1] + ) << endl;
   //////   some simple test ////////
-  assert(floor(grid[1]) == 1);
+  assert(grid[0] < grid[1]);
+  // assert(floor(grid[1]) == 1);
   assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
   assert(floor(0.0) == 0);
   assert(floor(grid[size - 1]) == size - 2);
@@ -85,6 +88,8 @@ int Tau::floor(double x) const {
     return _coeff1.floor(x);
   else if (x >= grid[size - 2])
     return size - 2;
+  else if (x >= grid[size / 2 - 1] && x < grid[size / 2])
+    return size / 2 - 1;
   else
     return 0; // x<Grid[1]
 };
@@ -99,6 +104,7 @@ string Tau::str() {
 
 void FermiK::build(double kF, double maxK, int _size, double scale) {
   assert(maxK > kF);
+  MaxK = maxK;
   size = _size;
   assert(size > 2);
   kFidx = size / 2;
@@ -116,7 +122,7 @@ void FermiK::build(double kF, double maxK, int _size, double scale) {
   grid[0] = 1.0e-6;
   // cout << floor(maxK) << endl;
   //////   some simple test ////////
-  assert(floor(grid[1]) == 1);
+  // assert(floor(grid[1]) == 1);
   assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
   assert(floor(0.0) == 0);
   assert(floor(grid[size - 1]) == size - 2);
@@ -160,7 +166,7 @@ void BoseK::build(double kF, double maxK, int _size, double scale) {
 
   grid[0] = 1.0e-6;
   //////   some simple test ////////
-  assert(floor(grid[1]) == 1);
+  // assert(floor(grid[1]) == 1);
   assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
   assert(floor(0.0) == 0);
   assert(floor(grid[size - 1]) == size - 2);

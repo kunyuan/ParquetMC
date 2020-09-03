@@ -49,6 +49,7 @@ public:
   array<green, 4> G;           // G for 0, T, U, S, TC and UC
   vector<array<int, 4>> Tpair; // external T list
   vector<verWeight> Weight;    // size: equal to T.size()
+  // vector<verWeight> Weight;    // size: equal to T.size()
 
   vector<bubble> _UST;        // bubble diagrams
   vector<int> _EnvolpeVerIdx; // weight idx of the envolope diagrams

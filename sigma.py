@@ -4,8 +4,8 @@ import utility.fourier as fourier
 from utility.plot import *
 
 # XType = "Tau"
-XType = "Mom"
-# XType = "Z"
+# XType = "Mom"
+XType = "Z"
 # XType = "Freq"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
@@ -49,8 +49,9 @@ if(XType == "Mom"):
 
 elif(XType == "Z"):
 
-    phyFreq = np.array([-1, 1])*np.pi / Para.Beta
+    phyFreq = np.array([1, 3])*np.pi / Para.Beta
     Fourier = fourier.fourier(TauGrid, phyFreq, Para.Beta)
+    Fourier.InitializeKernel(100.0, 1024, "Fermi", 1.0e-13)
 
     arr = np.amin(abs(MomGrid-Para.kF))
     kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
@@ -58,10 +59,17 @@ elif(XType == "Z"):
     for o in Order:
         SigmaW, Err = Estimate(Data, Norm, lambda d: Fourier.naiveT2W(
             np.sum(d[2:o+1, :, :], axis=0)))
+        # SigmaW, Err = Estimate(Data, Norm, lambda d: Fourier.SpectralT2W(
+        #     np.sum(d[2:o+1, :, :], axis=0)))
         # print SigmaW.shape
         # print SigmaW[:, 1]-SigmaW[:, 0]
-        Errorbar(MomGrid/Para.kF, 1.0-(SigmaW[:, 1].imag-SigmaW[:, 0].imag)/(2.0*np.pi/Para.Beta),
+        # Errorbar(MomGrid/Para.kF, SigmaW[:, 0].real,
+        #          color=ColorList[o], label="Order {0}, 1".format(o))
+        # Errorbar(MomGrid/Para.kF, SigmaW[:, 1].real,
+        #          color=ColorList[o+1], label="Order {0}, 3".format(o))
+        Errorbar(MomGrid/Para.kF, (SigmaW[:, 1].imag-SigmaW[:, 0].imag)/(2.0*np.pi/Para.Beta),
                  color=ColorList[o], label="Order {0}".format(o))
+        # print(Para.Beta)
         plt.axvline(x=1.0, linestyle='--')
     ax.set_xlim([MomGrid[0]/Para.kF, MomGrid[-1]/Para.kF])
     ax.set_xlabel("$Ext K$", size=size)
@@ -90,8 +98,8 @@ elif(XType == "Freq"):
         q = i*MomGridSize/N
         dataW = [Fourier.naiveT2W(d[o, q, :]) for d in Data]
         SigmaW, Err = Estimate(dataW, Norm)
-        # ax.errorbar(phyFreq, SigmaW.real, fmt='s-',
-        #             capthick=1, capsize=2, color=ColorList[2*i+1], label="$k={0}k_F$".format(MomGrid[q]/Para.kF))
+        ax.errorbar(phyFreq, SigmaW.real, fmt='s-',
+                    capthick=1, capsize=2, color=ColorList[2*i+1], label="$k={0}k_F$".format(MomGrid[q]/Para.kF))
         ax.errorbar(phyFreq, SigmaW.imag, fmt='o-',
                     capthick=1, capsize=2, markersize=2, label="$k={0}k_F$".format(MomGrid[q]/Para.kF))
     # ax.set_xlim([TauGrid[0]/Para.Beta-1e-3, TauGrid[-1]/Para.Beta])

@@ -45,6 +45,7 @@ class FermiK {
 public:
   int size;
   int kFidx;
+  double MaxK;
   vector<double> grid;
   void build(double kF, double maxK, int _size, double scale);
   int floor(double x) const; // return the index of a given value

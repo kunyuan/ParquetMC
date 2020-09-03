@@ -24,7 +24,7 @@ const int MaxMomNum = MaxOrder + 3;
 const int IsDynamic = false;
 const bool BoldG = false;
 
-const diagtype DiagType = GAMMA;
+const diagtype DiagType = SIGMA;
 // typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 

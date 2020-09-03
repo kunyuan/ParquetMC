@@ -30,6 +30,7 @@ struct verPair {
 class sigma {
 public:
   int Order;
+  int ExtTauIdx;
   green G1, G2, G3;
   vector<verPair> Bubble;
 
@@ -40,6 +41,23 @@ public:
   string ToString();
 
   bool Test();
+};
+
+class sigma2 {
+public:
+  int Order;
+  int ExtTauIdx;
+  vertex4 Vertex;
+  green G1, G2, G3;
+  vector<array<int, 3>> Gidx; // external T list
+
+  int TauNum() { return Order; }
+  int LoopNum() { return Order; }
+  void Build(int Order);
+  double Evaluate();
+  string ToString() { return Vertex.ToString(); };
+
+  bool Test() { return true; };
 };
 
 class delta {
