@@ -57,16 +57,18 @@ elif(XType == "Z"):
     kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
 
     for o in Order:
+        # SigmaW, Err = Estimate(Data, Norm, lambda d: Fourier.naiveT2W(
+            # np.sum(d[2:o+1, :, :], axis=0)))
         SigmaW, Err = Estimate(Data, Norm, lambda d: Fourier.naiveT2W(
-            np.sum(d[2:o+1, :, :], axis=0)))
+            d[o, :, :]))
         # SigmaW, Err = Estimate(Data, Norm, lambda d: Fourier.SpectralT2W(
         #     np.sum(d[2:o+1, :, :], axis=0)))
         # print SigmaW.shape
         # print SigmaW[:, 1]-SigmaW[:, 0]
         # Errorbar(MomGrid/Para.kF, SigmaW[:, 0].real,
-        #          color=ColorList[o], label="Order {0}, 1".format(o))
+                 # color=ColorList[o], label="Order {0}, 1".format(o))
         # Errorbar(MomGrid/Para.kF, SigmaW[:, 1].real,
-        #          color=ColorList[o+1], label="Order {0}, 3".format(o))
+                 # color=ColorList[o+1], label="Order {0}, 3".format(o))
         Errorbar(MomGrid/Para.kF, (SigmaW[:, 1].imag-SigmaW[:, 0].imag)/(2.0*np.pi/Para.Beta),
                  color=ColorList[o], label="Order {0}".format(o))
         # print(Para.Beta)

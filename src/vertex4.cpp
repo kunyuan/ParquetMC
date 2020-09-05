@@ -32,7 +32,7 @@ void green::Evaluate(bool IsAnomal) {
     else
       _Weight[i] = Prop.F(Var.Tau[T[OUT]] - Var.Tau[T[IN]], K, UP);
     // if (Var.CurrOrder == 2)
-    //   cout << T[IN] << "->" << T[OUT] << ": " << _Weight[i] << endl;
+    // cout << T[IN] << "->" << T[OUT] << ": " << _Weight[i] << endl;
   }
 }
 

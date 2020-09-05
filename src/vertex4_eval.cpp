@@ -101,6 +101,9 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
       auto &Lw = LVerW[map[LVERT]];
       auto &Rw = RVerW[map[RVERT]];
 
+      // cout << "Lw: " << Lw[DIR] << ", " << Lw[EX] << endl;
+      // cout << "Rw: " << Rw[DIR] << ", " << Rw[EX] << endl;
+
       // cout << "g " << G[0][map[G0T]] << ", " << G[chan][map[GXT]] << endl;
       // cout << "Order: " << Order << ", c=" << chan << ", " << GWeight << ",
       // ["
@@ -176,6 +179,8 @@ void vertex4::_EvalI(const momentum &KInL, const momentum &KOutL,
                      const momentum &KInR, const momentum &KOutR, bool IsFast) {
   // only loop 3 has envolope diagrams
   if (Order != 3)
+    return;
+  if (_EnvolpeVerIdx.size() == 0)
     return;
 
   momentum &K0 = Var.LoopMom[LoopIdx];

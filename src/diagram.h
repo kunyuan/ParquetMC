@@ -57,7 +57,7 @@ public:
   double Evaluate();
   string ToString() { return Vertex.ToString(); };
 
-  bool Test() { return true; };
+  bool Test();
 };
 
 class delta {
