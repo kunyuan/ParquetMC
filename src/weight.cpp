@@ -179,10 +179,11 @@ void weight::SaveToFile() {
   if (DiagType == GAMMA)
     GammaObs.Save();
   else if (DiagType == DELTA){
-    OneBodyObs.Save();
     for(int channel=0;channel<ChannelNum;channel++){
       ChannelObs[channel].Save(channel);
     }
+    OneBodyObs.Save();
+    OneBodyObs.Save(0);
   }
   else
     OneBodyObs.Save();

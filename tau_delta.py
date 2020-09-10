@@ -15,6 +15,8 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import grid
 
+is_IR=True
+
 plt.style.use(['science','grid'])
 #rs = None
 #Lambda = None
@@ -271,8 +273,8 @@ def Plot_F(F,F_err):
     d_naive,_=Fourier.SpectralT2W(fff)
     lines=6
     cutf_dum=0.9
-    q_cut1=np.searchsorted(ExtMomBin,(1.0-q_cut)*Para.kF,side='right') 
-    q_cut2=np.searchsorted(ExtMomBin,(1.0+q_cut)*Para.kF,side='right') 
+    q_cut1=0#np.searchsorted(ExtMomBin,(1.0-q_cut)*Para.kF,side='right') 
+    q_cut2=-1#np.searchsorted(ExtMomBin,(1.0+q_cut)*Para.kF,side='right') 
     fig, ax = plt.subplots()
     for i in range(lines):
         pidx=len(ExtMomBin)//lines*i
@@ -397,8 +399,8 @@ def Plot_Dfreq(fff,fff_o1):
     plt.close()
 
 
-Omega=3.0#0.1*Para.EF
-g=2.0
+Omega=1.0#0.1*Para.EF
+g=16.0
 kF = 1.0
 
 
@@ -442,10 +444,14 @@ DataList = []
 
 #initialize F
 
-q_cut=0.1*Para.kF
+q_cut=0.5*Para.kF
 
-cut_left=0 #np.searchsorted(ExtMomBin,Para.kF-q_cut,side='right') 
-cut_right=ExtMomBinSize #np.searchsorted(ExtMomBin,Para.kF+q_cut,side='right')
+if is_IR==False:
+    cut_left=0
+    cut_right=ExtMomBinSize
+else:
+    cut_left=np.searchsorted(ExtMomBin,Para.kF-q_cut,side='right') 
+    cut_right=np.searchsorted(ExtMomBin,Para.kF+q_cut,side='right')
 cut_left_plt=np.searchsorted(ExtMomBin,Para.kF-5*q_cut,side='right') 
 cut_right_plt=np.searchsorted(ExtMomBin,Para.kF+5*q_cut,side='right')
 
@@ -503,14 +509,14 @@ modulus_dum=0.0
 
 #os set
 Duplicate=4
-SleepTime=3000
-WaitTime=5
+SleepTime=0.1
+WaitTime=0.1
 ThermoSteps=10
 
 rootdir = os.getcwd()
 homedir = os.path.join(rootdir, "Data")
 myCmd='python send.py {0}'.format(Duplicate)
-os.system(myCmd)
+#os.system(myCmd)
 os.chdir(homedir)
 files = os.listdir(folder)
 
@@ -579,21 +585,27 @@ while True:
         err_o1=err_o1[:,np.newaxis]+0*d
 
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
-        d=d
-        d_o1=d_o1
+        d=d*0
+        d_o1=d_o1*0
         #print ("sum_delta0",np.sum(d_o1))
         #print ("sum_delta",np.sum(d))
         if(np.isnan(np.sum(d))):
             raise ValueError ("delta has nan")
-        F0=0.0#-g/4.0/np.pi/np.pi*sum(ExtMomBin*F[0])/ExtMomBinSize*ExtMomBin[-1]
+        F0=0#-g/4.0/np.pi/np.pi*scp_int.simps(ExtMomBin**2/epsilon(ExtMomBin)*F[0],ExtMomBin)/ExtMomBinSize*ExtMomBin[-1]
         #print(F)
         #p_square=ExtMomBin**2
         #print (p_square)
         #print  (scp_int.simps(p_square[np.newaxis,:]*F,ExtMomBin))
-        taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
+        #taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
         #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
+        taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
         taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
-        #d=d+np.tensordot(epsilon(ExtMomBin),taudep,axes=0)
+        largeomega=Omega*3
+        taudep2= np.cosh(largeomega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
+        taudep2=taudep2*g*largeomega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*largeomega)
+        taudep=taudep-taudep2#*(largeomega/Omega)**2
+        d=d+np.tensordot(epsilon(ExtMomBin),taudep,axes=0)
+        d_o1=d_o1+F0*epsilon(ExtMomBin)[:,np.newaxis]
         print(epsilon(ExtMomBin))
         Plot_D(d)
         Plot_D_o1(d_o1)
@@ -655,7 +667,7 @@ while True:
         # plt.show()    
 
         middle=middle.T 
-        shift=0.0
+        shift=2.0
             
         if(IterationType==0):
             F[:,0:cut_left]=middle[:,0:cut_left]
@@ -670,8 +682,8 @@ while True:
 
        # if loopcounter>ThermoSteps:
        
-        #if loopcounter<-1:
-        if loopcounter>-1:
+        if loopcounter<-1:
+        #if loopcounter>-1:
             if(IterationType==0):
                 high_mom_counter += 1
                 F_accumulate[:,0:cut_left] += F[:,0:cut_left]
@@ -687,21 +699,21 @@ while True:
                 modulus_dum=math.sqrt(np.tensordot(F_accumulate[:,cut_left:cut_right],F_accumulate[:,cut_left:cut_right],axes=([0,1],[0,1])))
                 F[:,cut_left:cut_right] = F_accumulate[:,cut_left:cut_right]/modulus_dum
                 if(low_mom_counter%block_size==block_size-1):
-                    F_errors=0*F_errors
+                    F_errors[:,cut_left:cut_right]=0*F_errors[:,cut_left:cut_right]
                     for ll in range (block_size):
-                        F_errors += (F_blocks[ll,:,cut_left:cut_right]*block_size/modulus_dum-F[:,cut_left:cut_right])**2
+                        F_errors[:,cut_left:cut_right] += (F_blocks[ll,:,cut_left:cut_right]*block_size/modulus_dum-F[:,cut_left:cut_right])**2
                         print("check block counter",low_block_counter[ll])
-                    F_errors=F_errors/block_size
-                    F_errors=np.sqrt(F_errors)
-                    print (F_errors)
+                    F_errors[:,cut_left:cut_right]=F_errors[:,cut_left:cut_right]/block_size
+                    F_errors[:,cut_left:cut_right]=np.sqrt(F_errors[:,cut_left:cut_right])
+                    print (F_errors[:,cut_left:cut_right])
                     #Plot_F(F,F_errors)
                 low_mom_counter += 1
         # if(loopcounter<2):
         #     Plot_F(gggg.T)
         Plot_F(F,F_errors)
         loopcounter += 1
-        #if(loopcounter%5==0):
-        #    IterationType=(IterationType+1)%2
+        if(loopcounter%5==0 and is_IR==True):
+           IterationType=(IterationType+1)%2
         print ("$$$$iterationtype=",IterationType)
     
         print ("lamu",lamu)
