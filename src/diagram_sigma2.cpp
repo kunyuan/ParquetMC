@@ -21,7 +21,8 @@ void sigma2::Build(int order) {
   // vertex is only needed for order>=2
   if (Order >= 2) {
     // vector<channel> Chan = {I, T, U, S, TC, UC};
-    vector<channel> Chan = {T, U, S, I};
+    // vector<channel> Chan = {T, U, S, I};
+    vector<channel> Chan = {T};
     // vector<channel> Chan = {
     //     T,
     // };
@@ -88,7 +89,7 @@ double sigma2::Evaluate() {
 }
 
 bool sigma2::Test() {
-  // return false;
+  return false;
   // Two-loop sigma
   if (Order != 3)
     return false;

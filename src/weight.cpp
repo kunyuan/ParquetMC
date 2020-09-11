@@ -39,7 +39,7 @@ void weight::Initialization() {
     for (int order = 1; order <= Para.Order; order++) {
       LOG_INFO("Generating order " << order);
       Sigma[order].Build(order);
-      if (order < 4)
+      if (order <= 4)
         LOG_INFO(Sigma[order].ToString());
     }
   } else if (DiagType == POLAR) {

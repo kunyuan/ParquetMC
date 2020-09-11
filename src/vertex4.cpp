@@ -118,9 +118,13 @@ int vertex4::_AddTidxPair(const array<int, 4> &T) {
 }
 
 bubble vertex4::_BuildBubble(channel chan, int ol) {
-  vector<channel> FULL = {I, T, U, S, TC, UC};
-  vector<channel> F = {I, U, S, TC, UC};
-  vector<channel> V = {I, T, U, TC, UC};
+  // vector<channel> FULL = {I, T, U, S, TC, UC};
+  // vector<channel> F = {I, U, S, TC, UC};
+  // vector<channel> V = {I, T, U, TC, UC};
+
+  vector<channel> FULL = {I, T};
+  vector<channel> F = {I};
+  vector<channel> V = {I, T};
 
   ASSERT_ALLWAYS(chan != I, "BuildUST can not process I channel!");
   ASSERT_ALLWAYS(ol < LoopNum(),
