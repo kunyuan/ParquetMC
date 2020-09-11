@@ -54,6 +54,5 @@ inlist
 *.data
 *.vscode
 parameter
-*.pdf
 .rendered*
 *.cppimporthash
