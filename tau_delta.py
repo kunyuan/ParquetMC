@@ -400,7 +400,7 @@ def Plot_Dfreq(fff,fff_o1):
 
 
 Omega=1.0#0.1*Para.EF
-g=16.0
+g=32.0
 kF = 1.0
 
 
@@ -425,7 +425,7 @@ omega_c=10000000.0 #float(line0.split(",")[-1])
 #for order in Order:
    # for chan in Channel:
 
-MaxFreq = 50
+MaxFreq = 125
 Freq = np.array(range(-MaxFreq, MaxFreq))
 phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
 shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
@@ -444,7 +444,7 @@ DataList = []
 
 #initialize F
 
-q_cut=0.5*Para.kF
+q_cut=0.2*Para.kF
 
 if is_IR==False:
     cut_left=0
@@ -509,14 +509,14 @@ modulus_dum=0.0
 
 #os set
 Duplicate=4
-SleepTime=0.1
-WaitTime=0.1
+SleepTime=3001
+WaitTime=5
 ThermoSteps=10
 
 rootdir = os.getcwd()
 homedir = os.path.join(rootdir, "Data")
 myCmd='python send.py {0}'.format(Duplicate)
-#os.system(myCmd)
+os.system(myCmd)
 os.chdir(homedir)
 files = os.listdir(folder)
 
@@ -585,8 +585,8 @@ while True:
         err_o1=err_o1[:,np.newaxis]+0*d
 
         #d=-d0[3].reshape((int(order_num+1),int(size0)))[2].reshape((ExtMomBinSize,TauBinSize))
-        d=d*0
-        d_o1=d_o1*0
+        d=d
+        d_o1=d_o1
         #print ("sum_delta0",np.sum(d_o1))
         #print ("sum_delta",np.sum(d))
         if(np.isnan(np.sum(d))):
@@ -598,14 +598,16 @@ while True:
         #print  (scp_int.simps(p_square[np.newaxis,:]*F,ExtMomBin))
         #taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
         #np.tensordot(ExtMomBin**2,F,axes=([0,1]))/ExtMomBinSize*ExtMomBin[-1]
-        taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
-        taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
-        largeomega=Omega*3
-        taudep2= np.cosh(largeomega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
-        taudep2=taudep2*g*largeomega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*largeomega)
-        taudep=taudep-taudep2#*(largeomega/Omega)**2
-        d=d+np.tensordot(epsilon(ExtMomBin),taudep,axes=0)
-        d_o1=d_o1+F0*epsilon(ExtMomBin)[:,np.newaxis]
+
+        # taudep= np.cosh(Omega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
+        # taudep=taudep*g*Omega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*Omega)
+        # largeomega=Omega*3
+        # taudep2= np.cosh(largeomega*(0.5*Beta-np.abs(TauBin))) * scp_int.simps((ExtMomBin**2/epsilon(ExtMomBin))[np.newaxis,:]*F,ExtMomBin)
+        # taudep2=taudep2*g*largeomega/8.0/np.pi/np.pi/np.sinh(0.5*Beta*largeomega)
+        # taudep=taudep-taudep2#*(largeomega/Omega)**2
+        # d=d+np.tensordot(epsilon(ExtMomBin),taudep,axes=0)
+        # d_o1=d_o1+F0*epsilon(ExtMomBin)[:,np.newaxis]
+
         print(epsilon(ExtMomBin))
         Plot_D(d)
         Plot_D_o1(d_o1)
@@ -667,7 +669,7 @@ while True:
         # plt.show()    
 
         middle=middle.T 
-        shift=2.0
+        shift=4.0
             
         if(IterationType==0):
             F[:,0:cut_left]=middle[:,0:cut_left]
