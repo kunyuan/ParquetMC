@@ -42,6 +42,7 @@ parameter~
 
 infile/
 outfile/
+savefile/
 Beta*/
 build/
 Data/
