@@ -62,6 +62,36 @@ int testTau(){
   std::cout<<"end testing tau"<<std::endl;
 }
 
+int testTauUL(){
+  double beta=40;
+  grid::TauUL tau;
+  tau.build(10,4,4,0.01);
+
+  std::cout<<"start testing tau grid"<<std::endl;
+  std::cout<<"grid:"<<std::endl;
+  for(int i=0;i<tau.size;i++){
+    std::cout<<std::setw(9)<<i<<"\t";
+  }
+  std::cout<<std::endl;
+  for(int i=0;i<tau.size;i++){
+    std::cout<<std::setw(9)<<tau.grid[i]<<"\t";
+  }
+  std::cout<<std::endl;
+
+  std::cout<<0.0<<"\t"<<tau.floor(0.0)<<std::endl;
+  std::cout<<tau.grid[0]<<"\t"<<tau.floor(tau.grid[0])<<std::endl;
+  std::cout<<beta<<"\t"<<tau.floor(beta)<<std::endl;
+  std::cout<<tau.grid[tau.size-1]<<"\t"<<tau.floor(tau.grid[tau.size-1])<<std::endl;
+
+  for(int i=1;i<tau.size-1;i++){
+    std::cout<<"around "<<tau.grid[i]<<std::endl;
+    std::cout<<tau.grid[i]-EPS<<"\t"<<tau.floor(tau.grid[i]-EPS)<<"\t"<<(i-1)<<std::endl;
+    std::cout<<tau.grid[i]+EPS<<"\t"<<tau.floor(tau.grid[i]+EPS)<<"\t"<<(i)<<std::endl;
+  }
+  std::cout<<"end testing tau"<<std::endl;
+}
+
+
 int testFermiK(){
   double kf=1;
   double maxk=3;
@@ -130,15 +160,43 @@ int testBoseK(){
   std::cout<<"end testing bose K"<<std::endl;
 }
 
+int testUniLog(){
+  double end=1;
+  double init=0;
+  int m=3;
+  int n=3;
+  double alpha=0.5;
+
+  grid::UniLog ul;
+  ul.init({init,end}, 0, m, n, -alpha);
+  std::cout<<"start testing unilog grid"<<std::endl;
+  std::cout<<"length"<<ul.length<<std::endl;
+  std::cout<<"m"<<ul.m<<std::endl;
+  std::cout<<"n"<<ul.n<<std::endl;
+  std::cout<<"grid:"<<std::endl;
+  for(int i=0;i<(m+1)*n;i++){
+    std::cout<<std::setw(9)<<i<<"\t";
+  }
+  std::cout<<std::endl;
+  for(int i=0;i<(m+1)*n;i++){
+    std::cout<<std::setw(9)<<ul.grid(i)<<"\t";
+  }
+  std::cout<<std::endl;
+
+}
+
 bool testgrid(){
   // test log grid for tau
-  testTau();
+  //testTau();
+
+  testUniLog();
+  testTauUL();
 
   // test log grid for fermiK
-  testFermiK();
+  // testFermiK();
 
-  testBoseK();
-  testUniform();
+  // testBoseK();
+  // testUniform();
   return 1;
 }
 
