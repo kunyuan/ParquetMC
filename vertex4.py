@@ -16,7 +16,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 ChanColor = {0: "k", 1: "r", 2: "b", 3: "g"}
 # 0: total, 1: order 1, ...
 Order = range(Para.Order+1)
-IsIrreducible = False
+IsIrreducible = True
 
 shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 Data, Norm, Step, Grid = LoadFile("./Data", "vertex_pid[0-9]+.dat", shape)

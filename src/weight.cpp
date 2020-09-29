@@ -20,6 +20,7 @@ void weight::Initialization() {
   if (DiagType == GAMMA) {
 
     vector<channel> Chan = {I, T, U, S, TC, UC};
+    // vector<channel> Chan = {I, T, U, S};
     // vector<channel> Chan = {T};
     // vector<channel> Chan = {U, UC};
     // vector<channel> Chan = {T};

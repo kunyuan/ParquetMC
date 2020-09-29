@@ -86,7 +86,7 @@ int main(int argc, const char *argv[]) {
 
       // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << ", "
       //      << Var.LoopMom[0][2] << endl;
-      Markov.Weight.Test();
+      // Markov.Weight.Test();
 
       if (i % 8 == 0)
         // fast operations
@@ -95,7 +95,7 @@ int main(int argc, const char *argv[]) {
       if (i % 1000 == 0) {
         // slow operations
         if (PrinterTimer.check(Para.PrinterTimer)) {
-          Markov.Weight.Test();
+          // Markov.Weight.Test();
           Markov.PrintDeBugMCInfo();
           Markov.PrintMCInfo();
           LOG_INFO(ProgressBar((double)Block / Para.TotalStep));

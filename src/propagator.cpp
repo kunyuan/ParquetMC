@@ -111,7 +111,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
     Weight[DIR] = 0.0;
 
   // check irreducibility
-  if (DiagType == POLAR && IsEqual(kDiQ, ExtQ))
+  if ((IsReducible == false || DiagType == POLAR) && IsEqual(kDiQ, ExtQ))
     Weight[DIR] = 0.0;
 
   double kExQ = (KInL - KOutR).norm();
@@ -122,7 +122,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
     Weight[EX] = 0.0;
 
   // check irreducibility
-  if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
+  if ((IsReducible == false || DiagType == POLAR) && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
@@ -133,7 +133,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 double propagator::Interaction(const momentum &TranQ, int VerOrder,
                                double ExtQ) {
   double kQ = TranQ.norm();
-  if (DiagType == POLAR && IsEqual(kQ, ExtQ))
+  if ((IsReducible == false || DiagType == POLAR) && IsEqual(kQ, ExtQ))
     return 0.0;
 
   if (VerOrder < 0) {

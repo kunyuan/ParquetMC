@@ -7,8 +7,8 @@ import sys
 ##### Modify parameters here  ###############
 # Cluster="Rutgers"
 # Cluster="PBS"
-# Cluster = "local"
-Cluster = "condor"
+Cluster = "local"
+# Cluster = "condor"
 ############################################
 
 assert len(sys.argv) == 2, "Number of jobs is needed as a parameter!"
