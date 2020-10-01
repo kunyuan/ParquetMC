@@ -6,7 +6,7 @@ import numpy as np
 import sys
 
 SleepTime = 5
-IsIrreducible = False
+IsIrreducible = True
 
 Para = param()
 
