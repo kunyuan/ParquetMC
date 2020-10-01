@@ -75,11 +75,16 @@ Para = param()
 EPS= 1.0e-9
 Beta=Para.Beta
 Temp=1/Beta
-order_num=Para.Order 
-K=grid.FermiK()
-K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize,math.sqrt(1.0 / Para.Beta) * 2) #kf,maxk,size,scale
-Ta=grid.Tau()
-Ta.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF) #Beta,size,scale
+order_num=Para.Order
+
+scale=0.000001
+KMult=8
+TaMult=8
+K=grid.FermiKUL()
+K.build(Para.kF,Para.MaxExtMom,Para.MomGridSize//KMult//2-1,KMult,Para.kF*scale) #kf,maxk,size,scale
+Ta=grid.TauUL()
+Ta.build(Para.Beta, Para.TauGridSize//TaMult//2-1, TaMult, Para.EF*scale) #Beta,size,scale
+print("grid sizes:",Ta.size,",",K.size)
 
 def epsilon(p):
     #E=np.abs(p**2-Para.EF)+0.0001/Para.Beta
@@ -509,7 +514,7 @@ modulus_dum=0.0
 
 #os set
 Duplicate=4
-SleepTime=3001
+SleepTime=211
 WaitTime=5
 ThermoSteps=10
 
@@ -684,8 +689,8 @@ while True:
 
        # if loopcounter>ThermoSteps:
        
-        if loopcounter<-1:
-        #if loopcounter>-1:
+        #if loopcounter<-1:
+        if loopcounter>-1:
             if(IterationType==0):
                 high_mom_counter += 1
                 F_accumulate[:,0:cut_left] += F[:,0:cut_left]

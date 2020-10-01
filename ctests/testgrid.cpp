@@ -126,6 +126,41 @@ int testFermiK(){
   std::cout<<"end testing fermi K"<<std::endl;
 }
 
+int testFermiKUL(){
+  double kf=1;
+  double maxk=3;
+  int m=4;
+  int n=4;
+  double scale=0.001;
+
+  grid::FermiKUL K;
+  K.build(kf,maxk,m,n,scale);
+
+  std::cout<<"start testing fermiK grid"<<std::endl;
+  std::cout<<"grid:"<<std::endl;
+  for(int i=0;i<K.size;i++){
+    std::cout<<std::setw(9)<<i<<"\t";
+  }
+  std::cout<<std::endl;
+  for(int i=0;i<K.size;i++){
+    std::cout<<std::setw(9)<<K.grid[i]<<"\t";
+  }
+  std::cout<<std::endl;
+
+  std::cout<<0.0<<"\t"<<K.floor(0.0)<<std::endl;
+  std::cout<<K.grid[0]<<"\t"<<K.floor(K.grid[0])<<std::endl;
+  std::cout<<maxk<<"\t"<<K.floor(maxk)<<std::endl;
+  std::cout<<K.grid[K.size-1]<<"\t"<<K.floor(K.grid[K.size-1])<<std::endl;
+  std::cout<<K.grid[K.size-1]-EPS<<"\t"<<K.floor(K.grid[K.size-1]-EPS)<<std::endl;
+
+  for(int i=1;i<K.size-1;i++){
+    std::cout<<"around "<<K.grid[i]<<std::endl;
+    std::cout<<K.grid[i]-EPS<<"\t"<<K.floor(K.grid[i]-EPS)<<"\t"<<(i-1)<<std::endl;
+    std::cout<<K.grid[i]+EPS<<"\t"<<K.floor(K.grid[i]+EPS)<<"\t"<<(i)<<std::endl;
+  }
+  std::cout<<"end testing fermi K"<<std::endl;
+}
+
 int testBoseK(){
   double kf=1;
   double maxk=3;
@@ -160,6 +195,42 @@ int testBoseK(){
   std::cout<<"end testing bose K"<<std::endl;
 }
 
+int testBoseKUL(){
+  double kf=1;
+  double maxk=3;
+  double scale=0.001;
+  int m=4;
+  int n=4;
+
+  grid::BoseKUL K;
+  K.build(kf,maxk,m,n,scale);
+
+  std::cout<<"start testing boseK grid"<<std::endl;
+  std::cout<<"grid:"<<std::endl;
+  for(int i=0;i<K.size;i++){
+    std::cout<<std::setw(9)<<i<<"\t";
+  }
+  std::cout<<std::endl;
+  for(int i=0;i<K.size;i++){
+    std::cout<<std::setw(9)<<K.grid[i]<<"\t";
+  }
+  std::cout<<std::endl;
+
+  std::cout<<0.0<<"\t"<<K.floor(0.0)<<std::endl;
+  std::cout<<K.grid[0]<<"\t"<<K.floor(K.grid[0])<<std::endl;
+  std::cout<<maxk<<"\t"<<K.floor(maxk)<<std::endl;
+  std::cout<<K.grid[K.size-1]<<"\t"<<K.floor(K.grid[K.size-1])<<std::endl;
+  std::cout<<K.grid[K.size-1]-EPS<<"\t"<<K.floor(K.grid[K.size-1]-EPS)<<std::endl;
+
+  for(int i=1;i<K.size-1;i++){
+    std::cout<<"around "<<K.grid[i]<<std::endl;
+    std::cout<<K.grid[i]-EPS<<"\t"<<K.floor(K.grid[i]-EPS)<<"\t"<<(i-1)<<std::endl;
+    std::cout<<K.grid[i]+EPS<<"\t"<<K.floor(K.grid[i]+EPS)<<"\t"<<(i)<<std::endl;
+  }
+  std::cout<<"end testing bose K"<<std::endl;
+}
+
+
 int testUniLog(){
   double end=1;
   double init=0;
@@ -174,11 +245,11 @@ int testUniLog(){
   std::cout<<"m"<<ul.m<<std::endl;
   std::cout<<"n"<<ul.n<<std::endl;
   std::cout<<"grid:"<<std::endl;
-  for(int i=0;i<(m+1)*n;i++){
+  for(int i=-1;i<(m+1)*n+1;i++){
     std::cout<<std::setw(9)<<i<<"\t";
   }
   std::cout<<std::endl;
-  for(int i=0;i<(m+1)*n;i++){
+  for(int i=-1;i<(m+1)*n+1;i++){
     std::cout<<std::setw(9)<<ul.grid(i)<<"\t";
   }
   std::cout<<std::endl;
@@ -189,13 +260,16 @@ bool testgrid(){
   // test log grid for tau
   //testTau();
 
-  testUniLog();
-  testTauUL();
+  // testUniLog();
+  // testTauUL();
 
+  testFermiKUL();
+  
   // test log grid for fermiK
-  // testFermiK();
+  //testFermiK();
 
   // testBoseK();
+  testBoseKUL();
   // testUniform();
   return 1;
 }

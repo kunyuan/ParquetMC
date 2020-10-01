@@ -60,9 +60,13 @@ struct parameter {
 
   // external variable tables
 
-  grid::Tau TauGrid; 
-  grid::FermiK FermiKGrid; 
-  grid::BoseK BoseKGrid; 
+  grid::TauUL TauGrid; 
+  grid::FermiKUL FermiKGrid; 
+  grid::BoseKUL BoseKGrid; 
+
+  // grid::Tau TauGrid;
+  // grid::FermiK FermiKGrid; 
+  // grid::BoseK BoseKGrid; 
  
   //grid::Uniform TauGrid;
   //grid::Uniform FermiKGrid;

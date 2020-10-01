@@ -41,6 +41,7 @@ namespace grid {
     int floor(double x) const;
     // return the Grid with a given index
     double grid(int i) const;
+    // for d2s, give bound[0] at i=idx[0];  bound[1]-(1-alpha)*length/n at i = idx[1] 
 
     //private:
     double length;
@@ -98,6 +99,21 @@ namespace grid {
     Coeff _coeff1;
   };
 
+  class FermiKUL {
+  public:
+    int size;
+    int kFidx;
+    vector<double> grid;
+    void build(double kF, double maxK, int m, int n, double scale);
+    int floor(double x) const; // return the index of a given value
+    string str();
+
+  private:
+    UniLog _unilog0;
+    UniLog _unilog1;
+  };
+
+
   class BoseK {
   public:
     int size;
@@ -112,6 +128,22 @@ namespace grid {
     Coeff _coeff0;
     Coeff _coeff1;
     Coeff _coeff2;
+  };
+
+  class BoseKUL {
+  public:
+    int size;
+    int kFidx;
+    int twokFidx;
+    vector<double> grid;
+    void build(double kF, double maxK, int m,int n, double scale);
+    int floor(double x) const; // return the index of a given value
+    string str();
+
+  private:
+    UniLog _unilog0;
+    UniLog _unilog1;
+    UniLog _unilog2;
   };
 
   class Uniform {

@@ -225,10 +225,13 @@ void InitPara() {
                           << "MessageTimer: " << Para.MessageTimer << "\n");
 
   // initialize grids
-  Para.TauGrid.build(Para.Beta, TauSize, 6.0/Para.Ef);
+  int TauMult=8;
+  int KMult=8;
+  double mingrid=0.000001;
+  Para.TauGrid.build(Para.Beta, TauSize/TauMult/2-1,TauMult, Para.Ef*mingrid);
   Para.AngleGrid.build({-1.0, 1.0}, AngSize);
-  Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2);
-  Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
+  Para.FermiKGrid.build(Para.Kf, MaxK, KSize/KMult/2-1,KMult, Para.Kf*mingrid);
+  Para.BoseKGrid.build(Para.Kf, MaxK, KSize/KMult/2-1,KMult, Para.Kf*mingrid);
 
   if (BoldG)
     Prop.LoadGreen();

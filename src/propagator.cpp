@@ -120,7 +120,8 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
 
   //Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
-  _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
+  //  _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
+  _Interp1D<grid::FermiKUL>(_StaticSigma, Para.FermiKGrid, k);
 
   //_Interp1D<grid::Uniform>(_StaticSigma, Para.FermiKGrid, k);
   // if (BoldG && k < Para.FermiKGrid.MaxK) {
