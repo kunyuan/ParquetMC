@@ -124,12 +124,15 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         Weight[map[VERT]] += W * GWeight;
       else {
         int t = map[VERT];
-        double dTau = Var.Tau[Tpair[t][INL]] - Var.Tau[Tpair[t][OUTL]];
-        dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
-        // double dTau = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]];
-        // dTau += -Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
-        ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
-        // ChanWeight[ChanMap[chan]] += W * GWeight;
+        if (IsF) {
+          double dTau = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]];
+          dTau += -Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
+          ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
+        } else {
+          double dTau = Var.Tau[Tpair[t][INL]] - Var.Tau[Tpair[t][OUTL]];
+          dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
+          ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
+        }
       }
     }
   }
@@ -145,10 +148,19 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
     // cout << Tpair[0][0] << ", " << Tpair[0][1] << Tpair[0][2] << Tpair[0][3]
     //      << endl;
     for (auto &c : ChannelCT) {
+      double weight;
       if (c == TC) {
-        double weight =
-            pow(Prop.Interaction(KInL - KOutL, 0, Var.LoopMom[0].norm()),
-                LoopNum() + 1);
+        if (DiagType == POLAR)
+          weight = pow(Prop.Interaction(KInL - KOutL, 0, Var.LoopMom[0].norm()),
+                       LoopNum() + 1);
+        else if (IsProper && DiagType == GAMMA)
+          weight = pow(
+              Prop.Interaction(KInL - KOutL, 0,
+                               (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm()),
+              LoopNum() + 1);
+        else
+          weight = pow(Prop.Interaction(KInL - KOutL, 0), LoopNum() + 1);
+
         for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
           weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
         }
@@ -158,9 +170,21 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
           // counter-term Tpair and the weight are always the first element
           Weight[0][DIR] += weight * SymFactor[TC];
       } else if (c == UC) {
-        double weight =
-            pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
-                LoopNum() + 1);
+        if (DiagType == POLAR)
+          weight = pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
+                       LoopNum() + 1);
+        else if (IsProper && DiagType == GAMMA)
+          weight = pow(
+              Prop.Interaction(KInL - KOutR, 0,
+                               (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm()),
+              LoopNum() + 1);
+        else
+          weight = pow(Prop.Interaction(KInL - KOutR, 0), LoopNum() + 1);
+
+        // double weight =
+        //     pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
+        //         LoopNum() + 1);
+
         for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
           weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
         }

@@ -18,7 +18,7 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
   auto k = K.norm();
   auto Ek = k * k - Para.Mu; // bare propagator
 
-  // Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
+  Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
   // _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
 
