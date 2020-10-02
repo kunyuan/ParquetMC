@@ -98,7 +98,7 @@ int main(int argc, const char *argv[]) {
       if (i % 1000 == 0) {
         // slow operations
         if (PrinterTimer.check(Para.PrinterTimer)) {
-          Markov.Weight.Test();
+          // Markov.Weight.Test();
           Markov.PrintDeBugMCInfo();
           Markov.PrintMCInfo();
           LOG_INFO(ProgressBar((double)Block / Para.TotalStep));

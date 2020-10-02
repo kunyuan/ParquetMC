@@ -39,7 +39,6 @@ F_*/
 *.mod
 *.exe
 *.dat
-*.pdf
 *.png
 
 infile/
@@ -60,6 +59,5 @@ inlist
 *.data
 *.vscode
 parameter
-*.pdf
 .rendered*
 *.cppimporthash

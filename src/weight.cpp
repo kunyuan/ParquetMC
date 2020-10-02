@@ -19,7 +19,18 @@ void weight::Initialization() {
 
   if (DiagType == GAMMA) {
 
-    vector<channel> Chan = {I, T, U, S, UC}; // {I, T, U, S, TC, UC};
+    vector<channel> Chan;
+    if (IsProper)
+      Chan = {I, T, U, S, UC}; // proper diagram doesn't contain TC channel
+    // Chan = {I, T, U, S}; // proper diagram doesn't contain TC channel
+    else
+      Chan = {I, T, U, S, TC, UC};
+
+    cout << "Printing Diagram..." << endl;
+    for (int i = 0; i < Chan.size(); ++i) {
+      cout << Chan[i] << endl;
+    }
+
     // vector<channel> Chan = {T};
     // vector<channel> Chan = {U, UC};
     // vector<channel> Chan = {T};

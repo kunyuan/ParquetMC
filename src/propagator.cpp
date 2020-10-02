@@ -18,7 +18,7 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
   auto k = K.norm();
   auto Ek = k * k - Para.Mu; // bare propagator
 
-  // Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
+  Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
   // _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
 
@@ -110,8 +110,8 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   if (DiagType == SIGMA && IsZero(kDiQ))
     Weight[DIR] = 0.0;
 
-  // check irreducibility, reducible
-  if (DiagType == POLAR && IsEqual(kDiQ, ExtQ))
+  // check irreducibility
+  if ((IsProper || DiagType == POLAR) && IsEqual(kDiQ, ExtQ))
     Weight[DIR] = 0.0;
   if (DiagType == GAMMA && IsEqual(kDiQ, ExtQ))
     Weight[DIR] = 0.0;
@@ -123,8 +123,8 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   if (DiagType == SIGMA && IsZero(kExQ))
     Weight[EX] = 0.0;
 
-  // check irreducibility, reducible
-  if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
+  // check irreducibility
+  if ((IsProper || DiagType == POLAR) && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
   if (DiagType == GAMMA && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
@@ -136,7 +136,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 double propagator::Interaction(const momentum &TranQ, int VerOrder,
                                double ExtQ) {
   double kQ = TranQ.norm();
-  if (DiagType == POLAR && IsEqual(kQ, ExtQ))
+  if ((IsProper || DiagType == POLAR) && IsEqual(kQ, ExtQ))
     return 0.0;
 
   if (VerOrder < 0) {

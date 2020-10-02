@@ -204,6 +204,10 @@ string vertex4::ToString(string indent) {
     Info +=
         fmt::format("({0}, {1}, {2}, {3}), ", t[INL], t[OUTL], t[INR], t[OUTR]);
   Info += "\n";
+  Info += indent + fmt::format("├─CT: ");
+  for (auto &c : ChannelCT)
+    Info += fmt::format("{0}, ", ChanName[c]);
+  Info += "\n";
 
   ASSERT_ALLWAYS(Tpair.size() == Weight.size(),
                  "Tpair size must be equal to Weight size!");
