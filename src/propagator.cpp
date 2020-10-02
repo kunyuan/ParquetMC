@@ -110,8 +110,10 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   if (DiagType == SIGMA && IsZero(kDiQ))
     Weight[DIR] = 0.0;
 
-  // check irreducibility
+  // check irreducibility, reducible
   if (DiagType == POLAR && IsEqual(kDiQ, ExtQ))
+    Weight[DIR] = 0.0;
+  if (DiagType == GAMMA && IsEqual(kDiQ, ExtQ))
     Weight[DIR] = 0.0;
 
   double kExQ = (KInL - KOutR).norm();
@@ -121,10 +123,11 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   if (DiagType == SIGMA && IsZero(kExQ))
     Weight[EX] = 0.0;
 
-  // check irreducibility
+  // check irreducibility, reducible
   if (DiagType == POLAR && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
-
+  if (DiagType == GAMMA && IsEqual(kExQ, ExtQ))
+    Weight[EX] = 0.0;
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
   return Weight;

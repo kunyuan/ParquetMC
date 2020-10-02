@@ -19,7 +19,7 @@ void weight::Initialization() {
 
   if (DiagType == GAMMA) {
 
-    vector<channel> Chan = {I, T, U, S, TC, UC};
+    vector<channel> Chan = {I, T, U, S, UC}; // {I, T, U, S, TC, UC};
     // vector<channel> Chan = {T};
     // vector<channel> Chan = {U, UC};
     // vector<channel> Chan = {T};
@@ -135,10 +135,14 @@ void weight::SaveToFile() {
 
 void weight::Test() {
   // cout << "start testing ..." << endl;
+  
+  /***
   if (DiagType == GAMMA)
     Gamma[Var.CurrOrder].Test();
   else if (DiagType == SIGMA)
     Sigma[Var.CurrOrder].Test();
+  ***/
+ 
 }
 
 void weight::Benchmark(int LoopNum, int Step) {

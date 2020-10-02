@@ -1,15 +1,26 @@
 #!/usr/bin/env python3
 from utility.IO import *
 from utility.plot import *
+from utility.angle import LegendreCoeff
 import numpy as np
 import sys
+import argparse
 # import matplotlib.pyplot as plt
 # import matplotlib as mat
 # mat.rcParams.update({'font.size': 16})
 # mat.rcParams["font.family"] = "Times New Roman"
 # size = 12
 
-Para = param()
+parser = argparse.ArgumentParser("Specify some parameters.")
+parser.add_argument("folder")
+args = parser.parse_args()
+
+folder = args.folder
+print("Folder to plot : " + folder)
+
+
+
+Para = param(folder)
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
@@ -19,15 +30,13 @@ Order = range(Para.Order+1)
 IsIrreducible = False
 
 shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
-Data, Norm, Step, Grid = LoadFile("./Data", "vertex_pid[0-9]+.dat", shape)
+Data, Norm, Step, Grid = LoadFile(folder, "vertex_pid[0-9]+.dat", shape)
 
 AngGrid = Grid["AngleGrid"]
 MomGrid = Grid["KGrid"]
 Angle = np.arccos(AngGrid)
 
-# print(AngGrid)
-# print(Angle)
-
+# Data shape : (pid numbers, order, chan, AngleGrid, KGrid)
 
 def PrintInfo(Channel, Data, DataErr):
     Data = -np.copy(Data)
@@ -62,9 +71,7 @@ def Bare(angle, Lambda):
     Bare = SpinMapping(Bare)
     return Bare
 
-
 fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
-
 
 bare = Bare(Angle, 0.0)
 ax1.plot(Angle, -bare[:, 0], '-', c='y', label="$u_s$")
@@ -72,6 +79,8 @@ ax2.plot(Angle, -bare[:, 1], '-', c='y', label="$u_a$")
 
 
 Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
+
+# sys.exit()
 
 # DataAllList = [np.sum(d, axis=0) for d in Data]
 # map DIR, EX to As, Aa

@@ -41,7 +41,7 @@ int main(int argc, const char *argv[]) {
 
   InitPara(); // initialize global parameters
 
-  testcode::TestCode();
+  // testcode::TestCode();
 
   markov Markov;
   InterruptHandler Interrupt;
@@ -89,7 +89,7 @@ int main(int argc, const char *argv[]) {
 
       // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << ", "
       //      << Var.LoopMom[0][2] << endl;
-      Markov.Weight.Test();
+      // Markov.Weight.Test();
 
       if (i % 8 == 0)
         // fast operations
@@ -178,6 +178,11 @@ void InitPara() {
   Para.Ef = Kf * Kf;
   Para.Mu = Para.Ef;
   MaxK *= Kf;
+
+  Para.OmegaINL = - PI / Para.Beta;
+  Para.OmegaINR = PI / Para.Beta;
+  // Para.Omega = 0;     // A
+  Para.Omega = 2 * PI / Para.Beta;    // F
 
   // scale all energy with E_F
   Para.Beta /= Para.Ef;

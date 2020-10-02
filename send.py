@@ -3,16 +3,26 @@ import random
 from datetime import datetime
 import os
 import sys
+import argparse
+
+
+parser = argparse.ArgumentParser("Specify number of jobs, and the name of working folder.")
+parser.add_argument("jobs_number")
+parser.add_argument("folder_name")
+args = parser.parse_args()
+
+jobs_number = args.jobs_number
+folder_name = args.folder_name
+
 
 ##### Modify parameters here  ###############
 # Cluster="Rutgers"
 # Cluster="PBS"
-# Cluster = "local"
-Cluster = "condor"
+Cluster = "local"
+# Cluster = "condor"
 ############################################
 
-assert len(sys.argv) == 2, "Number of jobs is needed as a parameter!"
-Number = int(sys.argv[1])
+Number = int(jobs_number)
 print "Creating {0} jobs ...".format(Number)
 PIDList = range(Number)
 
@@ -26,8 +36,7 @@ rootdir = os.getcwd()
 execute = "feyncalc.exe"
 random.seed(datetime.now())
 
-
-homedir = os.path.join(rootdir, "Data")
+homedir = os.path.join(rootdir, folder_name)
 CreateFolder(homedir)
 
 os.system("cp {0} {1}".format(execute, homedir))

@@ -23,9 +23,9 @@ def getListOfFiles(dirName):
 class param:
     # Order, Beta, Rs, Mass2, Lambda, Charge2, TotalStep = [None, ]*7
     # kF, Nf, EF, Bubble = [0.0, ]*4
-    def __init__(self):
-        self.DataFolder = "Data"
-        self.InputFile = "parameter"
+    def __init__(self, foldername):
+        self.DataFolder = foldername
+        self.InputFile = os.path.join(self.DataFolder, "parameter")
 
         with open(self.InputFile, "r") as file:
             file.readline()  # comment line
