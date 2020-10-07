@@ -109,6 +109,9 @@ int vertex4::_AddTidxPair(const array<int, 4> &T) {
   for (int i = 0; i < Tpair.size(); i++) {
     auto t = Tpair[i];
 
+    // force equal 
+    //t[INL]=T[INL];
+    //
     ASSERT_ALLWAYS(t[INL] == T[INL],
                    "left Tin must be the same for all subvertex!"
                        << t[INL] << " vs " << T[INL]);

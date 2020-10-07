@@ -8,6 +8,7 @@
 #include <array>
 #include <math.h>
 #include <vector>
+#include <exception>
 
 // comment to turn on all assert
 // #define NDEBUG
@@ -21,7 +22,7 @@ const int MaxOrder = 9; // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
-const int ChannelNum = 3;
+const int ChannelNum = 1;
 // MaxMomNum = get_power<2, MaxOrder + 1>::value * 128;
 
 
@@ -58,9 +59,18 @@ struct parameter {
   int ReweightTimer; // time interval to reweight different orders
 
   // external variable tables
-  grid::Tau TauGrid;
-  grid::FermiK FermiKGrid;
-  grid::BoseK BoseKGrid;
+
+  grid::TauUL TauGrid; 
+  grid::FermiKUL FermiKGrid; 
+  grid::BoseKUL BoseKGrid; 
+
+  // grid::Tau TauGrid;
+  // grid::FermiK FermiKGrid; 
+  // grid::BoseK BoseKGrid; 
+ 
+  //grid::Uniform TauGrid;
+  //grid::Uniform FermiKGrid;
+  //grid::Uniform BoseKGrid;
   grid::Uniform AngleGrid;
 };
 

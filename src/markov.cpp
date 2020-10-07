@@ -106,10 +106,13 @@ void markov::ChangeOrder() {
              Para.ReWeight[Var.CurrOrder];
 
   if (Random.urn() < R) {
+    //  if (DEBUG)WeightCount();
     Accepted[Name][Var.CurrOrder]++;
     Var.CurrOrder = NewOrder;
     Var.CurrAbsWeight = NewAbsWeight;
+   
   }
+ 
   return;
 };
 
@@ -132,12 +135,14 @@ void markov::ChangeExtTau() {
              Var.CurrAbsWeight / Para.TauGrid.weight[OldTauBin];
 
   if (Random.urn() < R) {
+    //if(DEBUG)WeightCount();
     Accepted[CHANGE_EXTTAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.CurrExtTauBin = OldTauBin;
     Var.Tau[ExtTauIdx] = Para.TauGrid.grid[OldTauBin];
   }
+    
 };
 
 void markov::ChangeTau() {
@@ -162,11 +167,13 @@ void markov::ChangeTau() {
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
+    //  if(DEBUG)WeightCount();
     Accepted[CHANGE_TAU][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.Tau[TauIndex] = CurrTau;
   }
+    
 };
 
 void markov::ChangeMomentum() {
@@ -174,7 +181,6 @@ void markov::ChangeMomentum() {
     return;
   double Prop;
   static momentum CurrMom;
-
   int LoopIndex =
       Random.irn(FirstInterLoopIdx(), LastInterLoopIdx(Var.CurrOrder));
 
@@ -188,13 +194,15 @@ void markov::ChangeMomentum() {
 
   NewAbsWeight = fabs(Weight.Evaluate(Var.CurrOrder));
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
-
+  
   if (Random.urn() < R) {
+   
     Accepted[CHANGE_MOM][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
     Var.LoopMom[LoopIndex] = CurrMom;
   }
+  
 };
 
 void markov::ChangeExtMomentum() {
@@ -229,6 +237,7 @@ void markov::ChangeExtMomentum() {
   double R = Prop * NewAbsWeight / Var.CurrAbsWeight;
 
   if (Random.urn() < R) {
+    // if(DEBUG)WeightCount();
     Accepted[CHANGE_EXTMOM][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
@@ -244,6 +253,7 @@ void markov::ChangeExtMomentum() {
         Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
     }
   }
+     
 };
 
 double markov::GetNewTau(double &NewTau) {
@@ -443,9 +453,18 @@ markov::markov() {
   InitialArray(&Accepted[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
   InitialArray(&Proposed[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
   InitialArray(&Counter[0], 0.0, MaxOrder+1);
-
   AdjustGroupReWeight();
 };
+
+void markov::Reset(){
+  //Weight.Initialization();
+  Weight.Reset();
+  InitialArray(&Accepted[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
+  InitialArray(&Proposed[0][0], 1.0e-10, MCUpdates * (MaxOrder + 1));
+  InitialArray(&Counter[0], 0.0, MaxOrder+1);
+
+}
+
 
 void markov::AdjustGroupReWeight(){
   // double mult=Proposed[DECREASE_ORDER][1]/(Accepted[DECREASE_ORDER][1]+1)/Para.ReWeight[0];
@@ -461,8 +480,9 @@ void markov::AdjustGroupReWeight(){
   // }
   for (int o = 1; o < Para.Order + 1; ++o){
     Para.ReWeight[o]=Para.ReWeight[o]*(Counter[0]+1)/(Counter[o]+1);
+    if(o==2) Para.ReWeight[o]*=4;
+    if(o==3) Para.ReWeight[o]*=25;
   }
-
   string Output = "";
   Output = string(80, '=') + "\n";
   Output += "New Reweight: ";
@@ -531,3 +551,5 @@ void markov::PrintDeBugMCInfo() {
 void markov::Count(){
   Counter[Var.CurrOrder]++;
 }
+
+

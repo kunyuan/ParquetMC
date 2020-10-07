@@ -19,11 +19,12 @@ variable Var;
 const string HelpStr = "Two parameters: PID Seed";
 
 int main(int argc, const char *argv[]) {
+ 
   // take two parameters: PID and Seed
   Para.PID = atoi(argv[1]);
   Para.Seed = atoi(argv[2]);
 
-  //// initialize the global log configuration   /////////////
+   //// initialize the global log configuration   /////////////
   string LogFile = "_" + to_string(Para.PID) + ".log";
   LOGGER_CONF(LogFile, "MC", Logger::file_on | Logger::screen_on, INFO, INFO);
 
@@ -39,6 +40,8 @@ int main(int argc, const char *argv[]) {
 
   InitPara(); // initialize global parameters
   Prop.Initialize();
+
+   //return 0;
   markov Markov;
   InterruptHandler Interrupt;
 
@@ -63,6 +66,8 @@ int main(int argc, const char *argv[]) {
   //////////////////////////////////////////////////////
 
   LOG_INFO("Start simulation ...");
+
+ 
   int Block = 0;
   while (Block < Para.TotalStep) {
     Block++;
@@ -70,20 +75,25 @@ int main(int argc, const char *argv[]) {
     for (int i = 0; i < 1000000; i++) {
       Var.Counter++;
       Markov.Count();
+      //      Markov.Weight.Check();
 
+    
       double x = Random.urn();
-      if (x < 1.0 / 5.0) {
-        Markov.ChangeOrder();
-      } else if (x < 2.0 / 5.0) {
-        Markov.ChangeMomentum();
-      } else if (x < 3.0 / 5.0) {
-        Markov.ChangeExtMomentum();
-      } else if (x < 4.0 / 5.0) {
-        Markov.ChangeTau();
-      } else if (x < 5.0 / 5.0) {
-        Markov.ChangeExtTau();
+      try{
+        if (x < 1.0 / 5.0) {
+          Markov.ChangeOrder();
+        } else if (x < 2.0 / 5.0) {
+          Markov.ChangeMomentum();
+        } else if (x < 3.0 / 5.0) {
+          Markov.ChangeExtMomentum();
+        } else if (x < 4.0 / 5.0) {
+          Markov.ChangeTau();
+        } else if (x < 5.0 / 5.0) {
+          Markov.ChangeExtTau();
+        }
+      }catch (const std::invalid_argument& ia){
+        throw ia;
       }
-
       // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << ", "
       //      << Var.LoopMom[0][2] << endl;
       // Markov.Weight.Test();
@@ -91,7 +101,7 @@ int main(int argc, const char *argv[]) {
       if (i % 8 == 0)
         // fast operations
         Markov.Weight.Measure();
-
+     
       if (i % 1000 == 0) {
         // slow operations
         if (PrinterTimer.check(Para.PrinterTimer)) {
@@ -102,25 +112,49 @@ int main(int argc, const char *argv[]) {
         }
 
         if (SaveFileTimer.check(Para.SaveFileTimer)) {
-          Interrupt.Delay(); // the process can not be killed in saving
-          Markov.Weight.SaveToFile();
-          Interrupt.Resume(); // after this point, the process can be killed
+          try{
+            Interrupt.Delay(); // the process can not be killed in saving
+            Markov.Weight.SaveToFile();
+            Interrupt.Resume(); // after this point, the process can be killed
+          }catch (const std::invalid_argument& ia){
+            throw ia;
+          }
+
         }
 
         if (ReweightTimer.check(Para.ReweightTimer)) {
-          Markov.AdjustGroupReWeight();
+           Markov.AdjustGroupReWeight();
           Para.ReweightTimer *= 1.5;
         }
 
         if (MessageTimer.check(Para.MessageTimer)) {
           LOG_INFO("Loading Weight...")
+          try{
           if (BoldG)
             Prop.LoadGreen();
+          if(Prop.LoadF()){
+              Markov.Reset();
+             Var.Counter=0;
+            // InitPara(); // initialize global parameters
+            // Prop.Initialize();
+            // Markov.Reset();
+
+            // LOG_INFO("Loading Weight ...")
+            //   Markov.Weight.LoadFile();
+            // InitVar(); // initialize MC variables
+            // Var.CurrAbsWeight = fabs(Markov.Weight.Evaluate(Var.CurrOrder));
+
+          }
+          }catch (const std::invalid_argument& ia){
+            throw ia;
+          }
           // Markov.Weight.LoadFile();
         }
       }
     }
-    if (Block==1) Markov.AdjustGroupReWeight();
+    // if (Block%10==1){
+    //   Markov.AdjustGroupReWeight();
+    // }
   }
 
   Markov.PrintMCInfo();
@@ -191,11 +225,13 @@ void InitPara() {
                           << "MessageTimer: " << Para.MessageTimer << "\n");
 
   // initialize grids
-  Para.TauGrid.build(Para.Beta, TauSize, 6.0 / Para.Ef);
+  int TauMult=8;
+  int KMult=8;
+  double mingrid=0.000001;
+  Para.TauGrid.build(Para.Beta, TauSize/TauMult/2-1,TauMult, Para.Ef*mingrid);
   Para.AngleGrid.build({-1.0, 1.0}, AngSize);
-
-  Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2.0);
-  Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
+  Para.FermiKGrid.build(Para.Kf, MaxK, KSize/KMult/2-1,KMult, Para.Kf*mingrid);
+  Para.BoseKGrid.build(Para.Kf, MaxK, KSize/KMult/2-1,KMult, Para.Kf*mingrid);
 
   if (BoldG)
     Prop.LoadGreen();

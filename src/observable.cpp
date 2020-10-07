@@ -38,7 +38,25 @@ oneBodyObs::oneBodyObs() {
   return;
 }
 
-void oneBodyObs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
+void oneBodyObs::Reset(){
+  Normalization = 1.0e-10;
+  _Estimator.Reset();
+  return;
+
+}
+
+void oneBodyObs::Check() {
+  for (int order = 0; order <= Para.Order; order++)
+    for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
+      for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
+        {
+          if(!std::isfinite(_Estimator(order, qindex, tindex))){
+            throw std::invalid_argument("Estimator is nan");
+          }
+        }
+}
+
+void oneBodyObs::Measure0(double Factor) { Normalization += 1.0 * Factor;}
 void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
                          double Factor) {
   ASSERT(KBin >= 0 && KBin < ksize, "Kidx is out of range!");
@@ -46,6 +64,7 @@ void oneBodyObs::Measure(int Order, int KBin, int TauBin, double Weight,
 
   _Estimator(Order, KBin, TauBin) += Weight * Factor;
   _Estimator(0, KBin, TauBin) += Weight * Factor;
+
 }
 
 void oneBodyObs::Save() {
@@ -83,10 +102,12 @@ void oneBodyObs::Save() {
     for (int order = 0; order <= Para.Order; order++)
       for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
         for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
-          VerFile << order << "\t"
+          {VerFile << order << "\t"
                   << Para.FermiKGrid.grid[qindex] << "\t"
                   << Para.TauGrid.grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
+           
+          }
     VerFile.close();
   } else {
     LOG_WARNING(Name << " for PID " << Para.PID << " fails to save!");
@@ -101,8 +122,8 @@ void oneBodyObs::Save(int channel) {
 
   if (VerFile.is_open()) {
 
-    VerFile << "# Counter: " << Var.Counter << endl;
-    VerFile << "# Norm: " << Normalization << endl;
+    //VerFile << "Counter: " << Var.Counter << endl;
+    VerFile << "Norm: " << Normalization << endl;
     for (int order = 0; order <= Para.Order; order++)
       for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
         for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
@@ -121,10 +142,13 @@ void oneBodyObs::Save(int channel) {
     for (int order = 0; order <= Para.Order; order++)
       for (int qindex = 0; qindex < Para.FermiKGrid.size; ++qindex)
         for (int tindex = 0; tindex < Para.TauGrid.size; ++tindex)
-          VerFile << order << "\t"
+          {
+            VerFile << order << "\t"
                   << Para.FermiKGrid.grid[qindex] << "\t"
                   << Para.TauGrid.grid[tindex] << "\t"
                   << _Estimator(order, qindex, tindex) * PhyWeight/Normalization << "\n";
+          
+          }
     VerFile.close();
   } else {
     LOG_WARNING(Name << " for PID " << Para.PID << " fails to save!");
@@ -137,7 +161,15 @@ ver4Obs::ver4Obs() {
   for (auto &estimator : _Estimator)
     estimator.Initialize(
         {Para.Order + 1, Para.AngleGrid.size, Para.BoseKGrid.size});
-};
+}
+
+void ver4Obs::Reset() {
+  Normalization = 1.0e-10;
+  for (auto &estimator : _Estimator)
+    estimator.Initialize(
+                         {Para.Order + 1, Para.AngleGrid.size, Para.BoseKGrid.size});
+}
+
 
 void ver4Obs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
 

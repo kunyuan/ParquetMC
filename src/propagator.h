@@ -28,7 +28,7 @@ public:
 
   double CounterBubble(const momentum &K);
 
-  void LoadF();
+  bool LoadF();
   void TestF();
   void LoadGreen();
 
@@ -41,6 +41,7 @@ private:
 
   double _Interp1D(double K, const weight1D &data);
   double _Interp2D(double K, double tau, const weight2D &data);
+  int loopcounter;
   vector<double> _f;
   vector<double> _taulist;
   vector<double> _extMom;
@@ -51,6 +52,7 @@ private:
   template <typename KGrid>
   double _Interp2D(const weight2D &data, const KGrid &kgrid, double K,
                    double T);
+  double _InterpF(const vector<double> &data, double K, double T, int chan);
 };
 
 double Angle3D(const momentum &K1, const momentum &K2);

@@ -108,9 +108,12 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
       if (chan == T) {
         W[DIR] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         W[EX] = Lw[EX] * Rw[EX];
+        //W[EX] = 0.0;
       } else if (chan == U) {
         W[EX] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         W[DIR] = Lw[EX] * Rw[EX];
+        //W[EX] = 0.0;
+        //W[DIR] = 0.0;
       } else if (chan == S) {
         // see the note "code convention"
         W[DIR] = Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];

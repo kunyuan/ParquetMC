@@ -17,6 +17,17 @@ double legendre(double xi, int channel){
   else return 0;
 }
 
+double epsilon(double p){
+  double E=abs(p*p-Para.Ef);
+  // // if(E<=EPS){
+  // //   return 4/Para.Beta;
+  // // }
+  // double result= E*(2+2*cosh(Para.Beta*E))/sinh(Para.Beta*E);
+  // if(!std::isfinite(result)) return 4/Para.Beta;
+  // return result;
+  return 1.0;//4*E*Para.Beta+EPS;
+}
+
 void delta::Build(int order) {
   ASSERT_ALLWAYS(order >= 0, "Polar order must be larger than 0!");
   Order = order;
@@ -72,21 +83,30 @@ void delta::_ResetLastTidx(vertex4 &Vertex) {
 }
 
 double delta::Evaluate() {
+  double result=0;
   double Factor = 1.0 / pow(2.0 * π, D);
+  int main_channel=0;
   // normalization
   if (Order == 0)
     return 1.0;
   else if (Order == 1) {
     // bare interaction
-    double Weight = Prop.Interaction(Var.LoopMom[0] + Var.LoopMom[1], -1);
-    Weight *= Prop.F(-1.0e-8, Var.LoopMom[1], UP, 0);
+    double Weight = Prop.Interaction(Var.LoopMom[0] - Var.LoopMom[1], -1);
+    Weight *= Prop.F(1.0e-8, Var.LoopMom[1], UP, 0,main_channel);
     // cout << "1: " << Weight * Factor * 0.5 << endl;
-    return Weight * Factor;
+    double xi=Var.LoopMom[0].dot(Var.LoopMom[1])/Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
+    result= Weight * Factor * legendre(xi,main_channel);
+    // if(result<1e-300){
+    //   string output=fmt::format("change_mom:{0:e}\t{1:e}",Prop.Interaction(Var.LoopMom[0] + Var.LoopMom[1], -1),Prop.F(1.0e-8, Var.LoopMom[1], UP, 0));
+    //   cout<<output<<endl;
+    //   throw std::invalid_argument("delta eval order 1");
+    // }
+    return result*epsilon(Var.LoopMom[0].norm())/epsilon(Var.LoopMom[1].norm());
   }
 
   // loop order >=2
   vertex4 &Ver4 = Vertex;
-  F.Evaluate(Var.LoopMom[1], true);
+  F.Evaluate(Var.LoopMom[1], main_channel);
   // if (Var.CurrOrder == 2)
   //   cout << Var.LoopMom[1].norm() << endl;
 
@@ -98,26 +118,38 @@ double delta::Evaluate() {
   for (int i = 0; i < Size; ++i) {
     auto &fidx = Fidx[i];
     Weight += (Ver4.Weight[i][DIR] - Ver4.Weight[i][EX]) * F[fidx];
+    //Weight += (Ver4.Weight[i][DIR]) * F[fidx];
+
   }
   // there is a symmetry factor -0.5
   // cout << "2: " << Weight * Factor * 0.5 << endl;
-  return Weight * Factor * (-0.5);
+  double xi=Var.LoopMom[0].dot(Var.LoopMom[1])/Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
+  result= Weight * Factor * (0.5)* legendre(xi,main_channel);
+
+  // if(result<1e-300){
+  //     throw std::invalid_argument("delta Eval order 2");
+  // }
+  return result*epsilon(Var.LoopMom[0].norm())/epsilon(Var.LoopMom[1].norm());
 }
 
 double delta::Evaluate(int channel) {
   double Factor = 1.0 / pow(2.0 * PI, D);
+  double result=0;
   // normalization
   if (Order == 0)
     return 1.0;
   else if (Order == 1) {
     // bare interaction
     double Weight = Prop.Interaction(Var.LoopMom[0] - Var.LoopMom[1], -1);
-    Weight *= Prop.F(-1.0e-8, Var.LoopMom[1], UP, 0,channel);
+    Weight *= Prop.F(1.0e-8, Var.LoopMom[1], UP, 0,channel);
     // cout << "1: " << Weight * Factor * 0.5 << endl;
     double xi=Var.LoopMom[0].dot(Var.LoopMom[1])/Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
-    return Weight * Factor * legendre(xi,channel);
+    result= Weight * Factor * legendre(xi,channel);
+    // if(!std::isfinite(result)){
+    //   throw std::invalid_argument("delta_evaluate nan");
+    // }
+    return result*epsilon(Var.LoopMom[0].norm())/epsilon(Var.LoopMom[1].norm());
   }
-
   // loop order >=2
   vertex4 &Ver4 = Vertex;
   F.Evaluate(Var.LoopMom[1], channel);
@@ -132,11 +164,16 @@ double delta::Evaluate(int channel) {
   for (int i = 0; i < Size; ++i) {
     auto &fidx = Fidx[i];
     Weight += (Ver4.Weight[i][DIR] - Ver4.Weight[i][EX]) * F[fidx];
+    //Weight += (Ver4.Weight[i][DIR]) * F[fidx];
   }
   // there is a symmetry factor -0.5
   // cout << "2: " << Weight * Factor * 0.5 << endl;
   double xi=Var.LoopMom[0].dot(Var.LoopMom[1])/Var.LoopMom[0].norm()/Var.LoopMom[1].norm();
-  return Weight * Factor * (-0.5) * legendre(xi,channel);
+  result= Weight * Factor * (0.5) * legendre(xi,channel);
+  // if(!std::isfinite(result)){
+  //   throw std::invalid_argument("delta_evaluate nan");
+  // }
+  return result*epsilon(Var.LoopMom[0].norm())/epsilon(Var.LoopMom[1].norm());
 }
 
 string delta::ToString() { return Vertex.ToString(""); }

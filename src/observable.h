@@ -29,6 +29,11 @@ public:
     return _Estimator[X * Index0 + Y * Index1 + Z];
   };
 
+  void Reset(){
+    for (int i = 0; i < Size; ++i)
+      _Estimator[i] *= 0.0; // set all elements to zero
+  }
+
 private:
   T *_Estimator;
   int Index0, Index1, Size;
@@ -40,6 +45,7 @@ public:
   void Measure0(double Factor);
   void Measure(int Order, int QIndex, int AngIdx,
                const std::vector<verWeight> &Weight, double Factor);
+  void Reset();
   void Save();
 
 private:
@@ -54,9 +60,10 @@ public:
   void Measure0(double Factor);
   void Measure(int Order, int KBin, int TauBin, double Weight,
                double Factor); // all tau variables
+  void Reset();
   void Save();
   void Save(int);
-
+  void Check();
 private:
   std::string Name;
   int channel; // channel s=0,p=1,d=2 ...

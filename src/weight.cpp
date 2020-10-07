@@ -13,7 +13,34 @@ using namespace std;
 extern parameter Para;        // global parameters
 extern variable Var;          // global MC variables
 extern diag::propagator Prop; // global progator
-
+void weight::Check() {
+  OneBodyObs.Check();
+  for(int i=0;i<ChannelNum;i++){
+    ChannelObs[i].Check();
+  }
+}
+void weight::Reset(){
+  OneBodyObs.Reset();
+  for(int i=0;i<ChannelNum;i++){
+    ChannelObs[i].Reset();
+  }
+  /*
+  if (DiagType == DELTA) {
+    ////////////////////////// Delta /////////////////////////
+    for (int order = 1; order <= Para.Order; order++) {
+      LOG_INFO("Generating order " << order);
+      Delta[order].Build(order);
+      if (order < 4)
+        LOG_INFO(Delta[order].Vertex.ToString());
+    }
+    // for(int channel=0;channel<ChannelNum;channel++){
+    //   LOG_INFO("Init Channel"<<channel);
+    //   ChannelObs.push_back(obs::oneBodyObs());
+    // }
+  }
+  LOG_INFO("End of Init Weight");
+  */
+}
 void weight::Initialization() {
   array<momentum *, 4> ExtLegK;
 
@@ -123,6 +150,7 @@ void weight::Measure() {
   }
   else if (DiagType == DELTA){
     Factor /= Para.TauGrid.weight[Var.CurrExtTauBin];
+          
     if (Var.CurrOrder == 0)
       OneBodyObs.Measure0(Factor);
     else
@@ -151,10 +179,11 @@ void weight::SaveToFile() {
   if (DiagType == GAMMA)
     GammaObs.Save();
   else if (DiagType == DELTA){
-    OneBodyObs.Save();
     for(int channel=0;channel<ChannelNum;channel++){
       ChannelObs[channel].Save(channel);
     }
+    OneBodyObs.Save();
+    OneBodyObs.Save(0);
   }
   else
     OneBodyObs.Save();

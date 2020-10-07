@@ -36,10 +36,13 @@
 *.dat
 *.pdf
 *.png
+*.txt
 TAGS
+parameter~
 
 infile/
 outfile/
+savefile/
 Beta*/
 build/
 Data/
