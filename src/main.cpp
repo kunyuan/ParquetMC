@@ -192,7 +192,7 @@ void InitPara() {
 
   // initialize grids
   Para.TauGrid.build(Para.Beta, TauSize, 6.0 / Para.Ef);
-  Para.AngleGrid.build({-1.0, 1.0}, AngSize);
+  Para.AngleGrid.build({-1.0 + 1.0e-8, 1.0 - 1.0e-8}, AngSize);
 
   Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2.0);
   Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
