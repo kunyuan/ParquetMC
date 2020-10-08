@@ -28,16 +28,16 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 ChanColor = {0: "k", 1: "r", 2: "b", 3: "g"}
 # 0: total, 1: order 1, ...
 Order = range(Para.Order+1)
-Irreducible = False
+Irreducible = True
 
 shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 Data, Norm, Step, Grid = LoadFile(folderA, "vertex_pid[0-9]+.dat", shape)
 
-AngGrid = Grid["AngleGrid"]
+AngGrid = Grid["AngleGrid"]         # cos
 MomGrid = Grid["KGrid"]
 Angle = np.arccos(AngGrid)
 
-# Data shape : (pid numbers, order, chan, AngleGrid, KGrid)
+# Data shape : (pid numbers, order, chan, AngleGrid, KGrid, 2)
 
 def PrintInfo(Channel, Data, DataErr):
     Data = -np.copy(Data)
@@ -63,7 +63,6 @@ def SpinMapping(Data):
 
 
 def Bare(angle, Lambda):
-
     Bare = np.zeros([Para.AngGridSize, 2])
     if Irreducible == False:
         Bare[:, 0] += -8.0*np.pi/(Para.Mass2+Lambda)*Para.Nf
@@ -75,11 +74,17 @@ def Bare(angle, Lambda):
 
 bare = Bare(Angle, 0.0)
 
+# Data shape : (pid numbers, order, chan, AngleGrid, KGrid, 2)
 Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
+# Data shape : (pid numbers, chan, AngleGrid, KGrid, 2)
 
 #---------------- 
 Adata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
+# Adata shape : (pid numbers, AngleGrid, 2), channels are summed, momentum is set as p=0. 
 avg, err = Estimate(Adata, Norm)
+
+
+
 bareLambda = Bare(Angle, Para.Lambda)
 
 Adata_s = -(avg[:, 0]+bareLambda[:, 0])
@@ -87,10 +92,10 @@ Adata_a = -(avg[:, 1]+bareLambda[:, 1])
 Aerr_s = -err[:, 0]
 Aerr_a = -err[:, 1]
 
-Bl = LegendreCoeff(Adata_s, AngGrid, legendreL)
-Cl = LegendreCoeff(Adata_a, AngGrid, legendreL)
-BlErr = LegendreCoeff(Aerr_s, AngGrid, legendreL)
-ClErr = LegendreCoeff(Aerr_a, AngGrid, legendreL)
+As = LegendreCoeff(Adata_s, AngGrid, legendreL)
+Aa = LegendreCoeff(Adata_a, AngGrid, legendreL)
+AsErr = LegendreCoeff(Aerr_s, AngGrid, legendreL)
+AaErr = LegendreCoeff(Aerr_a, AngGrid, legendreL)
 
 
 #----------------------------------------------
@@ -103,7 +108,7 @@ Angle = np.arccos(AngGrid)
 
 Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
 
-#---------------- 
+#----
 Fdata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
 avg, err = Estimate(Fdata, Norm)
 Irreducible = True
@@ -113,10 +118,10 @@ Fdata_a = -(avg[:, 1]+bareLambda[:, 1])
 Ferr_s = -err[:, 0]
 Ferr_a = -err[:, 1]
 
-Fl = LegendreCoeff(Fdata_s, AngGrid, legendreL)
-Zl = LegendreCoeff(Fdata_a, AngGrid, legendreL)
-FlErr = LegendreCoeff(Ferr_s, AngGrid, legendreL)
-ZlErr = LegendreCoeff(Ferr_a, AngGrid, legendreL)
+Fs = LegendreCoeff(Fdata_s, AngGrid, legendreL)
+Fa = LegendreCoeff(Fdata_a, AngGrid, legendreL)
+FsErr = LegendreCoeff(Ferr_s, AngGrid, legendreL)
+FaErr = LegendreCoeff(Ferr_a, AngGrid, legendreL)
 
 def renormalize(ldict):
     newl = {}
@@ -135,17 +140,22 @@ def AFprint(Bl, Errl):
         print("order-" + str(k) + ":  ", Bl[k], "+-", abs(Errl[k]) )
 
 
-print("Fl: ")
-AFprint(Fl, FlErr)
-print("\nZl:")
-AFprint(Zl, ZlErr)
+print("Fs: ")
+AFprint(Fs, FsErr)
+print("Fa:")
+AFprint(Fa, FaErr)
+print("----------------------------------\nAs:")
+AFprint(As, AsErr)
+print("Aa:")
+AFprint(Aa, AaErr)
 
-print("\n\nrenormalized Fl :")
-AFprint(renormalize(Fl), renormalize_error(Fl, FlErr))
-print("Bl:")
-AFprint(Bl, BlErr)
 
-print("\nrenormalized Zl:")
-AFprint(renormalize(Zl), renormalize_error(Zl, ZlErr))
-print("Cl:")
-AFprint(Cl, ClErr)
+# print("\n\nrenormalized Fs :")
+# AFprint(renormalize(Fs), renormalize_error(Fs, FsErr))
+# print("As:")
+# AFprint(As, AsErr)
+
+# print("\nrenormalized Fa:")
+# AFprint(renormalize(Fa), renormalize_error(Fa, FaErr))
+# print("Aa:")
+# AFprint(Aa, AaErr)

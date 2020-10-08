@@ -126,25 +126,26 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         int t = map[VERT];
         // double dTau = Var.Tau[Tpair[t][INL]] - Var.Tau[Tpair[t][OUTL]];
         // dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
-        double dTau1 = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]] - 2 * Var.Tau[Tpair[t][OUTR]];
-        double dTau2 = Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
-        double dTau3 = Var.Tau[Tpair[t][OUTL]] - Var.Tau[Tpair[t][OUTR]];
-        double exp1 = cos(Para.OmegaINL * dTau1);
-        double exp2 = cos(Para.OmegaINR * dTau2);
-        double exp3 = cos(Para.Omega * dTau3);
+        
+        // double dTau1 = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]] - 2 * Var.Tau[Tpair[t][OUTR]];
+        // double dTau2 = Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
+        // double dTau3 = Var.Tau[Tpair[t][OUTL]] - Var.Tau[Tpair[t][OUTR]];
+        // double exp1 = cos(Para.OmegaINL * dTau1);
+        // double exp2 = cos(Para.OmegaINR * dTau2);
+        // double exp3 = cos(Para.Omega * dTau3);
 
 
-        ChanWeight[ChanMap[chan]] += W * GWeight * exp1 * exp2 * exp3;
-        // ChanWeight[ChanMap[chan]] += W * GWeight;
-        // if (IsF) {
-        //   double dTau = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]];
-        //   dTau += -Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
-        //   ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
-        // } else {
-        //   double dTau = Var.Tau[Tpair[t][INL]] - Var.Tau[Tpair[t][OUTL]];
-        //   dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
-        //   ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
-        // }
+        // ChanWeight[ChanMap[chan]] += W * GWeight * exp1 * exp2 * exp3;
+        
+        if (IsF) {
+          double dTau = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]];
+          dTau += -Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
+          ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
+        } else {
+          double dTau = Var.Tau[Tpair[t][INL]] - Var.Tau[Tpair[t][OUTL]];
+          dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
+          ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
+        }
 
 
       }
