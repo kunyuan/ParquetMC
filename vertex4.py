@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from utility.IO import *
 from utility.plot import *
-from utility.angle import LegendreCoeff
+import utility.angle as angle
 import numpy as np
 import sys
 import argparse
@@ -96,6 +96,7 @@ for chan in Channel:
                  capthick=1, capsize=4, c=ChanColor[chan], label=f"${ChanName[chan]}_s$")
     ax2.errorbar(Angle, -avg[:, 1], yerr=err[:, 1], fmt='-',
                  capthick=1, capsize=4, c=ChanColor[chan], label=f"${ChanName[chan]}_a$")
+    # print(chan, avg[:, 0])
 
 data = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
 avg, err = Estimate(data, Norm)

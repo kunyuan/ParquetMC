@@ -3,6 +3,7 @@ from utility.IO import *
 import time
 import traceback
 import numpy as np
+import utility.angle as legendre
 import sys
 import argparse
 
@@ -83,7 +84,9 @@ while True:
         #         Data[(0, 1)][0, 1], Data[(0, 1)][0, 1], Data[(0, 2)][0, 1], Data[(0, 3)][0, 1]))
 
         # Keep the ExtMom=0 elements only, and average the angle
-        DataList = [np.average(d[:, :, :, 0, :], axis=2) for d in Data]
+        # DataList = [np.average(d[:, :, :, 0, :], axis=2) for d in Data]
+        DataList = [legendre.LegendreCoeff(d[:, :, :, 0, :], AngGrid, [
+                                           0, ], axis=2)[0] for d in Data]
         # DataList = [d[:, :, 0, 0, :] for d in DataList]
 
         # construct bare interaction
@@ -94,12 +97,25 @@ while True:
         AngHalf = np.arccos(AngGrid)/2.0
         ExBare = +8.0 * np.pi / \
             ((2.0*Para.kF*np.sin(AngHalf))**2+Para.Mass2+Para.Lambda)
+        # ExBare = +8.0 * np.pi / \
+        # ((2.0*Para.kF*np.sin(AngHalf))**2+Para.Mass2)
         # print ExBare.shape
 
         # print "ExBare: ", AngleIntegation(ExBare, 0)
-        Bare[1] = np.average(ExBare)
+        # Bare[1] = np.average(ExBare)
+        Bare[1] = legendre.LegendreCoeff(ExBare, AngGrid, [0, ], 0)[0]
+        exchange0 = 8.0*np.pi/2.0/Para.kF**2 * \
+            np.log((Para.Mass2+Para.Lambda+4.0*Para.kF**2) /
+                   (Para.Mass2+Para.Lambda))/2.0  # factor 2 comes from the normalization
+        print(f"Benchmark exchange bare for l=0: {Bare[1]} vs {exchange0}")
         Bare = SpinMapping(Bare)
         # print(Bare*Para.Nf)
+
+        # print(AngGrid)
+        # print(ExBare)
+        # print(np.sum(ExBare)/len(ExBare), np.average(ExBare))
+        # coeff = legendre.LegendreCoeff(ExBare, AngGrid, [0, ], 0)
+        # print(f"{Bare[1]} vs {coeff}")
 
         # Bare *= 0.0
         # print Bare

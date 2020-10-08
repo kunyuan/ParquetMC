@@ -49,7 +49,8 @@ def LegendreCoeff(Data, AngleGrid, lList, axis=0):
         data = np.copy(Data)
         legendreP = np.array([eval_legendre(l, x) for x in AngleGrid])
         data = mult_along_axis(data, legendreP, axis)
-        Coeff[l] = integrate.simps(data, AngleGrid, axis=axis)/2.0
+        Coeff[l] = integrate.trapz(data, AngleGrid, axis=axis)/2.0
+        # Coeff[l] = integrate.simps(data, AngleGrid, axis=axis)/2.0
     return Coeff
 
 
