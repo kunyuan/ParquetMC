@@ -144,8 +144,10 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
       return 0.0;
   } else {
     // Order N shifted interaction
-    double Weight =
-        -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+    // double Weight =
+    //     -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+    double gd = 1.0 - Gd(0.0, TranQ);
+    double Weight = -8.0 * PI * gd / (kQ * kQ + Para.Mass2 + Para.Lambda * gd);
     if (VerOrder > 0)
       Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
     return Weight;
@@ -162,6 +164,11 @@ double propagator::CounterBubble(const momentum &K) {
 
   // ASSERT_ALLWAYS(IsEqual())
   return Factor;
+}
+
+double propagator::Gd(double Tau, const momentum &K) {
+  double KK = K.squaredNorm();
+  return Para.Charge2 * KK / (KK + Para.Kf * Para.Kf);
 }
 
 template <typename KGrid>

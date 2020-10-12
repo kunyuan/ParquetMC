@@ -26,7 +26,7 @@ const bool IsProper = true; // true means one-interaction irreducible
 const bool BoldG = false;
 const bool IsF = false;
 
-const diagtype DiagType = GAMMA;
+const diagtype DiagType = POLAR;
 // typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 

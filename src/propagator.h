@@ -12,6 +12,8 @@ typedef Matrix<double, Dynamic, Dynamic, RowMajor> weight2D;
 class propagator {
 public:
   void Initialize();
+  double Gd(double Tau, const momentum &K); // direct local field correction
+  double Ge(double Tau, const momentum &K); // exchange local field correction
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
   double F(double Tau, const momentum &K, spin Spin, int GType = 0);
 

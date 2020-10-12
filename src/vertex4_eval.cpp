@@ -138,6 +138,71 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
   }
 }
 
+// void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
+//                           const momentum &KInR, const momentum &KOutR,
+//                           bool IsFast) {
+//   if (ChannelCT.size() > 0) {
+//     double Factor = 1.0 / pow(2.0 * PI, D);
+//     // cout << weight << endl;
+//     // ProjFactor = SymFactor[chan] * Factor;
+//     // cout << Tpair[0][0] << ", " << Tpair[0][1] << Tpair[0][2] <<
+//     Tpair[0][3]
+//     //      << endl;
+//     for (auto &c : ChannelCT) {
+//       double weight;
+//       if (c == TC) {
+//         if (DiagType == POLAR)
+//           weight = pow(Prop.Interaction(KInL - KOutL, 0,
+//           Var.LoopMom[0].norm()),
+//                        LoopNum() + 1);
+//         else if (IsProper && DiagType == GAMMA)
+//           weight = pow(
+//               Prop.Interaction(KInL - KOutL, 0,
+//                                (Var.LoopMom[INL] -
+//                                Var.LoopMom[OUTL]).norm()),
+//               LoopNum() + 1);
+//         else
+//           weight = pow(Prop.Interaction(KInL - KOutL, 0), LoopNum() + 1);
+
+//         for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
+//           weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+//         }
+//         if (IsFast && Level == 0)
+//           ChanWeight[T][DIR] += weight * SymFactor[TC];
+//         else
+//           // counter-term Tpair and the weight are always the first element
+//           Weight[0][DIR] += weight * SymFactor[TC];
+//       } else if (c == UC) {
+//         if (DiagType == POLAR)
+//           weight = pow(Prop.Interaction(KInL - KOutR, 0,
+//           Var.LoopMom[0].norm()),
+//                        LoopNum() + 1);
+//         else if (IsProper && DiagType == GAMMA)
+//           weight = pow(
+//               Prop.Interaction(KInL - KOutR, 0,
+//                                (Var.LoopMom[INL] -
+//                                Var.LoopMom[OUTL]).norm()),
+//               LoopNum() + 1);
+//         else
+//           weight = pow(Prop.Interaction(KInL - KOutR, 0), LoopNum() + 1);
+
+//         // double weight =
+//         //     pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
+//         //         LoopNum() + 1);
+
+//         for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
+//           weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+//         }
+//         if (IsFast && Level == 0)
+//           ChanWeight[U][EX] += weight * SymFactor[UC];
+//         else
+//           // counter-term Tpair and the weight are always the first element
+//           Weight[0][EX] += weight * SymFactor[UC];
+//       }
+//     }
+//   }
+// }
+
 void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
                           const momentum &KInR, const momentum &KOutR,
                           bool IsFast) {
