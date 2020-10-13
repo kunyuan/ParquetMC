@@ -12,8 +12,8 @@ typedef Matrix<double, Dynamic, Dynamic, RowMajor> weight2D;
 class propagator {
 public:
   void Initialize();
-  double Gd(double Tau, const momentum &K); // direct local field correction
-  double Ge(double Tau, const momentum &K); // exchange local field correction
+  double Gp(double Tau, double K); // local field correction G^+
+  double Gm(double Tau, double K); // local field correction G^-
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
   double F(double Tau, const momentum &K, spin Spin, int GType = 0);
 
@@ -24,6 +24,8 @@ public:
   // get the Direct part of the interaction
   double Interaction(const momentum &TranQ, int VerOrder = 0,
                      double ExtQ = 0.0);
+
+  verWeight RInt(const momentum &TranQ, int VerOrder = 0, double ExtQ = 0.0);
 
   double CounterBubble(const momentum &K);
 

@@ -104,30 +104,79 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // return Weight;
 
   double kDiQ = (KInL - KOutL).norm();
-  Weight[DIR] =
-      -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
-
+  bool Irreducible;
   if (DiagType == SIGMA && IsZero(kDiQ))
-    Weight[DIR] = 0.0;
-
-  // check irreducibility
+    Irreducible = false;
   if ((IsProper || DiagType == POLAR) && IsEqual(kDiQ, ExtQ))
-    Weight[DIR] = 0.0;
+    Irreducible = false;
+  else
+    Irreducible = true;
 
+  double Rp0, Rm0;
+  double gpp;
+  double gm = Gm(0.0, kDiQ);
+  double gp = Gp(0.0, kDiQ);
+  if (Irreducible)
+    gpp = -gp;
+  else
+    gpp = 1.0 - gp;
+
+  Rp0 = 8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Kf * Para.Kf) +
+        8.0 * PI * (1 - gp) / (kDiQ * kDiQ + Para.Lambda * (1 - gp));
+
+  Rm0 = 8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Kf * Para.Kf) -
+        8.0 * PI * gm / (kDiQ * kDiQ - Para.Lambda * gm);
+
+  // exchange
   double kExQ = (KInL - KOutR).norm();
-  Weight[EX] =
-      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+  if (DiagType == SIGMA && IsZero(kDiQ))
+    Irreducible = false;
+  if ((IsProper || DiagType == POLAR) && IsEqual(kDiQ, ExtQ))
+    Irreducible = false;
+  else
+    Irreducible = true;
 
-  if (DiagType == SIGMA && IsZero(kExQ))
-    Weight[EX] = 0.0;
+  double Rp1, Rm1;
+  gm = Gm(0.0, kExQ);
+  gp = Gp(0.0, kExQ);
+  if (Irreducible)
+    gpp = -gp;
+  else
+    gpp = 1.0 - gp;
 
-  // check irreducibility
-  if ((IsProper || DiagType == POLAR) && IsEqual(kExQ, ExtQ))
-    Weight[EX] = 0.0;
+  Rp1 = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Kf * Para.Kf) +
+        8.0 * PI * (1 - gp) / (kExQ * kExQ + Para.Lambda * (1 - gp));
+
+  Rm1 = 8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Kf * Para.Kf) -
+        8.0 * PI * gm / (kExQ * kExQ - Para.Lambda * gm);
+
+  Weight[DIR] = -(Rp0 - Rm0) + SPIN * Rm1;
+  Weight[EX] = (Rp1 - Rm1) - SPIN * Rm0;
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
   return Weight;
+}
+
+verWeight propagator::RInt(const momentum &TranQ, int VerOrder, double ExtQ) {
+  double kQ = TranQ.norm();
+  double gm = Gm(0.0, kQ);
+  double wp, wm;
+  // R^+
+  if ((IsProper || DiagType == POLAR) && IsEqual(kQ, ExtQ)) {
+    wp += 0.0;
+  } else {
+    wp = -8.0 * PI / (kQ * kQ + Para.Mass2 + Para.Lambda);
+  }
+  // R^-
+  wm = 8.0 * PI * gm / (kQ * kQ - gm * Para.Lambda);
+  if (VerOrder > 0) {
+    wp *= pow(wp * Para.Lambda / 8.0 / PI, VerOrder);
+    wm *= pow(wm * Para.Lambda / 8.0 / PI, VerOrder);
+  }
+  verWeight Weight;
+  Weight[DIR] = wp - wm;
+  Weight[EX] = SPIN * wm;
 }
 
 double propagator::Interaction(const momentum &TranQ, int VerOrder,
@@ -144,10 +193,11 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
       return 0.0;
   } else {
     // Order N shifted interaction
-    // double Weight =
-    //     -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
-    double gd = 1.0 - Gd(0.0, TranQ);
-    double Weight = -8.0 * PI * gd / (kQ * kQ + Para.Mass2 + Para.Lambda * gd);
+    double Weight =
+        -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
+    // double gd = 1.0 - Gd(0.0, kQ);
+    // double Weight = -8.0 * PI * gd / (kQ * kQ + Para.Mass2 + Para.Lambda *
+    // gd);
     if (VerOrder > 0)
       Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
     return Weight;
@@ -166,9 +216,14 @@ double propagator::CounterBubble(const momentum &K) {
   return Factor;
 }
 
-double propagator::Gd(double Tau, const momentum &K) {
-  double KK = K.squaredNorm();
-  return Para.Charge2 * KK / (KK + Para.Kf * Para.Kf);
+double propagator::Gp(double Tau, double K) {
+  double KK = K * K;
+  return Para.Charge2 * KK / (KK + Para.Mass2 + Para.Kf * Para.Kf);
+}
+
+double propagator::Gm(double Tau, double K) {
+  double KK = K * K;
+  return Para.Charge2 * KK / (KK + Para.Mass2 + Para.Kf * Para.Kf);
 }
 
 template <typename KGrid>
