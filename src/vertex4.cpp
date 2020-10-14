@@ -122,6 +122,9 @@ bubble vertex4::_BuildBubble(channel chan, int ol) {
   vector<channel> F = {I, U, S, TC, UC};
   vector<channel> V = {I, T, U, TC, UC};
 
+  // vector<channel> FULL = {T, TC};
+  // vector<channel> F = {TC};
+  // vector<channel> V = {T, TC};
   ASSERT_ALLWAYS(chan != I, "BuildUST can not process I channel!");
   ASSERT_ALLWAYS(ol < LoopNum(),
                  "LVer order must be smaller than the Ver order!");

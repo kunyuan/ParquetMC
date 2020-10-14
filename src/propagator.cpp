@@ -197,17 +197,33 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   }
 
   double kExQ = (KInL - KOutR).norm();
-  Weight[EX] +=
-      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+  if (DiagType == POLAR) {
+    bool isproper = IsEqual(kExQ, ExtQ);
+    double rp = Rp(0.0, kExQ, false, isproper);
+    double rm = Rm(0.0, kExQ, false, isproper);
+    // if (!isproper) {
+    //   ASSERT_ALLWAYS(IsEqual(-8.0 * PI * Para.Charge2 /
+    //                              (kDiQ * kDiQ + Para.Mass2 + Para.Lambda),
+    //                          rp),
+    //                  "wrong : "
+    //                      << rp << " vs "
+    //                      << -8.0 * PI * Para.Charge2 /
+    //                             (kDiQ * kDiQ + Para.Mass2 + Para.Lambda));
+    // }
+    Weight[EX] += -(rp - rm);
+    Weight[DIR] += -SPIN * rm;
+  }
+  // Weight[EX] +=
+  //     8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
 
-  if (DiagType == SIGMA && IsZero(kExQ))
-    Weight[EX] = 0.0;
+  // if (DiagType == SIGMA && IsZero(kExQ))
+  //   Weight[EX] = 0.0;
 
   // check irreducibility
-  if ((IsProper || DiagType == POLAR) && IsEqual(kExQ, ExtQ)) {
-    // ABORT("should not happen");
-    Weight[EX] = 0.0;
-  }
+  // if ((IsProper || DiagType == POLAR) && IsEqual(kExQ, ExtQ)) {
+  // ABORT("should not happen");
+  // Weight[EX] = 0.0;
+  // }
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;

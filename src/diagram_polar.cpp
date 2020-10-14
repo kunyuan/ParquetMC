@@ -19,6 +19,7 @@ void polar::Build(int order) {
   // vertex is only needed for order>=2
   if (Order >= 2) {
     vector<channel> Chan = {I, T, U, S, TC, UC};
+    // vector<channel> Chan = {T, TC};
     // vector<channel> Chan = {
     //     T,
     // };

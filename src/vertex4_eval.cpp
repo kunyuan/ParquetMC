@@ -213,10 +213,10 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
     // cout << Tpair[0][0] << ", " << Tpair[0][1] << Tpair[0][2] << Tpair[0][3]
     //      << endl;
     for (auto &c : ChannelCT) {
-      double wd, we, bubbles;
-      double K = (KInL - KOutL).norm();
       if (c == TC) {
+        double wd, we, bubbles;
         if (DiagType == POLAR) {
+          double K = (KInL - KOutL).norm();
           bool isproper = IsEqual(K, Var.LoopMom[0].norm());
           // if IsProper=true, then only one-interaction irreducible diagrams
           // are allowed;
@@ -246,30 +246,46 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
           Weight[0][EX] += we * bubbles * SymFactor[TC];
         }
       } else if (c == UC) {
-        double weight;
-        if (DiagType == POLAR)
-          weight = pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
-                       LoopNum() + 1);
-        else if (IsProper && DiagType == GAMMA)
-          weight = pow(
-              Prop.Interaction(KInL - KOutR, 0,
-                               (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm()),
-              LoopNum() + 1);
-        else
-          weight = pow(Prop.Interaction(KInL - KOutR, 0), LoopNum() + 1);
+        double wd, we, bubbles;
+        if (DiagType == POLAR) {
+          double K = (KInL - KOutR).norm();
+          bool isproper = IsEqual(K, Var.LoopMom[0].norm());
+          wd = SPIN * pow(Prop.Rm(0.0, K, true, isproper), LoopNum() + 1);
+          we = pow(Prop.Rp(0.0, K, true, isproper), LoopNum() + 1) - wd / SPIN;
+        }
+        // weight = pow(Prop.Interaction(KInL - KOutR, 0,
+        // Var.LoopMom[0].norm()),
+        //              LoopNum() + 1);
+        // else if (IsProper && DiagType == GAMMA) weight =
+        //     pow(Prop.Interaction(KInL - KOutR, 0,
+        //                          (Var.LoopMom[INL] -
+        //                          Var.LoopMom[OUTL]).norm()),
+        //         LoopNum() + 1);
+        // else weight = pow(Prop.Interaction(KInL - KOutR, 0), LoopNum() + 1);
 
         // double weight =
         //     pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
         //         LoopNum() + 1);
-
+        // cout << wd << ", " << we << ", " << weight << endl;
+        bubbles = 1.0;
         for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
-          weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+          bubbles *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
         }
-        if (IsFast && Level == 0)
-          ChanWeight[U][EX] += weight * SymFactor[UC];
-        else
+
+        // for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
+        //   weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+        // }
+        if (IsFast && Level == 0) {
+          ChanWeight[U][DIR] += wd * bubbles * SymFactor[UC];
+          ChanWeight[U][EX] += we * bubbles * SymFactor[UC];
+          // ChanWeight[U][DIR] += wd * SymFactor[UC];
+          // ChanWeight[U][EX] += we * SymFactor[UC];
+        } else {
           // counter-term Tpair and the weight are always the first element
-          Weight[0][EX] += weight * SymFactor[UC];
+          Weight[0][DIR] += wd * bubbles * SymFactor[UC];
+          // Weight[0][EX] += we * SymFactor[UC];
+          Weight[0][EX] += we * bubbles * SymFactor[UC];
+        }
       }
     }
   }
