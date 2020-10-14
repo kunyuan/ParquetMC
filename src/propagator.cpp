@@ -275,12 +275,12 @@ double propagator::CounterBubble(const momentum &K) {
 
 double propagator::Gp(double K) {
   double KK = K * K;
-  return Para.Gp * KK / (KK + Para.Mass2 + Para.Kf * Para.Kf);
+  return Para.Gp * KK / (KK + Para.Mass2 + 2.0 * Para.Kf * Para.Kf);
 }
 
 double propagator::Gm(double K) {
   double KK = K * K;
-  return Para.Gm * KK / (KK + Para.Mass2 + Para.Kf * Para.Kf);
+  return Para.Gm * KK / (KK + Para.Mass2 + 2.0 * Para.Kf * Para.Kf);
 }
 
 double propagator::Rp(double Tau, double K, bool DoubleCounting,
