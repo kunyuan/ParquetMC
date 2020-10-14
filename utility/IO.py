@@ -70,7 +70,7 @@ class param:
         self.MaxExtMom *= self.kF
 
         print(yellow("Parameters:"))
-        print(f"Rs={self.Rs}, kF={self.kF}, EF={self.EF}, Beta={self.Beta}, Mass2={self.Mass2}, Lambda={self.Lambda}, Dim={self.Dim}, Spin={self.Spin}\n")
+        print(f"Rs={self.Rs}, kF={self.kF}, EF={self.EF}, NF={self.Nf}, Beta={self.Beta}, Mass2={self.Mass2}, Lambda={self.Lambda}, Dim={self.Dim}, Spin={self.Spin}\n")
         print(yellow("Grid Information:"))
         print(
             f"TauSize={self.TauGridSize}, MomSize={self.MomGridSize}, AngleSize={self.AngGridSize}, MaxExtMom={self.MaxExtMom}")

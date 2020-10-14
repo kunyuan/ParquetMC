@@ -14,9 +14,9 @@ public:
   void Initialize();
   double Gp(double K); // local field correction G^+
   double Gm(double K); // local field correction G^-
-  double Rp(double Tau, double K, bool NoDoubleCounting,
+  double Rp(double Tau, double K, bool DoubleCounting,
             bool isproper); // spin-symmetric renormalized coupling
-  double Rm(double Tau, double K, bool NoDoubleCounting,
+  double Rm(double Tau, double K, bool DoubleCounting,
             bool isproper); // spin-antisymmetric renormalized coupling
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
   double F(double Tau, const momentum &K, spin Spin, int GType = 0);

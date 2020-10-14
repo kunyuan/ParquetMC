@@ -220,8 +220,8 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
           bool isproper = IsEqual(K, Var.LoopMom[0].norm());
           // if IsProper=true, then only one-interaction irreducible diagrams
           // are allowed;
-          we = SPIN * pow(Prop.Rm(0.0, K, false, isproper), LoopNum() + 1);
-          wd = pow(Prop.Rp(0.0, K, false, isproper), LoopNum() + 1) - we / SPIN;
+          we = SPIN * pow(Prop.Rm(0.0, K, true, isproper), LoopNum() + 1);
+          wd = pow(Prop.Rp(0.0, K, true, isproper), LoopNum() + 1) - we / SPIN;
         }
         //  else if (IsProper && DiagType == GAMMA)
         //   weight = pow(
@@ -236,6 +236,7 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
         for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
           bubbles *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
         }
+        // bubbles *= pow(-1.0, LoopNum() + 1);
         if (IsFast && Level == 0) {
           ChanWeight[T][DIR] += wd * bubbles * SymFactor[TC];
           ChanWeight[T][EX] += we * bubbles * SymFactor[TC];

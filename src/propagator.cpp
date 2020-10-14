@@ -1,6 +1,7 @@
 #define FMT_HEADER_ONLY
 #include "propagator.h"
 #include "lib/green.h"
+#include "utility/abort.h"
 #include "utility/fmt/format.h"
 #include "utility/fmt/printf.h"
 #include <iostream>
@@ -174,19 +175,39 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
     Weight[DIR] = 0.0;
 
   // check irreducibility
-  if ((IsProper || DiagType == POLAR) && IsEqual(kDiQ, ExtQ))
+  if ((IsProper || DiagType == POLAR) && IsEqual(kDiQ, ExtQ)) {
     Weight[DIR] = 0.0;
+  }
+
+  if (DiagType == POLAR) {
+    bool isproper = IsEqual(kDiQ, ExtQ);
+    double rp = Rp(0.0, kDiQ, false, isproper);
+    double rm = Rm(0.0, kDiQ, false, isproper);
+    // if (!isproper) {
+    //   ASSERT_ALLWAYS(IsEqual(-8.0 * PI * Para.Charge2 /
+    //                              (kDiQ * kDiQ + Para.Mass2 + Para.Lambda),
+    //                          rp),
+    //                  "wrong : "
+    //                      << rp << " vs "
+    //                      << -8.0 * PI * Para.Charge2 /
+    //                             (kDiQ * kDiQ + Para.Mass2 + Para.Lambda));
+    // }
+    Weight[DIR] = rp - rm;
+    Weight[EX] = SPIN * rm;
+  }
 
   double kExQ = (KInL - KOutR).norm();
-  Weight[EX] =
+  Weight[EX] +=
       8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
 
   if (DiagType == SIGMA && IsZero(kExQ))
     Weight[EX] = 0.0;
 
   // check irreducibility
-  if ((IsProper || DiagType == POLAR) && IsEqual(kExQ, ExtQ))
+  if ((IsProper || DiagType == POLAR) && IsEqual(kExQ, ExtQ)) {
+    // ABORT("should not happen");
     Weight[EX] = 0.0;
+  }
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
@@ -254,37 +275,38 @@ double propagator::CounterBubble(const momentum &K) {
 
 double propagator::Gp(double K) {
   double KK = K * K;
-  return Para.Charge2 * KK / (KK + Para.Mass2 + Para.Kf * Para.Kf);
+  return Para.Gp * KK / (KK + Para.Mass2 + Para.Kf * Para.Kf);
 }
 
 double propagator::Gm(double K) {
   double KK = K * K;
-  return Para.Charge2 * KK / (KK + Para.Mass2 + Para.Kf * Para.Kf);
+  return Para.Gm * KK / (KK + Para.Mass2 + Para.Kf * Para.Kf);
 }
 
-double propagator::Rp(double Tau, double K, bool NoDoubleCounting,
+double propagator::Rp(double Tau, double K, bool DoubleCounting,
                       bool isproper) {
   double factor = 0.0;
   if (isproper == true)
-    factor = Gp(K);
+    factor = -Gp(K);
   else
     factor = 1.0 - Gp(K);
 
-  double weight = -8.0 * PI * factor / (K * K - Para.Lambda * factor);
+  // cout << factor << endl;
+  double weight = -8.0 * PI * factor / (K * K + Para.Lambda * factor);
 
-  if (!NoDoubleCounting)
+  if (!DoubleCounting)
     weight += -8.0 * PI * Gp(K) / K / K;
 
   return weight;
 }
 
-double propagator::Rm(double Tau, double K, bool NoDoubleCounting,
+double propagator::Rm(double Tau, double K, bool DoubleCounting,
                       bool isproper) {
-  double factor = Gm(K);
+  double factor = -Gm(K);
 
-  double weight = -8.0 * PI * factor / (K * K - Para.Lambda * factor);
+  double weight = -8.0 * PI * factor / (K * K + Para.Lambda * factor);
 
-  if (!NoDoubleCounting)
+  if (!DoubleCounting)
     weight += -8.0 * PI * Gm(K) / K / K;
 
   return weight;
