@@ -213,28 +213,39 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
     // cout << Tpair[0][0] << ", " << Tpair[0][1] << Tpair[0][2] << Tpair[0][3]
     //      << endl;
     for (auto &c : ChannelCT) {
-      double weight;
+      double wd, we, bubbles;
+      double K = (KInL - KOutL).norm();
       if (c == TC) {
-        if (DiagType == POLAR)
-          weight = pow(Prop.Interaction(KInL - KOutL, 0, Var.LoopMom[0].norm()),
-                       LoopNum() + 1);
-        else if (IsProper && DiagType == GAMMA)
-          weight = pow(
-              Prop.Interaction(KInL - KOutL, 0,
-                               (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm()),
-              LoopNum() + 1);
-        else
-          weight = pow(Prop.Interaction(KInL - KOutL, 0), LoopNum() + 1);
-
-        for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
-          weight *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+        if (DiagType == POLAR) {
+          bool isproper = IsEqual(K, Var.LoopMom[0].norm());
+          // if IsProper=true, then only one-interaction irreducible diagrams
+          // are allowed;
+          we = SPIN * pow(Prop.Rm(0.0, K, false, isproper), LoopNum() + 1);
+          wd = pow(Prop.Rp(0.0, K, false, isproper), LoopNum() + 1) - we / SPIN;
         }
-        if (IsFast && Level == 0)
-          ChanWeight[T][DIR] += weight * SymFactor[TC];
-        else
+        //  else if (IsProper && DiagType == GAMMA)
+        //   weight = pow(
+        //       Prop.Interaction(KInL - KOutL, 0,
+        //                        (Var.LoopMom[INL] -
+        //                        Var.LoopMom[OUTL]).norm()),
+        //       LoopNum() + 1);
+        // else
+        //   weight = pow(Prop.Interaction(KInL - KOutL, 0), LoopNum() + 1);
+
+        bubbles = 1.0;
+        for (int o = LoopIdx; o < LoopIdx + LoopNum(); o++) {
+          bubbles *= Prop.CounterBubble(Var.LoopMom[o]) * Factor * SPIN;
+        }
+        if (IsFast && Level == 0) {
+          ChanWeight[T][DIR] += wd * bubbles * SymFactor[TC];
+          ChanWeight[T][EX] += we * bubbles * SymFactor[TC];
+        } else {
           // counter-term Tpair and the weight are always the first element
-          Weight[0][DIR] += weight * SymFactor[TC];
+          Weight[0][DIR] += wd * bubbles * SymFactor[TC];
+          Weight[0][EX] += we * bubbles * SymFactor[TC];
+        }
       } else if (c == UC) {
+        double weight;
         if (DiagType == POLAR)
           weight = pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
                        LoopNum() + 1);

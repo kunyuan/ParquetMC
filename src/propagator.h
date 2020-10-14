@@ -12,8 +12,12 @@ typedef Matrix<double, Dynamic, Dynamic, RowMajor> weight2D;
 class propagator {
 public:
   void Initialize();
-  double Gp(double Tau, double K); // local field correction G^+
-  double Gm(double Tau, double K); // local field correction G^-
+  double Gp(double K); // local field correction G^+
+  double Gm(double K); // local field correction G^-
+  double Rp(double Tau, double K, bool NoDoubleCounting,
+            bool isproper); // spin-symmetric renormalized coupling
+  double Rm(double Tau, double K, bool NoDoubleCounting,
+            bool isproper); // spin-antisymmetric renormalized coupling
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
   double F(double Tau, const momentum &K, spin Spin, int GType = 0);
 

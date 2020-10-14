@@ -41,6 +41,7 @@ struct parameter {
   double Nf, Mu, Beta;  // chemical potential, inverse temperature
   double Mass2, Lambda; // screening length^2, shift
   double Charge2;       // screening length^2
+  double Gp, Gm;        // constants for G^+- local field corrections
 
   // MC inputs
   int TotalStep;             // total steps of the Monte Carlo
