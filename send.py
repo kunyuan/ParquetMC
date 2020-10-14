@@ -44,20 +44,18 @@ else:
     infilepath = homedir
 
 for pid in PIDList:
-    seed = random.randint(0, 2**31-1)
     # print pid, seed
     outfile = os.path.join(outfilepath, "_out{0}".format(pid))  # output files
     jobfile = os.path.join(jobfilepath, "_job{0}.sh".format(pid))  # job files
 
     if Cluster == "local":
         os.chdir(homedir)
-        os.system("./{0} {1} {2} > {3} &".format(execute, pid, seed, outfile))
+        os.system("./{0} > {1} &".format(execute, outfile))
         os.chdir("..")
 
     elif Cluster == "condor":
         with open(jobfile, "w") as fjob:
             fjob.write("executable = {0}\n".format(execute))
-            fjob.write("arguments = {0} {1}\n".format(pid, seed))
             fjob.write("output ={0}\n".format(outfile))
             fjob.write("initialdir ={0}\n".format(homedir))
             fjob.write("queue")
@@ -75,7 +73,7 @@ for pid in PIDList:
             fjob.write("echo $PBS_JOBID >>"+homedir+"/id_job.log\n")
             fjob.write("cd "+homedir+"\n")
             fjob.write(
-                "./{0} {1} {2} > {3}".format(execute, pid, seed, outfile))
+                "./{0} > {1}".format(execute, outfile))
 
         os.chdir(homedir)
         os.system("qsub {0}".format(jobfile))

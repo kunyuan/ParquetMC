@@ -3,6 +3,7 @@
 #include "utility/timer.h"
 #include <iostream>
 #include <math.h>
+#include <random>
 
 using namespace std;
 using namespace mc;
@@ -21,8 +22,16 @@ const string HelpStr = "Two parameters: PID Seed";
 
 int main(int argc, const char *argv[]) {
   // take two parameters: PID and Seed
-  Para.PID = atoi(argv[1]);
-  Para.Seed = atoi(argv[2]);
+  // Para.PID = atoi(argv[1]);
+  // Para.Seed = atoi(argv[2]);
+  if (argc > 1) {
+    Para.PID = atoi(argv[1]);
+    Para.Seed = Para.PID;
+  } else {
+    std::random_device rd;
+    Para.PID = rd() % 1000000;
+    Para.Seed = Para.PID;
+  }
 
   //// initialize the global log configuration   /////////////
   string LogFile = "_" + to_string(Para.PID) + ".log";
