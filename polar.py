@@ -44,6 +44,7 @@ if(XType == "Mom"):
         # err = np.average(Err[o, :, :], axis=1)
         Errorbar(MomGrid/Para.kF, y[:, 0], err*2.0, fmt='o-',
                  color=ColorList[o], label="Order {0}".format(o))
+        print(f"{o}   {y[0, 0].real}   {err[0][0].real*2.0}")
 
     # x = ExtMomBin*kF
     # l = Mass2+Lambda
