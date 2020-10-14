@@ -277,6 +277,7 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
 
 void vertex4::_EvalI(const momentum &KInL, const momentum &KOutL,
                      const momentum &KInR, const momentum &KOutR, bool IsFast) {
+  return;
   // only loop 3 has envolope diagrams
   if (Order != 3)
     return;
