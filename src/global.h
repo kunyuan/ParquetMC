@@ -12,7 +12,7 @@
 // comment to turn on all assert
 // #define NDEBUG
 
-enum diagtype { GAMMA, SIGMA, POLAR, DELTA };
+enum diagtype { GAMMA, SIGMA, POLAR, DELTA, VERTEX3 };
 
 ///////////  Global Constants ////////////////////
 const int D = 3;        // dimensions, 2 or 3
@@ -26,7 +26,8 @@ const bool IsProper = true; // true means one-interaction irreducible
 const bool BoldG = false;
 const bool IsF = false;
 
-const diagtype DiagType = GAMMA;
+const diagtype DiagType = VERTEX3;
+// const diagtype DiagType = GAMMA;
 // typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 

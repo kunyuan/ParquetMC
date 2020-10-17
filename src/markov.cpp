@@ -26,6 +26,8 @@ int LastInterTauIdx(int Order) {
     return Order - 2;
   else if (DiagType == POLAR)
     return Order - 1;
+  else if (DiagType == VERTEX3)
+    return Order - 1;
   else if (DiagType == DELTA)
     return Order - 2;
   else
@@ -38,6 +40,8 @@ int FirstInterLoopIdx() {
   else if (DiagType == SIGMA)
     return 1;
   else if (DiagType == POLAR)
+    return 1;
+  else if (DiagType == VERTEX3)
     return 1;
   else if (DiagType == DELTA)
     return 1;
@@ -213,11 +217,12 @@ void markov::ChangeExtMomentum() {
     Var.LoopMom[INR][1] = Para.Kf * sin(theta);
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
 
-  } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
+  } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA ||
+             DiagType == VERTEX3) {
     // In Momentum
     OldExtMomBin = Var.CurrExtMomBin;
     Prop = ShiftExtTransferK(OldExtMomBin, Var.CurrExtMomBin);
-    if (DiagType == POLAR)
+    if (DiagType == POLAR || DiagType == VERTEX3)
       Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
     else
       Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
@@ -236,9 +241,10 @@ void markov::ChangeExtMomentum() {
       Var.CurrExtAngBin = OldAngBin;
       Var.LoopMom[INR] = OldMom;
       Var.LoopMom[OUTR] = OldMom;
-    } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
+    } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA ||
+               DiagType == VERTEX3) {
       Var.CurrExtMomBin = OldExtMomBin;
-      if (DiagType == POLAR)
+      if (DiagType == POLAR || DiagType == VERTEX3)
         Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
       else
         Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
@@ -375,7 +381,7 @@ double markov::ShiftK(const momentum &OldMom, momentum &NewMom) {
 };
 
 double markov::ShiftExtTransferK(const int &OldExtMomBin, int &NewExtMomBin) {
-  if (DiagType == POLAR)
+  if (DiagType == POLAR || DiagType == VERTEX3)
     NewExtMomBin = Random.irn(0, Para.BoseKGrid.size - 1);
   else
     NewExtMomBin = Random.irn(0, Para.FermiKGrid.size - 1);

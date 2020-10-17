@@ -5,6 +5,20 @@
 
 namespace diag {
 
+class vertex3 {
+public:
+  int Order;
+  int ExtTauIdx;
+  vertex4 Vertex;
+  array<green, 2> G;
+  vector<array<int, 2>> Gidx; // external T list
+
+  int TauNum() { return Order + 1; }
+  int LoopNum() { return Order; }
+  void Build(int Order);
+  double Evaluate();
+};
+
 class polar {
 public:
   int Order;

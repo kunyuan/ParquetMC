@@ -22,6 +22,9 @@ oneBodyObs::oneBodyObs() {
   if (DiagType == POLAR) {
     Name = "polar";
     ksize = Para.BoseKGrid.size;
+  } else if (DiagType == VERTEX3) {
+    Name = "vertex3";
+    ksize = Para.BoseKGrid.size;
   } else if (DiagType == SIGMA) {
     Name = "sigma";
     ksize = Para.FermiKGrid.size;
@@ -60,7 +63,7 @@ void oneBodyObs::Save() {
     VerFile << "# Counter: " << Var.Counter << endl;
     VerFile << "# Norm: " << Normalization << endl;
 
-    if (DiagType == POLAR)
+    if (DiagType == POLAR || DiagType == VERTEX3)
       VerFile << "# KGrid: " << Para.BoseKGrid.str() << endl;
     else
       VerFile << "# KGrid: " << Para.FermiKGrid.str() << endl;
