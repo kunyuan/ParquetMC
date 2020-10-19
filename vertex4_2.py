@@ -69,12 +69,13 @@ def Bare(angle, Lambda):
     return Bare
 
 
+fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
 # fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
-plt.figure()
+
 
 bare = Bare(Angle, 0.0)
-plt.plot(Angle, -bare[:, 0], '-', c='g', label="bare")
-# ax2.plot(Angle, -bare[:, 1], '-', c='y', label="$v_{ex}$")
+ax1.plot(Angle, -bare[:, 0], '-', c='g', label="$v_{ex}$")
+ax2.plot(Angle, -bare[:, 1], '-', c='y', label="$v_{ex}$")
 
 
 Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
@@ -99,30 +100,26 @@ for chan in Channel:
 data = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
 avg, err = Estimate(data, Norm)
 bareLambda = Bare(Angle, Para.Lambda)
-plt.errorbar(Angle, -(avg[:, 0]+bareLambda[:, 0]), yerr=err[:, 0]*2.0, fmt='-',
-             capthick=1, capsize=1, c='r', label=f"$F_s$")
-plt.errorbar(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1]*2.0, fmt='-',
-             capthick=1, capsize=1, c='b', label=f"$F_a$")
-# plt.plot(Angle, -(avg[:, 0]+bareLambda[:, 0]), yerr=err[:, 0], fmt='-',
-             # capthick=1, capsize=4, c='r', label=f"$F_s$")
-# plt.plot(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1], fmt='-',
-             # capthick=1, capsize=4, c='b', label=f"$F_a$")
+ax1.errorbar(Angle, -(avg[:, 0]+bareLambda[:, 0]), yerr=err[:, 0], fmt='-',
+             capthick=1, capsize=4, c='r', label=f"$F_s$")
+ax1.errorbar(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1], fmt='-',
+             capthick=1, capsize=4, c='g', label=f"$F_a$")
 
 
-plt.xlim([0.0, np.pi])
-plt.ylim([-2.0, 1.0])
-# ax2.set_ylim([-2.0, 2.0])
-plt.xlabel("$\\theta$", size=size)
-# ax2.set_xlim([0.0, np.pi])
-# ax2.set_xlabel("$\\theta$", size=size)
-plt.legend(loc=1, frameon=False, fontsize=size)
-# ax2.legend(loc=1, frameon=False, fontsize=size)
-plt.xticks([0, 1, 2, 3])
-# ax2.set_xticks([0, 1, 2, 3])
+ax1.set_xlim([0.0, np.pi])
+ax1.set_ylim([-2.0, 2.0])
+ax2.set_ylim([-2.0, 2.0])
+ax1.set_xlabel("$\\theta$", size=size)
+ax2.set_xlim([0.0, np.pi])
+ax2.set_xlabel("$\\theta$", size=size)
+ax1.legend(loc=1, frameon=False, fontsize=size)
+ax2.legend(loc=1, frameon=False, fontsize=size)
+ax1.set_xticks([0, 1, 2, 3])
+ax2.set_xticks([0, 1, 2, 3])
 
 plt.legend(loc=1, frameon=False, fontsize=size)
 # plt.title("2D density integral")
 plt.tight_layout()
 
-plt.savefig("landau_parameter.pdf")
-# plt.show()
+# plt.savefig("spin_rs1_lambda1.pdf")
+plt.show()
