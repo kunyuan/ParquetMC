@@ -29,11 +29,9 @@ void polar::Build(int order) {
                  Chan, RIGHT);
     for (auto &t : Vertex.Tpair) {
       // cout << t[0] << ", " << t[1] << ", " << t[2] << ", " << t[3] << endl;
-      int inL = G[INL].AddTidxPair({0, t[INL]});
-      int outL = G[OUTL].AddTidxPair({t[OUTL], 0});
-      int inR = G[INR].AddTidxPair({ExtTauIdx, t[INR]});
-      int outR = G[OUTR].AddTidxPair({t[OUTR], ExtTauIdx});
-      Gidx.push_back(array<int, 4>({inL, outL, inR, outR}));
+      int inR = G[0].AddTidxPair({ExtTauIdx, t[INR]});
+      int outR = G[1].AddTidxPair({t[OUTR], ExtTauIdx});
+      Gidx.push_back(array<int, 4>({inR, outR}));
     }
   }
 };
@@ -44,11 +42,7 @@ double polar::Evaluate() {
   if (Order == 0)
     return 1.0;
   else if (Order == 1) {
-    double Tau = Var.Tau[ExtTauIdx] - Var.Tau[0];
-    double Weight = Prop.Green(Tau, Var.LoopMom[1], UP, 0);
-    Weight *= Prop.Green(-Tau, Var.LoopMom[1] - Var.LoopMom[0], UP, 0);
-
-    return -SPIN * Weight * Factor;
+    return 1.0;
   }
 
   // loop order >=2

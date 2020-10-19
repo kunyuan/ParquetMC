@@ -216,7 +216,6 @@ void markov::ChangeExtMomentum() {
     Var.LoopMom[INR][0] = Para.Kf * cos(theta);
     Var.LoopMom[INR][1] = Para.Kf * sin(theta);
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
-
   } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA ||
              DiagType == VERTEX3) {
     // In Momentum
@@ -226,6 +225,9 @@ void markov::ChangeExtMomentum() {
       Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
     else
       Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
+    if (DiagType == VERTEX3) {
+      Var.LoopMom[2] = Var.LoopMom[1] + Var.LoopMom[0];
+    }
   }
 
   Proposed[CHANGE_EXTMOM][Var.CurrOrder]++;
@@ -248,6 +250,10 @@ void markov::ChangeExtMomentum() {
         Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
       else
         Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
+
+      if (DiagType == VERTEX3) {
+        Var.LoopMom[2] = Var.LoopMom[1] + Var.LoopMom[0];
+      }
     }
   }
 };
