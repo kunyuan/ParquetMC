@@ -27,7 +27,7 @@ int LastInterTauIdx(int Order) {
   else if (DiagType == POLAR)
     return Order - 1;
   else if (DiagType == VERTEX3)
-    return Order - 1;
+    return Order;
   else if (DiagType == DELTA)
     return Order - 2;
   else
@@ -121,6 +121,8 @@ void markov::ChangeExtTau() {
   // Gamma diagram doesn't have ExtTau variable
   if (DiagType == GAMMA)
     return;
+  if (DiagType == VERTEX3)
+    return;
 
   Proposed[CHANGE_EXTTAU][Var.CurrOrder]++;
 
@@ -206,7 +208,9 @@ void markov::ChangeExtMomentum() {
   int OldExtMomBin, OldAngBin;
   static momentum OldMom;
 
-  if (DiagType == GAMMA) {
+  if (DiagType == VERTEX3)
+    return;
+  else if (DiagType == GAMMA) {
     // the INL, OUTL, OUTR momentum are fixed
     OldMom = Var.LoopMom[INR];
     OldAngBin = Var.CurrExtAngBin;
@@ -216,18 +220,14 @@ void markov::ChangeExtMomentum() {
     Var.LoopMom[INR][0] = Para.Kf * cos(theta);
     Var.LoopMom[INR][1] = Para.Kf * sin(theta);
     Var.LoopMom[OUTR] = Var.LoopMom[INR];
-  } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA ||
-             DiagType == VERTEX3) {
+  } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
     // In Momentum
     OldExtMomBin = Var.CurrExtMomBin;
     Prop = ShiftExtTransferK(OldExtMomBin, Var.CurrExtMomBin);
-    if (DiagType == POLAR || DiagType == VERTEX3)
+    if (DiagType == POLAR)
       Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
     else
       Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
-    if (DiagType == VERTEX3) {
-      Var.LoopMom[2] = Var.LoopMom[1] + Var.LoopMom[0];
-    }
   }
 
   Proposed[CHANGE_EXTMOM][Var.CurrOrder]++;
@@ -239,21 +239,16 @@ void markov::ChangeExtMomentum() {
     Accepted[CHANGE_EXTMOM][Var.CurrOrder]++;
     Var.CurrAbsWeight = NewAbsWeight;
   } else {
-    if (DiagType == GAMMA) {
+    if (DiagType == GAMMA || DiagType == VERTEX3) {
       Var.CurrExtAngBin = OldAngBin;
       Var.LoopMom[INR] = OldMom;
       Var.LoopMom[OUTR] = OldMom;
-    } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA ||
-               DiagType == VERTEX3) {
+    } else if (DiagType == SIGMA || DiagType == POLAR || DiagType == DELTA) {
       Var.CurrExtMomBin = OldExtMomBin;
-      if (DiagType == POLAR || DiagType == VERTEX3)
+      if (DiagType == POLAR)
         Var.LoopMom[0][0] = Para.BoseKGrid.grid[Var.CurrExtMomBin];
       else
         Var.LoopMom[0][0] = Para.FermiKGrid.grid[Var.CurrExtMomBin];
-
-      if (DiagType == VERTEX3) {
-        Var.LoopMom[2] = Var.LoopMom[1] + Var.LoopMom[0];
-      }
     }
   }
 };

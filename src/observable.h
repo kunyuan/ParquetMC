@@ -64,6 +64,21 @@ private:
   int ksize;
 };
 
+class simpleObs {
+public:
+  simpleObs();
+  void Measure0(double Factor);
+  void Measure(int Order, double Weight,
+               double Factor); // all tau variables
+  void Save();
+
+private:
+  std::string Name;
+  double Normalization;
+  double _Estimator;
+  double PhyWeight;
+};
+
 } // namespace obs
 
 #endif

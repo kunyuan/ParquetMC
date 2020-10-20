@@ -38,7 +38,7 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
   if (DiagType == POLAR)
     Weight[0] =
         Prop.Interaction(KInL, KOutL, KInR, KOutR, Var.LoopMom[0].norm());
-  else if ((DiagType == GAMMA) && IsProper)
+  else if ((DiagType == GAMMA || DiagType == VERTEX3) && IsProper)
     Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR,
                                  (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm());
   else
@@ -153,7 +153,7 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
         if (DiagType == POLAR)
           weight = pow(Prop.Interaction(KInL - KOutL, 0, Var.LoopMom[0].norm()),
                        LoopNum() + 1);
-        else if (IsProper && DiagType == GAMMA)
+        else if (IsProper && (DiagType == GAMMA || DiagType == VERTEX3))
           weight = pow(
               Prop.Interaction(KInL - KOutL, 0,
                                (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm()),
@@ -173,7 +173,7 @@ void vertex4::_EvalUST_CT(const momentum &KInL, const momentum &KOutL,
         if (DiagType == POLAR)
           weight = pow(Prop.Interaction(KInL - KOutR, 0, Var.LoopMom[0].norm()),
                        LoopNum() + 1);
-        else if (IsProper && DiagType == GAMMA)
+        else if (IsProper && (DiagType == GAMMA || DiagType == VERTEX3))
           weight = pow(
               Prop.Interaction(KInL - KOutR, 0,
                                (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm()),

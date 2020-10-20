@@ -103,6 +103,10 @@ double weight::Evaluate(int Order) {
     // polarization diagram
     double Weight = Polar[Order].Evaluate();
     return Weight;
+  } else if (DiagType == diagtype::VERTEX3) {
+    // polarization diagram
+    double Weight = Vertex3[Order].Evaluate();
+    return Weight;
   } else if (DiagType == diagtype::SIGMA) {
     // self-energy diagram
     double Weight = Sigma[Order].Evaluate();
@@ -133,6 +137,13 @@ void weight::Measure() {
 
       GammaObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtAngBin,
                        ChanWeight, Factor);
+    }
+  } else if (DiagType == diagtype::VERTEX3) {
+    if (Var.CurrOrder == 0) {
+      // order zero
+      Ver3Obs.Measure0(Factor);
+    } else {
+      Ver3Obs.Measure(Var.CurrOrder, Evaluate(Var.CurrOrder), Factor);
     }
   } else {
     Factor /= Para.TauGrid.weight[Var.CurrExtTauBin];

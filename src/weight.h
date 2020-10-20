@@ -29,11 +29,12 @@ public:
   obs::ver4Obs GammaObs;
 
   diag::polar Polar[MaxOrder];
-  diag::vertex3 Vertex3[MaxOrder];
   diag::sigma Sigma[MaxOrder];
   diag::delta Delta[MaxOrder];
   obs::oneBodyObs OneBodyObs;
 
+  diag::vertex3 Vertex3[MaxOrder];
+  obs::simpleObs Ver3Obs;
   // sigma, polar and delta can use the same observable
 
 private:

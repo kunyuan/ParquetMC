@@ -132,3 +132,37 @@ void ver4Obs::Save() {
   } else
     LOG_WARNING("Vertex4 for PID " << Para.PID << " fails to save!");
 }
+
+simpleObs::simpleObs() {
+  Normalization = 1.0e-10;
+  PhyWeight = Para.AngleGrid.size;
+  _Estimator = 0.0;
+  if (DiagType == VERTEX3) {
+    Name = "vertex3";
+  }
+};
+void simpleObs::Measure0(double Factor) { Normalization += 1.0 * Factor; }
+void simpleObs::Measure(int Order, double Weight, double Factor) {
+  ASSERT(Order != 0, "Order must be >=1!");
+  _Estimator += Weight * Factor;
+  return;
+}
+void simpleObs::Save() {
+  string FileName = fmt::format("{0}_pid{1}.dat", Name, Para.PID);
+  ofstream VerFile;
+  VerFile.open(FileName, ios::out | ios::trunc);
+
+  if (VerFile.is_open()) {
+
+    VerFile << "# Counter: " << Var.Counter << endl;
+    VerFile << "# Norm: " << Normalization << endl;
+
+    // cout << "Size: " << Para.Order << ", " << Para.AngleGrid.size << ", "
+    //      << Para.BoseKGrid.size << endl;
+
+    for (int order = 0; order <= Para.Order; order++)
+      VerFile << _Estimator * PhyWeight << "  ";
+    VerFile.close();
+  } else
+    LOG_WARNING("Vertex4 for PID " << Para.PID << " fails to save!");
+}
