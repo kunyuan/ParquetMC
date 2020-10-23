@@ -179,10 +179,10 @@ void InitPara() {
   Para.Mu = Para.Ef;
   MaxK *= Kf;
 
-  Para.OmegaINL = - PI / Para.Beta;
-  Para.OmegaINR = PI / Para.Beta;
-  // Para.Omega = 0;     // A
-  Para.Omega = 2 * PI / Para.Beta;    // F
+  // Para.OmegaINL = - PI / Para.Beta;
+  // Para.OmegaINR = PI / Para.Beta;
+  // // Para.Omega = 0;     // A
+  // Para.Omega = 2 * PI / Para.Beta;    // F
 
   // scale all energy with E_F
   Para.Beta /= Para.Ef;

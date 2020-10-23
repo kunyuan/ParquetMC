@@ -124,8 +124,6 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         Weight[map[VERT]] += W * GWeight;
       else {
         int t = map[VERT];
-        // double dTau = Var.Tau[Tpair[t][INL]] - Var.Tau[Tpair[t][OUTL]];
-        // dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
         
         // double dTau1 = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]] - 2 * Var.Tau[Tpair[t][OUTR]];
         // double dTau2 = Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];

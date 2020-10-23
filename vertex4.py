@@ -11,6 +11,10 @@ import argparse
 # mat.rcParams["font.family"] = "Times New Roman"
 # size = 12
 
+
+Type = "As_Aa"
+Type = "Gamma_4spin"
+
 parser = argparse.ArgumentParser("Specify some parameters.")
 parser.add_argument("folder")
 args = parser.parse_args()
@@ -24,7 +28,7 @@ Para = param(folder)
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
-ChanColor = {0: "k", 1: "r", 2: "b", 3: "g"}
+ChanColor = {0: "c", 1: "r", 2: "b", 3: "g"}
 # 0: total, 1: order 1, ...
 Order = range(Para.Order+1)
 IsIrreducible = True
@@ -56,8 +60,13 @@ def PrintInfo(Channel, Data, DataErr):
 
 def SpinMapping(Data):
     d = np.copy(Data)
-    d[..., 0] += d[..., 1]/Para.Spin
-    d[..., 1] /= Para.Spin
+    if Type == "As_Aa":
+        d[..., 0] += d[..., 1]/Para.Spin
+        d[..., 1] /= Para.Spin
+    elif Type == "Gamma_4spin":
+        e = d[..., 0] + d[..., 1]
+        d[..., 1] = d[..., 0]
+        d[..., 0] = e
     return d
 
 
@@ -72,52 +81,70 @@ def Bare(angle, Lambda):
     return Bare
 
 fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+plt.suptitle("$r_s={0}, \\lambda={1}$".format(Para.Rs, Para.Lambda))
+
+
+if Type == "As_Aa":
+    label_bare_1 = "$u_s$"
+    label_bare_2 = "$u_a$"
+    label_all_1 = "$A_s$"
+    label_all_2 = "$A_a$"
+elif Type == "Gamma_4spin":
+    label_bare_1 = "$u_{\\uparrow\\uparrow}$"
+    label_bare_2 = "$u_{\\uparrow\\downarrow}$"
+    label_all_1 = "$A_{\\uparrow\\uparrow}$"
+    label_all_2 = "$A_{\\uparrow\\downarrow}$"
+
 
 bare = Bare(Angle, 0.0)
-ax1.plot(Angle, -bare[:, 0], '-', c='y', label="$u_s$")
-ax2.plot(Angle, -bare[:, 1], '-', c='y', label="$u_a$")
+ax1.plot(Angle, -bare[:, 0], '-', c='y', label=label_bare_1)
+ax2.plot(Angle, -bare[:, 1], '-', c='y', label=label_bare_2)
 
 
 Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
 
-# sys.exit()
 
-# DataAllList = [np.sum(d, axis=0) for d in Data]
-# map DIR, EX to As, Aa
-# DataAllList = [SpinMapping(d) for d in DataAllList]
-# Data, Err = Estimate(DataAllList, Norm)
-# PrintInfo("Sum", Data, Err)
-
-ColorList = ["grey", "r", "b", "g"]
+ColorList = ["r", "b", "g","c","m","y"]
 for chan in Channel:
+    if Type == "As_Aa":
+        label_channel_1 = f"${ChanName[chan]}_s$"
+        label_channel_2 = f"${ChanName[chan]}_a$"
+    elif Type == "Gamma_4spin":
+        label_channel_1 = f"${ChanName[chan]}$" + "$_{\\uparrow\\uparrow}$"
+        label_channel_2 = f"${ChanName[chan]}$" + "$_{\\uparrow\\downarrow}$"
+
     data = [SpinMapping(d[chan, :, 0, :])*Para.Nf for d in Data]
     avg, err = Estimate(data, Norm)
+    print(ChanColor[chan])
     ax1.errorbar(Angle, -avg[:, 0], yerr=err[:, 0], fmt='-',
-                 capthick=1, capsize=4, c=ChanColor[chan], label=f"${ChanName[chan]}_s$")
+                 capthick=1, capsize=4, c=ChanColor[chan], label=label_channel_1)
     ax2.errorbar(Angle, -avg[:, 1], yerr=err[:, 1], fmt='-',
-                 capthick=1, capsize=4, c=ChanColor[chan], label=f"${ChanName[chan]}_a$")
-    # print(chan, avg[:, 0])
+                 capthick=1, capsize=4, c=ChanColor[chan], label=label_channel_2)
+
 
 data = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
 avg, err = Estimate(data, Norm)
 bareLambda = Bare(Angle, Para.Lambda)
 ax1.errorbar(Angle, -(avg[:, 0]+bareLambda[:, 0]), yerr=err[:, 0], fmt='-',
-             capthick=1, capsize=4, c='k', label=f"$A_s$")
+             capthick=1, capsize=4, c='k', label=label_all_1)
 ax2.errorbar(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1], fmt='-',
-             capthick=1, capsize=4, c='k', label=f"$A_a$")
+             capthick=1, capsize=4, c='k', label=label_all_2)
 
-ax1.set_xlim([0.0, np.pi])
-# ax.set_ylim([0.0, 5.0])
+# ax1.set_xlim([-1.01, 1.01])
+ax1.set_xlim([0.0, 3.15])
+ax1.set_ylim([-3, 2])
 ax1.set_xlabel("$\\theta$", size=size)
-ax2.set_xlim([0.0, np.pi])
+# ax2.set_xlim([-1.01, 1.01])
+ax2.set_xlim([0.0, 3.15])
+ax2.set_ylim([-3, 2])
 ax2.set_xlabel("$\\theta$", size=size)
 ax1.legend(loc=1, frameon=False, fontsize=size)
 ax2.legend(loc=1, frameon=False, fontsize=size)
-ax1.set_xticks([0, 1, 2, 3])
-ax2.set_xticks([0, 1, 2, 3])
+# ax1.set_xticks([0, 1, 2, 3])
+# ax2.set_xticks([0, 1, 2, 3])
 
 plt.legend(loc=1, frameon=False, fontsize=size)
-# plt.title("2D density integral")
+
 plt.tight_layout()
 
 # plt.savefig("spin_rs1_lambda1.pdf")

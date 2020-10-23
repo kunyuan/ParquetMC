@@ -161,8 +161,7 @@ double propagator::CounterBubble(const momentum &K) {
   //     Green(Para.Beta / 2.0, K, UP, 0) * Green(-Para.Beta / 2.0, K, UP, 0);
 
   double Ek = K.squaredNorm() - Para.Ef;
-  Factor *= -0.5 / (1.0 + cosh(Ek * Para.Beta));
-
+  Factor *= -0.5 / (1.0 + cosh(Ek * Para.Beta)); 
   // ASSERT_ALLWAYS(IsEqual())
   return Factor;
 }

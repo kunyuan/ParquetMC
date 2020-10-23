@@ -15,10 +15,11 @@ folder = args.folder
 print("Folder to plot : " + folder)
 
 
+Type = "As_Aa"
+Type = "Gamma_4spin"
+
 SleepTime = 5
-Irreducible = False
-if "F_" in folder:
-    Irreducible = True
+Irreducible = True
 
 Para = param(folder)
 
@@ -35,9 +36,13 @@ shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 
 def SpinMapping(Data):
     d = np.copy(Data)
-    d[..., 0] += d[..., 1]/Para.Spin
-    d[..., 1] /= Para.Spin
-    # return As and Aa,
+    if Type == "As_Aa":
+        d[..., 0] += d[..., 1]/Para.Spin
+        d[..., 1] /= Para.Spin
+    elif Type == "Gamma_4spin":
+        e = d[..., 0] + d[..., 1]
+        d[..., 1] = d[..., 0]
+        d[..., 0] = e
     return d
 
 

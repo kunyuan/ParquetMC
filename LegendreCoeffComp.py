@@ -12,12 +12,12 @@ import argparse
 
 parser = argparse.ArgumentParser("Specify some parameters.")
 parser.add_argument("folder1")
-parser.add_argument("folder2")
+# parser.add_argument("folder2")
 args = parser.parse_args()
 
 folderA = args.folder1
-folderF = args.folder2
-print("Folders : " + folderA + ", " + folderF)
+# folderF = args.folder2
+print("Folders : " + folderA + ", ")
 
 legendreL = [0,1,2,3]
 
@@ -98,30 +98,29 @@ AsErr = LegendreCoeff(Aerr_s, AngGrid, legendreL)
 AaErr = LegendreCoeff(Aerr_a, AngGrid, legendreL)
 
 
-#----------------------------------------------
-Para = param(folderF)
-Data, Norm, Step, Grid = LoadFile(folderF, "vertex_pid[0-9]+.dat", shape)
+# #----------------------------------------------
+# Para = param(folderF)
+# Data, Norm, Step, Grid = LoadFile(folderF, "vertex_pid[0-9]+.dat", shape)
 
-AngGrid = Grid["AngleGrid"]
-MomGrid = Grid["KGrid"]
-Angle = np.arccos(AngGrid)
+# AngGrid = Grid["AngleGrid"]
+# MomGrid = Grid["KGrid"]
+# Angle = np.arccos(AngGrid)
 
-Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
+# Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
 
-#----
-Fdata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
-avg, err = Estimate(Fdata, Norm)
-Irreducible = True
-bareLambda = Bare(Angle, Para.Lambda)
-Fdata_s = -(avg[:, 0]+bareLambda[:, 0])
-Fdata_a = -(avg[:, 1]+bareLambda[:, 1])
-Ferr_s = -err[:, 0]
-Ferr_a = -err[:, 1]
+# #----
+# Fdata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
+# avg, err = Estimate(Fdata, Norm)
+# bareLambda = Bare(Angle, Para.Lambda)
+# Fdata_s = -(avg[:, 0]+bareLambda[:, 0])
+# Fdata_a = -(avg[:, 1]+bareLambda[:, 1])
+# Ferr_s = -err[:, 0]
+# Ferr_a = -err[:, 1]
 
-Fs = LegendreCoeff(Fdata_s, AngGrid, legendreL)
-Fa = LegendreCoeff(Fdata_a, AngGrid, legendreL)
-FsErr = LegendreCoeff(Ferr_s, AngGrid, legendreL)
-FaErr = LegendreCoeff(Ferr_a, AngGrid, legendreL)
+# Fs = LegendreCoeff(Fdata_s, AngGrid, legendreL)
+# Fa = LegendreCoeff(Fdata_a, AngGrid, legendreL)
+# FsErr = LegendreCoeff(Ferr_s, AngGrid, legendreL)
+# FaErr = LegendreCoeff(Ferr_a, AngGrid, legendreL)
 
 def renormalize(ldict):
     newl = {}
@@ -140,13 +139,14 @@ def AFprint(Bl, Errl):
         print("order-" + str(k) + ":  ", Bl[k], "+-", abs(Errl[k]) )
 
 
-print("Fs: ")
-AFprint(Fs, FsErr)
-print("Fa:")
-AFprint(Fa, FaErr)
-print("----------------------------------\nAs:")
+# print("Fs: ")
+# AFprint(Fs, FsErr)
+# print("Fa:")
+# AFprint(Fa, FaErr)
+print("----------------------------------\nFs:")
 AFprint(As, AsErr)
-print("Aa:")
+AFprint(renormalize(As), renormalize_error(As, AsErr))
+print("Fa:")
 AFprint(Aa, AaErr)
 
 
