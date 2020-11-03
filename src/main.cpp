@@ -22,6 +22,7 @@ const string HelpStr = "Two parameters: PID Seed";
 
 int main(int argc, const char *argv[]) {
   // take two parameters: PID and Seed
+
   Para.PID = atoi(argv[1]);
   Para.Seed = atoi(argv[2]);
 

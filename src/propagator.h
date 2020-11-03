@@ -27,10 +27,13 @@ public:
 
   void LoadF();
   void LoadGreen();
+  void LoadGreenOrder();
 
 private:
   weight1D _StaticSigma;
   weight2D _DeltaG;
+  std::vector<weight2D> _deltaGOrder;
+
   template <typename KGrid>
   double _Interp1D(const weight1D &data, const KGrid &kgrid, double K);
   template <typename KGrid>

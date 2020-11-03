@@ -20,6 +20,7 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
 
   Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
 
+
   // _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
 
   // if (BoldG && k < Para.KGrid.MaxK) {
@@ -29,7 +30,13 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
   //                            << " vs " << Fock(k));
   // Ek += -sigma;
   // }
-  return fermiGreen(Para.Beta, Tau, Ek);
+
+  double fgreen = fermiGreen(Para.Beta, Tau, Ek);
+  if (BoldG){
+    fgreen += _Interp2D<grid::FermiK>(_DeltaG, Para.FermiKGrid, k, Tau);
+    // fgreen += _Interp2D<grid::FermiK>(_deltaGOrder[Var.CurrOrder-1], Para.FermiKGrid, k, Tau);
+  }
+  return fgreen;
 }
 
 void propagator::LoadGreen() {
@@ -49,18 +56,38 @@ void propagator::LoadGreen() {
   File.close();
 
   File.open("green.data", ios::in);
-  if (!File.is_open()) {
+  if (File.is_open()) {
     for (int k = 0; k < Para.FermiKGrid.size; ++k)
-      for (int t = 0; t < Para.FermiKGrid.size; ++t)
+      for (int t = 0; t < Para.TauGrid.size; ++t)
         File >> _DeltaG(k, t);
   } else {
     LOG_WARNING("Can not load Green weights! Initialze with zeros!\n");
     _DeltaG.setZero();
   }
   File.close();
-  // for (int k = 0; k < Para.KGrid.Size; ++k)
-  //   cout << _StaticSigma[k] + Fock(Para.KGrid.Grid[k]) << endl;
+  // LoadGreenOrder();
 }
+
+
+void propagator::LoadGreenOrder() {
+  weight2D _deltaGTem;
+  _deltaGTem.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
+
+  ifstream File;
+  File.open("green_order.data", ios::in);
+  if (File.is_open()) {
+    for (int o=1; o < Para.Order+1; ++o){
+      for (int k = 0; k < Para.FermiKGrid.size; ++k)
+        for (int t = 0; t < Para.TauGrid.size; ++t)
+          File >> _deltaGTem(k, t);
+      _deltaGOrder.push_back(_deltaGTem);
+    }
+  } else {
+    LOG_WARNING("Can not load Order-Green weights! Initialze with zeros!\n");
+  }
+  File.close();
+}
+
 
 double propagator::F(double Tau, const momentum &K, spin Spin, int GType) {
   if (Tau == 0.0)
@@ -119,7 +146,8 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   double kExQ = (KInL - KOutR).norm();
   Weight[EX] =
       8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
-
+      
+  // Weight[EX] = 0.0;
   if (DiagType == SIGMA && IsZero(kExQ))
     Weight[EX] = 0.0;
 
@@ -186,6 +214,12 @@ double propagator::_Interp1D(const weight1D &data, const KGrid &kgrid,
 template <typename KGrid>
 double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
                              double T) {
+  double factor = 1.0;
+  if (T < 0.0) {
+    double tau = T + beta;
+    factor *= -1.0;
+  }
+
   int Tidx0 = Para.TauGrid.floor(T);
   double dT0 = T - Para.TauGrid.grid[Tidx0],
          dT1 = Para.TauGrid.grid[Tidx0 + 1] - T;
@@ -202,7 +236,7 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
 
   double g0 = d00 * dK1 + d10 * dK0;
   double g1 = d01 * dK1 + d11 * dK0;
-  return (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
+  return factor*(g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
 }
 
 double diag::Angle3D(const momentum &K1, const momentum &K2) {

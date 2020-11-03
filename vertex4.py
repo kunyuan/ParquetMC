@@ -23,7 +23,6 @@ folder = args.folder
 print("Folder to plot : " + folder)
 
 
-
 Para = param(folder)
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]

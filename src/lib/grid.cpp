@@ -69,7 +69,7 @@ vector<double> Tau::build(double beta, int _size, double scale) {
   grid[0] = 1.0e-8;
   grid[size - 1] = beta - 1.0e-8;
   //////   some simple test ////////
-  assert(floor(grid[1]) == 1);
+  // assert(floor(grid[1]) == 1);
   assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
   assert(floor(0.0) == 0);
   assert(floor(grid[size - 1]) == size - 2);
@@ -160,7 +160,7 @@ void BoseK::build(double kF, double maxK, int _size, double scale) {
 
   grid[0] = 1.0e-6;
   //////   some simple test ////////
-  assert(floor(grid[1]) == 1);
+  // assert(floor(grid[1]) == 1);
   assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
   assert(floor(0.0) == 0);
   assert(floor(grid[size - 1]) == size - 2);
