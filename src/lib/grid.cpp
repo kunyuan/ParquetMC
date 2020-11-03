@@ -69,6 +69,11 @@ vector<double> Tau::build(double beta, int _size, double scale) {
   grid[0] = 1.0e-8;
   grid[size - 1] = beta - 1.0e-8;
   //////   some simple test ////////
+  int aa[128];
+  for (int i=0; i<128; i++){
+    aa[i] = floor(grid[i]);
+    }
+
   // assert(floor(grid[1]) == 1);
   assert(floor((grid[size - 2] + grid[size - 1]) / 2.0) == size - 2);
   assert(floor(0.0) == 0);
