@@ -184,6 +184,12 @@ double propagator::_Interp1D(const weight1D &data, const KGrid &kgrid,
 template <typename KGrid>
 double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
                              double T) {
+  double factor = 1.0;
+  if (T < 0.0) {
+    T += beta;
+    factor *= -1.0;
+  }
+
   int Tidx0 = Para.TauGrid.floor(T);
   double dT0 = T - Para.TauGrid.grid[Tidx0],
          dT1 = Para.TauGrid.grid[Tidx0 + 1] - T;
@@ -200,7 +206,7 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
 
   double g0 = d00 * dK1 + d10 * dK0;
   double g1 = d01 * dK1 + d11 * dK0;
-  return (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
+  return factor*(g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
 }
 
 double diag::Angle3D(const momentum &K1, const momentum &K2) {
