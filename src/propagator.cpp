@@ -186,7 +186,7 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
                              double T) {
   double factor = 1.0;
   if (T < 0.0) {
-    T += beta;
+    T += Para.Beta;
     factor *= -1.0;
   }
 
