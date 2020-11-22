@@ -1,7 +1,7 @@
 #include "lib/grid.h"
 #include "markov.h"
 #include "utility/timer.h"
-#include "assist/testcode.h"
+#include "tools/testcode.h"
 #include <iostream>
 #include <math.h>
 
@@ -206,6 +206,7 @@ void InitPara() {
   Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2.0);
   Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
 
+  Prop.Initialize();
   if (BoldG)
     Prop.LoadGreen();
 }

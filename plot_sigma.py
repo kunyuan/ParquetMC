@@ -3,6 +3,8 @@ from utility.IO import *
 import utility.fourier as fourier
 from utility.plot import *
 import argparse
+from mpl_toolkits.mplot3d import Axes3D
+
 
 parser = argparse.ArgumentParser("Specify some parameters.")
 parser.add_argument("folder")
@@ -11,26 +13,55 @@ args = parser.parse_args()
 folder = args.folder
 print("Folder to plot : " + folder)
 
+def AnaliticFock(x, l):
+    kF = Para.kF
+    # Analytic Fock energy
+    y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
+                      (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
 
-def PlotSigmaW_RI(SigmaT, MomGrid, idx, Save=True):
+    x = kF
+    Mu = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
+                       (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
+    return y
+
+
+def CoulombFock(k, l):
+    kF = Para.kF
+    y = 2.0*kF/np.pi*(1.0 + (k*k-kF*kF)/(2*k*kF)*np.log(np.abs((k-kF)/(k+kF))))
+    return y
+
+def PlotSigmaW_RI(SigmaT, MomGrid, idx, Save=False):
     SigmaW, Spec = Fourier.SpectralT2W(SigmaT[idx, :])
 
+    # Fourier1 = fourier.fourier(dataTau[:,0], phyFreq, Para.Beta)
+    # Fourier1.InitializeKernel(100.0, 1024, "Fermi", 1.0e-13)
+
+    # dataWFromTau, _ = Fourier1.SpectralT2W(dataTau[:,1])
+
     _, (ax1, ax2) = plt.subplots(1, 2)
-    Nw = int(len(phyFreq)/4)
+    # _, ((ax1, ax2), (ax3,ax4)) = plt.subplots(2, 2)
+    Nw = int(len(phyFreq)/2) - 94
 
 
-    ax1.plot(phyFreq[Nw:-Nw], SigmaW.real[Nw:-Nw], "r-", label="real")
+    ax1.plot(phyFreq[Nw:-Nw]/Para.EF, SigmaW.real[Nw:-Nw], "r-", label="real")
+    # ax1.plot(phyFreq[Nw:-Nw]/Para.EF, dataWFromTau.real[Nw:-Nw], "b-", label="Wang Tao")
     
-    # ax1.set_ylim([-0.05, 0.05])
-    # ax2.set_ylim([1.0e-6, 1.1])
-    # ax2.set_yscale("log")
-    ax2.plot(phyFreq[Nw:-Nw], SigmaW.imag[Nw:-Nw], "b-", label="imaginary")
+    ax2.plot(phyFreq[Nw:-Nw]/Para.EF, SigmaW.imag[Nw:-Nw], "r-", label="imaginary")
+    # ax2.plot(phyFreq[Nw:-Nw]/Para.EF, dataWFromTau.imag[Nw:-Nw], "b-", label="Wang Tao")
+
+    # print(np.max(dataWFromTau.real),np.max(dataWFromTau.imag),np.max(dataWFromTau.real)/np.max(dataWFromTau.imag))
+    # print((np.max(dataFreqReal[:,1])-np.min(dataFreqReal[:,1])),(np.max(dataFreqImag[:,1])-np.min(dataFreqImag[:,1])),
+    # (np.max(dataFreqReal[:,1])-np.min(dataFreqReal[:,1])) / (np.max(dataFreqImag[:,1])-np.min(dataFreqImag[:,1])) )
+
+    print(np.max(SigmaW.real),np.max(SigmaW.imag),np.max(SigmaW.real)/np.max(SigmaW.imag))
+    print((np.max(SigmaW.real)-np.min(SigmaW.real)) , (np.max(SigmaW.imag)-np.min(SigmaW.imag)),
+     (np.max(SigmaW.real)-np.min(SigmaW.real)) / (np.max(SigmaW.imag)-np.min(SigmaW.imag)) )
 
     ax1.set_ylabel("$\Sigma(i\\omega_n, k_F)$")
-    ax1.set_xlabel("$\\omega_n$")
+    ax1.set_xlabel("$\\omega_n/E_F$")
     # ax2.set_ylabel("$\\Sigma(\\tau, k)$")
     ax2.set_ylabel("$\Sigma(i\\omega_n, k_F)$")
-    ax2.set_xlabel("$\\omega_n$")
+    ax2.set_xlabel("$\\omega_n/E_F$")
     ax2.yaxis.set_label_position("right")
     ax2.yaxis.tick_right()
     ax1.legend(loc=1, frameon=False, fontsize=size)
@@ -40,24 +71,26 @@ def PlotSigmaW_RI(SigmaT, MomGrid, idx, Save=True):
 
 
 def PlotSigmaT_RI(SigmaT, MomGrid, idx, Save=True):
-    _, (ax1, ax2) = plt.subplots(1, 2)
+    _, (ax1, ax2) = plt.subplots(2)
     Nw = int(len(phyFreq)/4)
 
-    ax1.plot(TauGrid/Para.Beta, SigmaT.real[idx, :], "r-", label="real")
-    
-    # ax1.set_ylim([-0.05, 0.05])
-    # ax2.set_ylim([1.0e-6, 1.1])
-    # ax2.set_yscale("log")
-    ax2.plot(TauGrid/Para.Beta, SigmaT.imag[idx, :], "b-", label="imaginary")
+    print(SigmaT.real[idx, :])
+    # print(dataTau[:,0]/Para.Beta, 0.50087*dataTau[:,1])
 
+    # with open("taugrid.data", "w") as ff:
+    #     for i in range(0, len(TauGrid)):
+    #         ff.write(str(TauGrid[i]) + "    " +str(SigmaT.real[idx, i]) + "\n")
+
+    ax1.plot(TauGrid/Para.Beta, SigmaT.real[idx, :], "r-", label="real")
+    ax2.plot(TauGrid/Para.Beta, SigmaT.imag[idx, :], "r-", label="real")
+    # ax1.plot(dataTau[:,0]/Para.Beta, 0.5*dataTau[:,1], "b-", label="Wang Tao")
+    
     ax1.set_ylabel("$\Sigma(\\tau, k_F)$")
     ax1.set_xlabel("$\\tau/\\beta$")
-    # ax2.set_ylabel("$\\Sigma(\\tau, k)$")
+    ax1.legend(loc=1, frameon=False, fontsize=size)
+
     ax2.set_ylabel("$\Sigma(\\tau, k_F)$")
     ax2.set_xlabel("$\\tau/\\beta$")
-    ax2.yaxis.set_label_position("right")
-    ax2.yaxis.tick_right()
-    ax1.legend(loc=1, frameon=False, fontsize=size)
     ax2.legend(loc=1, frameon=False, fontsize=size)
     plt.tight_layout()
     plt.show()
@@ -73,7 +106,7 @@ def PlotSigmaW(SigmaT, MomGrid, idx, Save=True):
     # ax.plot(Freq, Spec[idx, :], "k--",
     #         label="k={0}, spectral".format(Grid.MomGrid[idx]))
     k = MomGrid[idx]/Para.kF
-    print(phyFreq)
+
     ax1.plot(phyFreq, SigmaW.real, "r-",
              label="Spectral Fourier")
     ax1.plot(phyFreq, SigmaWp.imag, "b--",
@@ -117,7 +150,7 @@ def PlotSigmaW(SigmaT, MomGrid, idx, Save=True):
     ax1.legend(loc=1, frameon=False, fontsize=size)
     ax2.legend(loc=1, frameon=False, fontsize=size)
     plt.tight_layout()
-    plt.savefig(f"sigma_k={k}.pdf")
+    # plt.savefig(f"sigma_k={k}.pdf")
     # plt.grid()
     if Save:
         plt.savefig("SigmaW.pdf")
@@ -143,7 +176,7 @@ def PlotDataK(dataK, wn, FreqGrid, Save=True):
         plt.show()
 
 
-def PlotSigmaT(dataMomTau, kList, Save=True):
+def PlotSigmaT(dataMomTau, kList, Save=False):
     fig, ax = plt.subplots()
     dataW, _ = Fourier.SpectralT2W(dataMomTau)
     # dataWp = Fourier.naiveT2W(dataT)
@@ -156,8 +189,8 @@ def PlotSigmaT(dataMomTau, kList, Save=True):
         dataTp = Fourier.naiveW2T(dataW[idx, :])
         ax.plot(TauGrid/Para.Beta, dataT.real, "r-",
                 label="original: $k={:.2f}k_F$".format(k/Para.kF))
-        ax.plot(TauGrid/Para.Beta, dataTp.real, "b--",
-                label="Naive Fourier: $k={:.2f}k_F$".format(k/Para.kF))
+        # ax.plot(TauGrid/Para.Beta, dataTp.real, "b--",
+                # label="Naive Fourier: $k={:.2f}k_F$".format(k/Para.kF))
         Ek = k*k-Para.EF
         
         # G0 = np.exp(-Ek*TauGrid)/(1.0+np.exp(-Ek*Para.Beta))
@@ -176,14 +209,73 @@ def PlotSigmaT(dataMomTau, kList, Save=True):
     else:
         plt.show()
 
+def CheckFock():
+    fig, ax1 = plt.subplots()
+    MomGrid = np.array([1.0*i/100.0*Para.kF for i in range(1, 1700)])
+    # fock = [AnaliticFock(k, np.sqrt(Para.Mass2 + Para.Lambda)) for k in MomGrid]
+    fock = [AnaliticFock(k, 0.00000000001) for k in MomGrid]
+    fockCoulomb = [CoulombFock(k, 0.0000000001) for k in MomGrid]
 
-def PlotG(dataT, kFidx, Save=True):
+    # ax1.plot(MomGrid/Para.kF, Static, "k-", label="Fock in code")
+    ax1.plot(MomGrid/Para.kF, fock, "c-", label="Analitical Fock")
+    # ax1.plot(MomGrid/Para.kF, fockCoulomb, "r-", label="Coulomb Fock")
+    plt.legend(loc=1, frameon=False, fontsize=size)
+
+    plt.show()
+
+
+def GTPlot(kList, Save=False):
+    fig, ax1 = plt.subplots()
+    BareGTFW, _ = Fourier.SpectralW2T(BareGW)
+    BareGT = np.zeros((Para.MomGridSize, len(TauGrid)), dtype=complex)
+    for i, k in enumerate(MomGrid):
+            Ek = k*k-Para.EF
+            BareGT[i, ] = np.exp(-Ek*TauGrid)/(1.0+np.exp(-Ek*Para.Beta))
+    # fig = plt.figure()
+    # ax = Axes3D(fig)
+    # X, Y = np.meshgrid(TauGrid, MomGrid)
+
+    # ax.plot_surface(X, Y, dG_T.real, rstride=1, cstride=1, cmap='rainbow')
+    
+    # with open(os.path.join(folder, "green2.data"), "w") as f:
+    #         for k in range(Para.MomGridSize):
+    #             for t in range(Para.TauGridSize):
+    #                 f.write("{0} ".format(dG_T[k, t].real))
+    #         f.write("\n")
+
+    # d1 = np.loadtxt(os.path.join(folder, "green.data"), dtype=float).reshape(64,128)
+
+    # d1 = np.loadtxt(os.path.join(folder,"selfconsistent/green_order2.data"), dtype=float).reshape(64,128)
+    d2 = np.loadtxt(os.path.join(folder,"selfconsistent/green_order3.data"), dtype=float).reshape(64,128)
+    # d3 = d1 + d2
+
+    for idx in kList:
+        idx = int(idx)
+        k = MomGrid[idx]
+        ax1.plot(TauGrid/Para.Beta, dG_T[idx].real, "k-", label="dG")
+        # ax1.plot(TauGrid/Para.Beta, d1[idx].real, "r-", label="d1")
+        ax1.plot(TauGrid/Para.Beta, d2[idx].real, "r-", label="d2")
+        # ax1.plot(TauGrid/Para.Beta, d3[idx].real, "c-", label="d3")
+
+        # ax1.plot(TauGrid/Para.Beta, BareGTFW[idx], "b-", label="BareG From W")
+        # ax1.plot(TauGrid/Para.Beta, BoldG_T[idx], "r-", label="BoldG")
+        # ax1.plot(TauGrid/Para.Beta, BareGT[idx], "c-", label="GBare")
+        
+        # ax1.plot(TauGrid/Para.Beta, BareG_T[idx], "b-", label="GBare")
+    plt.legend(loc=1, frameon=False, fontsize=size)
+
+    if Save:
+        plt.savefig("GTPlot.pdf")
+    else:
+        plt.show()
+
+
+def PlotG(dataMomTau, kList, Save=False):
     _, (ax1, ax2) = plt.subplots(1, 2)
 
-
-    ax1.plot(MomGrid/Para.kF, dataT[:, -1], "ro-",
+    ax1.plot(MomGrid/Para.kF, dataMomTau[:, -1], "r-",
              label="$\\tau=0^-$")
-    ax1.plot(MomGrid/Para.kF, dataT[:, 0], "bs-",
+    ax1.plot(MomGrid/Para.kF, dataMomTau[:, 0], "b-",
              label="$\\tau=0^+$")
     # ax.plot(TauGrid, dataTp.real, "--",
     #         label="$k/k_F={0}$, naive".format(k))
@@ -192,15 +284,20 @@ def PlotG(dataT, kFidx, Save=True):
     ax1.axvline(x=1.0, linestyle='--')
     ax1.set_xlim([MomGrid[0]/Para.kF, MomGrid[-1]/Para.kF])
     ax1.set_xlabel("$k/k_F$")
+    ax1.set_ylabel("$G(k,\\tau=0^{\\pm})$")
     # ax1.set_ylim([-0.12, 0.12])
 
-    for idx in [kFidx/2, kFidx, kFidx+kFidx/2]:
+    for idx in kList:
         k = MomGrid[int(idx)]
-        ax2.plot(TauGrid/Para.Beta, dataT[int(idx), :].real, "--",
+        ax2.plot(TauGrid/Para.Beta, dataMomTau[int(idx), :].real, "--",
                  label="$k/k_F={0:.2f}$, spectral".format(k/Para.kF))
         ax2.set_xlim([TauGrid[0]/Para.Beta, TauGrid[-1]/Para.Beta])
-        ax2.set_xlabel("$\\tau/\\beta$")
+    ax2.set_xlabel("$\\tau/\\beta$")
+    ax2.set_ylabel("$G(\\tau)$")
     ax2.plot([TauGrid[0], TauGrid[-1]], [0.5, 0.5], linestyle='--')
+
+    ax2.yaxis.set_label_position("right")
+    ax2.yaxis.tick_right()
 
     plt.legend(loc=1, frameon=False, fontsize=size)
     plt.grid()
@@ -210,7 +307,7 @@ def PlotG(dataT, kFidx, Save=True):
         plt.show()
 
 
-def PlotGT(dataW, Save=True):
+def PlotGT(dataW, Save=False):
     _, ax = plt.subplots()
 
     dataT, _ = Fourier.SpectralW2T(dataW)
@@ -269,6 +366,17 @@ def check_convergence(Para, Data):
 
 if __name__ == "__main__":
     while True:
+
+        # dataFreqReal = np.loadtxt(os.path.join(folder, "sigma_freq_real.dat"))
+        # dataFreqImag = np.loadtxt(os.path.join(folder, "sigma_freq_imag.dat"))
+        # dataTau = np.loadtxt(os.path.join(folder, "sigma_tau.dat"))
+
+        # with open("taugrid.data", "w") as ff:
+        #     for i in range(0, len(dataTau[:,0])):
+        #         ff.write(str(dataTau[i,0]) + "\n")
+
+        # sys.exit(0)
+
         Para = param(folder)
         Order = range(0, Para.Order+1)
 
@@ -284,7 +392,17 @@ if __name__ == "__main__":
         TauGrid = Grids["TauGrid"]
         MomGrid = Grids["KGrid"]
 
-        check_convergence(Para, Data)
+        # fig, ax = plt.subplots()
+        # ax.plot(range(len(TauGrid)), TauGrid, 'r-')
+        # ax.plot(range(len(dataTau[:,0])), dataTau[:,0], 'b-', label="Wang Tao")
+        # ax.legend(loc=1, frameon=False, fontsize=size)
+        # plt.tight_layout()
+        # plt.show()
+
+        # # check_convergence(Para, Data)
+        # sys.exit()
+
+        
 
         Fourier = fourier.fourier(TauGrid, phyFreq, Para.Beta)
         Fourier.InitializeKernel(100.0, 1024, "Fermi", 1.0e-13)
@@ -295,14 +413,25 @@ if __name__ == "__main__":
             Data, Norm, lambda d: np.average(d[1, :, :], axis=1))
         # Dynamic(MomGrid, TauGrid) : order 2-n
         Dynamic, DynErr = Estimate(
-            Data, Norm, lambda d: np.sum(d[1:Para.Order+1, ...], axis=0))
+            Data, Norm, lambda d: np.sum(d[2:3, ...], axis=0))
+        # Dynamic, DynErr = Estimate(
+            # Data, Norm, lambda d: d[2, ...])
         # Static_MomTau(MomGrid, TauGrid) : order 2-n
-        # Static_MomTau, StaticErr = Estimate(Data, Norm, lambda d: d[1, :, :])
-
+        Static_MomTau, StaticErr = Estimate(Data, Norm, lambda d: d[1, :, :])
         
         arr = np.amin(abs(MomGrid-Para.kF))
         kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
         
+        SigmaW, _ = Fourier.SpectralT2W(Static_MomTau)
+        s0, s1 = SigmaW[kFidx, MaxFreq-1], SigmaW[kFidx, MaxFreq]
+        Z = 1.0-(s1.imag-s0.imag)/(2.0*np.pi/Para.Beta)
+        print("Z=", Z)
+
+        # PlotSigmaT_RI(-Dynamic, MomGrid, kFidx, Save=False)
+        PlotSigmaW_RI(-Static_MomTau, MomGrid, kFidx, Save=False)
+        sys.exit(0)
+
+
         print("Mu=", Static[kFidx])
         Static -= Static[kFidx]  # subtract the self-energy shift
 
@@ -311,41 +440,66 @@ if __name__ == "__main__":
         print("MomGrid idx at the Fermi surface:{0}, KF: {1}=={2}".format(kFidx,MomGrid[kFidx],Para.kF))
         # PlotSigmaW(Dynamic, MomGrid, kFidx, False)
 
+        allorder, DynErr = Estimate(
+            Data, Norm, lambda d: np.sum(d[1:Para.Order+1, ...], axis=0))
         SigmaW, _ = Fourier.SpectralT2W(Dynamic)
 
+        
+
         s0, s1 = SigmaW[kFidx, MaxFreq-1], SigmaW[kFidx, MaxFreq]
-        print("Z=", 1.0-(s1.imag-s0.imag)/(2.0*np.pi/Para.Beta))
+        Z = 1.0-(s1.imag-s0.imag)/(2.0*np.pi/Para.Beta)
+        print("Z=", Z)
         dMu = (s0.real+s1.real)/2.0
         print("Dynamic chemical shift: ", dMu)
 
-        BareG = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
+        BareGW = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
 
         for i, q in enumerate(MomGrid):
-            BareG[i, :] = 1.0/(1j*phyFreq+q*q-Static[i]-Para.EF)
+            BareGW[i, :] = Z/(1j*phyFreq + (q*q-Para.EF) + Static[i])
 
-        # dG_W = BareG
-        dG_W = 1.0/(1.0/BareG+SigmaW-dMu)
-        # dG_W = (SigmaW-dMu)*BareG*BareG/(1-(SigmaW-dMu)*BareG)
+
+        BoldGW = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
+        for i, q in enumerate(MomGrid):
+            for j, w in enumerate(phyFreq):
+                BoldGW[i, j] = Z/( 1j*w + (q*q-Para.EF) + Static[i] + SigmaW[i,j] )
+
+        
+
+        # CheckFock()
+        # sys.exit(0)
+
+        dG_W = BoldGW - BareGW
 
         dG_T, _ = Fourier.SpectralW2T(dG_W)
-        dG_Tp = Fourier.naiveW2T(dG_W)
-        # PlotSigmaT(dG_W, range(0, Para.MomGridSize, Para.MomGridSize/8), False)
-        # print MomGrid[kFidx]/Para.kF
-        # print BareG[kFidx, :]
-        # PlotSigmaT(Static_MomTau, [kFidx], False)
-        # PlotG(dG_T, kFidx, False)
+
+        
+
+        BoldG_T, _ = Fourier.SpectralW2T(BoldGW)
+        BareG_T, _ = Fourier.SpectralW2T(BareGW)
+
+        print(kFidx/2)
+        # with open(os.path.join(folder, "green.data"), "w") as f:
+        #     for k in range(Para.MomGridSize):
+        #         for t in range(Para.TauGridSize):
+        #             f.write("{0} ".format(dG_T[k, t].real))
+        #     f.write("\n")
+
+        # GTPlot([kFidx/2], False)
+        
+
+        PlotSigmaT(Dynamic, [kFidx/2, kFidx, kFidx+kFidx/2], False)
+
+
+        print("dG_T shape:{0}".format(np.array(dG_T).shape))
+        
         print("Maximum Error of \delta G: ", np.amax(abs(dG_T-dG_Tp)))
 
-        with open("dispersion.data", "w") as f:
-            for k in range(Para.MomGridSize):
-                f.write("{0} ".format(Static[k]))
-            f.write("\n")
+        # with open("dispersion.data", "w") as f:
+        #     for k in range(Para.MomGridSize):
+        #         f.write("{0} ".format(Static[k]))
+        #     f.write("\n")
 
-        with open("green.data", "w") as f:
-            for k in range(Para.MomGridSize):
-                for t in range(Para.TauGridSize):
-                    f.write("{0} ".format(dG_T[k, t].real))
-            f.write("\n")
+        
 
         ####### Tau space test  ############################
         BareG = np.zeros((Para.MomGridSize, Para.TauGridSize), dtype=float)
@@ -354,7 +508,7 @@ if __name__ == "__main__":
             Ek = k*k-Para.EF
             BareG[i, ] = np.exp(-Ek*TauGrid)/(1.0+np.exp(-Ek*Para.Beta))
 
-        PlotSigmaT_RI(Dynamic, MomGrid, kFidx, False)
+        # PlotSigmaW(allorder, MomGrid, kFidx, False)
         # BareGW, _ = Fourier.SpectralT2W(BareG)
         # BareGT, _ = Fourier.SpectralW2T(BareGW)
         

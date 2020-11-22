@@ -5,15 +5,26 @@ namespace testcode{
 
 
 void TestCode(){
-    std::cout << "Beta = " << Para.Beta << std::endl;
-    std::cout << "TauGrid.size = " << Para.TauGrid.size << std::endl;
 
-    for (size_t i = 0; i < Para.TauGrid.size; i++)
+    std::vector<double> res;
+    int num = 10000;
+    for (int i = 0; i <= num; i++)
     {
-        std::cout << Para.TauGrid.grid[i] << std::endl;
+        double T = 0.0 + 1.0*i/num*Para.Beta;
+        int Tidx = Para.TauGrid.floor(T);
+        double interpT = Para.TauGrid.grid[Tidx];
+        res.push_back(interpT);
     }
     
-
+    std::string fname = "tauinterp.data";
+    std::ofstream interpFile;
+    interpFile.open(fname, std::ios::out|std::ios::trunc);
+    if (interpFile.is_open()){
+        for (int i = 0; i < res.size(); i++)
+            interpFile << res[i] << "   ";
+    }
+    interpFile.close();
+    
     std::exit(0);
 }
 

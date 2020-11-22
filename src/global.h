@@ -27,7 +27,10 @@ const bool BoldG = true;
 const bool IsF = false;
 
 // const diagtype DiagType = GAMMA;
-const diagtype DiagType = SIGMA;
+// const diagtype DiagType = SIGMA;
+
+const diagtype DiagType = POLAR;
+
 // typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 

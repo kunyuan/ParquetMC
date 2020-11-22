@@ -12,8 +12,8 @@ folder = args.folder
 print("Folder to plot : " + folder)
 
 
-XType = "Tau"
-# XType = "Mom"
+# XType = "Tau"
+XType = "Mom"
 # XType = "Z"
 # XType = "Freq"
 OrderByOrder = False
@@ -56,8 +56,8 @@ if(XType == "Mom"):
     Mu = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
                        (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
     print("Mu: ", Mu)
-    for i in range(MomGridSize):
-        print(f"{MomGrid[i]/Para.kF:12.6f}{(y[i]-Mu)/Para.EF:12.6f}")
+    # for i in range(MomGridSize):
+    #     print(f"{MomGrid[i]/Para.kF:12.6f}{(y[i]-Mu)/Para.EF:12.6f}")
     ax.plot(MomGrid/Para.kF, y, "ko-", label="Fock Analytic")
     plt.title("Fock energy")
 

@@ -38,8 +38,11 @@ def CheckFilesExist(folder, fname):
 if __name__ == "__main__":
     while True:
         Para = param(folder)
+        selfFolder = os.path.join(folder, "selfconsistent")
+        if not os.path.exists(selfFolder):
+            os.system("mkdir " + selfFolder)
+        
         Order = range(0, Para.Order+1)
-
         MaxFreq = 3000
         Freq = np.array(range(-MaxFreq, MaxFreq))
         phyFreq = (Freq*2.0+1.0)*np.pi/Para.Beta  # the physical frequency
@@ -63,7 +66,6 @@ if __name__ == "__main__":
 
         # Data.shape : (pid, order+1, MomGrid, TauGrid)
         
-
         CheckConvergence(Para, Data)
 
         Fourier = fourier.fourier(TauGrid, phyFreq, Para.Beta)
@@ -88,64 +90,60 @@ if __name__ == "__main__":
         print("MomGrid idx at the Fermi surface:{0}, KF: {1}=={2}".format(kFidx,MomGrid[kFidx],Para.kF))
         # PlotSigmaW(Dynamic, MomGrid, kFidx, False)
 
-        BareG = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
-        for i, q in enumerate(MomGrid):
-            BareG[i, :] = 1.0/(1j*phyFreq+q*q-Static[i]-Para.EF)
-
-
-        allorder, DynErr = Estimate(
-            Data, Norm, lambda d: np.sum(d[1:Para.Order+1, ...], axis=0))
-        SigmaW, _ = Fourier.SpectralT2W(allorder)
-
-        s0, s1 = SigmaW[kFidx, MaxFreq-1], SigmaW[kFidx, MaxFreq]
-        print("Z=", 1.0-(s1.imag-s0.imag)/(2.0*np.pi/Para.Beta))
-        dMu = (s0.real+s1.real)/2.0
-        print("Dynamic chemical shift: ", dMu)
-
-
-        # dG_W = BareG
-        dG_W = 1.0/(1.0/BareG+SigmaW-dMu)
-        # dG_W = (SigmaW-dMu)*BareG*BareG/(1-(SigmaW-dMu)*BareG)
-
-        dG_T, _ = Fourier.SpectralW2T(dG_W)
-        dG_Tp = Fourier.naiveW2T(dG_W)
-        # PlotSigmaT(dG_W, range(0, Para.MomGridSize, Para.MomGridSize/8), False)
-        # print MomGrid[kFidx]/Para.kF
-        # print BareG[kFidx, :]
-        # PlotSigmaT(Static_MomTau, [kFidx], False)
-        # PlotG(dG_T, kFidx, False)
-        print("Maximum Error of \delta G: ", np.amax(abs(dG_T-dG_Tp)))
-
-        with open(os.path.join(folder, "dispersion.data"), "w") as f:
+        with open(os.path.join(selfFolder,"dispersion.data"), "w") as f:
             for k in range(Para.MomGridSize):
                 f.write("{0} ".format(Static[k]))
             f.write("\n")
 
-        with open(os.path.join(folder, "green.data"), "w") as f:
-            for k in range(Para.MomGridSize):
-                for t in range(Para.TauGridSize):
-                    f.write("{0} ".format(dG_T[k, t].real))
-            f.write("\n")
+        for o in range(2, Para.Order+1):
+            Dynamic, DynErr = Estimate(Data, Norm, lambda d: np.sum(d[2:o+1, ...], axis=0))
+            SigmaW, _ = Fourier.SpectralT2W(Dynamic)
+            
+            s0, s1 = SigmaW[kFidx, MaxFreq-1], SigmaW[kFidx, MaxFreq]
+            Z = 1.0-(s1.imag-s0.imag)/(2.0*np.pi/Para.Beta)
+            print("order={0}\n Z={1}".format(o, Z) )
+            dMu = (s0.real+s1.real)/2.0
+            print("Dynamic chemical shift: ", dMu)
 
-        with open(os.path.join(folder, "greenList.data"), "a+") as f:
-            for k in range(Para.MomGridSize):
-                for t in range(Para.TauGridSize):
-                    f.write("{0} ".format(dG_T[k, t].real))
-            f.write("\n")
+            BareGW = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
+            for i, q in enumerate(MomGrid):
+                # BareGW[i, :] = Z/(1j*phyFreq + (q*q-Para.EF) +Static[i] )
+                BareGW[i, :] = Z/(1j*phyFreq - (q*q-Para.EF) - Static[i] )
 
-        # with open("green_order.data", "w") as f:
-        #     for k in range(Para.MomGridSize):
-        #         for t in range(Para.TauGridSize):
-        #             f.write("{0} ".format(dG_T[k, t].real))
-        #     f.write("\n")
+            BoldGW = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
+            for i, q in enumerate(MomGrid):
+                for j, w in enumerate(phyFreq):
+                    # BoldGW[i, j] = Z/( 1j*w + (q*q-Para.EF) + Static[i] + (SigmaW[i,j]-dMu) )
+                    BoldGW[i, j] = Z/( 1j*w - (q*q-Para.EF) - Static[i] - (SigmaW[i,j]-dMu) )
 
+            dG_W = BoldGW - BareGW
+
+            dG_T, _ = Fourier.SpectralW2T(dG_W)
+
+            BoldG_T, _ = Fourier.SpectralW2T(BoldGW)
+            fname = "green_order{0}.data".format(o)
+            with open(os.path.join(selfFolder, fname), "w") as f:
+                for k in range(Para.MomGridSize):
+                    for t in range(Para.TauGridSize):
+                        f.write("{0} ".format(dG_T[k, t].real))
+                f.write("\n")
+            with open(os.path.join(selfFolder, "greenList_order{0}.data".format(o)), "a+") as f:
+                for k in range(Para.MomGridSize):
+                    for t in range(Para.TauGridSize):
+                        f.write("{0} ".format(dG_T[k, t].real))
+                f.write("\n")
+
+            if o == Para.Order:
+                fname = "green.data".format(o)
+                with open(os.path.join(selfFolder, fname), "w") as f:
+                    for k in range(Para.MomGridSize):
+                        for t in range(Para.TauGridSize):
+                            f.write("{0} ".format(dG_T[k, t].real))
+                    f.write("\n")
+        # print("Maximum Error of \delta G: ", np.amax(abs(dG_T - dG_Tp)))
         time.sleep(2)
 
-        print("\n")
-
         flag = np.array([step/1000000 >= Para.TotalStep for step in Step])
-        print([step/1000000 for step in Step])
-        print("Total Step: ", Para.TotalStep)
         if np.all(flag == True):
             print("End of Simulation!")
             sys.exit(0)

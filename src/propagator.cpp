@@ -12,40 +12,39 @@ using namespace Eigen;
 extern parameter Para;
 extern variable Var;
 
+void propagator::Initialize(){
+  if (BoldG){
+      
+  }
+}
+
 double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
   if (GType == 1)
     Tau = -1.0e-12;
   auto k = K.norm();
   auto Ek = k * k - Para.Mu; // bare propagator
+  double fgreen = 0.0;
 
-  Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
-
-
-  // _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
-
-  // if (BoldG && k < Para.KGrid.MaxK) {
-  // double sigma = _Interp1D(k, _StaticSigma);
-  // ASSERT_ALLWAYS(abs(sigma + Fock(k)) < 6.0e-4,
-  //                "fail at: " << Para.KGrid.Floor(k) << " , " << sigma
-  //                            << " vs " << Fock(k));
-  // Ek += -sigma;
-  // }
-
-  double fgreen = fermiGreen(Para.Beta, Tau, Ek);
-  if (BoldG){
-    fgreen += _Interp2D<grid::FermiK>(_DeltaG, Para.FermiKGrid, k, Tau);
-    // fgreen += _Interp2D<grid::FermiK>(_deltaGOrder[Var.CurrOrder-1], Para.FermiKGrid, k, Tau);
+  if (BoldG && DiagType == POLAR)
+  {
+    Ek += _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
+    fgreen = fermiGreen(Para.Beta, Tau, Ek);
+    if (Var.CurrOrder >= 3){
+      fgreen += _Interp2D<grid::FermiK>(_deltaGOrder[Var.CurrOrder-1], Para.FermiKGrid, k, Tau);}
+  } else {
+    Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
+    fgreen = fermiGreen(Para.Beta, Tau, Ek);
   }
+
   return fgreen;
 }
 
 void propagator::LoadGreen() {
-
   _StaticSigma.setZero(Para.FermiKGrid.size);
   _DeltaG.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
 
   ifstream File;
-  File.open("dispersion.data", ios::in);
+  File.open("./selfconsistent/dispersion.data", ios::in);
   if (File.is_open()) {
     for (int k = 0; k < Para.FermiKGrid.size; ++k)
       File >> _StaticSigma[k];
@@ -55,7 +54,7 @@ void propagator::LoadGreen() {
   }
   File.close();
 
-  File.open("green.data", ios::in);
+  File.open("./selfconsistent/green.data", ios::in);
   if (File.is_open()) {
     for (int k = 0; k < Para.FermiKGrid.size; ++k)
       for (int t = 0; t < Para.TauGrid.size; ++t)
@@ -65,27 +64,34 @@ void propagator::LoadGreen() {
     _DeltaG.setZero();
   }
   File.close();
-  // LoadGreenOrder();
+
+  LoadGreenOrder();
 }
 
 
 void propagator::LoadGreenOrder() {
   weight2D _deltaGTem;
-  _deltaGTem.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
-
+  
   ifstream File;
-  File.open("green_order.data", ios::in);
-  if (File.is_open()) {
-    for (int o=1; o < Para.Order+1; ++o){
-      for (int k = 0; k < Para.FermiKGrid.size; ++k)
-        for (int t = 0; t < Para.TauGrid.size; ++t)
-          File >> _deltaGTem(k, t);
-      _deltaGOrder.push_back(_deltaGTem);
+  for (int o = 2; o <= Para.Order; o++)
+  {
+    _deltaGTem.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
+    char fname[100];
+    snprintf(fname, 100, "./selfconsistent/green_order%d.data", o);
+    File.open(fname, ios::in);
+    if (File.is_open()) {
+        for (int k = 0; k < Para.FermiKGrid.size; ++k){
+          for (int t = 0; t < Para.TauGrid.size; ++t)
+            File >> _deltaGTem(k, t);
+      }
+        _deltaGOrder[o] = _deltaGTem;
+    } else {
+      LOG_WARNING("Can not load Order-Green weights! Initialze with zeros!\n");
+      _deltaGTem.setZero();
+      _deltaGOrder[o] = _deltaGTem;
     }
-  } else {
-    LOG_WARNING("Can not load Order-Green weights! Initialze with zeros!\n");
+    File.close();
   }
-  File.close();
 }
 
 
@@ -197,6 +203,9 @@ double propagator::CounterBubble(const momentum &K) {
 template <typename KGrid>
 double propagator::_Interp1D(const weight1D &data, const KGrid &kgrid,
                              double K) {
+  if (K > kgrid.grid.back() || K < kgrid.grid[1])
+    return 0.0;
+  
   int idx0 = kgrid.floor(K);
   int idx1 = idx0 + 1;
   double K0 = kgrid.grid[idx0];
@@ -220,14 +229,18 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
     factor *= -1.0;
   }
 
+  if (K > kgrid.grid.back() || K < kgrid.grid[0] || T > Para.TauGrid.grid.back() || T < 0.0)
+    return 0.0;
+
   int Tidx0 = Para.TauGrid.floor(T);
   double dT0 = T - Para.TauGrid.grid[Tidx0],
          dT1 = Para.TauGrid.grid[Tidx0 + 1] - T;
+
   ASSERT(dT0 >= 0.0 && dT1 > 0.0,
          "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
-
   int Kidx0 = kgrid.floor(K);
-  int dK0 = K - kgrid.grid[Kidx0], dK1 = kgrid.grid[Kidx0 + 1] - K;
+  double dK0 = K - kgrid.grid[Kidx0], dK1 = kgrid.grid[Kidx0 + 1] - K;
+
   ASSERT(dK0 >= 0.0 && dK1 > 0.0,
          "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
 
@@ -236,7 +249,8 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
 
   double g0 = d00 * dK1 + d10 * dK0;
   double g1 = d01 * dK1 + d11 * dK0;
-  return factor*(g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
+  double gx = factor*(g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
+  return gx;
 }
 
 double diag::Angle3D(const momentum &K1, const momentum &K2) {

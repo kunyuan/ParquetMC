@@ -9,10 +9,13 @@ import argparse
 parser = argparse.ArgumentParser("Specify number of jobs, and the name of working folder.")
 parser.add_argument("jobs_number")
 parser.add_argument("folder_name")
+parser.add_argument("-sc", type=bool, default=False,
+        help="If the code need to be self-consistent, the argument should be set as -sc=True.")
 args = parser.parse_args()
 
 jobs_number = args.jobs_number
 folder_name = args.folder_name
+selfConsistent = args.sc
 
 
 ##### Modify parameters here  ###############
@@ -41,8 +44,8 @@ CreateFolder(homedir)
 
 os.system("cp {0} {1}".format(execute, homedir))
 os.system("cp {0} {1}".format("parameter", homedir))
-os.system("cp {0} {1}".format("green.data", homedir))
-os.system("cp {0} {1}".format("dispersion.data", homedir))
+# os.system("cp {0} {1}".format("green.data", homedir))
+# os.system("cp {0} {1}".format("dispersion.data", homedir))
 
 if Cluster != "Rutgers":
     outfilepath = os.path.join(homedir, "outfile")
@@ -94,4 +97,10 @@ for pid in PIDList:
         print("{0} means no submission.".format(Cluster))
 
 print("\nJobs has submitted.")
+
+if selfConsistent:
+    os.chdir(rootdir)
+    os.system("cp  -r  selfconsistent/  {0}".format(homedir))
+    # os.system("./merge_sigma.py  " + folder_name + " > merge_sigma.log &")
+
 sys.exit(0)

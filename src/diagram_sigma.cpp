@@ -53,16 +53,24 @@ void sigma::Build(int order) {
 }
 
 double sigma::Evaluate() {
-  // normalization
   double Factor = 1.0 / pow(2.0 * PI, D);
+  bool rpaCounter = false;
+
   if (Order == 0) {
     return 1.0;
   } else if (Order == 1) {
     double GWeight = Prop.Green(-EPS, Var.LoopMom[0] + Var.LoopMom[1], UP, 0);
-    double VerWeight = Prop.Interaction(Var.LoopMom[1], 0);
-    // cout << GWeight << ", " << VerWeight << endl;
+    double VerWeight = 0.0;
+    if (rpaCounter){
+      for (int o = 0; o <= Para.Order-1; o++)
+        VerWeight += Prop.Interaction(Var.LoopMom[1], o);
+    }else{
+      VerWeight += Prop.Interaction(Var.LoopMom[1], 0);
+    }
+    
     return GWeight * VerWeight * Factor;
   }
+  
 
   // Sigma with LoopNum>=2
   G1.K = Var.LoopMom[1];
