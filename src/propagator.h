@@ -30,6 +30,7 @@ public:
   void LoadF();
   void LoadGreen();
   void LoadGreenOrder();
+  void SaveGreenOrder();
 
 private:
   weight1D _StaticSigma;

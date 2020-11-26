@@ -14,7 +14,6 @@ extern variable Var;
 
 void propagator::Initialize(){
   if (BoldG){
-      
   }
 }
 
@@ -27,15 +26,14 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
 
   if (BoldG && DiagType == POLAR)
   {
-    Ek += _Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
+    Ek += -1*_Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
     fgreen = fermiGreen(Para.Beta, Tau, Ek);
-    if (Var.CurrOrder >= 3){
-      fgreen += _Interp2D<grid::FermiK>(_deltaGOrder[Var.CurrOrder-1], Para.FermiKGrid, k, Tau);}
+    if (Var.CurrOrder >= 1)
+      fgreen += -1*_Interp2D<grid::FermiK>(_deltaGOrder[Para.Order], Para.FermiKGrid, k, Tau);
   } else {
     Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
     fgreen = fermiGreen(Para.Beta, Tau, Ek);
   }
-
   return fgreen;
 }
 
@@ -66,6 +64,33 @@ void propagator::LoadGreen() {
   File.close();
 
   LoadGreenOrder();
+  // SaveGreenOrder();
+}
+
+void propagator::SaveGreenOrder() {
+  ofstream File;
+  std::array<momentum, 256> extKList;
+  for (int k = 0; k < Para.FermiKGrid.size; ++k){
+    extKList[k].setZero();
+    extKList[k][0] = Para.FermiKGrid.grid[k];
+  }
+
+  for (int o = 1; o <= Para.Order; o++)
+  {
+    char fname[100];
+    snprintf(fname, 100, "SaveFullGreenOrder%d.data", o);
+    File.open(fname, ios::out|ios::app);
+    if (File.is_open()) {
+        for (int k = 0; k < Para.FermiKGrid.size; ++k){
+          momentum K = extKList[k];
+          for (int t = 0; t < Para.TauGrid.size-1; ++t)
+            File << Green(Para.TauGrid.grid[t], K, UP, 0) << "   ";
+      }
+    } else {
+      LOG_WARNING("Fail to save the Green function's data.");
+    }
+    File.close();
+  }
 }
 
 
@@ -200,20 +225,22 @@ double propagator::CounterBubble(const momentum &K) {
   return Factor;
 }
 
+
 template <typename KGrid>
 double propagator::_Interp1D(const weight1D &data, const KGrid &kgrid,
                              double K) {
-  if (K > kgrid.grid.back() || K < kgrid.grid[1])
+  if (K > kgrid.grid.back() || K < kgrid.grid[0])
     return 0.0;
   
   int idx0 = kgrid.floor(K);
   int idx1 = idx0 + 1;
   double K0 = kgrid.grid[idx0];
   double K1 = kgrid.grid[idx1];
-  // cout << K << "=>" << idx0 << ": " << K0 << "  " << idx1 << ": " << K1 <<
-  // endl;
-  ASSERT(K0 <= K && K1 > K,
-         "Interpolate fails: " << K0 << "<" << K << "<" << K1);
+  
+  // cout <<idx0<<" "<<idx1<<" "<<K0<<" "<<K1<<endl;
+  // cout <<(data[idx0]*(K1-K)+data[idx1]*(K-K0))/(K1-K0)<<"  "<<data[idx0]<<"  "<<data[idx1]<<endl;
+  // ASSERT(K0 <= K && K1 >= K,
+        //  "Interpolate fails: " << K0 << "<" << K << "<" << K1);
   return (data[idx0] * (K1 - K) + data[idx1] * (K - K0)) / (K1 - K0);
 }
 
@@ -236,13 +263,13 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
   double dT0 = T - Para.TauGrid.grid[Tidx0],
          dT1 = Para.TauGrid.grid[Tidx0 + 1] - T;
 
-  ASSERT(dT0 >= 0.0 && dT1 > 0.0,
-         "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
+  // ASSERT(dT0 >= 0.0 && dT1 >= 0.0,
+        //  "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
   int Kidx0 = kgrid.floor(K);
   double dK0 = K - kgrid.grid[Kidx0], dK1 = kgrid.grid[Kidx0 + 1] - K;
 
-  ASSERT(dK0 >= 0.0 && dK1 > 0.0,
-         "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
+  // ASSERT(dK0 >= 0.0 && dK1 >= 0.0,
+        //  "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
 
   double d00 = data(Kidx0, Tidx0), d01 = data(Kidx0, Tidx0 + 1);
   double d10 = data(Kidx0 + 1, Tidx0), d11 = data(Kidx0 + 1, Tidx0 + 1);

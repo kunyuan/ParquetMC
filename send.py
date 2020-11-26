@@ -6,7 +6,7 @@ import sys
 import argparse
 
 
-parser = argparse.ArgumentParser("Specify number of jobs, and the name of working folder.")
+parser = argparse.ArgumentParser("Specify the number of jobs, and the name of working folder.")
 parser.add_argument("jobs_number")
 parser.add_argument("folder_name")
 parser.add_argument("-sc", type=bool, default=False,
@@ -17,6 +17,7 @@ jobs_number = args.jobs_number
 folder_name = args.folder_name
 selfConsistent = args.sc
 
+selfConsistent = True
 
 ##### Modify parameters here  ###############
 # Cluster="Rutgers"

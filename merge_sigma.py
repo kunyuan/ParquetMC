@@ -12,6 +12,30 @@ folder = args.folder
 print("Folder to merge : " + folder)
 
 
+def AnaliticFock(k, l):
+    kF = Para.kF
+    # Analytic Fock energy
+    y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((k-kF)/l)-l/kF*np.arctan((k+kF)/l) -
+                      (l*l-k*k+kF*kF)/4.0/k/kF*np.log((l*l+(k-kF)**2)/(l*l+(k+kF)**2)))
+
+    k = kF
+    Mu = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((k-kF)/l)-l/kF*np.arctan((k+kF)/l) -
+                       (l*l-k*k+kF*kF)/4.0/k/kF*np.log((l*l+(k-kF)**2)/(l*l+(k+kF)**2)))
+    return y-Mu
+
+
+def PlotStatic():
+    fig, ax1 = plt.subplots()
+    fock = [AnaliticFock(k, Para.Lambda) for k in MomGrid]
+
+    print(fock)
+    ax1.plot(MomGrid/Para.kF, fock, "r-", label="Analitical Fock")
+    ax1.plot(MomGrid/Para.kF, 1.5*Static, "b-", label="Static")
+
+    plt.legend(loc=1, frameon=False, fontsize=size)
+    plt.show()
+
+
 def CheckConvergence(Para, Data):
     print(Para.Order)
     Order = range(0, Para.Order+1)
@@ -85,6 +109,9 @@ if __name__ == "__main__":
         print("Mu=", Static[kFidx])
         Static -= Static[kFidx]  # subtract the self-energy shift
 
+        # print(Static)
+        # PlotStatic()
+
         print("Maximum Error of Dynamic Sigma: ", np.amax(abs(DynErr)))
 
         print("MomGrid idx at the Fermi surface:{0}, KF: {1}=={2}".format(kFidx,MomGrid[kFidx],Para.kF))
@@ -108,19 +135,20 @@ if __name__ == "__main__":
             BareGW = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
             for i, q in enumerate(MomGrid):
                 # BareGW[i, :] = Z/(1j*phyFreq + (q*q-Para.EF) +Static[i] )
-                BareGW[i, :] = Z/(1j*phyFreq - (q*q-Para.EF) - Static[i] )
+                BareGW[i, :] = 1.0/(1j*phyFreq + (q*q-Para.EF) + Static[i] )
+
 
             BoldGW = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
             for i, q in enumerate(MomGrid):
                 for j, w in enumerate(phyFreq):
                     # BoldGW[i, j] = Z/( 1j*w + (q*q-Para.EF) + Static[i] + (SigmaW[i,j]-dMu) )
-                    BoldGW[i, j] = Z/( 1j*w - (q*q-Para.EF) - Static[i] - (SigmaW[i,j]-dMu) )
+                    BoldGW[i, j] = 1.0/( 1j*w + (q*q-Para.EF) + Static[i] + (SigmaW[i,j]-dMu) )
+
 
             dG_W = BoldGW - BareGW
 
             dG_T, _ = Fourier.SpectralW2T(dG_W)
 
-            BoldG_T, _ = Fourier.SpectralW2T(BoldGW)
             fname = "green_order{0}.data".format(o)
             with open(os.path.join(selfFolder, fname), "w") as f:
                 for k in range(Para.MomGridSize):
@@ -141,6 +169,7 @@ if __name__ == "__main__":
                             f.write("{0} ".format(dG_T[k, t].real))
                     f.write("\n")
         # print("Maximum Error of \delta G: ", np.amax(abs(dG_T - dG_Tp)))
+
         time.sleep(2)
 
         flag = np.array([step/1000000 >= Para.TotalStep for step in Step])

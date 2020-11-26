@@ -54,7 +54,7 @@ void sigma::Build(int order) {
 
 double sigma::Evaluate() {
   double Factor = 1.0 / pow(2.0 * PI, D);
-  bool rpaCounter = false;
+  bool rpaCounter = true;
 
   if (Order == 0) {
     return 1.0;

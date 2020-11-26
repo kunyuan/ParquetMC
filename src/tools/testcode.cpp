@@ -25,6 +25,28 @@ void TestCode(){
     }
     interpFile.close();
     
+
+    std::vector<double> resK;
+    num = 10000;
+    double kMax = Para.FermiKGrid.grid.back();
+    for (int i = 0; i <= num; i++)
+    {
+        double k = -1.5*kMax + 1.0*i/num*(3*kMax);
+        int Kidx = Para.FermiKGrid.floor(k);
+        double interpK = Para.FermiKGrid.grid[Kidx];
+        resK.push_back(interpK);
+    }
+
+    fname = "kinterp.data";
+    interpFile;
+    interpFile.open(fname, std::ios::out|std::ios::trunc);
+    if (interpFile.is_open()){
+        for (int i = 0; i < res.size(); i++)
+            interpFile << resK[i] << "   ";
+    }
+    interpFile.close();
+
+
     std::exit(0);
 }
 
