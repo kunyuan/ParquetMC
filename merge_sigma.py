@@ -3,6 +3,7 @@ from utility.IO import *
 import utility.fourier as fourier
 import argparse
 import time
+# from utility.plot import *
 
 parser = argparse.ArgumentParser("Specify some parameters.")
 parser.add_argument("folder")
@@ -28,9 +29,8 @@ def PlotStatic():
     fig, ax1 = plt.subplots()
     fock = [AnaliticFock(k, Para.Lambda) for k in MomGrid]
 
-    print(fock)
     ax1.plot(MomGrid/Para.kF, fock, "r-", label="Analitical Fock")
-    ax1.plot(MomGrid/Para.kF, 1.5*Static, "b-", label="Static")
+    ax1.plot(MomGrid/Para.kF, Static, "b-", label="Static")
 
     plt.legend(loc=1, frameon=False, fontsize=size)
     plt.show()
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         arr = np.amin(abs(MomGrid-Para.kF))
         kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
         
-        print("Mu=", Static[kFidx])
+        print("Mu=", Static[kFidx], " +- ", StaticErr[kFidx])
         Static -= Static[kFidx]  # subtract the self-energy shift
 
         # print(Static)
@@ -116,34 +116,40 @@ if __name__ == "__main__":
 
         print("MomGrid idx at the Fermi surface:{0}, KF: {1}=={2}".format(kFidx,MomGrid[kFidx],Para.kF))
         # PlotSigmaW(Dynamic, MomGrid, kFidx, False)
+        
+        fname = "para.data"
+        with open(os.path.join(selfFolder,fname), "w") as f:
+            f.write("{0}  {1}  {2}\n".format(Para.TauGridSize, Para.MomGridSize, Para.MaxExtMomKF))
+            f.write("#TauGrid, MomGrid, MaxExtMom(*kF)")
 
-        with open(os.path.join(selfFolder,"dispersion.data"), "w") as f:
+
+        fname = "dispersion_order{0}.data".format(Para.Order)
+        with open(os.path.join(selfFolder,fname), "w") as f:
             for k in range(Para.MomGridSize):
                 f.write("{0} ".format(Static[k]))
             f.write("\n")
 
-        for o in range(2, Para.Order+1):
+        for o in range(Para.Order, Para.Order+1):
             Dynamic, DynErr = Estimate(Data, Norm, lambda d: np.sum(d[2:o+1, ...], axis=0))
             SigmaW, _ = Fourier.SpectralT2W(Dynamic)
+            SigmaWErr, _ = Fourier.SpectralT2W(DynErr)
             
             s0, s1 = SigmaW[kFidx, MaxFreq-1], SigmaW[kFidx, MaxFreq]
             Z = 1.0-(s1.imag-s0.imag)/(2.0*np.pi/Para.Beta)
             print("order={0}\n Z={1}".format(o, Z) )
             dMu = (s0.real+s1.real)/2.0
-            print("Dynamic chemical shift: ", dMu)
+            dMuErr = (SigmaWErr[kFidx, MaxFreq-1] + SigmaWErr[kFidx, MaxFreq])/2.0
+            print("Dynamic chemical shift: ", dMu, "+-", dMuErr)
 
             BareGW = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
             for i, q in enumerate(MomGrid):
-                # BareGW[i, :] = Z/(1j*phyFreq + (q*q-Para.EF) +Static[i] )
-                BareGW[i, :] = 1.0/(1j*phyFreq + (q*q-Para.EF) + Static[i] )
+                BareGW[i, :] = 1.0/(1j*phyFreq + ( (q*q-Para.EF) + Static[i] ) )
 
 
             BoldGW = np.zeros((Para.MomGridSize, len(phyFreq)), dtype=complex)
             for i, q in enumerate(MomGrid):
                 for j, w in enumerate(phyFreq):
-                    # BoldGW[i, j] = Z/( 1j*w + (q*q-Para.EF) + Static[i] + (SigmaW[i,j]-dMu) )
-                    BoldGW[i, j] = 1.0/( 1j*w + (q*q-Para.EF) + Static[i] + (SigmaW[i,j]-dMu) )
-
+                    BoldGW[i, j] = 1.0/(1j*w + ( (q*q-Para.EF) + Static[i] + (SigmaW[i,j]-dMu) ) )
 
             dG_W = BoldGW - BareGW
 
@@ -155,20 +161,14 @@ if __name__ == "__main__":
                     for t in range(Para.TauGridSize):
                         f.write("{0} ".format(dG_T[k, t].real))
                 f.write("\n")
-            with open(os.path.join(selfFolder, "greenList_order{0}.data".format(o)), "a+") as f:
-                for k in range(Para.MomGridSize):
-                    for t in range(Para.TauGridSize):
-                        f.write("{0} ".format(dG_T[k, t].real))
-                f.write("\n")
 
-            if o == Para.Order:
-                fname = "green.data".format(o)
-                with open(os.path.join(selfFolder, fname), "w") as f:
-                    for k in range(Para.MomGridSize):
-                        for t in range(Para.TauGridSize):
-                            f.write("{0} ".format(dG_T[k, t].real))
-                    f.write("\n")
-        # print("Maximum Error of \delta G: ", np.amax(abs(dG_T - dG_Tp)))
+            # if o == Para.Order:
+            #     fname = "green.data".format(o)
+            #     with open(os.path.join(selfFolder, fname), "w") as f:
+            #         for k in range(Para.MomGridSize):
+            #             for t in range(Para.TauGridSize):
+            #                 f.write("{0} ".format(dG_T[k, t].real))
+            #         f.write("\n")
 
         time.sleep(2)
 

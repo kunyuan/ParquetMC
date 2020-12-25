@@ -145,7 +145,6 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
           ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
         }
 
-
       }
     }
   }

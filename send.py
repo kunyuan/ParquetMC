@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import sys
 import argparse
+import time
 
 
 parser = argparse.ArgumentParser("Specify the number of jobs, and the name of working folder.")
@@ -57,6 +58,7 @@ else:
     infilepath = homedir
 
 for pid in PIDList:
+    time.sleep(0.3)
     seed = random.randint(0, 2**31-1)
     # print pid, seed
     outfile = os.path.join(outfilepath, "_out{0}".format(pid))  # output files
@@ -81,7 +83,7 @@ for pid in PIDList:
         os.chdir("..")
     elif Cluster == "PBS":
         with open(jobfile, "w") as fjob:
-            fjob.write("#!/bin/sh\n"+"#PBS -N "+jobfile+"\n")
+            fjob.write("#!/bin/sh\n"+"#PBS -N " + folder_name+"_"+jobfile+"\n")
             fjob.write("#PBS -o "+homedir+"/Output\n")
             fjob.write("#PBS -e "+homedir+"/Error\n")
             fjob.write("#PBS -l walltime=2000:00:00\n")

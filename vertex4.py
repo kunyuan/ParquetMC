@@ -13,7 +13,7 @@ import argparse
 
 
 Type = "As_Aa"
-Type = "Gamma_4spin"
+# Type = "Gamma_4spin"
 
 parser = argparse.ArgumentParser("Specify some parameters.")
 parser.add_argument("folder")

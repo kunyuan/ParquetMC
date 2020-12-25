@@ -13,6 +13,7 @@
 // #define NDEBUG
 
 enum diagtype { GAMMA, SIGMA, POLAR, DELTA };
+enum greentype { BoldG, FockG, BareG};
 
 ///////////  Global Constants ////////////////////
 const int D = 3;        // dimensions, 2 or 3
@@ -23,12 +24,14 @@ const int MaxMomNum = MaxOrder + 3;
 
 const int IsDynamic = false;
 const bool IsProper = true; // true means one-interaction irreducible
-const bool BoldG = true;
-const bool IsF = false;
+const bool IsF = true;
+
+const greentype GreenType = BoldG;
+// const greentype GreenType = FockG;
+// const greentype GreenType = BareG;
 
 // const diagtype DiagType = GAMMA;
 // const diagtype DiagType = SIGMA;
-
 const diagtype DiagType = POLAR;
 
 // typedef kFermiGrid kGrid; // for sigma
