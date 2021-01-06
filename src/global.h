@@ -26,13 +26,13 @@ const int IsDynamic = false;
 const bool IsProper = true; // true means one-interaction irreducible
 const bool IsF = true;
 
-const greentype GreenType = BoldG;
-// const greentype GreenType = FockG;
+// const greentype GreenType = BoldG;
+const greentype GreenType = FockG;
 // const greentype GreenType = BareG;
 
-// const diagtype DiagType = GAMMA;
+const diagtype DiagType = GAMMA;
 // const diagtype DiagType = SIGMA;
-const diagtype DiagType = POLAR;
+// const diagtype DiagType = POLAR;
 
 // typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta

@@ -97,18 +97,28 @@ void propagator::LoadGreenOrder() {
   
   ifstream File;
 
-  File.open("./selfconsistent/para.data", ios::in);
-  if (File.is_open()) {
-      File >> _TauSize;
-      File >> _MomSize;
-      File >> _MaxK;
-      _TauGridInterp.build(Para.Beta, _TauSize, 6.0 / Para.Ef);
-      _MomGridInterp.build(Para.Kf, _MaxK*Para.Kf, _MomSize, sqrt(1.0 / Para.Beta) * 2.0); 
-  } else {
-    LOG_WARNING("Can not load parameters, FAILED\n");
-    exit(0);
+  for (size_t i = 0; i <= 10; i++)
+  {
+      char fname[100];
+      snprintf(fname, 100, "./selfconsistent/para.data");
+      File.open("./selfconsistent/para.data", ios::in);
+      if (File.is_open()) {
+          File >> _TauSize;
+          File >> _MomSize;
+          File >> _MaxK;
+          _TauGridInterp.build(Para.Beta, _TauSize, 6.0 / Para.Ef);
+          _MomGridInterp.build(Para.Kf, _MaxK*Para.Kf, _MomSize, sqrt(1.0 / Para.Beta) * 2.0);
+          File.close(); 
+          break;
+      } else {
+        LOG_WARNING(to_string(i) + ": Can not load parameters, FAILED\n");
+        if (i==10) exit(0);
+      }
+      File.close();
   }
-  File.close();
+
+
+  
 
 
   weight1D  _SigmaTem;
@@ -116,14 +126,20 @@ void propagator::LoadGreenOrder() {
       _SigmaTem.setZero(_MomGridInterp.size);
       char fname[100];
       snprintf(fname, 100, "./selfconsistent/dispersion_order%d.data", o);
-      File.open(fname, ios::in);
-      if (File.is_open()) {
-        for (int k = 0; k < _MomGridInterp.size; ++k)
-          File >> _SigmaTem[k];
-      } else {
-        LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
-        _SigmaTem.setZero(_MomGridInterp.size);
+      for (size_t i = 0; i < 10; i++)
+      {
+          File.close();
+          File.open(fname, ios::in);
+          if (File.is_open()) {
+            for (int k = 0; k < _MomGridInterp.size; ++k)
+              File >> _SigmaTem[k];
+            break;
+          } else {
+            LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
+            _SigmaTem.setZero(_MomGridInterp.size);
+          }
       }
+
       File.close();
       _StaticSigma[o] = _SigmaTem;
   }
@@ -134,16 +150,23 @@ void propagator::LoadGreenOrder() {
       _deltaGTem.setZero(_MomGridInterp.size, _TauGridInterp.size);
       char fname[100];
       snprintf(fname, 100, "./selfconsistent/green_order%d.data", o);
-      File.open(fname, ios::in);
-      if (File.is_open()) {
-          for (int k = 0; k < _MomGridInterp.size; ++k){
-            for (int t = 0; t < _TauGridInterp.size; ++t)
-              File >> _deltaGTem(k, t);
+
+      for (size_t i = 0; i < 10; i++)
+      {
+          File.close();
+          File.open(fname, ios::in);
+          if (File.is_open()) {
+              for (int k = 0; k < _MomGridInterp.size; ++k){
+                for (int t = 0; t < _TauGridInterp.size; ++t)
+                  File >> _deltaGTem(k, t);
+              }
+              break;
+          } else {
+            LOG_WARNING("Can not load Order-Green weights! Initialze with zeros!\n");
+            _deltaGTem.setZero(_MomGridInterp.size, _TauGridInterp.size);
           }
-      } else {
-        LOG_WARNING("Can not load Order-Green weights! Initialze with zeros!\n");
-        _deltaGTem.setZero(_MomGridInterp.size, _TauGridInterp.size);
       }
+
       File.close();
       _deltaGOrder[o] = _deltaGTem;
   }
@@ -202,8 +225,6 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // check irreducibility
   if ((IsProper || DiagType == POLAR) && IsEqual(kDiQ, ExtQ))
     Weight[DIR] = 0.0;
-  if (DiagType == GAMMA && IsEqual(kDiQ, ExtQ))
-    Weight[DIR] = 0.0;
 
   double kExQ = (KInL - KOutR).norm();
   Weight[EX] =
@@ -216,8 +237,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // check irreducibility
   if ((IsProper || DiagType == POLAR) && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
-  if (DiagType == GAMMA && IsEqual(kExQ, ExtQ))
-    Weight[EX] = 0.0;
+
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
   return Weight;

@@ -19,7 +19,11 @@ folderA = args.folder1
 folderF = args.folder2
 print("Folders : " + folderA + ", ")
 
-legendreL = [0,1,2,3]
+
+Type = "As_Aa"
+# Type = "Dir_Ex"
+# Type = "Gamma_4spin"
+legendreL = [0]
 
 Para = param(folderA)
 # 0: I, 1: T, 2: U, 3: S
@@ -28,7 +32,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 ChanColor = {0: "k", 1: "r", 2: "b", 3: "g"}
 # 0: total, 1: order 1, ...
 Order = range(Para.Order+1)
-Irreducible = True
+Irreducible = False
 
 shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 Data, Norm, Step, Grid = LoadFile(folderA, "vertex_pid[0-9]+.dat", shape)
@@ -55,10 +59,18 @@ def PrintInfo(Channel, Data, DataErr):
         MomGrid[0], Data[1], DataErr[1]))
 
 
+
 def SpinMapping(Data):
     d = np.copy(Data)
-    d[..., 0] += d[..., 1]/Para.Spin
-    d[..., 1] /= Para.Spin
+    if Type == "As_Aa":
+        d[..., 0] += d[..., 1]/Para.Spin
+        d[..., 1] /= Para.Spin
+    elif Type == "Gamma_4spin":
+        e = d[..., 0] + d[..., 1]
+        d[..., 1] = d[..., 0]
+        d[..., 0] = e
+    elif Type == "Dir_Ex":
+        pass
     return d
 
 
@@ -85,10 +97,12 @@ avg, err = Estimate(Adata, Norm)
 
 bareLambda = Bare(Angle, Para.Lambda)
 
+
 Adata_s = -(avg[:, 0]+bareLambda[:, 0])
 Adata_a = -(avg[:, 1]+bareLambda[:, 1])
 Aerr_s = -err[:, 0]
 Aerr_a = -err[:, 1]
+
 
 As = LegendreCoeff(Adata_s, AngGrid, legendreL)
 Aa = LegendreCoeff(Adata_a, AngGrid, legendreL)
@@ -98,6 +112,7 @@ AaErr = LegendreCoeff(Aerr_a, AngGrid, legendreL)
 
 #------------------ F ----------------------------
 Para = param(folderF)
+shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 Data, Norm, Step, Grid = LoadFile(folderF, "vertex_pid[0-9]+.dat", shape)
 
 AngGrid = Grid["AngleGrid"]
@@ -114,6 +129,7 @@ Fdata_s = -(avg[:, 0]+bareLambda[:, 0])
 Fdata_a = -(avg[:, 1]+bareLambda[:, 1])
 Ferr_s = -err[:, 0]
 Ferr_a = -err[:, 1]
+
 
 Fs = LegendreCoeff(Fdata_s, AngGrid, legendreL)
 Fa = LegendreCoeff(Fdata_a, AngGrid, legendreL)

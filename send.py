@@ -63,6 +63,7 @@ for pid in PIDList:
     # print pid, seed
     outfile = os.path.join(outfilepath, "_out{0}".format(pid))  # output files
     jobfile = os.path.join(jobfilepath, "_job{0}.sh".format(pid))  # job files
+    jobname = folder_name + "_" + "_job{0}.sh".format(pid)
 
     if Cluster == "local":
         os.chdir(homedir)
@@ -83,7 +84,7 @@ for pid in PIDList:
         os.chdir("..")
     elif Cluster == "PBS":
         with open(jobfile, "w") as fjob:
-            fjob.write("#!/bin/sh\n"+"#PBS -N " + folder_name+"_"+jobfile+"\n")
+            fjob.write("#!/bin/sh\n"+"#PBS -N " + jobname +"\n")
             fjob.write("#PBS -o "+homedir+"/Output\n")
             fjob.write("#PBS -e "+homedir+"/Error\n")
             fjob.write("#PBS -l walltime=2000:00:00\n")
