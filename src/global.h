@@ -23,10 +23,15 @@ const int MaxMomNum = MaxOrder + 3;
 
 const int IsDynamic = false;
 const bool IsProper = true; // true means one-interaction irreducible
+
 const bool BoldG = false;
 const bool IsF = true;
 
-const diagtype DiagType = GAMMA;
+// const diagtype DiagType = GAMMA;
+// const diagtype DiagType = SIGMA;
+
+const diagtype DiagType = POLAR;
+
 // typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 
@@ -41,6 +46,9 @@ struct parameter {
   double Nf, Mu, Beta;  // chemical potential, inverse temperature
   double Mass2, Lambda; // screening length^2, shift
   double Charge2;       // screening length^2
+  double Omega;         // 
+  double OmegaINL;
+  double OmegaINR;
 
   // MC inputs
   int TotalStep;             // total steps of the Monte Carlo

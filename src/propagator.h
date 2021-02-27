@@ -2,6 +2,7 @@
 #define propagator_H
 #include "global.h"
 #include <Eigen/Dense>
+#include <map>
 
 namespace diag {
 
@@ -11,6 +12,7 @@ typedef Matrix<double, Dynamic, Dynamic, RowMajor> weight2D;
 
 class propagator {
 public:
+  // propagator();
   void Initialize();
   double Green(double Tau, const momentum &K, spin Spin, int GType = 0);
   double F(double Tau, const momentum &K, spin Spin, int GType = 0);
@@ -27,10 +29,14 @@ public:
 
   void LoadF();
   void LoadGreen();
+  void LoadGreenOrder();
+  void SaveGreenOrder();
 
 private:
   weight1D _StaticSigma;
   weight2D _DeltaG;
+  std::map<int, weight2D> _deltaGOrder;
+
   template <typename KGrid>
   double _Interp1D(const weight1D &data, const KGrid &kgrid, double K);
   template <typename KGrid>

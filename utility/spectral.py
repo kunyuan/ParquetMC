@@ -91,6 +91,7 @@ def MatFreqKernel(Beta, MatFreqGrid, RealFreqGrid, Type):
         kernel = np.zeros([len(RealFreqGrid), len(MatFreqGrid)], dtype=complex)
         for i, w in enumerate(RealFreqGrid):
             kernel[i, :] = 1.0/(1j*MatFreqGrid+w)
+        # print(dRealFreq)
         return kernel*dRealFreq/2.0/np.pi
     elif Type == "Bose":
         # require w in [0.0, +inf)

@@ -3,16 +3,30 @@ import random
 from datetime import datetime
 import os
 import sys
+import argparse
+
+
+parser = argparse.ArgumentParser("Specify the number of jobs, and the name of working folder.")
+parser.add_argument("jobs_number")
+parser.add_argument("folder_name")
+parser.add_argument("-sc", type=bool, default=False,
+        help="If the code need to be self-consistent, the argument should be set as -sc=True.")
+args = parser.parse_args()
+
+jobs_number = args.jobs_number
+folder_name = args.folder_name
+selfConsistent = args.sc
+
+selfConsistent = True
 
 ##### Modify parameters here  ###############
 # Cluster="Rutgers"
 # Cluster="PBS"
-# Cluster = "local"
-Cluster = "condor"
+Cluster = "local"
+# Cluster = "condor"
 ############################################
 
-assert len(sys.argv) == 2, "Number of jobs is needed as a parameter!"
-Number = int(sys.argv[1])
+Number = int(jobs_number)
 print "Creating {0} jobs ...".format(Number)
 PIDList = range(Number)
 
@@ -26,14 +40,13 @@ rootdir = os.getcwd()
 execute = "feyncalc.exe"
 random.seed(datetime.now())
 
-
-homedir = os.path.join(rootdir, "Data")
+homedir = os.path.join(rootdir, folder_name)
 CreateFolder(homedir)
 
 os.system("cp {0} {1}".format(execute, homedir))
 os.system("cp {0} {1}".format("parameter", homedir))
-os.system("cp {0} {1}".format("green.data", homedir))
-os.system("cp {0} {1}".format("dispersion.data", homedir))
+# os.system("cp {0} {1}".format("green.data", homedir))
+# os.system("cp {0} {1}".format("dispersion.data", homedir))
 
 if Cluster != "Rutgers":
     outfilepath = os.path.join(homedir, "outfile")
@@ -85,4 +98,10 @@ for pid in PIDList:
         print("{0} means no submission.".format(Cluster))
 
 print("\nJobs has submitted.")
+
+if selfConsistent:
+    os.chdir(rootdir)
+    os.system("cp  -r  selfconsistent/  {0}".format(homedir))
+    # os.system("./merge_sigma.py  " + folder_name + " > merge_sigma.log &")
+
 sys.exit(0)

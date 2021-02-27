@@ -5,11 +5,23 @@ import traceback
 import numpy as np
 import utility.angle as legendre
 import sys
+import argparse
+
+parser = argparse.ArgumentParser("Specify some parameters.")
+parser.add_argument("folder")
+args = parser.parse_args()
+
+folder = args.folder
+print("Folder to plot : " + folder)
+
+
+Type = "As_Aa"
+Type = "Gamma_4spin"
 
 SleepTime = 5
-IsIrreducible = True
+Irreducible = True
 
-Para = param()
+Para = param(folder)
 
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
@@ -24,8 +36,13 @@ shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 
 def SpinMapping(Data):
     d = np.copy(Data)
-    d[..., 0] += d[..., 1]/Para.Spin
-    d[..., 1] /= Para.Spin
+    if Type == "As_Aa":
+        d[..., 0] += d[..., 1]/Para.Spin
+        d[..., 1] /= Para.Spin
+    elif Type == "Gamma_4spin":
+        e = d[..., 0] + d[..., 1]
+        d[..., 1] = d[..., 0]
+        d[..., 0] = e
     return d
 
 
@@ -50,8 +67,7 @@ while True:
     time.sleep(SleepTime)
 
     try:
-        Data, Norm, Step, Grid = LoadFile(
-            "./Data", "vertex_pid[0-9]+.dat", shape)
+        Data, Norm, Step, Grid = LoadFile(folder, "vertex_pid[0-9]+.dat", shape)
 
         AngGrid = Grid["AngleGrid"]
         MomGrid = Grid["KGrid"]
@@ -80,7 +96,7 @@ while True:
 
         # construct bare interaction
         Bare = np.zeros(2)
-        if IsIrreducible == False:
+        if not Irreducible:
             Bare[0] -= 8.0*np.pi/(Para.Mass2+Para.Lambda)
 
         AngHalf = np.arccos(AngGrid)/2.0
@@ -120,6 +136,11 @@ while True:
             Data, Err = Estimate(DataAllList, Norm)
             Data += Bare  # I channel has a bare part
             PrintInfo("Sum", Data, Err)
+            
+            # fig, ax1 = plt.subplots(1)
+            # ax1.errorbar(MomGrid, Data[], yerr=err[:, 0], fmt='-',
+            #     capthick=1, capsize=4, c=ChanColor[chan], label=f"${ChanName[chan]}_s$")
+ 
 
         #     # qData = Data[(o, 1)]
         #     # qDataErr = DataErr[(o, 1)]
