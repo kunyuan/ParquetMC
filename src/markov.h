@@ -10,15 +10,15 @@
 
 namespace mc {
 using namespace std;
-const int MCUpdates = 7;
-
-typedef array<double, ExtMomBinSize> polar;
+const int MCUpdates = 6;
 
 class markov {
 public:
   markov();
-  long long Counter;
 
+  diag::weight Weight; // Weight handler
+
+  // information printer
   void PrintMCInfo();
   void PrintDeBugMCInfo();
   void AdjustGroupReWeight();
@@ -26,32 +26,17 @@ public:
   // MC updates
   void ChangeTau();
   void ChangeMomentum();
+  void ChangeExtMomentum();
+  void ChangeExtTau();
   void ChangeOrder();
   void ChangeScale();
-  void ChangeChannel();
-
-  void Measure();
-  void ClearStatis();
-  void SaveToFile(bool Simple);
-  void LoadFile();
-
-  int DynamicTest();
-
-  // MC variables
-  diag::weight Weight;
-  diag::variable &Var;
 
 private:
-  ver::weightMatrix NewWeight;
   double NewAbsWeight;
 
-  int GetTauNum(int Order);
-  int GetLoopNum(int Order);
-
-  // MC updates
-
   double ShiftExtTransferK(const int &, int &);
-  double ShiftExtLegK(const momentum &, momentum &);
+  double ShiftExtLegK(const int &, int &);
+  double ShiftExtTau(const int &, int &);
   double ShiftK(const momentum &, momentum &);
   double ShiftTau(const double &, double &);
 
@@ -68,11 +53,10 @@ private:
   enum Updates {
     INCREASE_ORDER = 0,
     DECREASE_ORDER,
-    CHANGE_GROUP,
     CHANGE_TAU,
     CHANGE_MOM,
-    CHANGE_SCALE,
-    CHANGE_CHANNEL,
+    CHANGE_EXTMOM,
+    CHANGE_EXTTAU,
     END
   };
   std::string _DetailBalanceStr(Updates op);

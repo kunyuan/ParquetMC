@@ -1,91 +1,88 @@
 #ifndef FeynCalc_global_h
 #define FeynCalc_global_h
 
+#define FMT_HEADER_ONLY
+#include "lib/grid.h"
 #include "utility/utility.h"
-#include "utility/vector.h"
+#include <Eigen/Dense>
 #include <array>
 #include <math.h>
-#include <string>
 #include <vector>
 
-// turn off all assert
-const bool DEBUGMODE = true;
-// const bool DEBUGMODE = false;
-//#define NDEBUG
-// define NDEBUG will turn off debug checking, including the boundary check in
-// array.h
+// comment to turn on all assert
+// #define NDEBUG
+
+enum diagtype { GAMMA, SIGMA, POLAR, DELTA };
+
 ///////////  Global Constants ////////////////////
-// D=2 or D=3
-const int D = 3;
-// number of q bins of the external momentum
-const int ExtMomBinSize = 2;
-// number of bins for the angle between InL and InR legs
-const int AngBinSize = 64;
-// number of energy scales, only useful in RG approach
-const int ScaleBinSize = 64;
-const int TauBinSize = 128;
-const int TauBasisNum = 32;
-const int SpinIndex = 2;
+const int D = 3;        // dimensions, 2 or 3
+const int SPIN = 2;     // spin index
+const int MaxOrder = 9; // Max diagram order
+const int MaxTauNum = MaxOrder + 1;
+const int MaxMomNum = MaxOrder + 3;
 
-enum selfenergy { BARE, FOCK, DRESSED }; // self energy type
-enum type { GU, GW, RG, PARQUET };
-enum obstype { SCATTERING, LANDAU };
-enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
+const int IsDynamic = false;
+const bool IsProper = true; // true means one-interaction irreducible
+const bool BoldG = true;
+const bool IsF = false;
 
-typedef Vec<double, D> momentum;
-// typedef std::array<double, D> momentum;
+// const diagtype DiagType = GAMMA;
+// const diagtype DiagType = SIGMA;
+
+const diagtype DiagType = POLAR;
+
+// typedef kFermiGrid kGrid; // for sigma
+// typedef kBoseGrid kGrid; // for gamma, polar and delta
+
+typedef Eigen::Matrix<double, D, 1> momentum; // momentum vector
+typedef Eigen::Vector2d verWeight; // direct and exchange weights for gamma
 
 /////////// Global Parameter ////////////////////
 struct parameter {
   // physical parameters
-  double Rs, Ef, Kf,
-      Mu;            // r_s, fermi energy, fermi momentum, chemical potential
-  double Beta;       // inverse temperature
-  double UVScale;    // the UV bound of the energy scale
-  double UVCoupling; // the coupling constant at the UV scale
-  double Mass2;      // screening length^2
-  double Lambda;
-  double Delta;
-  double Charge2;   // screening length^2
-  double MaxExtMom; // the maximum external momentum
-  selfenergy SelfEnergyType;
-  ver4type Vertex4Type;
+  int Order;
+  double Rs, Ef, Kf;    // r_s, fermi energy, fermi momentum,
+  double Nf, Mu, Beta;  // chemical potential, inverse temperature
+  double Mass2, Lambda; // screening length^2, shift
+  double Charge2;       // screening length^2
+  double Omega;         // 
+  double OmegaINL;
+  double OmegaINR;
 
   // MC inputs
-  int Order;
-  type Type;             // polarization, RG
-  obstype ObsType;       // 0: static polarization, 1: equal-time polarization
-  bool UseVer4;          // use vertex4 to calculate weight or not
-  int TotalStep;         // total steps of the Monte Carlo
-  int Seed;              // rng seed
-  int PID;               // ID of the job
-  long long int Counter; // counter to save the current MC step
-  int Sweep;             // how many MC steps between two measuring
-  std::vector<std::string> GroupName; // ID for each group
-  std::vector<double> ReWeight;       // reweight factor for each group
+  int TotalStep;             // total steps of the Monte Carlo
+  int Sweep;                 // how many MC steps between two measuring
+  int Seed, PID;             // rng seed, job ID
+  double ReWeight[MaxOrder]; // reweight factor for each group
 
   // others
-  int PrinterTimer;  // how many seconds between to printing to screen
-  int SaveFileTimer; // how many secondes between saving to file
-  int MessageTimer;  // how many secondes between two checking for message
-  int ReweightTimer; // how many secondes between two reweighting
-  std::string DiagFileFormat; // the diagram file needs to be loaded
+  int PrinterTimer;  // time interval to print to screen
+  int SaveFileTimer; // time interval to file
+  int MessageTimer;  // time interval to check for new input data
+  int ReweightTimer; // time interval to reweight different orders
 
-  std::array<momentum, ExtMomBinSize>
-      ExtMomTable; // external bosonic Momentum (transfer momentum)
-  std::array<momentum, AngBinSize>
-      ExtLegKTable; // external fermionic Momentum (LegK momentum)
-  std::array<double, ScaleBinSize + 1> ScaleTable;
-  std::array<double, ScaleBinSize + 1> dScaleTable;
-  std::array<double, AngBinSize> AngleTable;
-  std::array<double, AngBinSize> dAngleTable;
+  // external variable tables
+  grid::Tau TauGrid;
+  grid::FermiK FermiKGrid;
+  grid::BoseK BoseKGrid;
+  grid::Uniform AngleGrid;
 };
 
-//////////   Diagram  ////////////////////////////
-const int MaxOrder = 9;              // Max diagram order
-const int MaxLoopNum = MaxOrder + 3; // Max diagram order
-const int MaxMomNum = get_power<2, MaxOrder + 1>::value * 8;
-const int MaxTauNum = MaxOrder + 1; // Max tau number in one group
+struct variable {
+  long long int Counter; // counter to save the current MC step
+
+  int CurrOrder;        // current order
+  double CurrAbsWeight; // current abs weight
+
+  // external variables
+  int CurrExtMomBin;
+  int CurrExtTauBin;
+  int CurrExtAngBin;
+
+  // interval variables
+  std::array<momentum, MaxMomNum> LoopMom; // all momentum loop variables
+  std::array<double, MaxTauNum> Tau;       // all tau variables
+};
 
 //////////   Generic Global Constants  /////////////////
 const double TM32 = 1.0 / (pow(2.0, 32));
@@ -98,26 +95,18 @@ const double MAXREAL = 1.0e30;
 const double MINREAL = -1.0e30;
 
 enum spin { DOWN, UP };
-
 #define FLIPSPIN(x) spin(1 - x)
 // Spin DOWN: 0,  Spin UP:1
 
-const int IN = 0;
-const int OUT = 1;
-
-const int LEFT = 0;
-const int RIGHT = 1;
-
-const int INL = 0, OUTL = 1, INR = 2, OUTR = 3;
-
-const int DIRECT = 0, EXCHANGE = 1;
-
-const int IRR = 0, RED = 1; // irreducible, reducible
-const int DIR = 0, EX = 1;
-
 #define FLIP(x) (1 - x)
-//////////////////////////////////////////////////////
 
-#define FMT_HEADER_ONLY
+const int IN = 0, OUT = 1;
+const int LEFT = 0, RIGHT = 1;
+const int INL = 0, OUTL = 1, INR = 2, OUTR = 3;
+const int DIRECT = 0, EXCHANGE = 1;
+const int DIR = 0, EX = 1;
+const int HEAD = 0, TAIL = 1;
+
+//////////////////////////////////////////////////////
 
 #endif

@@ -17,21 +17,21 @@
 const double eps0 = 1.0e-9;
 
 // FORTRAN abs
-double fabs(double x); // { return ( (x >= 0.0) ? x : -x); }
+// double fabs(double x); // { return ( (x >= 0.0) ? x : -x); }
 
 // FORTRAN iabs
-int iabs(int x); // { return ( (x >= 0.0) ? x : -x); }
+// int iabs(int x); // { return ( (x >= 0.0) ? x : -x); }
 // more functions ...
 
 // float iszero
-bool Zero(double x, double eps = eps0);
+bool IsZero(double x, double eps = eps0);
 
 // float equal
-bool Equal(double x1, double x2, double eps = eps0);
-bool Equal(uint x1, uint x2, double eps = eps0);
-bool Equal(int x1, int x2, double eps = eps0);
+bool IsEqual(double x1, double x2, double eps = eps0);
+bool IsEqual(uint x1, uint x2, double eps = eps0);
+bool IsEqual(int x1, int x2, double eps = eps0);
 template <typename T>
-bool Equal(const T *x1, const T *x2, uint num, double eps = eps0) {
+bool IsEqual(const T *x1, const T *x2, uint num, double eps = eps0) {
   for (uint i = 0; i < num; i++)
     if (!Equal(x1[i], x2[i], eps0))
       return false;
@@ -96,10 +96,14 @@ std::string ProgressBar(double progress);
 //   return std::string(format_buffer, length);
 // }
 
+std::string &trim(std::string &s, const char *t = " \t\n\r\f\v");
+
 // calculate A^B at the compile time
 template <int A, int B> struct get_power {
   static const int value = A * get_power<A, B - 1>::value;
 };
 template <int A> struct get_power<A, 0> { static const int value = 1; };
+
+std::stringstream GetLine(std::ifstream &File);
 
 #endif

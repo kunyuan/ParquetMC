@@ -1,3 +1,12 @@
+# user
+A_*/
+F_*/
+sigma_*/
+polar_*/
+test.*
+
+
+
 # Prerequisites
 *.d
 
@@ -34,7 +43,6 @@
 *.mod
 *.exe
 *.dat
-*.pdf
 *.png
 
 infile/
@@ -53,3 +61,7 @@ callgrind*
 in00
 inlist
 *.data
+*.vscode
+parameter
+.rendered*
+*.cppimporthash

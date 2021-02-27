@@ -7,10 +7,14 @@ project (FeynCalc)
 #set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g")
+#set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -g -DNDEBUG")
+#set(CMAKE_CXX_FLAGS_RELEASE "-march=native -ftree-vectorize -Ofast -g -DNDEBUG")
+#the flag -DNDEBUG is important to turn off assert codes
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wuninitialized")
 include_directories(${FeynCalc_SOURCE_DIR})
-#message("source dir:" ${FeynmanSimulator_SOURCE_DIR})
+message("source dir:" ${FeynCalc_SOURCE_DIR})
 
 file(GLOB_RECURSE SRCS *.cpp)
 file(GLOB_RECURSE HDRS *.h)
@@ -20,4 +24,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/..")
 ADD_EXECUTABLE(feyncalc.exe  ${SRCS} ${HDRS})
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 
-#install (TARGETS simulator.exe DESTINATION ${PROJECT_SOURCE_DIR}/..)
+#install (TARGETS simulator.exe DESTINATION ${PROJECT_SOURCE_DIR})

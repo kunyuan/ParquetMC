@@ -44,11 +44,18 @@
 
 #define ABORT(msg) THROW(msg, ERROR)
 
-#define ASSERT_ALLWAYS(expression, msg)                                        \
+#define ASSERT_ALLWAYS(condition, msg)                                         \
   do {                                                                         \
-    if ((expression) == false)                                                 \
-      ABORT(#expression " does not hold! " << msg);                            \
+    if ((condition) == false)                                                  \
+      ABORT(#condition " does not hold! " << msg);                             \
   } while (0)
+
+// ASSERT will turn off when NDEBUG is on
+#ifdef NDEBUG
+#define ASSERT(condition, msg) ((void)0)
+#else
+#define ASSERT(condition, msg) ASSERT_ALLWAYS(condition, msg);
+#endif
 
 class InterruptHandler {
 public:
