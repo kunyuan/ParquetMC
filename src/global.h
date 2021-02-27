@@ -17,7 +17,7 @@ enum diagtype { GAMMA, SIGMA, POLAR, DELTA };
 ///////////  Global Constants ////////////////////
 const int D = 3;        // dimensions, 2 or 3
 const int SPIN = 2;     // spin index
-const int MaxOrder = 9; // Max diagram order
+const int MaxOrder = 8; // Max diagram order
 const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
