@@ -74,6 +74,7 @@ def Bare(angle, Lambda):
     Bare = np.zeros([Para.AngGridSize, 2])
     if IsIrreducible == False:
         Bare[:, 0] += -8.0*np.pi/(Para.Mass2+Lambda)*Para.Nf
+
     Bare[:, 1] += +8.0 * np.pi / \
         ((2.0*Para.kF*np.sin(angle/2.0))**2+Para.Mass2+Lambda)*Para.Nf
     Bare = SpinMapping(Bare)
@@ -101,6 +102,7 @@ ax2.plot(Angle, -bare[:, 1], '-', c='y', label=label_bare_2)
 
 
 Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
+# Data = [np.sum(d[1:Para.Order, ...], axis=0) for d in Data]
 
 
 ColorList = ["r", "b", "g","c","m","y"]
@@ -114,6 +116,7 @@ for chan in Channel:
 
     data = [SpinMapping(d[chan, :, 0, :])*Para.Nf for d in Data]
     avg, err = Estimate(data, Norm)
+
     print(ChanColor[chan])
     ax1.errorbar(Angle, -avg[:, 0], yerr=err[:, 0], fmt='-',
                  capthick=1, capsize=4, c=ChanColor[chan], label=label_channel_1)
@@ -124,6 +127,7 @@ for chan in Channel:
 data = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
 avg, err = Estimate(data, Norm)
 bareLambda = Bare(Angle, Para.Lambda)
+
 ax1.errorbar(Angle, -(avg[:, 0]+bareLambda[:, 0]), yerr=err[:, 0], fmt='-',
              capthick=1, capsize=4, c='k', label=label_all_1)
 ax2.errorbar(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1], fmt='-',
@@ -140,11 +144,12 @@ ax2.set_xlabel("$\\theta$", size=size)
 ax1.legend(loc=1, frameon=False, fontsize=size)
 ax2.legend(loc=1, frameon=False, fontsize=size)
 # ax1.set_xticks([0, 1, 2, 3])
+
 # ax2.set_xticks([0, 1, 2, 3])
 
 plt.legend(loc=1, frameon=False, fontsize=size)
 
 plt.tight_layout()
 
-# plt.savefig("spin_rs1_lambda1.pdf")
-plt.show()
+plt.savefig("landau_parameter.pdf")
+# plt.show()
