@@ -61,12 +61,13 @@ def PlotStatic():
 
     # ax3.plot_surface(X, Y, Dynamic2, cmap='rainbow')
     # plt.show()
+    analiticFock = [AnaliticFock(k, 0.0000001) for k in MomGrid]
 
     fig, ax1 = plt.subplots()
     
-    ax1.plot(MomGrid/Para.kF, Static, "r-", label="Static Fock")
+    ax1.plot(MomGrid/Para.kF, 2.5*Static, "r-", label="Static Fock")
     # ax1.plot(TauGrid/Para.kF, Dynamic2[kFidx], "b-", label="Dynamic2")
-    # ax1.plot(TauGrid/Para.kF, Dynamic3[kFidx], "c-", label="Dynamic3")
+    ax1.plot(MomGrid/Para.kF, analiticFock, "b-", label="Analytic Fock")
     # ax1.plot(data_tau[:,0]/Para.kF, data_tau[:,1], "c-", label="Static")
     ax1.set_ylabel('$\Sigma_{Fock}$')
     ax1.set_xlabel("$k/k_F$")
@@ -431,21 +432,26 @@ if __name__ == "__main__":
 
         arr = np.amin(abs(MomGrid-Para.kF))
         kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
+
+        Static -= Static[kFidx]
+        PlotStatic()
+        sys.exit(0)
         
         SigmaW, _ = Fourier.SpectralT2W(Dynamic)
         s0, s1 = SigmaW[kFidx, MaxFreq-1], SigmaW[kFidx, MaxFreq]
         Z = 1.0-(s1.imag-s0.imag)/(2.0*np.pi/Para.Beta)
         print("Z=", Z)
+        
 
         # Static = -Static
         # Dynamic = -Dynamic
         # print(data_tau[0,1]/Dynamic[kFidx,0])
         # print(data_tau[-1,1]/Dynamic[kFidx,-1])
-        # PlotStatic()
+        
         # kList = [int(t) for t in [kFidx/2, kFidx, kFidx+kFidx/2]]
         # PlotSigmaT_RI(Dynamic, kList, Save=False)
         # PlotSigmaW_RI(2*Dynamic, Save=False)
-        # sys.exit(0)
+        
 
         print("Mu=", Static[kFidx])
         # Static -= Static[kFidx]  # subtract the self-energy shift

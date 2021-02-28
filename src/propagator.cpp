@@ -58,9 +58,11 @@ void propagator::LoadGreen() {
   //   _DeltaG.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
   // }
   // File.close();
-
-  LoadGreenOrder();
-  // SaveGreenOrder();
+  if (Para.Order > 2){
+    LoadGreenOrder();
+    // SaveGreenOrder();
+  }
+  
 }
 
 void propagator::SaveGreenOrder() {
@@ -94,83 +96,60 @@ void propagator::LoadGreenOrder() {
   weight2D _deltaGTem;
   int _TauSize, _MomSize;
   double _MaxK;
-  
-  ifstream File;
 
-  for (size_t i = 0; i <= 10; i++)
-  {
-      char fname[100];
-      snprintf(fname, 100, "./selfconsistent/para.data");
-      File.open("./selfconsistent/para.data", ios::in);
-      if (File.is_open()) {
-          File >> _TauSize;
-          File >> _MomSize;
-          File >> _MaxK;
-          _TauGridInterp.build(Para.Beta, _TauSize, 6.0 / Para.Ef);
-          _MomGridInterp.build(Para.Kf, _MaxK*Para.Kf, _MomSize, sqrt(1.0 / Para.Beta) * 2.0);
-          File.close(); 
-          break;
-      } else {
-        LOG_WARNING(to_string(i) + ": Can not load parameters, FAILED\n");
-        if (i==10) exit(0);
-      }
-      File.close();
+  ifstream File1;
+  File1.open("./selfconsistent/para.data", ios::in);
+  if (File1.is_open()) {
+      File1 >> _TauSize;
+      File1 >> _MomSize;
+      File1 >> _MaxK;
+      _TauGridInterp.build(Para.Beta, _TauSize, 6.0 / Para.Ef);
+      _MomGridInterp.build(Para.Kf, _MaxK*Para.Kf, _MomSize, sqrt(1.0 / Para.Beta) * 2.0);
+  } else {
+    LOG_WARNING("Can not load para.data, FAILED\n");
+    exit(0);
   }
-
-
-  
+  File1.close();
 
 
   weight1D  _SigmaTem;
+  ifstream File2;
   for (int o = 2; o <= Para.Order; o++){
       _SigmaTem.setZero(_MomGridInterp.size);
       char fname[100];
       snprintf(fname, 100, "./selfconsistent/dispersion_order%d.data", o);
-      for (size_t i = 0; i < 10; i++)
-      {
-          File.close();
-          File.open(fname, ios::in);
-          if (File.is_open()) {
-            for (int k = 0; k < _MomGridInterp.size; ++k)
-              File >> _SigmaTem[k];
-            break;
-          } else {
-            LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
-            _SigmaTem.setZero(_MomGridInterp.size);
-          }
+      File2.open(fname, ios::in);
+      if (File2.is_open()) {
+        for (int k = 0; k < _MomGridInterp.size; ++k)
+          File2 >> _SigmaTem[k];
+      } else {
+        LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
+        _SigmaTem.setZero(_MomGridInterp.size);
       }
-
-      File.close();
       _StaticSigma[o] = _SigmaTem;
   }
+  File2.close();
 
 
+  ifstream File3;
   for (int o = 2; o <= Para.Order; o++)
   {
       _deltaGTem.setZero(_MomGridInterp.size, _TauGridInterp.size);
       char fname[100];
       snprintf(fname, 100, "./selfconsistent/green_order%d.data", o);
-
-      for (size_t i = 0; i < 10; i++)
-      {
-          File.close();
-          File.open(fname, ios::in);
-          if (File.is_open()) {
-              for (int k = 0; k < _MomGridInterp.size; ++k){
-                for (int t = 0; t < _TauGridInterp.size; ++t)
-                  File >> _deltaGTem(k, t);
-              }
-              break;
-          } else {
-            LOG_WARNING("Can not load Order-Green weights! Initialze with zeros!\n");
-            _deltaGTem.setZero(_MomGridInterp.size, _TauGridInterp.size);
+      File3.open(fname, ios::in);
+      if (File3.is_open()) {
+          for (int k = 0; k < _MomGridInterp.size; ++k){
+            for (int t = 0; t < _TauGridInterp.size; ++t)
+              File3 >> _deltaGTem(k, t);
           }
+      } else {
+        LOG_WARNING("Can not load Order-Green weights! Initialze with zeros!\n");
+        _deltaGTem.setZero(_MomGridInterp.size, _TauGridInterp.size);
       }
-
-      File.close();
       _deltaGOrder[o] = _deltaGTem;
   }
-
+  File3.close();
 }
 
 

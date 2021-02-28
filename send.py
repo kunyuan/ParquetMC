@@ -4,13 +4,13 @@ from datetime import datetime
 import os
 import sys
 import argparse
-import time
+import time, re
 
 
 parser = argparse.ArgumentParser("Specify the number of jobs, and the name of working folder.")
 parser.add_argument("jobs_number")
 parser.add_argument("folder_name")
-parser.add_argument("-sc", type=bool, default=False,
+parser.add_argument("-sc", type=bool, default=True,
         help="If the code need to be self-consistent, the argument should be set as -sc=True.")
 args = parser.parse_args()
 
@@ -22,8 +22,8 @@ selfConsistent = True
 
 ##### Modify parameters here  ###############
 # Cluster="Rutgers"
-# Cluster="PBS"
-Cluster = "local"
+Cluster="PBS"
+# Cluster = "local"
 # Cluster = "condor"
 ############################################
 
@@ -36,6 +36,12 @@ def CreateFolder(path):
     if not os.path.exists(path):
         os.system("mkdir "+path)
 
+def GetLastOrderName(foldername):
+    o = re.findall(r'(?<=_O)\d', foldername)[0]
+    olast = str(int(o) - 1)
+    fnew = foldername.replace("_O"+o, "_O"+olast)
+    fnew = re.sub(r'A_|F_|polar_', 'sigma_', fnew)
+    return fnew
 
 rootdir = os.getcwd()
 execute = "feyncalc.exe"
@@ -46,8 +52,14 @@ CreateFolder(homedir)
 
 os.system("cp {0} {1}".format(execute, homedir))
 os.system("cp {0} {1}".format("parameter", homedir))
-# os.system("cp {0} {1}".format("green.data", homedir))
-# os.system("cp {0} {1}".format("dispersion.data", homedir))
+if selfConsistent:
+    lastFolderName = GetLastOrderName(folder_name)
+    if "sigma" in folder_name:
+        # merge the order-1 folder to produce the selfconsistent file.
+        os.system("./merge_sigma.py  " + lastFolderName)
+    os.chdir(rootdir)
+    folder_self = os.path.join(lastFolderName, "selfconsistent")
+    os.system("cp  -r  {0}  {1}".format(folder_self, homedir))
 
 if Cluster != "Rutgers":
     outfilepath = os.path.join(homedir, "outfile")
@@ -58,12 +70,12 @@ else:
     infilepath = homedir
 
 for pid in PIDList:
-    time.sleep(0.3)
+    time.sleep(0.2)
     seed = random.randint(0, 2**31-1)
     # print pid, seed
     outfile = os.path.join(outfilepath, "_out{0}".format(pid))  # output files
     jobfile = os.path.join(jobfilepath, "_job{0}.sh".format(pid))  # job files
-    jobname = folder_name + "_" + "_job{0}.sh".format(pid)
+    jobname = folder_name + "_job{0}.sh".format(pid)
 
     if Cluster == "local":
         os.chdir(homedir)
@@ -96,15 +108,10 @@ for pid in PIDList:
         os.chdir(homedir)
         os.system("qsub {0}".format(jobfile))
         os.system("rm {0}".format(jobfile))
-        os.chdir("..")
+        os.chdir(rootdir)
     else:
         print("{0} means no submission.".format(Cluster))
 
 print("\nJobs has submitted.")
-
-if selfConsistent:
-    os.chdir(rootdir)
-    os.system("cp  -r  selfconsistent/  {0}".format(homedir))
-    # os.system("./merge_sigma.py  " + folder_name + " > merge_sigma.log &")
 
 sys.exit(0)

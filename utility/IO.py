@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from utility.color import *
 import numpy as np
 import glob
@@ -25,6 +26,7 @@ class param:
     # kF, Nf, EF, Bubble = [0.0, ]*4
     def __init__(self, foldername):
         self.DataFolder = foldername
+        print(self.DataFolder)
         self.InputFile = os.path.join(self.DataFolder, "parameter")
 
         with open(self.InputFile, "r") as file:
@@ -138,6 +140,7 @@ def LoadFile(Folder, FileName, shape=None):
             except Exception as e:
                 print(f"Failed to load {f}")
                 print(str(e))
+                sys.exit(0)
 
     return Data, Norm, Step, Grid
 
