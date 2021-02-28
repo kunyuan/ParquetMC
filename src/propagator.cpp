@@ -302,8 +302,10 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
 
   double g0 = d00 * dK1 + d10 * dK0;
   double g1 = d01 * dK1 + d11 * dK0;
+
   double gx = factor*(g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
   return gx;
+
 }
 
 double diag::Angle3D(const momentum &K1, const momentum &K2) {

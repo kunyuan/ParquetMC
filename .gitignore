@@ -65,3 +65,7 @@ inlist
 parameter
 .rendered*
 *.cppimporthash
+A_*
+F_*
+sigma_*
+test.*
