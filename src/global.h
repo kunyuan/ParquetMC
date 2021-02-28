@@ -13,6 +13,7 @@
 // #define NDEBUG
 
 enum diagtype { GAMMA, SIGMA, POLAR, DELTA };
+enum greentype { BoldG, FockG, BareG };
 
 ///////////  Global Constants ////////////////////
 const int D = 3;        // dimensions, 2 or 3
@@ -23,10 +24,17 @@ const int MaxMomNum = MaxOrder + 3;
 
 const int IsDynamic = false;
 const bool IsProper = true; // true means one-interaction irreducible
-const bool BoldG = false;
+
 const bool IsF = true;
 
-const diagtype DiagType = GAMMA;
+const greentype GreenType = BoldG;
+// const greentype GreenType = FockG;
+// const greentype GreenType = BareG;
+
+// const diagtype DiagType = GAMMA;
+const diagtype DiagType = SIGMA;
+// const diagtype DiagType = POLAR;
+
 // typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
 
@@ -41,6 +49,9 @@ struct parameter {
   double Nf, Mu, Beta;  // chemical potential, inverse temperature
   double Mass2, Lambda; // screening length^2, shift
   double Charge2;       // screening length^2
+  double Omega;         //
+  double OmegaINL;
+  double OmegaINR;
 
   // MC inputs
   int TotalStep;             // total steps of the Monte Carlo

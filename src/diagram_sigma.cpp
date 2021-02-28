@@ -53,16 +53,25 @@ void sigma::Build(int order) {
 }
 
 double sigma::Evaluate() {
-  // normalization
   double Factor = 1.0 / pow(2.0 * PI, D);
+  bool rpaCounter = true;
+
   if (Order == 0) {
     return 1.0;
   } else if (Order == 1) {
     double GWeight = Prop.Green(-EPS, Var.LoopMom[0] + Var.LoopMom[1], UP, 0);
-    double VerWeight = Prop.Interaction(Var.LoopMom[1], 0);
-    // cout << GWeight << ", " << VerWeight << endl;
-    return GWeight * VerWeight * Factor;
+  
+    double VerWeight = 0.0;
+    if (rpaCounter){
+      for (int o = 0; o <= Para.Order-1; o++)
+        VerWeight += Prop.Interaction(Var.LoopMom[1], o);
+    }else{
+      VerWeight += Prop.Interaction(Var.LoopMom[1], 0);
+    }
+
+    return -1.0 * GWeight * VerWeight * Factor;
   }
+  
 
   // Sigma with LoopNum>=2
   G1.K = Var.LoopMom[1];
@@ -100,7 +109,7 @@ double sigma::Evaluate() {
   //       1.0 / pow((G1.K.squaredNorm() + 1), 2) / pow((G2.K.squaredNorm() +
   //       1), 2);
 
-  return Weight * Factor * Factor;
+  return  Weight * Factor * Factor;
 }
 
 string sigma::ToString() {

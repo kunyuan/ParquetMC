@@ -2,6 +2,18 @@
 from utility.IO import *
 import utility.fourier as fourier
 from utility.plot import *
+import argparse
+from mpl_toolkits.mplot3d import Axes3D
+
+
+parser = argparse.ArgumentParser("Specify some parameters.")
+parser.add_argument("folder")
+args = parser.parse_args()
+
+folder = args.folder
+print("Folder to plot : " + folder)
+
+
 
 # XType = "Tau"
 XType = "Mom"
@@ -9,10 +21,10 @@ OrderByOrder = False
 # Unit=1.0
 # 0: I, 1: T, 2: U, 3: S
 
-Para = param()
+Para = param(folder)
 Order = range(0, Para.Order+1)
 
-Data, Norm, Step, Grids = LoadFile("./Data", "polar_pid[0-9]+.dat")
+Data, Norm, Step, Grids = LoadFile(folder, "polar_pid[0-9]+.dat")
 
 TauGrid = Grids["TauGrid"]
 MomGrid = Grids["KGrid"]
@@ -35,16 +47,9 @@ if(XType == "Mom"):
     for o in Order[1:]:
         y, err = Estimate(Data, Norm, lambda x: Fourier.naiveT2W(
             np.sum(x[1:o+1, :, :], axis=0)))
-        # print y.shape
-        # Unit = 1.0/Para.kF
-        # Unit = 1.0
-        # for i in range(len(y)):
-        # print "{:10.6f} {:10.6f} {:10.6f}".format(
-        #     MomGrid[i]/Para.kF, y[i, 0].real*Unit, err[i, 0].real*Unit*2.0)
-        # err = np.average(Err[o, :, :], axis=1)
-        Errorbar(MomGrid/Para.kF, y[:, 0], err*2.0, fmt='o-',
+        Errorbar(MomGrid/Para.kF, y[:, 0], err[:, 0]*2.0, fmt='o-',
                  color=ColorList[o], label="Order {0}".format(o))
-
+        print("order:{0}   {1} +- {2}".format(o, y[0, 0], 2*err[0] ))
     # x = ExtMomBin*kF
     # l = Mass2+Lambda
     # y = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -

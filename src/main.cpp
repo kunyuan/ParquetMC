@@ -1,5 +1,6 @@
 #include "lib/grid.h"
 #include "markov.h"
+#include "tools/testcode.h"
 #include "utility/timer.h"
 #include <iostream>
 #include <math.h>
@@ -25,7 +26,7 @@ int main(int argc, const char *argv[]) {
   // Para.Seed = atoi(argv[2]);
   if (argc > 1) {
     Para.PID = atoi(argv[1]);
-    Para.Seed = Para.PID;
+    Para.Seed = atoi(argv[2]);
   } else {
     std::random_device rd;
     Para.PID = rd() % 1000000;
@@ -47,6 +48,8 @@ int main(int argc, const char *argv[]) {
   Random.Reset(Para.Seed);
 
   InitPara(); // initialize global parameters
+
+  // testcode::TestCode();
 
   markov Markov;
   InterruptHandler Interrupt;
@@ -122,8 +125,8 @@ int main(int argc, const char *argv[]) {
 
         if (MessageTimer.check(Para.MessageTimer)) {
           LOG_INFO("Loading Weight...")
-          if (BoldG)
-            Prop.LoadGreen();
+          // if (GreenType == BoldG)
+          // Prop.LoadGreen();
           // Markov.Weight.LoadFile();
         }
       }
@@ -184,6 +187,11 @@ void InitPara() {
   Para.Mu = Para.Ef;
   MaxK *= Kf;
 
+  // Para.OmegaINL = - PI / Para.Beta;
+  // Para.OmegaINR = PI / Para.Beta;
+  // // Para.Omega = 0;     // A
+  // Para.Omega = 2 * PI / Para.Beta;    // F
+
   // scale all energy with E_F
   Para.Beta /= Para.Ef;
 
@@ -205,7 +213,9 @@ void InitPara() {
   Para.FermiKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Beta) * 2.0);
   Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
 
-  if (BoldG)
+  Prop.Initialize();
+
+  if (GreenType == BoldG)
     Prop.LoadGreen();
 }
 

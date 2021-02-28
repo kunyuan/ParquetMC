@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from utility.color import *
 import numpy as np
 import glob
@@ -23,9 +24,10 @@ def getListOfFiles(dirName):
 class param:
     # Order, Beta, Rs, Mass2, Lambda, Charge2, TotalStep = [None, ]*7
     # kF, Nf, EF, Bubble = [0.0, ]*4
-    def __init__(self):
-        self.DataFolder = "Data"
-        self.InputFile = "parameter"
+    def __init__(self, foldername):
+        self.DataFolder = foldername
+        print(self.DataFolder)
+        self.InputFile = os.path.join(self.DataFolder, "parameter")
 
         with open(self.InputFile, "r") as file:
             file.readline()  # comment line
@@ -44,7 +46,7 @@ class param:
             self.TauGridSize = int(grid[0])
             self.MomGridSize = int(grid[1])
             self.AngGridSize = int(grid[2])
-            self.MaxExtMom = float(grid[3])
+            self.MaxExtMomKF = float(grid[3])
 
             timer = GetLine(file).split(",")
             self.PrintTimer = int(timer[0])
@@ -65,7 +67,7 @@ class param:
 
         self.EF = self.kF**2
         self.Beta /= self.EF
-        self.MaxExtMom *= self.kF
+        self.MaxExtMom = self.MaxExtMomKF * self.kF
 
         print(yellow("Parameters:"))
         print(f"Rs={self.Rs}, kF={self.kF}, EF={self.EF}, Beta={self.Beta}, Mass2={self.Mass2}, Lambda={self.Lambda}, Dim={self.Dim}, Spin={self.Spin}\n")
@@ -138,6 +140,7 @@ def LoadFile(Folder, FileName, shape=None):
             except Exception as e:
                 print(f"Failed to load {f}")
                 print(str(e))
+                sys.exit(0)
 
     return Data, Norm, Step, Grid
 

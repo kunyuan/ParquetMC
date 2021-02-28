@@ -2,6 +2,16 @@
 from utility.IO import *
 from utility.plot import *
 import utility.fourier as fourier
+import argparse
+from mpl_toolkits.mplot3d import Axes3D
+
+
+parser = argparse.ArgumentParser("Specify some parameters.")
+parser.add_argument("folder")
+args = parser.parse_args()
+
+folder = args.folder
+print("Folder to plot : " + folder)
 
 
 def PlotPolarW(PolarT, MomGrid, idx, Save=True):
@@ -65,7 +75,7 @@ def PlotPolarW(PolarT, MomGrid, idx, Save=True):
 
 if __name__ == "__main__":
 
-    Para = param()
+    Para = param(folder)
     Order = range(0, Para.Order+1)
 
     MaxFreq = 1024
@@ -73,7 +83,7 @@ if __name__ == "__main__":
     phyFreq = (Freq*2.0)*np.pi/Para.Beta  # the physical frequency
 
     shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
-    Data, Norm, Step, Grids = LoadFile("./Data", "polar_pid[0-9]+.dat", shape)
+    Data, Norm, Step, Grids = LoadFile(folder, "polar_pid[0-9]+.dat", shape)
 
     TauGrid = Grids["TauGrid"]
     MomGrid = Grids["KGrid"]

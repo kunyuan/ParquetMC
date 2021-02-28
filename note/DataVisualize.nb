@@ -1,0 +1,2492 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[    111304,       2484]
+NotebookOptionsPosition[    110593,       2464]
+NotebookOutlinePosition[    111029,       2481]
+CellTagsIndexPosition[    110986,       2478]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"DataSym", "[", "data_", "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"l", ",", "d"}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"d", "=", 
+       RowBox[{"data", "\[LeftDoubleBracket]", 
+        RowBox[{"6", ";;"}], "\[RightDoubleBracket]"}]}], ";", 
+      RowBox[{"l", "=", 
+       FractionBox[
+        RowBox[{"Length", "@", "d"}], "2"]}], ";", 
+      RowBox[{"Table", "[", 
+       RowBox[{
+        RowBox[{"Around", "[", 
+         RowBox[{
+          RowBox[{"d", "\[LeftDoubleBracket]", "i", "\[RightDoubleBracket]"}],
+           ",", 
+          RowBox[{"d", "\[LeftDoubleBracket]", 
+           RowBox[{"i", "+", "1"}], "\[RightDoubleBracket]"}]}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"i", ",", "1", ",", 
+          RowBox[{"l", "-", "1"}], ",", "2"}], "}"}]}], "]"}]}]}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"DataAsym", "[", "data_", "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"l", ",", "d"}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"d", "=", 
+       RowBox[{"data", "\[LeftDoubleBracket]", 
+        RowBox[{"6", ";;"}], "\[RightDoubleBracket]"}]}], ";", 
+      RowBox[{"l", "=", 
+       FractionBox[
+        RowBox[{"Length", "@", "d"}], "2"]}], ";", 
+      RowBox[{"Table", "[", 
+       RowBox[{
+        RowBox[{"Around", "[", 
+         RowBox[{
+          RowBox[{"d", "\[LeftDoubleBracket]", "i", "\[RightDoubleBracket]"}],
+           ",", 
+          RowBox[{"d", "\[LeftDoubleBracket]", 
+           RowBox[{"i", "+", "1"}], "\[RightDoubleBracket]"}]}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"i", ",", 
+          RowBox[{"l", "+", "1"}], ",", 
+          RowBox[{"2", " ", "l"}], ",", "2"}], "}"}]}], "]"}]}]}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"LabelName", "[", "data_", "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"l", ",", "d"}], "}"}], ",", 
+     RowBox[{"\"\<\[Beta]\>\"", "<>", 
+      RowBox[{"ToString", "[", 
+       RowBox[{"data", "\[LeftDoubleBracket]", "1", "\[RightDoubleBracket]"}],
+        "]"}], "<>", "\"\<_Rs\>\"", "<>", 
+      RowBox[{"ToString", "[", 
+       RowBox[{"data", "\[LeftDoubleBracket]", "2", "\[RightDoubleBracket]"}],
+        "]"}], "<>", "\"\<_\[Lambda]\>\"", "<>", 
+      RowBox[{"ToString", "[", 
+       RowBox[{"data", "\[LeftDoubleBracket]", "4", "\[RightDoubleBracket]"}],
+        "]"}], "<>", "\"\<_O\>\"", "<>", 
+      RowBox[{"ToString", "[", 
+       RowBox[{"data", "\[LeftDoubleBracket]", "5", "\[RightDoubleBracket]"}],
+        "]"}]}]}], "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.8226185809807916`*^9, 3.8226185884543715`*^9}, {
+  3.8226193045907087`*^9, 3.8226193684746437`*^9}, {3.822619404428644*^9, 
+  3.822619535229085*^9}, {3.8226195733145*^9, 3.8226195898080215`*^9}, {
+  3.822621955934116*^9, 3.822621960854235*^9}, {3.8226224758682823`*^9, 
+  3.822622476299281*^9}, {3.8226225329182816`*^9, 3.822622557487328*^9}, {
+  3.8226226923584385`*^9, 3.8226228102006383`*^9}, {3.8226229987986636`*^9, 
+  3.8226230703580427`*^9}, {3.8226233728098745`*^9, 3.8226233832258883`*^9}},
+ CellLabel->
+  "In[1192]:=",ExpressionUUID->"3fd829ac-d25f-4a5d-a8bf-ccd6cc549582"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"fn", "=", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"ParentDirectory", "@", 
+       RowBox[{"NotebookDirectory", "[", "]"}]}], ",", "\"\<F.data\>\""}], 
+     "}"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"data", "=", 
+   RowBox[{"Import", "[", 
+    RowBox[{"fn", ",", "\"\<Table\>\""}], "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.822618450033559*^9, 3.822618518457102*^9}, 
+   3.82262310097246*^9, 3.8230785575677056`*^9},
+ CellLabel->
+  "In[1195]:=",ExpressionUUID->"2db92802-81c7-4308-8e88-1b4c4e838fce"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Table", "[", 
+  RowBox[{
+   RowBox[{"ListPlot", "[", 
+    RowBox[{
+     RowBox[{"DataSym", "[", 
+      RowBox[{"data", "\[LeftDoubleBracket]", "i", "\[RightDoubleBracket]"}], 
+      "]"}], ",", 
+     RowBox[{"Joined", "\[Rule]", "True"}], ",", 
+     RowBox[{"PlotLabel", "\[Rule]", 
+      RowBox[{"LabelName", "[", 
+       RowBox[{"data", "\[LeftDoubleBracket]", "i", "\[RightDoubleBracket]"}],
+        "]"}]}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"i", ",", "1", ",", 
+     RowBox[{"Length", "@", "data"}]}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8226225872668514`*^9, 3.822622672011258*^9}, {
+  3.822622818316638*^9, 3.8226229836026626`*^9}},
+ CellLabel->
+  "In[1197]:=",ExpressionUUID->"fbed887f-b771-408e-939c-cd0f78fb33ce"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.208958}, {1., 0.209003}}], 
+           LineBox[{{1., 0.209003}, {1., 0.20904799999999998`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.251467}, {2., 0.251576}}], 
+           LineBox[{{2., 0.251576}, {2., 0.25168500000000005`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.243744}, {3., 0.244028}}], 
+           LineBox[{{3., 0.244028}, {3., 0.244312}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.260212}, {4., 0.260594}}], 
+           LineBox[{{4., 0.260594}, {4., 0.260976}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.20904799999999998`}, 
+              Offset[{3, 0}, {1., 0.20904799999999998`}]}, {{1., 
+              0.20904799999999998`}, 
+              Offset[{-3, 0}, {1., 0.20904799999999998`}]}, {{1., 0.208958}, 
+              Offset[{3, 0}, {1., 0.208958}]}, {{1., 0.208958}, 
+              Offset[{-3, 0}, {1., 0.208958}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.25168500000000005`}, 
+              Offset[{3, 0}, {2., 0.25168500000000005`}]}, {{2., 
+              0.25168500000000005`}, 
+              Offset[{-3, 0}, {2., 0.25168500000000005`}]}, {{2., 0.251467}, 
+              Offset[{3, 0}, {2., 0.251467}]}, {{2., 0.251467}, 
+              Offset[{-3, 0}, {2., 0.251467}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.244312}, Offset[{3, 0}, {3., 0.244312}]}, {{3., 
+              0.244312}, Offset[{-3, 0}, {3., 0.244312}]}, {{3., 0.243744}, 
+              Offset[{3, 0}, {3., 0.243744}]}, {{3., 0.243744}, 
+              Offset[{-3, 0}, {3., 0.243744}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.260976}, Offset[{3, 0}, {4., 0.260976}]}, {{4., 
+              0.260976}, Offset[{-3, 0}, {4., 0.260976}]}, {{4., 0.260212}, 
+              Offset[{3, 0}, {4., 0.260212}]}, {{4., 0.260212}, 
+              Offset[{-3, 0}, {4., 0.260212}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.209003}, {2., 0.251576}, {3., 0.244028}, {4., 
+        0.260594}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.20606811111111134`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.15_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.20606811111111134`, 0.260976}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.20918}, {1., 0.209251}}], 
+           LineBox[{{1., 0.209251}, {1., 0.20932199999999998`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.250512}, {2., 0.250634}}], 
+           LineBox[{{2., 0.250634}, {2., 0.25075600000000003`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.244429}, {3., 0.244595}}], 
+           LineBox[{{3., 0.244595}, {3., 0.244761}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.260539}, {4., 0.260823}}], 
+           LineBox[{{4., 0.260823}, {4., 0.26110700000000003`}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.20932199999999998`}, 
+              Offset[{3, 0}, {1., 0.20932199999999998`}]}, {{1., 
+              0.20932199999999998`}, 
+              Offset[{-3, 0}, {1., 0.20932199999999998`}]}, {{1., 0.20918}, 
+              Offset[{3, 0}, {1., 0.20918}]}, {{1., 0.20918}, 
+              Offset[{-3, 0}, {1., 0.20918}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.25075600000000003`}, 
+              Offset[{3, 0}, {2., 0.25075600000000003`}]}, {{2., 
+              0.25075600000000003`}, 
+              Offset[{-3, 0}, {2., 0.25075600000000003`}]}, {{2., 0.250512}, 
+              Offset[{3, 0}, {2., 0.250512}]}, {{2., 0.250512}, 
+              Offset[{-3, 0}, {2., 0.250512}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.244761}, Offset[{3, 0}, {3., 0.244761}]}, {{3., 
+              0.244761}, Offset[{-3, 0}, {3., 0.244761}]}, {{3., 0.244429}, 
+              Offset[{3, 0}, {3., 0.244429}]}, {{3., 0.244429}, 
+              Offset[{-3, 0}, {3., 0.244429}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.26110700000000003`}, 
+              Offset[{3, 0}, {4., 0.26110700000000003`}]}, {{4., 
+              0.26110700000000003`}, 
+              Offset[{-3, 0}, {4., 0.26110700000000003`}]}, {{4., 0.260539}, 
+              Offset[{3, 0}, {4., 0.260539}]}, {{4., 0.260539}, 
+              Offset[{-3, 0}, {4., 0.260539}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.209251}, {2., 0.250634}, {3., 0.244595}, {4., 
+        0.260823}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.20629516666666692`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.16_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.20629516666666692`, 0.26110700000000003`}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.20960199999999998`}, {1., 0.209661}}], 
+           LineBox[{{1., 0.209661}, {1., 0.20972}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.249773}, {2., 0.249888}}], 
+           LineBox[{{2., 0.249888}, {2., 0.250003}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.24428}, {3., 0.24446}}], 
+           LineBox[{{3., 0.24446}, {3., 0.24464000000000002`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.258886}, {4., 0.259156}}], 
+           LineBox[{{4., 0.259156}, {4., 0.259426}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.20972}, Offset[{3, 0}, {1., 0.20972}]}, {{1., 
+              0.20972}, Offset[{-3, 0}, {1., 0.20972}]}, {{1., 
+              0.20960199999999998`}, 
+              Offset[{3, 0}, {1., 0.20960199999999998`}]}, {{1., 
+              0.20960199999999998`}, 
+              Offset[{-3, 0}, {1., 0.20960199999999998`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.250003}, Offset[{3, 0}, {2., 0.250003}]}, {{2., 
+              0.250003}, Offset[{-3, 0}, {2., 0.250003}]}, {{2., 0.249773}, 
+              Offset[{3, 0}, {2., 0.249773}]}, {{2., 0.249773}, 
+              Offset[{-3, 0}, {2., 0.249773}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.24464000000000002`}, 
+              Offset[{3, 0}, {3., 0.24464000000000002`}]}, {{3., 
+              0.24464000000000002`}, 
+              Offset[{-3, 0}, {3., 0.24464000000000002`}]}, {{3., 0.24428}, 
+              Offset[{3, 0}, {3., 0.24428}]}, {{3., 0.24428}, 
+              Offset[{-3, 0}, {3., 0.24428}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.259426}, Offset[{3, 0}, {4., 0.259426}]}, {{4., 
+              0.259426}, Offset[{-3, 0}, {4., 0.259426}]}, {{4., 0.258886}, 
+              Offset[{3, 0}, {4., 0.258886}]}, {{4., 0.258886}, 
+              Offset[{-3, 0}, {4., 0.258886}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.209661}, {2., 0.249888}, {3., 0.24446}, {4., 
+        0.259156}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.20683400000000024`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.17_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.20683400000000024`, 0.259426}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.21004899999999999`}, {1., 0.210112}}], 
+           LineBox[{{1., 0.210112}, {1., 0.210175}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.249388}, {2., 0.249487}}], 
+           LineBox[{{2., 0.249487}, {2., 0.24958599999999997`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.24488000000000001`}, {3., 0.245036}}], 
+           LineBox[{{3., 0.245036}, {3., 0.245192}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.259147}, {4., 0.259413}}], 
+           LineBox[{{4., 0.259413}, {4., 0.259679}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.210175}, Offset[{3, 0}, {1., 0.210175}]}, {{1., 
+              0.210175}, Offset[{-3, 0}, {1., 0.210175}]}, {{1., 
+              0.21004899999999999`}, 
+              Offset[{3, 0}, {1., 0.21004899999999999`}]}, {{1., 
+              0.21004899999999999`}, 
+              Offset[{-3, 0}, {1., 0.21004899999999999`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.24958599999999997`}, 
+              Offset[{3, 0}, {2., 0.24958599999999997`}]}, {{2., 
+              0.24958599999999997`}, 
+              Offset[{-3, 0}, {2., 0.24958599999999997`}]}, {{2., 0.249388}, 
+              Offset[{3, 0}, {2., 0.249388}]}, {{2., 0.249388}, 
+              Offset[{-3, 0}, {2., 0.249388}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.245192}, Offset[{3, 0}, {3., 0.245192}]}, {{3., 
+              0.245192}, Offset[{-3, 0}, {3., 0.245192}]}, {{3., 
+              0.24488000000000001`}, 
+              Offset[{3, 0}, {3., 0.24488000000000001`}]}, {{3., 
+              0.24488000000000001`}, 
+              Offset[{-3, 0}, {3., 0.24488000000000001`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.259679}, Offset[{3, 0}, {4., 0.259679}]}, {{4., 
+              0.259679}, Offset[{-3, 0}, {4., 0.259679}]}, {{4., 0.259147}, 
+              Offset[{3, 0}, {4., 0.259147}]}, {{4., 0.259147}, 
+              Offset[{-3, 0}, {4., 0.259147}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.210112}, {2., 0.249487}, {3., 0.245036}, {4., 
+        0.259413}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.207291777777778},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.18_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.207291777777778, 0.259679}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.210473}, {1., 0.210539}}], 
+           LineBox[{{1., 0.210539}, {1., 0.21060500000000001`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.248847}, {2., 0.248972}}], 
+           LineBox[{{2., 0.248972}, {2., 0.24909699999999999`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.24539899999999998`}, {3., 0.245577}}], 
+           LineBox[{{3., 0.245577}, {3., 0.245755}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.259108}, {4., 0.25939}}], 
+           LineBox[{{4., 0.25939}, {4., 0.259672}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.21060500000000001`}, 
+              Offset[{3, 0}, {1., 0.21060500000000001`}]}, {{1., 
+              0.21060500000000001`}, 
+              Offset[{-3, 0}, {1., 0.21060500000000001`}]}, {{1., 0.210473}, 
+              Offset[{3, 0}, {1., 0.210473}]}, {{1., 0.210473}, 
+              Offset[{-3, 0}, {1., 0.210473}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.24909699999999999`}, 
+              Offset[{3, 0}, {2., 0.24909699999999999`}]}, {{2., 
+              0.24909699999999999`}, 
+              Offset[{-3, 0}, {2., 0.24909699999999999`}]}, {{2., 0.248847}, 
+              Offset[{3, 0}, {2., 0.248847}]}, {{2., 0.248847}, 
+              Offset[{-3, 0}, {2., 0.248847}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.245755}, Offset[{3, 0}, {3., 0.245755}]}, {{3., 
+              0.245755}, Offset[{-3, 0}, {3., 0.245755}]}, {{3., 
+              0.24539899999999998`}, 
+              Offset[{3, 0}, {3., 0.24539899999999998`}]}, {{3., 
+              0.24539899999999998`}, 
+              Offset[{-3, 0}, {3., 0.24539899999999998`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.259672}, Offset[{3, 0}, {4., 0.259672}]}, {{4., 
+              0.259672}, Offset[{-3, 0}, {4., 0.259672}]}, {{4., 0.259108}, 
+              Offset[{3, 0}, {4., 0.259108}]}, {{4., 0.259108}, 
+              Offset[{-3, 0}, {4., 0.259108}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.210539}, {2., 0.248972}, {3., 0.245577}, {4., 
+        0.25939}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.20773972222222245`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.19_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.20773972222222245`, 0.259672}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.211025}, {1., 0.21109}}], 
+           LineBox[{{1., 0.21109}, {1., 0.211155}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.24772}, {2., 0.247835}}], 
+           LineBox[{{2., 0.247835}, {2., 0.24795}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.24576}, {3., 0.245934}}], 
+           LineBox[{{3., 0.245934}, {3., 0.24610800000000002`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.258108}, {4., 0.258387}}], 
+           LineBox[{{4., 0.258387}, {4., 0.25866599999999995`}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.211155}, Offset[{3, 0}, {1., 0.211155}]}, {{1., 
+              0.211155}, Offset[{-3, 0}, {1., 0.211155}]}, {{1., 0.211025}, 
+              Offset[{3, 0}, {1., 0.211025}]}, {{1., 0.211025}, 
+              Offset[{-3, 0}, {1., 0.211025}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.24795}, Offset[{3, 0}, {2., 0.24795}]}, {{2., 
+              0.24795}, Offset[{-3, 0}, {2., 0.24795}]}, {{2., 0.24772}, 
+              Offset[{3, 0}, {2., 0.24772}]}, {{2., 0.24772}, 
+              Offset[{-3, 0}, {2., 0.24772}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.24610800000000002`}, 
+              Offset[{3, 0}, {3., 0.24610800000000002`}]}, {{3., 
+              0.24610800000000002`}, 
+              Offset[{-3, 0}, {3., 0.24610800000000002`}]}, {{3., 0.24576}, 
+              Offset[{3, 0}, {3., 0.24576}]}, {{3., 0.24576}, 
+              Offset[{-3, 0}, {3., 0.24576}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.25866599999999995`}, 
+              Offset[{3, 0}, {4., 0.25866599999999995`}]}, {{4., 
+              0.25866599999999995`}, 
+              Offset[{-3, 0}, {4., 0.25866599999999995`}]}, {{4., 0.258108}, 
+              Offset[{3, 0}, {4., 0.258108}]}, {{4., 0.258108}, 
+              Offset[{-3, 0}, {4., 0.258108}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.21109}, {2., 0.247835}, {3., 0.245934}, {4., 
+        0.258387}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.20837827777777798`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.21_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.20837827777777798`, 0.25866599999999995`}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.211442}, {1., 0.211494}}], 
+           LineBox[{{1., 0.211494}, {1., 0.21154599999999998`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.247131}, {2., 0.247242}}], 
+           LineBox[{{2., 0.247242}, {2., 0.247353}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.245959}, {3., 0.246114}}], 
+           LineBox[{{3., 0.246114}, {3., 0.246269}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.257578}, {4., 0.257831}}], 
+           LineBox[{{4., 0.257831}, {4., 0.258084}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.21154599999999998`}, 
+              Offset[{3, 0}, {1., 0.21154599999999998`}]}, {{1., 
+              0.21154599999999998`}, 
+              Offset[{-3, 0}, {1., 0.21154599999999998`}]}, {{1., 0.211442}, 
+              Offset[{3, 0}, {1., 0.211442}]}, {{1., 0.211442}, 
+              Offset[{-3, 0}, {1., 0.211442}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.247353}, Offset[{3, 0}, {2., 0.247353}]}, {{2., 
+              0.247353}, Offset[{-3, 0}, {2., 0.247353}]}, {{2., 0.247131}, 
+              Offset[{3, 0}, {2., 0.247131}]}, {{2., 0.247131}, 
+              Offset[{-3, 0}, {2., 0.247131}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.246269}, Offset[{3, 0}, {3., 0.246269}]}, {{3., 
+              0.246269}, Offset[{-3, 0}, {3., 0.246269}]}, {{3., 0.245959}, 
+              Offset[{3, 0}, {3., 0.245959}]}, {{3., 0.245959}, 
+              Offset[{-3, 0}, {3., 0.245959}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.258084}, Offset[{3, 0}, {4., 0.258084}]}, {{4., 
+              0.258084}, Offset[{-3, 0}, {4., 0.258084}]}, {{4., 0.257578}, 
+              Offset[{3, 0}, {4., 0.257578}]}, {{4., 0.257578}, 
+              Offset[{-3, 0}, {4., 0.257578}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.211494}, {2., 0.247242}, {3., 0.246114}, {4., 
+        0.257831}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.208850777777778},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.22_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.208850777777778, 0.258084}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.211569}, {1., 0.211631}}], 
+           LineBox[{{1., 0.211631}, {1., 0.21169300000000002`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.246488}, {2., 0.246599}}], 
+           LineBox[{{2., 0.246599}, {2., 0.24671}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.245678}, {3., 0.245823}}], 
+           LineBox[{{3., 0.245823}, {3., 0.24596800000000002`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.257358}, {4., 0.257621}}], 
+           LineBox[{{4., 0.257621}, {4., 0.257884}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.21169300000000002`}, 
+              Offset[{3, 0}, {1., 0.21169300000000002`}]}, {{1., 
+              0.21169300000000002`}, 
+              Offset[{-3, 0}, {1., 0.21169300000000002`}]}, {{1., 0.211569}, 
+              Offset[{3, 0}, {1., 0.211569}]}, {{1., 0.211569}, 
+              Offset[{-3, 0}, {1., 0.211569}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.24671}, Offset[{3, 0}, {2., 0.24671}]}, {{2., 
+              0.24671}, Offset[{-3, 0}, {2., 0.24671}]}, {{2., 0.246488}, 
+              Offset[{3, 0}, {2., 0.246488}]}, {{2., 0.246488}, 
+              Offset[{-3, 0}, {2., 0.246488}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.24596800000000002`}, 
+              Offset[{3, 0}, {3., 0.24596800000000002`}]}, {{3., 
+              0.24596800000000002`}, 
+              Offset[{-3, 0}, {3., 0.24596800000000002`}]}, {{3., 0.245678}, 
+              Offset[{3, 0}, {3., 0.245678}]}, {{3., 0.245678}, 
+              Offset[{-3, 0}, {3., 0.245678}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.257884}, Offset[{3, 0}, {4., 0.257884}]}, {{4., 
+              0.257884}, Offset[{-3, 0}, {4., 0.257884}]}, {{4., 0.257358}, 
+              Offset[{3, 0}, {4., 0.257358}]}, {{4., 0.257358}, 
+              Offset[{-3, 0}, {4., 0.257358}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.211631}, {2., 0.246599}, {3., 0.245823}, {4., 
+        0.257621}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.2089959444444447},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.23_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.2089959444444447, 0.257884}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.211948}, {1., 0.212007}}], 
+           LineBox[{{1., 0.212007}, {1., 0.212066}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.246055}, {2., 0.246165}}], 
+           LineBox[{{2., 0.246165}, {2., 0.246275}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.24599100000000002`}, {3., 0.246174}}], 
+           LineBox[{{3., 0.246174}, {3., 0.246357}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.256796}, {4., 0.257062}}], 
+           LineBox[{{4., 0.257062}, {4., 0.257328}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.212066}, Offset[{3, 0}, {1., 0.212066}]}, {{1., 
+              0.212066}, Offset[{-3, 0}, {1., 0.212066}]}, {{1., 0.211948}, 
+              Offset[{3, 0}, {1., 0.211948}]}, {{1., 0.211948}, 
+              Offset[{-3, 0}, {1., 0.211948}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.246275}, Offset[{3, 0}, {2., 0.246275}]}, {{2., 
+              0.246275}, Offset[{-3, 0}, {2., 0.246275}]}, {{2., 0.246055}, 
+              Offset[{3, 0}, {2., 0.246055}]}, {{2., 0.246055}, 
+              Offset[{-3, 0}, {2., 0.246055}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.246357}, Offset[{3, 0}, {3., 0.246357}]}, {{3., 
+              0.246357}, Offset[{-3, 0}, {3., 0.246357}]}, {{3., 
+              0.24599100000000002`}, 
+              Offset[{3, 0}, {3., 0.24599100000000002`}]}, {{3., 
+              0.24599100000000002`}, 
+              Offset[{-3, 0}, {3., 0.24599100000000002`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.257328}, Offset[{3, 0}, {4., 0.257328}]}, {{4., 
+              0.257328}, Offset[{-3, 0}, {4., 0.257328}]}, {{4., 0.256796}, 
+              Offset[{3, 0}, {4., 0.256796}]}, {{4., 0.256796}, 
+              Offset[{-3, 0}, {4., 0.256796}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.212007}, {2., 0.246165}, {3., 0.246174}, {4., 
+        0.257062}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.2094268888888891},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.24_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.2094268888888891, 0.257328}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.21221700000000002`}, {1., 0.212261}}], 
+           LineBox[{{1., 0.212261}, {1., 0.212305}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.245518}, {2., 0.245604}}], 
+           LineBox[{{2., 0.245604}, {2., 0.24569}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.245883}, {3., 0.246105}}], 
+           LineBox[{{3., 0.246105}, {3., 0.246327}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.25664}, {4., 0.256955}}], 
+           LineBox[{{4., 0.256955}, {4., 0.25727}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.212305}, Offset[{3, 0}, {1., 0.212305}]}, {{1., 
+              0.212305}, Offset[{-3, 0}, {1., 0.212305}]}, {{1., 
+              0.21221700000000002`}, 
+              Offset[{3, 0}, {1., 0.21221700000000002`}]}, {{1., 
+              0.21221700000000002`}, 
+              Offset[{-3, 0}, {1., 0.21221700000000002`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.24569}, Offset[{3, 0}, {2., 0.24569}]}, {{2., 
+              0.24569}, Offset[{-3, 0}, {2., 0.24569}]}, {{2., 0.245518}, 
+              Offset[{3, 0}, {2., 0.245518}]}, {{2., 0.245518}, 
+              Offset[{-3, 0}, {2., 0.245518}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.246327}, Offset[{3, 0}, {3., 0.246327}]}, {{3., 
+              0.246327}, Offset[{-3, 0}, {3., 0.246327}]}, {{3., 0.245883}, 
+              Offset[{3, 0}, {3., 0.245883}]}, {{3., 0.245883}, 
+              Offset[{-3, 0}, {3., 0.245883}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.25727}, Offset[{3, 0}, {4., 0.25727}]}, {{4., 
+              0.25727}, Offset[{-3, 0}, {4., 0.25727}]}, {{4., 0.25664}, 
+              Offset[{3, 0}, {4., 0.25664}]}, {{4., 0.25664}, 
+              Offset[{-3, 0}, {4., 0.25664}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.212261}, {2., 0.245604}, {3., 0.246105}, {4., 
+        0.256955}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.2097140555555558},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1._\[Lambda]1.25_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.2097140555555558, 0.25727}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.27837799999999996`}, {1., 0.278487}}], 
+           LineBox[{{1., 0.278487}, {1., 0.278596}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.382882}, {2., 0.383109}}], 
+           LineBox[{{2., 0.383109}, {2., 0.38333599999999995`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.341498}, {3., 0.342065}}], 
+           LineBox[{{3., 0.342065}, {3., 0.342632}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.410987}, {4., 0.411894}}], 
+           LineBox[{{4., 0.411894}, {4., 0.412801}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.278596}, Offset[{3, 0}, {1., 0.278596}]}, {{1., 
+              0.278596}, Offset[{-3, 0}, {1., 0.278596}]}, {{1., 
+              0.27837799999999996`}, 
+              Offset[{3, 0}, {1., 0.27837799999999996`}]}, {{1., 
+              0.27837799999999996`}, 
+              Offset[{-3, 0}, {1., 0.27837799999999996`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.38333599999999995`}, 
+              Offset[{3, 0}, {2., 0.38333599999999995`}]}, {{2., 
+              0.38333599999999995`}, 
+              Offset[{-3, 0}, {2., 0.38333599999999995`}]}, {{2., 0.382882}, 
+              Offset[{3, 0}, {2., 0.382882}]}, {{2., 0.382882}, 
+              Offset[{-3, 0}, {2., 0.382882}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.342632}, Offset[{3, 0}, {3., 0.342632}]}, {{3., 
+              0.342632}, Offset[{-3, 0}, {3., 0.342632}]}, {{3., 0.341498}, 
+              Offset[{3, 0}, {3., 0.341498}]}, {{3., 0.341498}, 
+              Offset[{-3, 0}, {3., 0.341498}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.412801}, Offset[{3, 0}, {4., 0.412801}]}, {{4., 
+              0.412801}, Offset[{-3, 0}, {4., 0.412801}]}, {{4., 0.410987}, 
+              Offset[{3, 0}, {4., 0.410987}]}, {{4., 0.410987}, 
+              Offset[{-3, 0}, {4., 0.410987}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.278487}, {2., 0.383109}, {3., 0.342065}, {4., 
+        0.411894}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.2709100555555557},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.65_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.2709100555555557, 0.412801}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.279687}, {1., 0.279857}}], 
+           LineBox[{{1., 0.279857}, {1., 0.280027}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.37964}, {2., 0.379942}}], 
+           LineBox[{{2., 0.379942}, {2., 0.380244}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.343139}, {3., 0.34361}}], 
+           LineBox[{{3., 0.34361}, {3., 0.344081}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.40718}, {4., 0.407918}}], 
+           LineBox[{{4., 0.407918}, {4., 0.408656}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.280027}, Offset[{3, 0}, {1., 0.280027}]}, {{1., 
+              0.280027}, Offset[{-3, 0}, {1., 0.280027}]}, {{1., 0.279687}, 
+              Offset[{3, 0}, {1., 0.279687}]}, {{1., 0.279687}, 
+              Offset[{-3, 0}, {1., 0.279687}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.380244}, Offset[{3, 0}, {2., 0.380244}]}, {{2., 
+              0.380244}, Offset[{-3, 0}, {2., 0.380244}]}, {{2., 0.37964}, 
+              Offset[{3, 0}, {2., 0.37964}]}, {{2., 0.37964}, 
+              Offset[{-3, 0}, {2., 0.37964}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.344081}, Offset[{3, 0}, {3., 0.344081}]}, {{3., 
+              0.344081}, Offset[{-3, 0}, {3., 0.344081}]}, {{3., 0.343139}, 
+              Offset[{3, 0}, {3., 0.343139}]}, {{3., 0.343139}, 
+              Offset[{-3, 0}, {3., 0.343139}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.408656}, Offset[{3, 0}, {4., 0.408656}]}, {{4., 
+              0.408656}, Offset[{-3, 0}, {4., 0.408656}]}, {{4., 0.40718}, 
+              Offset[{3, 0}, {4., 0.40718}]}, {{4., 0.40718}, 
+              Offset[{-3, 0}, {4., 0.40718}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.279857}, {2., 0.379942}, {3., 0.34361}, {4., 
+        0.407918}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.27252205555555575`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.66_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.27252205555555575`, 0.408656}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.280716}, {1., 0.280878}}], 
+           LineBox[{{1., 0.280878}, {1., 0.28104}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.37660899999999997`}, {2., 0.376928}}], 
+           LineBox[{{2., 0.376928}, {2., 0.377247}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.345751}, {3., 0.346188}}], 
+           LineBox[{{3., 0.346188}, {3., 0.346625}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.403156}, {4., 0.403928}}], 
+           LineBox[{{4., 0.403928}, {4., 0.4047}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.28104}, Offset[{3, 0}, {1., 0.28104}]}, {{1., 
+              0.28104}, Offset[{-3, 0}, {1., 0.28104}]}, {{1., 0.280716}, 
+              Offset[{3, 0}, {1., 0.280716}]}, {{1., 0.280716}, 
+              Offset[{-3, 0}, {1., 0.280716}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.377247}, Offset[{3, 0}, {2., 0.377247}]}, {{2., 
+              0.377247}, Offset[{-3, 0}, {2., 0.377247}]}, {{2., 
+              0.37660899999999997`}, 
+              Offset[{3, 0}, {2., 0.37660899999999997`}]}, {{2., 
+              0.37660899999999997`}, 
+              Offset[{-3, 0}, {2., 0.37660899999999997`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.346625}, Offset[{3, 0}, {3., 0.346625}]}, {{3., 
+              0.346625}, Offset[{-3, 0}, {3., 0.346625}]}, {{3., 0.345751}, 
+              Offset[{3, 0}, {3., 0.345751}]}, {{3., 0.345751}, 
+              Offset[{-3, 0}, {3., 0.345751}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.4047}, Offset[{3, 0}, {4., 0.4047}]}, {{4., 
+              0.4047}, Offset[{-3, 0}, {4., 0.4047}]}, {{4., 0.403156}, 
+              Offset[{3, 0}, {4., 0.403156}]}, {{4., 0.403156}, 
+              Offset[{-3, 0}, {4., 0.403156}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.280878}, {2., 0.376928}, {3., 0.346188}, {4., 
+        0.403928}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.2738280000000003},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.67_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.2738280000000003, 0.4047}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.281951}, {1., 0.2821}}], 
+           LineBox[{{1., 0.2821}, {1., 0.282249}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.373951}, {2., 0.374228}}], 
+           LineBox[{{2., 0.374228}, {2., 0.37450500000000003`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.34705199999999997`}, {3., 0.347477}}], 
+           LineBox[{{3., 0.347477}, {3., 0.347902}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.400326}, {4., 0.401104}}], 
+           LineBox[{{4., 0.401104}, {4., 0.401882}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.282249}, Offset[{3, 0}, {1., 0.282249}]}, {{1., 
+              0.282249}, Offset[{-3, 0}, {1., 0.282249}]}, {{1., 0.281951}, 
+              Offset[{3, 0}, {1., 0.281951}]}, {{1., 0.281951}, 
+              Offset[{-3, 0}, {1., 0.281951}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.37450500000000003`}, 
+              Offset[{3, 0}, {2., 0.37450500000000003`}]}, {{2., 
+              0.37450500000000003`}, 
+              Offset[{-3, 0}, {2., 0.37450500000000003`}]}, {{2., 0.373951}, 
+              Offset[{3, 0}, {2., 0.373951}]}, {{2., 0.373951}, 
+              Offset[{-3, 0}, {2., 0.373951}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.347902}, Offset[{3, 0}, {3., 0.347902}]}, {{3., 
+              0.347902}, Offset[{-3, 0}, {3., 0.347902}]}, {{3., 
+              0.34705199999999997`}, 
+              Offset[{3, 0}, {3., 0.34705199999999997`}]}, {{3., 
+              0.34705199999999997`}, 
+              Offset[{-3, 0}, {3., 0.34705199999999997`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.401882}, Offset[{3, 0}, {4., 0.401882}]}, {{4., 
+              0.401882}, Offset[{-3, 0}, {4., 0.401882}]}, {{4., 0.400326}, 
+              Offset[{3, 0}, {4., 0.400326}]}, {{4., 0.400326}, 
+              Offset[{-3, 0}, {4., 0.400326}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.2821}, {2., 0.374228}, {3., 0.347477}, {4., 
+        0.401104}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.2752881666666669},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.68_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.2752881666666669, 0.401882}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.283227}, {1., 0.283371}}], 
+           LineBox[{{1., 0.283371}, {1., 0.28351499999999996`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.371408}, {2., 0.371659}}], 
+           LineBox[{{2., 0.371659}, {2., 0.37191}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.34951600000000005`}, {3., 0.349905}}], 
+           LineBox[{{3., 0.349905}, {3., 0.350294}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.397275}, {4., 0.398039}}], 
+           LineBox[{{4., 0.398039}, {4., 0.39880299999999996`}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.28351499999999996`}, 
+              Offset[{3, 0}, {1., 0.28351499999999996`}]}, {{1., 
+              0.28351499999999996`}, 
+              Offset[{-3, 0}, {1., 0.28351499999999996`}]}, {{1., 0.283227}, 
+              Offset[{3, 0}, {1., 0.283227}]}, {{1., 0.283227}, 
+              Offset[{-3, 0}, {1., 0.283227}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.37191}, Offset[{3, 0}, {2., 0.37191}]}, {{2., 
+              0.37191}, Offset[{-3, 0}, {2., 0.37191}]}, {{2., 0.371408}, 
+              Offset[{3, 0}, {2., 0.371408}]}, {{2., 0.371408}, 
+              Offset[{-3, 0}, {2., 0.371408}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.350294}, Offset[{3, 0}, {3., 0.350294}]}, {{3., 
+              0.350294}, Offset[{-3, 0}, {3., 0.350294}]}, {{3., 
+              0.34951600000000005`}, 
+              Offset[{3, 0}, {3., 0.34951600000000005`}]}, {{3., 
+              0.34951600000000005`}, 
+              Offset[{-3, 0}, {3., 0.34951600000000005`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.39880299999999996`}, 
+              Offset[{3, 0}, {4., 0.39880299999999996`}]}, {{4., 
+              0.39880299999999996`}, 
+              Offset[{-3, 0}, {4., 0.39880299999999996`}]}, {{4., 0.397275}, 
+              Offset[{3, 0}, {4., 0.397275}]}, {{4., 0.397275}, 
+              Offset[{-3, 0}, {4., 0.397275}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.283371}, {2., 0.371659}, {3., 0.349905}, {4., 
+        0.398039}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.27680611111111136`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.69_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.27680611111111136`, 0.39880299999999996`}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.284857}, {1., 0.284976}}], 
+           LineBox[{{1., 0.284976}, {1., 0.285095}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.36697199999999996`}, {2., 0.367212}}], 
+           LineBox[{{2., 0.367212}, {2., 0.367452}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.351943}, {3., 0.352306}}], 
+           LineBox[{{3., 0.352306}, {3., 0.352669}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.39183599999999996`}, {4., 0.392526}}], 
+           LineBox[{{4., 0.392526}, {4., 0.393216}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.285095}, Offset[{3, 0}, {1., 0.285095}]}, {{1., 
+              0.285095}, Offset[{-3, 0}, {1., 0.285095}]}, {{1., 0.284857}, 
+              Offset[{3, 0}, {1., 0.284857}]}, {{1., 0.284857}, 
+              Offset[{-3, 0}, {1., 0.284857}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.367452}, Offset[{3, 0}, {2., 0.367452}]}, {{2., 
+              0.367452}, Offset[{-3, 0}, {2., 0.367452}]}, {{2., 
+              0.36697199999999996`}, 
+              Offset[{3, 0}, {2., 0.36697199999999996`}]}, {{2., 
+              0.36697199999999996`}, 
+              Offset[{-3, 0}, {2., 0.36697199999999996`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.352669}, Offset[{3, 0}, {3., 0.352669}]}, {{3., 
+              0.352669}, Offset[{-3, 0}, {3., 0.352669}]}, {{3., 0.351943}, 
+              Offset[{3, 0}, {3., 0.351943}]}, {{3., 0.351943}, 
+              Offset[{-3, 0}, {3., 0.351943}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.393216}, Offset[{3, 0}, {4., 0.393216}]}, {{4., 
+              0.393216}, Offset[{-3, 0}, {4., 0.393216}]}, {{4., 
+              0.39183599999999996`}, 
+              Offset[{3, 0}, {4., 0.39183599999999996`}]}, {{4., 
+              0.39183599999999996`}, 
+              Offset[{-3, 0}, {4., 0.39183599999999996`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.284976}, {2., 0.367212}, {3., 0.352306}, {4., 
+        0.392526}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.2788370555555559},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.71_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.2788370555555559, 0.393216}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.286078}, {1., 0.286225}}], 
+           LineBox[{{1., 0.286225}, {1., 0.286372}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.36498400000000003`}, {2., 0.365238}}], 
+           LineBox[{{2., 0.365238}, {2., 0.365492}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.353404}, {3., 0.353794}}], 
+           LineBox[{{3., 0.353794}, {3., 0.354184}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.392086}, {4., 0.39274}}], 
+           LineBox[{{4., 0.39274}, {4., 0.39339399999999997`}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.286372}, Offset[{3, 0}, {1., 0.286372}]}, {{1., 
+              0.286372}, Offset[{-3, 0}, {1., 0.286372}]}, {{1., 0.286078}, 
+              Offset[{3, 0}, {1., 0.286078}]}, {{1., 0.286078}, 
+              Offset[{-3, 0}, {1., 0.286078}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.365492}, Offset[{3, 0}, {2., 0.365492}]}, {{2., 
+              0.365492}, Offset[{-3, 0}, {2., 0.365492}]}, {{2., 
+              0.36498400000000003`}, 
+              Offset[{3, 0}, {2., 0.36498400000000003`}]}, {{2., 
+              0.36498400000000003`}, 
+              Offset[{-3, 0}, {2., 0.36498400000000003`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.354184}, Offset[{3, 0}, {3., 0.354184}]}, {{3., 
+              0.354184}, Offset[{-3, 0}, {3., 0.354184}]}, {{3., 0.353404}, 
+              Offset[{3, 0}, {3., 0.353404}]}, {{3., 0.353404}, 
+              Offset[{-3, 0}, {3., 0.353404}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.39339399999999997`}, 
+              Offset[{3, 0}, {4., 0.39339399999999997`}]}, {{4., 
+              0.39339399999999997`}, 
+              Offset[{-3, 0}, {4., 0.39339399999999997`}]}, {{4., 0.392086}, 
+              Offset[{3, 0}, {4., 0.392086}]}, {{4., 0.392086}, 
+              Offset[{-3, 0}, {4., 0.392086}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.286225}, {2., 0.365238}, {3., 0.353794}, {4., 
+        0.39274}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.28011600000000025`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.72_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.28011600000000025`, 0.39339399999999997`}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.286998}, {1., 0.287128}}], 
+           LineBox[{{1., 0.287128}, {1., 0.287258}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.36339899999999997`}, {2., 0.36366}}], 
+           LineBox[{{2., 0.36366}, {2., 0.363921}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.354561}, {3., 0.354955}}], 
+           LineBox[{{3., 0.354955}, {3., 0.355349}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.389826}, {4., 0.390486}}], 
+           LineBox[{{4., 0.390486}, {4., 0.391146}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.287258}, Offset[{3, 0}, {1., 0.287258}]}, {{1., 
+              0.287258}, Offset[{-3, 0}, {1., 0.287258}]}, {{1., 0.286998}, 
+              Offset[{3, 0}, {1., 0.286998}]}, {{1., 0.286998}, 
+              Offset[{-3, 0}, {1., 0.286998}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.363921}, Offset[{3, 0}, {2., 0.363921}]}, {{2., 
+              0.363921}, Offset[{-3, 0}, {2., 0.363921}]}, {{2., 
+              0.36339899999999997`}, 
+              Offset[{3, 0}, {2., 0.36339899999999997`}]}, {{2., 
+              0.36339899999999997`}, 
+              Offset[{-3, 0}, {2., 0.36339899999999997`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.355349}, Offset[{3, 0}, {3., 0.355349}]}, {{3., 
+              0.355349}, Offset[{-3, 0}, {3., 0.355349}]}, {{3., 0.354561}, 
+              Offset[{3, 0}, {3., 0.354561}]}, {{3., 0.354561}, 
+              Offset[{-3, 0}, {3., 0.354561}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.391146}, Offset[{3, 0}, {4., 0.391146}]}, {{4., 
+              0.391146}, Offset[{-3, 0}, {4., 0.391146}]}, {{4., 0.389826}, 
+              Offset[{3, 0}, {4., 0.389826}]}, {{4., 0.389826}, 
+              Offset[{-3, 0}, {4., 0.389826}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.287128}, {2., 0.36366}, {3., 0.354955}, {4., 
+        0.390486}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.2812120000000002},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.73_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.2812120000000002, 0.391146}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.287422}, {1., 0.287536}}], 
+           LineBox[{{1., 0.287536}, {1., 0.28765}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.36084000000000005`}, {2., 0.361065}}], 
+           LineBox[{{2., 0.361065}, {2., 0.36129}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.354278}, {3., 0.354622}}], 
+           LineBox[{{3., 0.354622}, {3., 0.354966}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.387272}, {4., 0.387891}}], 
+           LineBox[{{4., 0.387891}, {4., 0.38850999999999997`}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.28765}, Offset[{3, 0}, {1., 0.28765}]}, {{1., 
+              0.28765}, Offset[{-3, 0}, {1., 0.28765}]}, {{1., 0.287422}, 
+              Offset[{3, 0}, {1., 0.287422}]}, {{1., 0.287422}, 
+              Offset[{-3, 0}, {1., 0.287422}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.36129}, Offset[{3, 0}, {2., 0.36129}]}, {{2., 
+              0.36129}, Offset[{-3, 0}, {2., 0.36129}]}, {{2., 
+              0.36084000000000005`}, 
+              Offset[{3, 0}, {2., 0.36084000000000005`}]}, {{2., 
+              0.36084000000000005`}, 
+              Offset[{-3, 0}, {2., 0.36084000000000005`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.354966}, Offset[{3, 0}, {3., 0.354966}]}, {{3., 
+              0.354966}, Offset[{-3, 0}, {3., 0.354966}]}, {{3., 0.354278}, 
+              Offset[{3, 0}, {3., 0.354278}]}, {{3., 0.354278}, 
+              Offset[{-3, 0}, {3., 0.354278}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.38850999999999997`}, 
+              Offset[{3, 0}, {4., 0.38850999999999997`}]}, {{4., 
+              0.38850999999999997`}, 
+              Offset[{-3, 0}, {4., 0.38850999999999997`}]}, {{4., 0.387272}, 
+              Offset[{3, 0}, {4., 0.387272}]}, {{4., 0.387272}, 
+              Offset[{-3, 0}, {4., 0.387272}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.287536}, {2., 0.361065}, {3., 0.354622}, {4., 
+        0.387891}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.2818060000000002},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.74_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.2818060000000002, 0.38850999999999997`}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.288259}, {1., 0.288327}}], 
+           LineBox[{{1., 0.288327}, {1., 0.288395}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.35903999999999997`}, {2., 0.359199}}], 
+           LineBox[{{2., 0.359199}, {2., 0.359358}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.355031}, {3., 0.355454}}], 
+           LineBox[{{3., 0.355454}, {3., 0.355877}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.384599}, {4., 0.385253}}], 
+           LineBox[{{4., 0.385253}, {4., 0.385907}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.288395}, Offset[{3, 0}, {1., 0.288395}]}, {{1., 
+              0.288395}, Offset[{-3, 0}, {1., 0.288395}]}, {{1., 0.288259}, 
+              Offset[{3, 0}, {1., 0.288259}]}, {{1., 0.288259}, 
+              Offset[{-3, 0}, {1., 0.288259}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.359358}, Offset[{3, 0}, {2., 0.359358}]}, {{2., 
+              0.359358}, Offset[{-3, 0}, {2., 0.359358}]}, {{2., 
+              0.35903999999999997`}, 
+              Offset[{3, 0}, {2., 0.35903999999999997`}]}, {{2., 
+              0.35903999999999997`}, 
+              Offset[{-3, 0}, {2., 0.35903999999999997`}]}}], {{{1., 0.}, {0.,
+             1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.355877}, Offset[{3, 0}, {3., 0.355877}]}, {{3., 
+              0.355877}, Offset[{-3, 0}, {3., 0.355877}]}, {{3., 0.355031}, 
+              Offset[{3, 0}, {3., 0.355031}]}, {{3., 0.355031}, 
+              Offset[{-3, 0}, {3., 0.355031}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.385907}, Offset[{3, 0}, {4., 0.385907}]}, {{4., 
+              0.385907}, Offset[{-3, 0}, {4., 0.385907}]}, {{4., 0.384599}, 
+              Offset[{3, 0}, {4., 0.384599}]}, {{4., 0.384599}, 
+              Offset[{-3, 0}, {4., 0.384599}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.288327}, {2., 0.359199}, {3., 0.355454}, {4., 
+        0.385253}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.28283411111111134`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs1.5_\[Lambda]0.75_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.28283411111111134`, 0.385907}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.345469}, {1., 0.345619}}], 
+           LineBox[{{1., 0.345619}, {1., 0.345769}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.519604}, {2., 0.520042}}], 
+           LineBox[{{2., 0.520042}, {2., 0.52048}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.437238}, {3., 0.438228}}], 
+           LineBox[{{3., 0.438228}, {3., 0.439218}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.587451}, {4., 0.589143}}], 
+           LineBox[{{4., 0.589143}, {4., 0.590835}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.345769}, Offset[{3, 0}, {1., 0.345769}]}, {{1., 
+              0.345769}, Offset[{-3, 0}, {1., 0.345769}]}, {{1., 0.345469}, 
+              Offset[{3, 0}, {1., 0.345469}]}, {{1., 0.345469}, 
+              Offset[{-3, 0}, {1., 0.345469}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.52048}, Offset[{3, 0}, {2., 0.52048}]}, {{2., 
+              0.52048}, Offset[{-3, 0}, {2., 0.52048}]}, {{2., 0.519604}, 
+              Offset[{3, 0}, {2., 0.519604}]}, {{2., 0.519604}, 
+              Offset[{-3, 0}, {2., 0.519604}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.439218}, Offset[{3, 0}, {3., 0.439218}]}, {{3., 
+              0.439218}, Offset[{-3, 0}, {3., 0.439218}]}, {{3., 0.437238}, 
+              Offset[{3, 0}, {3., 0.437238}]}, {{3., 0.437238}, 
+              Offset[{-3, 0}, {3., 0.437238}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.590835}, Offset[{3, 0}, {4., 0.590835}]}, {{4., 
+              0.590835}, Offset[{-3, 0}, {4., 0.590835}]}, {{4., 0.587451}, 
+              Offset[{3, 0}, {4., 0.587451}]}, {{4., 0.587451}, 
+              Offset[{-3, 0}, {4., 0.587451}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.345619}, {2., 0.520042}, {3., 0.438228}, {4., 
+        0.589143}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0.33183755555555583`},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs2._\[Lambda]0.45_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0.33183755555555583`, 0.590835}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.05], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.400335}, {1., 0.400632}}], 
+           LineBox[{{1., 0.400632}, {1., 0.400929}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.6973159999999999}, {2., 0.697877}}], 
+           LineBox[{{2., 0.697877}, {2., 0.698438}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.496677}, {3., 0.49826}}], 
+           LineBox[{{3., 0.49826}, {3., 0.499843}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 0.875822}, {4., 0.878845}}], 
+           LineBox[{{4., 0.878845}, {4., 0.881868}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.400929}, Offset[{3, 0}, {1., 0.400929}]}, {{1., 
+              0.400929}, Offset[{-3, 0}, {1., 0.400929}]}, {{1., 0.400335}, 
+              Offset[{3, 0}, {1., 0.400335}]}, {{1., 0.400335}, 
+              Offset[{-3, 0}, {1., 0.400335}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.698438}, Offset[{3, 0}, {2., 0.698438}]}, {{2., 
+              0.698438}, Offset[{-3, 0}, {2., 0.698438}]}, {{2., 
+              0.6973159999999999}, 
+              Offset[{3, 0}, {2., 0.6973159999999999}]}, {{2., 
+              0.6973159999999999}, 
+              Offset[{-3, 0}, {2., 0.6973159999999999}]}}], {{{1., 0.}, {0., 
+            1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.499843}, Offset[{3, 0}, {3., 0.499843}]}, {{3., 
+              0.499843}, Offset[{-3, 0}, {3., 0.499843}]}, {{3., 0.496677}, 
+              Offset[{3, 0}, {3., 0.496677}]}, {{3., 0.496677}, 
+              Offset[{-3, 0}, {3., 0.496677}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 0.881868}, Offset[{3, 0}, {4., 0.881868}]}, {{4., 
+              0.881868}, Offset[{-3, 0}, {4., 0.881868}]}, {{4., 0.875822}, 
+              Offset[{3, 0}, {4., 0.875822}]}, {{4., 0.875822}, 
+              Offset[{-3, 0}, {4., 0.875822}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.400632}, {2., 0.697877}, {3., 0.49826}, {4., 
+        0.878845}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs2.5_\[Lambda]0.32_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0, 0.881868}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.02], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}], ",", 
+   GraphicsBox[{{{
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{1., 0.465261}, {1., 0.465677}}], 
+           LineBox[{{1., 0.465677}, {1., 0.46609300000000004`}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{2., 0.843959}, {2., 0.844869}}], 
+           LineBox[{{2., 0.844869}, {2., 0.845779}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{3., 0.5917990000000001}, {3., 0.594184}}], 
+           LineBox[{{3., 0.594184}, {3., 0.596569}}]}},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{{}, {LineBox[{{4., 1.108707}, {4., 1.113453}}], 
+           LineBox[{{4., 1.113453}, {4., 1.118199}}]}},
+         Antialiasing->False]}}, {
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{1., 0.46609300000000004`}, 
+              Offset[{3, 0}, {1., 0.46609300000000004`}]}, {{1., 
+              0.46609300000000004`}, 
+              Offset[{-3, 0}, {1., 0.46609300000000004`}]}, {{1., 0.465261}, 
+              Offset[{3, 0}, {1., 0.465261}]}, {{1., 0.465261}, 
+              Offset[{-3, 0}, {1., 0.465261}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{2., 0.845779}, Offset[{3, 0}, {2., 0.845779}]}, {{2., 
+              0.845779}, Offset[{-3, 0}, {2., 0.845779}]}, {{2., 0.843959}, 
+              Offset[{3, 0}, {2., 0.843959}]}, {{2., 0.843959}, 
+              Offset[{-3, 0}, {2., 0.843959}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{3., 0.596569}, Offset[{3, 0}, {3., 0.596569}]}, {{3., 
+              0.596569}, Offset[{-3, 0}, {3., 0.596569}]}, {{3., 
+              0.5917990000000001}, 
+              Offset[{3, 0}, {3., 0.5917990000000001}]}, {{3., 
+              0.5917990000000001}, 
+              Offset[{-3, 0}, {3., 0.5917990000000001}]}}], {{{1., 0.}, {0., 
+            1.}}, {0., 0.}}]},
+         Antialiasing->False]}, 
+       {RGBColor[0.368417, 0.506779, 0.709798], 
+        StyleBox[{
+          GeometricTransformationBox[
+           LineBox[{}], {{{1., 0.}, {0., 1.}}, {0., 0.}}], 
+          GeometricTransformationBox[
+           LineBox[{{{4., 1.118199}, Offset[{3, 0}, {4., 1.118199}]}, {{4., 
+              1.118199}, Offset[{-3, 0}, {4., 1.118199}]}, {{4., 1.108707}, 
+              Offset[{3, 0}, {4., 1.108707}]}, {{4., 1.108707}, 
+              Offset[{-3, 0}, {4., 1.108707}]}}], {{{1., 0.}, {0., 1.}}, {0., 
+            0.}}]},
+         Antialiasing->False]}}}, {{}, {}, 
+      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
+       0.012833333333333334`], AbsoluteThickness[1.6], 
+       LineBox[{{1., 0.465677}, {2., 0.844869}, {3., 0.594184}, {4., 
+        1.113453}}]}}, {{}, {}}},
+    AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+    Axes->{True, True},
+    AxesLabel->{None, None},
+    AxesOrigin->{0., 0},
+    DisplayFunction->Identity,
+    Frame->{{False, False}, {False, False}},
+    FrameLabel->{{None, None}, {None, None}},
+    FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+    GridLines->{None, None},
+    GridLinesStyle->Directive[
+      GrayLevel[0.5, 0.4]],
+    Method->{
+     "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+      "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+          Identity[
+           Part[#, 1]], 
+          Identity[
+           Part[#, 2]]}& )}},
+    PlotLabel->FormBox[
+     "\"\[Beta]25._Rs3._\[Lambda]0.26_O4.\"", TraditionalForm],
+    PlotRange->{{0., 4.}, {0, 1.118199}},
+    PlotRangeClipping->True,
+    PlotRangePadding->{{
+       Scaled[0.02], 
+       Scaled[0.02]}, {
+       Scaled[0.02], 
+       Scaled[0.05]}},
+    Ticks->{Automatic, Automatic}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.822622959866663*^9, 3.822622985200663*^9}, 
+   3.822623026368663*^9, {3.822623076663663*^9, 3.8226231061394606`*^9}, 
+   3.8226231533744683`*^9, 3.8226233886878743`*^9, 3.8230785647847033`*^9},
+ CellLabel->
+  "Out[1197]=",ExpressionUUID->"4020e837-10db-4086-9236-416c194d8c5f"]
+}, Open  ]]
+},
+WindowSize->{1140.6, 574.8},
+WindowMargins->{{-4.2000000000000455`, Automatic}, {Automatic, 9.6}},
+FrontEndVersion->"12.2 for Microsoft Windows (64-bit) (2020\:5e7412\:67087\
+\:65e5)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"e3b7431e-d11f-4c81-9aa9-8b44bad7a122"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 3310, 82, 125, "Input",ExpressionUUID->"3fd829ac-d25f-4a5d-a8bf-ccd6cc549582"],
+Cell[3871, 104, 607, 16, 49, "Input",ExpressionUUID->"2db92802-81c7-4308-8e88-1b4c4e838fce"],
+Cell[CellGroupData[{
+Cell[4503, 124, 769, 19, 28, "Input",ExpressionUUID->"fbed887f-b771-408e-939c-cd0f78fb33ce"],
+Cell[5275, 145, 105302, 2316, 807, "Output",ExpressionUUID->"4020e837-10db-4086-9236-416c194d8c5f"]
+}, Open  ]]
+}
+]
+*)
+
