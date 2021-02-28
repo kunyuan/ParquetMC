@@ -70,11 +70,12 @@ def GetCoeff():
     try:
         Z, mStar = np.loadtxt(os.path.join(folder, "selfconsistent", Zname))
     except Exception as e:
-        print("Can not load Z and m*")
+        print("Can not load Z and m*, will assume Z=1 and m=1/2")
         Z, mStar = 1, m
-    Z, mStar = 0.873, 0.955*0.5
+    # Z, mStar = 0.873, 0.955*0.5
     coeff = Z*Z * mStar * Para.kF / (np.pi*np.pi)
     return coeff
+
 
 # rs=1  Z=0.873, m*=0.95
 while True:
@@ -82,7 +83,8 @@ while True:
     time.sleep(SleepTime)
 
     try:
-        Data, Norm, Step, Grid = LoadFile(folder, "vertex_pid[0-9]+.dat", shape)
+        Data, Norm, Step, Grid = LoadFile(
+            folder, "vertex_pid[0-9]+.dat", shape)
 
         AngGrid = Grid["AngleGrid"]
         MomGrid = Grid["KGrid"]
@@ -153,17 +155,27 @@ while True:
             Data, Err = Estimate(DataAllList, Norm)
             Data += Bare  # I channel has a bare part
             PrintInfo("Sum", Data, Err)
-            
-            if save and o==Para.Order:
+
+            # # print the S channel:
+            # DataAllList = [np.sum(d[1:o+1, ...], axis=0) for d in DataList]
+            # # sum all four channels
+            # DataAllList = [d[3, ...] for d in DataAllList]
+            # # map DIR, EX to As, Aa
+            # DataAllList = [SpinMapping(d) for d in DataAllList]
+            # Data, Err = Estimate(DataAllList, Norm)
+            # PrintInfo("S channel: ", Data, Err)
+
+            if save and o == Para.Order:
                 coeff = GetCoeff()
                 DataSave = Data * coeff
                 ErrSave = Err * coeff
-                dataStrAs += "{0:10.6f}  {1:10.6f}  ".format(DataSave[0], ErrSave[0])
-                dataStrAa += "{0:10.6f}  {1:10.6f}  ".format(DataSave[1], ErrSave[1])
+                dataStrAs += "{0:10.6f}  {1:10.6f}  ".format(
+                    DataSave[0], ErrSave[0])
+                dataStrAa += "{0:10.6f}  {1:10.6f}  ".format(
+                    DataSave[1], ErrSave[1])
             # fig, ax1 = plt.subplots(1)
             # ax1.errorbar(MomGrid, Data[], yerr=err[:, 0], fmt='-',
             #     capthick=1, capsize=4, c=ChanColor[chan], label=f"${ChanName[chan]}_s$")
- 
 
         #     # qData = Data[(o, 1)]
         #     # qDataErr = DataErr[(o, 1)]
@@ -174,10 +186,10 @@ while True:
         #     PrintInfo("Sum", qData, qDataErr)
         #     # print "\n"
 
-        
         if save:
             with open("vertexq0.data", "a") as f:
-                f.write("{0:4.2f} {1:4.2f} {2:4.2f} {3:4.2f} {4:4.2f} ".format(Para.Beta*Para.EF,Para.Rs,Para.Mass2,Para.Lambda,Para.Order))
+                f.write("{0:4.2f} {1:4.2f} {2:4.2f} {3:4.2f} {4:4.2f} ".format(
+                    Para.Beta*Para.EF, Para.Rs, Para.Mass2, Para.Lambda, Para.Order))
                 f.write(dataStrAs + dataStrAa + "\n")
 
         print("\n")
@@ -186,7 +198,6 @@ while True:
             print("End of Simulation!")
             sys.exit(0)
         sys.exit(0)
-        
 
     except Exception as e:
         print(e)

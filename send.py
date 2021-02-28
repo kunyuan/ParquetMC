@@ -4,27 +4,27 @@ from datetime import datetime
 import os
 import sys
 import argparse
-import time, re
+import time
+import re
 
 
-parser = argparse.ArgumentParser("Specify the number of jobs, and the name of working folder.")
+parser = argparse.ArgumentParser(
+    "Specify the number of jobs, and the name of working folder.")
 parser.add_argument("jobs_number")
 parser.add_argument("folder_name")
-parser.add_argument("-sc", type=bool, default=True,
-        help="If the code need to be self-consistent, the argument should be set as -sc=True.")
+parser.add_argument("-sc", type=bool, default=False,
+                    help="If the code need to be self-consistent, the argument should be set as -sc=True.")
 args = parser.parse_args()
 
 jobs_number = args.jobs_number
 folder_name = args.folder_name
 selfConsistent = args.sc
 
-selfConsistent = True
-
 ##### Modify parameters here  ###############
 # Cluster="Rutgers"
-Cluster="PBS"
+# Cluster = "PBS"
 # Cluster = "local"
-# Cluster = "condor"
+Cluster = "condor"
 ############################################
 
 Number = int(jobs_number)
@@ -36,12 +36,14 @@ def CreateFolder(path):
     if not os.path.exists(path):
         os.system("mkdir "+path)
 
+
 def GetLastOrderName(foldername):
     o = re.findall(r'(?<=_O)\d', foldername)[0]
     olast = str(int(o) - 1)
     fnew = foldername.replace("_O"+o, "_O"+olast)
     fnew = re.sub(r'A_|F_|polar_', 'sigma_', fnew)
     return fnew
+
 
 rootdir = os.getcwd()
 execute = "feyncalc.exe"
@@ -96,7 +98,7 @@ for pid in PIDList:
         os.chdir("..")
     elif Cluster == "PBS":
         with open(jobfile, "w") as fjob:
-            fjob.write("#!/bin/sh\n"+"#PBS -N " + jobname +"\n")
+            fjob.write("#!/bin/sh\n"+"#PBS -N " + jobname + "\n")
             fjob.write("#PBS -o "+homedir+"/Output\n")
             fjob.write("#PBS -e "+homedir+"/Error\n")
             fjob.write("#PBS -l walltime=2000:00:00\n")
