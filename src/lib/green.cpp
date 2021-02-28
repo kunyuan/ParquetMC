@@ -45,5 +45,4 @@ double fockYukawa(double k, double kF, double mass, bool shift) {
 
   assert(isfinite(fock));
   return fock;
-  // return fock;
 }

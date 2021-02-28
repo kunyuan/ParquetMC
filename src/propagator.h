@@ -33,9 +33,11 @@ public:
   void SaveGreenOrder();
 
 private:
-  weight1D _StaticSigma;
+  std::map<int, weight1D>  _StaticSigma;
   weight2D _DeltaG;
   std::map<int, weight2D> _deltaGOrder;
+  grid::Tau    _TauGridInterp;
+  grid::FermiK _MomGridInterp;
 
   template <typename KGrid>
   double _Interp1D(const weight1D &data, const KGrid &kgrid, double K);

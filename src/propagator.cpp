@@ -13,7 +13,7 @@ extern parameter Para;
 extern variable Var;
 
 void propagator::Initialize(){
-  if (BoldG){
+  if (GreenType == BoldG){
   }
 }
 
@@ -24,47 +24,45 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
   auto Ek = k * k - Para.Mu; // bare propagator
   double fgreen = 0.0;
 
-  if (BoldG && DiagType == POLAR)
-  {
-    Ek += -1*_Interp1D<grid::FermiK>(_StaticSigma, Para.FermiKGrid, k);
+  if (GreenType == BoldG){
+    int BoldGOrder = Para.Order - 1;
+    if (Para.Order == 2){
+      Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
+    } else if (Para.Order >= 3){
+      Ek += _Interp1D<grid::FermiK>(_StaticSigma[BoldGOrder], _MomGridInterp, k);
+    }
     fgreen = fermiGreen(Para.Beta, Tau, Ek);
-    if (Var.CurrOrder >= 1)
-      fgreen += -1*_Interp2D<grid::FermiK>(_deltaGOrder[Para.Order], Para.FermiKGrid, k, Tau);
-  } else {
+    if (Para.Order >= 3)
+      fgreen += _Interp2D<grid::FermiK>(_deltaGOrder[BoldGOrder], _MomGridInterp, k, Tau);
+  } else if (GreenType == BareG) {
+    fgreen = fermiGreen(Para.Beta, Tau, Ek); 
+  }  else {
     Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
-    fgreen = fermiGreen(Para.Beta, Tau, Ek);
+    fgreen = fermiGreen(Para.Beta, Tau, Ek); 
   }
+  
   return fgreen;
 }
 
+
 void propagator::LoadGreen() {
-  _StaticSigma.setZero(Para.FermiKGrid.size);
   _DeltaG.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
 
-  ifstream File;
-  File.open("./selfconsistent/dispersion.data", ios::in);
-  if (File.is_open()) {
-    for (int k = 0; k < Para.FermiKGrid.size; ++k)
-      File >> _StaticSigma[k];
-  } else {
-    LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
-    _StaticSigma.setZero();
+  // File.open("./selfconsistent/green.data", ios::in);
+  // if (File.is_open()) {
+  //   for (int k = 0; k < Para.FermiKGrid.size; ++k)
+  //     for (int t = 0; t < Para.TauGrid.size; ++t)
+  //       File >> _DeltaG(k, t);
+  // } else {
+  //   LOG_WARNING("Can not load Green weights! Initialze with zeros!\n");
+  //   _DeltaG.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
+  // }
+  // File.close();
+  if (Para.Order > 2){
+    LoadGreenOrder();
+    // SaveGreenOrder();
   }
-  File.close();
-
-  File.open("./selfconsistent/green.data", ios::in);
-  if (File.is_open()) {
-    for (int k = 0; k < Para.FermiKGrid.size; ++k)
-      for (int t = 0; t < Para.TauGrid.size; ++t)
-        File >> _DeltaG(k, t);
-  } else {
-    LOG_WARNING("Can not load Green weights! Initialze with zeros!\n");
-    _DeltaG.setZero();
-  }
-  File.close();
-
-  LoadGreenOrder();
-  // SaveGreenOrder();
+  
 }
 
 void propagator::SaveGreenOrder() {
@@ -96,27 +94,62 @@ void propagator::SaveGreenOrder() {
 
 void propagator::LoadGreenOrder() {
   weight2D _deltaGTem;
-  
-  ifstream File;
+  int _TauSize, _MomSize;
+  double _MaxK;
+
+  ifstream File1;
+  File1.open("./selfconsistent/para.data", ios::in);
+  if (File1.is_open()) {
+      File1 >> _TauSize;
+      File1 >> _MomSize;
+      File1 >> _MaxK;
+      _TauGridInterp.build(Para.Beta, _TauSize, 6.0 / Para.Ef);
+      _MomGridInterp.build(Para.Kf, _MaxK*Para.Kf, _MomSize, sqrt(1.0 / Para.Beta) * 2.0);
+  } else {
+    LOG_WARNING("Can not load para.data, FAILED\n");
+    exit(0);
+  }
+  File1.close();
+
+
+  weight1D  _SigmaTem;
+  ifstream File2;
+  for (int o = 2; o <= Para.Order; o++){
+      _SigmaTem.setZero(_MomGridInterp.size);
+      char fname[100];
+      snprintf(fname, 100, "./selfconsistent/dispersion_order%d.data", o);
+      File2.open(fname, ios::in);
+      if (File2.is_open()) {
+        for (int k = 0; k < _MomGridInterp.size; ++k)
+          File2 >> _SigmaTem[k];
+      } else {
+        LOG_WARNING("Can not load dispersion! Initialze with zeros!\n");
+        _SigmaTem.setZero(_MomGridInterp.size);
+      }
+      _StaticSigma[o] = _SigmaTem;
+  }
+  File2.close();
+
+
+  ifstream File3;
   for (int o = 2; o <= Para.Order; o++)
   {
-    _deltaGTem.setZero(Para.FermiKGrid.size, Para.TauGrid.size);
-    char fname[100];
-    snprintf(fname, 100, "./selfconsistent/green_order%d.data", o);
-    File.open(fname, ios::in);
-    if (File.is_open()) {
-        for (int k = 0; k < Para.FermiKGrid.size; ++k){
-          for (int t = 0; t < Para.TauGrid.size; ++t)
-            File >> _deltaGTem(k, t);
+      _deltaGTem.setZero(_MomGridInterp.size, _TauGridInterp.size);
+      char fname[100];
+      snprintf(fname, 100, "./selfconsistent/green_order%d.data", o);
+      File3.open(fname, ios::in);
+      if (File3.is_open()) {
+          for (int k = 0; k < _MomGridInterp.size; ++k){
+            for (int t = 0; t < _TauGridInterp.size; ++t)
+              File3 >> _deltaGTem(k, t);
+          }
+      } else {
+        LOG_WARNING("Can not load Order-Green weights! Initialze with zeros!\n");
+        _deltaGTem.setZero(_MomGridInterp.size, _TauGridInterp.size);
       }
-        _deltaGOrder[o] = _deltaGTem;
-    } else {
-      LOG_WARNING("Can not load Order-Green weights! Initialze with zeros!\n");
-      _deltaGTem.setZero();
       _deltaGOrder[o] = _deltaGTem;
-    }
-    File.close();
   }
+  File3.close();
 }
 
 
@@ -171,8 +204,6 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // check irreducibility
   if ((IsProper || DiagType == POLAR) && IsEqual(kDiQ, ExtQ))
     Weight[DIR] = 0.0;
-  if (DiagType == GAMMA && IsEqual(kDiQ, ExtQ))
-    Weight[DIR] = 0.0;
 
   double kExQ = (KInL - KOutR).norm();
   Weight[EX] =
@@ -185,8 +216,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // check irreducibility
   if ((IsProper || DiagType == POLAR) && IsEqual(kExQ, ExtQ))
     Weight[EX] = 0.0;
-  if (DiagType == GAMMA && IsEqual(kExQ, ExtQ))
-    Weight[EX] = 0.0;
+
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
   return Weight;
@@ -209,7 +239,7 @@ double propagator::Interaction(const momentum &TranQ, int VerOrder,
     double Weight =
         -8.0 * PI * Para.Charge2 / (kQ * kQ + Para.Mass2 + Para.Lambda);
     if (VerOrder > 0)
-      Weight *= pow(Weight * Para.Lambda / 8.0 / PI, VerOrder);
+      Weight *= pow(-1.0 * Weight * Para.Lambda / 8.0 / PI, VerOrder);
     return Weight;
   }
 }
@@ -237,10 +267,6 @@ double propagator::_Interp1D(const weight1D &data, const KGrid &kgrid,
   double K0 = kgrid.grid[idx0];
   double K1 = kgrid.grid[idx1];
   
-  // cout <<idx0<<" "<<idx1<<" "<<K0<<" "<<K1<<endl;
-  // cout <<(data[idx0]*(K1-K)+data[idx1]*(K-K0))/(K1-K0)<<"  "<<data[idx0]<<"  "<<data[idx1]<<endl;
-  // ASSERT(K0 <= K && K1 >= K,
-        //  "Interpolate fails: " << K0 << "<" << K << "<" << K1);
   return (data[idx0] * (K1 - K) + data[idx1] * (K - K0)) / (K1 - K0);
 }
 
@@ -259,10 +285,9 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
   if (K > kgrid.grid.back() || K < kgrid.grid[0] || T > Para.TauGrid.grid.back() || T < 0.0)
     return 0.0;
 
-
-  int Tidx0 = Para.TauGrid.floor(T);
-  double dT0 = T - Para.TauGrid.grid[Tidx0],
-         dT1 = Para.TauGrid.grid[Tidx0 + 1] - T;
+  int Tidx0 = _TauGridInterp.floor(T);
+  double dT0 = T - _TauGridInterp.grid[Tidx0],
+         dT1 = _TauGridInterp.grid[Tidx0 + 1] - T;
 
   // ASSERT(dT0 >= 0.0 && dT1 >= 0.0,
         //  "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);

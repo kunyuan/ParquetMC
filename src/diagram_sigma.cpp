@@ -60,6 +60,7 @@ double sigma::Evaluate() {
     return 1.0;
   } else if (Order == 1) {
     double GWeight = Prop.Green(-EPS, Var.LoopMom[0] + Var.LoopMom[1], UP, 0);
+  
     double VerWeight = 0.0;
     if (rpaCounter){
       for (int o = 0; o <= Para.Order-1; o++)
@@ -67,8 +68,8 @@ double sigma::Evaluate() {
     }else{
       VerWeight += Prop.Interaction(Var.LoopMom[1], 0);
     }
-    
-    return GWeight * VerWeight * Factor;
+
+    return -1.0 * GWeight * VerWeight * Factor;
   }
   
 
@@ -108,7 +109,7 @@ double sigma::Evaluate() {
   //       1.0 / pow((G1.K.squaredNorm() + 1), 2) / pow((G2.K.squaredNorm() +
   //       1), 2);
 
-  return Weight * Factor * Factor;
+  return  Weight * Factor * Factor;
 }
 
 string sigma::ToString() {

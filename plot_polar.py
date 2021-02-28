@@ -47,14 +47,7 @@ if(XType == "Mom"):
     for o in Order[1:]:
         y, err = Estimate(Data, Norm, lambda x: Fourier.naiveT2W(
             np.sum(x[1:o+1, :, :], axis=0)))
-        # print y.shape
-        # Unit = 1.0/Para.kF
-        # Unit = 1.0
-        # for i in range(len(y)):
-        # print "{:10.6f} {:10.6f} {:10.6f}".format(
-        #     MomGrid[i]/Para.kF, y[i, 0].real*Unit, err[i, 0].real*Unit*2.0)
-        # err = np.average(Err[o, :, :], axis=1)
-        Errorbar(MomGrid/Para.kF, y[:, 0], err*2.0, fmt='o-',
+        Errorbar(MomGrid/Para.kF, y[:, 0], err[:, 0]*2.0, fmt='o-',
                  color=ColorList[o], label="Order {0}".format(o))
         print("order:{0}   {1} +- {2}".format(o, y[0, 0], 2*err[0] ))
     # x = ExtMomBin*kF

@@ -11,17 +11,22 @@ import argparse
 # size = 12
 
 parser = argparse.ArgumentParser("Specify some parameters.")
-parser.add_argument("folder1")
-# parser.add_argument("folder2")
+parser.add_argument("--folderA", "-A", required=True)
+parser.add_argument("--folderF", "-F", required=True)
 args = parser.parse_args()
 
-folderA = args.folder1
-# folderF = args.folder2
+folderA = args.folderA
+folderF = args.folderF
 print("Folders : " + folderA + ", ")
 
-legendreL = [0,1,2,3]
+
+Type = "As_Aa"
+# Type = "Dir_Ex"
+# Type = "Gamma_4spin"
+legendreL = [0]
 
 Para = param(folderA)
+
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
@@ -39,88 +44,115 @@ Angle = np.arccos(AngGrid)
 
 # Data shape : (pid numbers, order, chan, AngleGrid, KGrid, 2)
 
-def PrintInfo(Channel, Data, DataErr):
-    Data = -np.copy(Data)
-    DataErr = np.copy(DataErr)
-
-    Data *= Para.Nf
-    DataErr *= Para.Nf
-
-    # print Data.shape, DataErr.shape
-
-    print("{0}     Q/kF,    Data,    Error".format(Channel))
-    print("As: {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        MomGrid[0], Data[0], DataErr[0]))
-    print("Aa:  {0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-        MomGrid[0], Data[1], DataErr[1]))
-
 
 def SpinMapping(Data):
     d = np.copy(Data)
-    d[..., 0] += d[..., 1]/Para.Spin
-    d[..., 1] /= Para.Spin
+    if Type == "As_Aa":
+        d[..., 0] += d[..., 1]/Para.Spin
+        d[..., 1] /= Para.Spin
+    elif Type == "Gamma_4spin":
+        e = d[..., 0] + d[..., 1]
+        d[..., 1] = d[..., 0]
+        d[..., 0] = e
+    elif Type == "Dir_Ex":
+        pass
     return d
 
 
 def Bare(angle, Lambda):
     Bare = np.zeros([Para.AngGridSize, 2])
     if Irreducible == False:
-        Bare[:, 0] += -8.0*np.pi/(Para.Mass2+Lambda)*Para.Nf
+        Bare[:, 0] += -8.0*np.pi/(Para.Mass2+Lambda)
     Bare[:, 1] += +8.0 * np.pi / \
-        ((2.0*Para.kF*np.sin(angle/2.0))**2+Para.Mass2+Lambda)*Para.Nf
+        ((2.0*Para.kF*np.sin(angle/2.0))**2+Para.Mass2+Lambda)
     Bare = SpinMapping(Bare)
     return Bare
+
+
+
+def GetCoeff():
+    m = 1.0/2.0
+    Zname = "ZandM_order{0}.data".format(Para.Order-1)
+    try:
+        Z, mStar = np.loadtxt(os.path.join(folderF, "selfconsistent", Zname))
+    except Exception as e:
+        print("Can not load Z and m*")
+        Z, mStar = 1, m
+    # Z, mStar = 0.873, 0.955*0.5
+    coeff = Z*Z * mStar * Para.kF / ( np.pi*np.pi)
+    return coeff
 
 
 bare = Bare(Angle, 0.0)
 
 # Data shape : (pid numbers, order, chan, AngleGrid, KGrid, 2)
-Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
+Data1 = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
 # Data shape : (pid numbers, chan, AngleGrid, KGrid, 2)
 
-#---------------- 
-Adata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
+
+#=========================== A ===============================
+Adata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0)) for d in Data1]
 # Adata shape : (pid numbers, AngleGrid, 2), channels are summed, momentum is set as p=0. 
 avg, err = Estimate(Adata, Norm)
-
-
-
 bareLambda = Bare(Angle, Para.Lambda)
 
 Adata_s = -(avg[:, 0]+bareLambda[:, 0])
 Adata_a = -(avg[:, 1]+bareLambda[:, 1])
-Aerr_s = -err[:, 0]
-Aerr_a = -err[:, 1]
-
-As = LegendreCoeff(Adata_s, AngGrid, legendreL)
-Aa = LegendreCoeff(Adata_a, AngGrid, legendreL)
-AsErr = LegendreCoeff(Aerr_s, AngGrid, legendreL)
-AaErr = LegendreCoeff(Aerr_a, AngGrid, legendreL)
 
 
-# #----------------------------------------------
-# Para = param(folderF)
-# Data, Norm, Step, Grid = LoadFile(folderF, "vertex_pid[0-9]+.dat", shape)
+# A Error 
+Data2 = [np.sum(d[1:Para.Order, ...], axis=0) for d in Data]
+Adata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0)) for d in Data2]
+avg, err = Estimate(Adata, Norm)
+Adata_sErr = -(avg[:, 0]+bareLambda[:, 0])
+Adata_aErr = -(avg[:, 1]+bareLambda[:, 1])
 
-# AngGrid = Grid["AngleGrid"]
-# MomGrid = Grid["KGrid"]
-# Angle = np.arccos(AngGrid)
 
-# Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
+#=========================== F ===============================
+Para = param(folderF)
+shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
+Data, Norm, Step, Grid = LoadFile(folderF, "vertex_pid[0-9]+.dat", shape)
 
-# #----
-# Fdata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
-# avg, err = Estimate(Fdata, Norm)
-# bareLambda = Bare(Angle, Para.Lambda)
-# Fdata_s = -(avg[:, 0]+bareLambda[:, 0])
-# Fdata_a = -(avg[:, 1]+bareLambda[:, 1])
-# Ferr_s = -err[:, 0]
-# Ferr_a = -err[:, 1]
+AngGrid = Grid["AngleGrid"]
+MomGrid = Grid["KGrid"]
+Angle = np.arccos(AngGrid)
 
-# Fs = LegendreCoeff(Fdata_s, AngGrid, legendreL)
-# Fa = LegendreCoeff(Fdata_a, AngGrid, legendreL)
-# FsErr = LegendreCoeff(Ferr_s, AngGrid, legendreL)
-# FaErr = LegendreCoeff(Ferr_a, AngGrid, legendreL)
+Data1 = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
+Fdata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0)) for d in Data1]
+avg, err = Estimate(Fdata, Norm)
+bareLambda = Bare(Angle, Para.Lambda)
+Fdata_s = -(avg[:, 0]+bareLambda[:, 0])
+Fdata_a = -(avg[:, 1]+bareLambda[:, 1])
+
+# F Error
+Data2 = [np.sum(d[1:Para.Order, ...], axis=0) for d in Data]
+Fdata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0)) for d in Data2]
+avg, err = Estimate(Fdata, Norm)
+bareLambda = Bare(Angle, Para.Lambda)
+Fdata_sErr = -(avg[:, 0]+bareLambda[:, 0])
+Fdata_aErr = -(avg[:, 1]+bareLambda[:, 1])
+
+
+# ============================================================================
+
+coeff = GetCoeff()
+
+As = LegendreCoeff(Adata_s*coeff, AngGrid, legendreL)
+Aa = LegendreCoeff(Adata_a*coeff, AngGrid, legendreL)
+AsErr = LegendreCoeff((Adata_s-Adata_sErr)*coeff, AngGrid, legendreL)
+AaErr = LegendreCoeff((Adata_a-Adata_aErr)*coeff, AngGrid, legendreL)
+
+
+Fs = LegendreCoeff(Fdata_s*coeff, AngGrid, legendreL)
+Fa = LegendreCoeff(Fdata_a*coeff, AngGrid, legendreL)
+# FsErr = LegendreCoeff(Ferr_s*coeff, AngGrid, legendreL)
+# FaErr = LegendreCoeff(Ferr_a*coeff, AngGrid, legendreL)
+FsErr = LegendreCoeff((Fdata_s-Fdata_sErr)*coeff, AngGrid, legendreL)
+FaErr = LegendreCoeff((Fdata_a-Fdata_aErr)*coeff, AngGrid, legendreL)
+
+
+
+# ============================================================================
 
 def renormalize(ldict):
     newl = {}
@@ -136,18 +168,23 @@ def renormalize_error(ldict, lerrdict):
     return newl
 def AFprint(Bl, Errl):
     for k in Bl.keys():
-        print("order-" + str(k) + ":  ", Bl[k], "+-", abs(Errl[k]) )
+        print("legendreL l=" + str(k) + ":  ", Bl[k], "+-", abs(Errl[k]) )
 
-
-# print("Fs: ")
-# AFprint(Fs, FsErr)
-# print("Fa:")
-# AFprint(Fa, FaErr)
-print("----------------------------------\nFs:")
-AFprint(As, AsErr)
-AFprint(renormalize(As), renormalize_error(As, AsErr))
+print("Fs: ")
+AFprint(Fs, FsErr)
 print("Fa:")
+AFprint(Fa, FaErr)
+
+print("----------------------------------\nAs:")
+AFprint(As, AsErr)
+print("Aa:")
 AFprint(Aa, AaErr)
+
+print("----------------------------------\nRenoemalized from Fs:")
+AFprint(renormalize(Fs), renormalize_error(Fs, FsErr))
+print("Renoemalized from Fa:")
+AFprint(renormalize(Fa), renormalize_error(Fa, FaErr))
+
 
 
 # print("\n\nrenormalized Fs :")

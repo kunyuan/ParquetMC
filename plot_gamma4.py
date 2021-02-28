@@ -12,8 +12,8 @@ import argparse
 # size = 12
 
 
-PlotType = "As_Aa"
-PlotType = "Gamma_4spin"
+PlotType = "Symmetry_Anti"
+# PlotType = "Gamma_4spin"
 
 parser = argparse.ArgumentParser("Specify some parameters.")
 parser.add_argument("folder")
@@ -21,7 +21,6 @@ args = parser.parse_args()
 
 folder = args.folder
 print("Folder to plot : " + folder)
-
 
 
 Para = param(folder)
@@ -58,7 +57,7 @@ def PrintInfo(Channel, Data, DataErr):
 
 def SpinMapping(Data):
     d = np.copy(Data)
-    if PlotType == "As_Aa":
+    if PlotType == "Symmetry_Anti":
         d[..., 0] += d[..., 1]/Para.Spin
         d[..., 1] /= Para.Spin
     elif PlotType == "Gamma_4spin":
@@ -77,7 +76,7 @@ def Bare(angle, Lambda):
     Bare = SpinMapping(Bare)
     return Bare
 
-if PlotType == "As_Aa":
+if PlotType == "Symmetry_Anti":
     label_bare_1 = "$u_s$"
     label_bare_2 = "$u_a$"
     label_all_1 = "$A_s$"
@@ -128,7 +127,7 @@ Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
 
 
 for chan in Channel:
-    if PlotType == "As_Aa":
+    if PlotType == "Symmetry_Anti":
         label_channel_1 = f"${ChanName[chan]}_s$"
         label_channel_2 = f"${ChanName[chan]}_a$"
     elif PlotType == "Gamma_4spin":
@@ -150,13 +149,9 @@ ax1.errorbar(Angle, -(avg[:, 0]+bareLambda[:, 0]), yerr=err[:, 0], fmt='-',
 ax2.errorbar(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1], fmt='-',
              capthick=1, capsize=4, c='k', label=label_all_2)
 
-# ax1.set_xlim([-1.01, 1.01])
-ax1.set_xlim([0.0, 3.15])
-ax1.set_ylim([-3, 2])
 ax1.set_xlabel("$\\theta$", size=size)
-# ax2.set_xlim([-1.01, 1.01])
-ax2.set_xlim([0.0, 3.15])
-ax2.set_ylim([-3, 2])
+# ax2.set_xlim([0.0, 3.15])
+# ax2.set_ylim([-3, 2])
 ax2.set_xlabel("$\\theta$", size=size)
 ax1.legend(loc=1, frameon=False, fontsize=size)
 ax2.legend(loc=1, frameon=False, fontsize=size)

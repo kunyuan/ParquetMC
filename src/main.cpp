@@ -118,8 +118,8 @@ int main(int argc, const char *argv[]) {
 
         if (MessageTimer.check(Para.MessageTimer)) {
           LOG_INFO("Loading Weight...")
-          if (BoldG)
-            Prop.LoadGreen();
+          // if (GreenType == BoldG)
+            // Prop.LoadGreen();
           // Markov.Weight.LoadFile();
         }
       }
@@ -207,7 +207,8 @@ void InitPara() {
   Para.BoseKGrid.build(Para.Kf, MaxK, KSize, sqrt(1.0 / Para.Kf));
 
   Prop.Initialize();
-  if (BoldG)
+
+  if (GreenType == BoldG)
     Prop.LoadGreen();
 }
 
