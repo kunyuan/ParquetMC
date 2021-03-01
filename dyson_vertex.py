@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 from utility.IO import *
 from utility.plot import *
+import utility.polar0 as polar
 import utility.fourier as fourier
+import utility.dlr_boson as dlr
 import argparse
 from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 
 
-parser = argparse.ArgumentParser("Specify some parameters.")
-parser.add_argument("folder")
-args = parser.parse_args()
+# parser = argparse.ArgumentParser("Specify some parameters.")
+# parser.add_argument("folder")
+# args = parser.parse_args()
 
-folder = args.folder
-print("Folder to plot : " + folder)
+# folder = args.folder
+# print("Folder to plot : " + folder)
 
 
 def PlotPolarW(PolarT, MomGrid, idx, Save=True):
@@ -66,7 +69,7 @@ def PlotPolarW(PolarT, MomGrid, idx, Save=True):
     # plt.title(f"$k/k_F={k:.4f}$")
     # plt.grid()
     plt.tight_layout()
-    plt.savefig(f"k={k}.pdf")
+    # plt.savefig(f"k={k}.pdf")
     if Save:
         plt.savefig("PolarW.pdf")
     else:
@@ -75,7 +78,7 @@ def PlotPolarW(PolarT, MomGrid, idx, Save=True):
 
 if __name__ == "__main__":
 
-    Para = param(folder)
+    Para = param("./")
     Order = range(0, Para.Order+1)
 
     MaxFreq = 1024
@@ -83,22 +86,35 @@ if __name__ == "__main__":
     phyFreq = (Freq*2.0)*np.pi/Para.Beta  # the physical frequency
 
     shape = (Para.Order+1, Para.MomGridSize, Para.TauGridSize)
-    Data, Norm, Step, Grids = LoadFile(folder, "polar_pid[0-9]+.dat", shape)
+    Data, Norm, Step, Grids = LoadFile(folder, "vertex_pid[0-9]+.dat", shape)
 
     TauGrid = Grids["TauGrid"]
     MomGrid = Grids["KGrid"]
 
-    Fourier = fourier.fourier(TauGrid, phyFreq, Para.Beta)
-    Fourier.InitializeKernel(100.0, 1024, "Bose", 1.0e-13)
+    Wmax = 6.0
+    Nw = 1024
+    dW = Wmax/Nw
+    beta = 25.0
+    Nt = int(beta*Wmax*100)
+    Nwn = int(Wmax*beta/2.0/np.pi*100)
+    eps = 1.0e-12
+    print("Nt: ", Nt)
+    print("Nwn: ", Nwn)
+    k, wGrid, wnGrid, tGrid = dlr.getDLR(beta, Wmax, Nw, Nwn, Nt, eps)
+    for i in range(k):
+        print(i, wGrid[i], tGrid[i], wnGrid[i])
 
+    # Fourier = fourier.fourier(TauGrid, phyFreq, Para.Beta)
+    # Fourier.InitializeKernel(100.0, 1024, "Bose", 1.0e-13)
+
+    # # Dynamic, DynErr = Estimate(
+    # #     Data, Norm, lambda d: np.sum(d[1:Para.Order+1, ...], axis=0))
     # Dynamic, DynErr = Estimate(
-    #     Data, Norm, lambda d: np.sum(d[1:Para.Order+1, ...], axis=0))
-    Dynamic, DynErr = Estimate(
-        Data, Norm, lambda d: np.sum(d[1:2, ...], axis=0))
+    #     Data, Norm, lambda d: np.sum(d[1:2, ...], axis=0))
 
-    arr = np.amin(abs(MomGrid-Para.kF))
-    kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
-    print(kFidx)
+    # arr = np.amin(abs(MomGrid-Para.kF))
+    # kFidx = np.where(abs(arr - abs(MomGrid-Para.kF)) < 1.0e-20)[0][0]
+    # print(kFidx)
 
-    PlotPolarW(Dynamic, MomGrid, kFidx, False)
+    # PlotPolarW(Dynamic, MomGrid, kFidx, False)
     # PlotDataK(SigmaW, MaxFreq, Freq, False)

@@ -68,9 +68,10 @@ class param:
         self.EF = self.kF**2
         self.Beta /= self.EF
         self.MaxExtMom = self.MaxExtMomKF * self.kF
+        self.qTF = np.sqrt(8.0*np.pi*self.Nf)
 
         print(yellow("Parameters:"))
-        print(f"Rs={self.Rs}, kF={self.kF}, EF={self.EF}, Beta={self.Beta}, Mass2={self.Mass2}, Lambda={self.Lambda}, Dim={self.Dim}, Spin={self.Spin}\n")
+        print(f"Rs={self.Rs}, kF={self.kF}, EF={self.EF}, NF={self.Nf}, qTF={self.qTF}, Beta={self.Beta}, Mass2={self.Mass2}, Lambda={self.Lambda}, Dim={self.Dim}, Spin={self.Spin}\n")
         print(yellow("Grid Information:"))
         print(
             f"TauSize={self.TauGridSize}, MomSize={self.MomGridSize}, AngleSize={self.AngGridSize}, MaxExtMom={self.MaxExtMom}")
