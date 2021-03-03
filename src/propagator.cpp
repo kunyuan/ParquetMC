@@ -235,7 +235,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
-  Weight = {0.0, 0.0};
+  // Weight = {0.0, 0.0};
   return Weight;
 }
 
@@ -245,17 +245,27 @@ verWeight propagator::InteractionTau(const momentum &KInL,
                                      const momentum &KOutR, double inT,
                                      double outT, double ExtQ) {
   verWeight Weight;
+  double Ws, Wa;
 
   double kDiQ = (KInL - KOutL).norm();
-  Weight[DIR] = -8.0 * PI * Para.Charge2 /
-                (kDiQ * kDiQ + Para.Mass2 + Para.Lambda) / Para.Beta;
+  Ws = _Interp2D<grid::BoseK>(_DeltaRs, Para.BoseKGrid, Para.TauGrid, kDiQ,
+                              outT - inT);
+  Wa = _Interp2D<grid::BoseK>(_DeltaRa, Para.BoseKGrid, Para.TauGrid, kDiQ,
+                              outT - inT);
+  Weight[DIR] = -(Ws - Wa);
+  Weight[EX] = 2.0 * Wa;
+  // cout << Ws << ", " << Wa << endl;
 
   double kExQ = (KInL - KOutR).norm();
-  Weight[EX] = 8.0 * PI * Para.Charge2 /
-               (kExQ * kExQ + Para.Mass2 + Para.Lambda) / Para.Beta;
+  Ws = _Interp2D<grid::BoseK>(_DeltaRs, Para.BoseKGrid, Para.TauGrid, kExQ,
+                              outT - inT);
+  Wa = _Interp2D<grid::BoseK>(_DeltaRa, Para.BoseKGrid, Para.TauGrid, kExQ,
+                              outT - inT);
+  Weight[DIR] += -2.0 * Wa;
+  Weight[EX] += Ws - Wa;
 
-  // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
-  // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
+  // cout << Ws << ", " << Wa << endl;
+
   // Weight = {0.0, 0.0};
   return Weight;
 }
@@ -326,6 +336,40 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
   int Tidx0 = _TauGridInterp.floor(T);
   double dT0 = T - _TauGridInterp.grid[Tidx0],
          dT1 = _TauGridInterp.grid[Tidx0 + 1] - T;
+
+  // ASSERT(dT0 >= 0.0 && dT1 >= 0.0,
+  //  "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);
+  int Kidx0 = kgrid.floor(K);
+  double dK0 = K - kgrid.grid[Kidx0], dK1 = kgrid.grid[Kidx0 + 1] - K;
+
+  // ASSERT(dK0 >= 0.0 && dK1 >= 0.0,
+  //  "Interpolate fails: " << K - dK0 << "<" << K << "<" << K + dK1);
+
+  double d00 = data(Kidx0, Tidx0), d01 = data(Kidx0, Tidx0 + 1);
+  double d10 = data(Kidx0 + 1, Tidx0), d11 = data(Kidx0 + 1, Tidx0 + 1);
+
+  double g0 = d00 * dK1 + d10 * dK0;
+  double g1 = d01 * dK1 + d11 * dK0;
+
+  double gx = factor * (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
+  return gx;
+}
+
+template <typename KGrid>
+double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid,
+                             const grid::Tau &tgrid, double K, double T) {
+  double factor = 1.0;
+  if (T < 0.0) {
+    T = T + Para.Beta;
+    factor *= -1.0;
+  }
+
+  if (K > kgrid.grid.back() || K < kgrid.grid[0] ||
+      T > Para.TauGrid.grid.back() || T < 0.0)
+    return 0.0;
+
+  int Tidx0 = tgrid.floor(T);
+  double dT0 = T - tgrid.grid[Tidx0], dT1 = tgrid.grid[Tidx0 + 1] - T;
 
   // ASSERT(dT0 >= 0.0 && dT1 >= 0.0,
   //  "Interpolate fails: " << T - dT0 << "<" << T << "<" << T + dT1);

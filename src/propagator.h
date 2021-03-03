@@ -52,6 +52,9 @@ private:
   template <typename KGrid>
   double _Interp2D(const weight2D &data, const KGrid &kgrid, double K,
                    double T);
+  template <typename KGrid>
+  double _Interp2D(const weight2D &data, const KGrid &kgrid,
+                   const grid::Tau &tGrid, double K, double T);
 };
 
 double Angle3D(const momentum &K1, const momentum &K2);
