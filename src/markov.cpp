@@ -21,7 +21,7 @@ using namespace std;
 int LastInterTauIdx(int Order) {
   // the last internal tau index
   if (DiagType == GAMMA)
-    return Order;
+    return Order * 2;
   else if (DiagType == SIGMA)
     return Order - 2;
   else if (DiagType == POLAR)
@@ -61,15 +61,16 @@ void markov::ChangeOrder() {
     if (Var.CurrOrder == Para.Order)
       return;
     NewOrder = Var.CurrOrder + 1;
-    double NewTau;
+    double NewTau1, NewTau2;
 
     // Generate New Tau
     int NewTauIndex = LastInterTauIdx(Var.CurrOrder) + 1;
     if (NewTauIndex < 1) {
       Prop = 1.0;
     } else {
-      Prop = GetNewTau(NewTau);
-      Var.Tau[NewTauIndex] = NewTau;
+      Prop = GetNewTau(NewTau1, NewTau2);
+      Var.Tau[NewTauIndex] = NewTau1;
+      Var.Tau[NewTauIndex + 1] = NewTau2;
     }
 
     // Generate New Mom
@@ -86,12 +87,12 @@ void markov::ChangeOrder() {
     NewOrder = Var.CurrOrder - 1;
 
     // Remove OldTau
-    int TauToRemove = LastInterTauIdx(Var.CurrOrder);
+    int TauToRemove = LastInterTauIdx(Var.CurrOrder) - 1;
 
     if (TauToRemove < 1)
       Prop = 1.0;
     else
-      Prop = RemoveOldTau(Var.Tau[TauToRemove]);
+      Prop = RemoveOldTau(Var.Tau[TauToRemove], Var.Tau[TauToRemove + 1]);
 
     // Remove OldMom
     int LoopToRemove = LastInterLoopIdx(Var.CurrOrder);
@@ -246,25 +247,26 @@ void markov::ChangeExtMomentum() {
   }
 };
 
-double markov::GetNewTau(double &NewTau) {
+double markov::GetNewTau(double &NewTau1, double &NewTau2) {
   double Step = 1.0;
-  NewTau = Random.urn() * Para.Beta;
+  NewTau1 = Random.urn() * Para.Beta;
+  NewTau2 = Random.urn() * Para.Beta;
   // NewTau2 = (Random.urn() - 0.5) * Step + NewTau1;
   // if (NewTau2 < 0.0)
   //   NewTau2 += Para.Beta;
   // if (NewTau2 > Para.Beta)
   //   NewTau2 -= Para.Beta;
   // return Para.Beta * Step;
-  return Para.Beta;
+  return Para.Beta * Para.Beta;
 }
 
-double markov::RemoveOldTau(double &OldTau) {
+double markov::RemoveOldTau(double &OldTau1, double &OldTau2) {
   // double Step = 1.0;
   // if (abs(OldTau2 - OldTau1) > Step / 2.0)
   //   return 0.0;
   // else
   //   return 1.0 / Para.Beta / Step;
-  return 1.0 / Para.Beta;
+  return 1.0 / Para.Beta / Para.Beta;
 }
 
 double markov::GetNewK(momentum &NewMom) {

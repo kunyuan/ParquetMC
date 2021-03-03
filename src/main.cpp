@@ -151,8 +151,11 @@ void InitPara() {
   int dim, spin;
   auto paraStream = GetLine(File);
   paraStream >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >>
-      Para.Lambda >> Para.Charge2 >> dim >> spin >> Para.TotalStep;
+      Para.Lambda >> Para.Fs >> Para.Fa >> Para.Charge2 >> dim >> spin >>
+      Para.TotalStep;
   ASSERT_ALLWAYS(dim == D && spin == SPIN, "Dimension or SPIN doesn't match!");
+
+  Para.Lambda = 0.0;
 
   // grid information
   int TauSize, KSize, AngSize;

@@ -26,6 +26,7 @@ void weight::Initialization() {
     else
       Chan = {I, T, U, S, TC, UC};
 
+    Chan = {I, S};
     cout << "Printing Diagram..." << endl;
     for (int i = 0; i < Chan.size(); ++i) {
       cout << Chan[i] << endl;
@@ -146,14 +147,13 @@ void weight::SaveToFile() {
 
 void weight::Test() {
   // cout << "start testing ..." << endl;
-  
+
   /***
   if (DiagType == GAMMA)
     Gamma[Var.CurrOrder].Test();
   else if (DiagType == SIGMA)
     Sigma[Var.CurrOrder].Test();
   ***/
- 
 }
 
 void weight::Benchmark(int LoopNum, int Step) {

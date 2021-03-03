@@ -21,6 +21,10 @@ public:
                         const momentum &KInR, const momentum &KOutR,
                         double ExtQ = 0.0);
 
+  verWeight InteractionTau(const momentum &KInL, const momentum &KOutL,
+                           const momentum &KInR, const momentum &KOutR,
+                           double inT, double outT, double ExtQ = 0.0);
+
   // get the Direct part of the interaction
   double Interaction(const momentum &TranQ, int VerOrder = 0,
                      double ExtQ = 0.0);
@@ -32,11 +36,15 @@ public:
   void LoadGreenOrder();
   void SaveGreenOrder();
 
+  void LoadInteraction();
+
 private:
-  std::map<int, weight1D>  _StaticSigma;
+  std::map<int, weight1D> _StaticSigma;
   weight2D _DeltaG;
+  weight2D _DeltaRs;
+  weight2D _DeltaRa;
   std::map<int, weight2D> _deltaGOrder;
-  grid::Tau    _TauGridInterp;
+  grid::Tau _TauGridInterp;
   grid::FermiK _MomGridInterp;
 
   template <typename KGrid>

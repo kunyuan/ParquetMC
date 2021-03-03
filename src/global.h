@@ -23,7 +23,7 @@ const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
 const int IsDynamic = false;
-const bool IsProper = true; // true means one-interaction irreducible
+const bool IsProper = false; // true means one-interaction irreducible
 
 const bool IsF = true;
 
@@ -48,6 +48,7 @@ struct parameter {
   double Rs, Ef, Kf;    // r_s, fermi energy, fermi momentum,
   double Nf, Mu, Beta;  // chemical potential, inverse temperature
   double Mass2, Lambda; // screening length^2, shift
+  double Fs, Fa;        // the first Landau parameters
   double Charge2;       // screening length^2
   double Omega;         //
   double OmegaINL;

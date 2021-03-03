@@ -20,7 +20,7 @@ Type = "Symmetry_Anti"
 # Type = "Gamma_4spin"
 
 SleepTime = 5
-Irreducible = True
+Irreducible = False
 
 Para = param(folder)
 
@@ -153,7 +153,7 @@ while True:
             # map DIR, EX to As, Aa
             DataAllList = [SpinMapping(d) for d in DataAllList]
             Data, Err = Estimate(DataAllList, Norm)
-            Data += Bare  # I channel has a bare part
+            # Data += Bare  # I channel has a bare part
             PrintInfo("Sum", Data, Err)
 
             # # print the S channel:

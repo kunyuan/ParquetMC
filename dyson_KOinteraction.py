@@ -9,7 +9,7 @@ import scipy.linalg as slinalg
 from scipy.linalg import lu_factor, lu_solve
 
 # F+ and F-
-Fs, Fa = -0.5, -0.3
+# Fs, Fa = -0.5, -0.3
 
 Para = param("./")
 
@@ -119,16 +119,17 @@ dRaT = np.zeros([Kbose.size, T.size])
 
 
 for qi, q in enumerate(Kbose.grid):
-    inv = (q*q+0.01)/(8.0*np.pi)  # add a small mass to regularize everything
+    # add a small mass to regularize everything
+    inv = (q*q+Para.Mass2)/(8.0*np.pi)
     # dRs=(v+fs)^2*Pi0/(1-(v+fs)*Pi0)
-    denorm = inv-(1.0+inv*fs(q, Fs))*PolarW[qi, :]
-    dRsw[qi, :] = (1.0+inv*fs(q, Fs))**2*PolarW[qi, :]/denorm/inv
+    denorm = inv-(1.0+inv*fs(q, Para.Fs))*PolarW[qi, :]
+    dRsw[qi, :] = (1.0+inv*fs(q, Para.Fs))**2*PolarW[qi, :]/denorm/inv
     coeff[qi, :] = lu_solve((lu, piv), dRsw[qi, :])
     dRsT[qi, :] = KerT @ coeff[qi, :]
 
     # dRa=fa^2*Pi0/(1-fa*Pi0)
-    denorm = 1.0-fa(q, Fa)*PolarW[qi, :]
-    dRaw[qi, :] = fa(q, Fa)**2*PolarW[qi, :]/denorm
+    denorm = 1.0-fa(q, Para.Fa)*PolarW[qi, :]
+    dRaw[qi, :] = fa(q, Para.Fa)**2*PolarW[qi, :]/denorm
     coeff[qi, :] = lu_solve((lu, piv), dRaw[qi, :])
     dRaT[qi, :] = KerT @ coeff[qi, :]
 
@@ -148,3 +149,11 @@ for qi, q in enumerate(Kbose.grid[::6]):
 plt.title("dRa")
 plt.legend()
 plt.show()
+
+with open("interaction.dat", "w") as f:
+    for qi, q in enumerate(Kbose.grid):
+        for ti, t in enumerate(T.grid):
+            f.write(f"{dRsT[qi, ti]} ")
+    for qi, q in enumerate(Kbose.grid):
+        for ti, t in enumerate(T.grid):
+            f.write(f"{dRaT[qi, ti]} ")

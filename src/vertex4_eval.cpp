@@ -38,10 +38,18 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
   if (DiagType == POLAR)
     Weight[0] =
         Prop.Interaction(KInL, KOutL, KInR, KOutR, Var.LoopMom[0].norm());
-  else if ((DiagType == GAMMA) && IsProper)
-    Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR,
-                                 (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm());
-  else
+  else if ((DiagType == GAMMA) && IsProper) {
+
+    Weight[0] =
+        Prop.Interaction(KInL, KOutL, KInR, KOutR,
+                         (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm()) /
+        Para.Beta; // equal-time contribution is distributed evenly in the
+                   // second time variable
+
+    Weight[1] = Prop.InteractionTau(
+        KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]],
+        (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm());
+  } else
     Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
   return;
 }
@@ -124,17 +132,16 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         Weight[map[VERT]] += W * GWeight;
       else {
         int t = map[VERT];
-        
-        // double dTau1 = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]] - 2 * Var.Tau[Tpair[t][OUTR]];
-        // double dTau2 = Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
-        // double dTau3 = Var.Tau[Tpair[t][OUTL]] - Var.Tau[Tpair[t][OUTR]];
-        // double exp1 = cos(Para.OmegaINL * dTau1);
+
+        // double dTau1 = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]] - 2 *
+        // Var.Tau[Tpair[t][OUTR]]; double dTau2 = Var.Tau[Tpair[t][INR]] -
+        // Var.Tau[Tpair[t][OUTR]]; double dTau3 = Var.Tau[Tpair[t][OUTL]] -
+        // Var.Tau[Tpair[t][OUTR]]; double exp1 = cos(Para.OmegaINL * dTau1);
         // double exp2 = cos(Para.OmegaINR * dTau2);
         // double exp3 = cos(Para.Omega * dTau3);
 
-
         // ChanWeight[ChanMap[chan]] += W * GWeight * exp1 * exp2 * exp3;
-        
+
         if (IsF) {
           double dTau = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]];
           dTau += -Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
@@ -144,7 +151,6 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
           dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
           ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
         }
-
       }
     }
   }

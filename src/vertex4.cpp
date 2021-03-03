@@ -63,6 +63,7 @@ void vertex4::Build(int level, int order, int loopIdx, int inTL,
   if (LoopNum() == 0) {
     // the same for left and right vertex with loopnum=0
     _AddTidxPair({Tidx, Tidx, Tidx, Tidx});
+    _AddTidxPair({Tidx, Tidx, Tidx + 1, Tidx + 1});
   } else {
     // push counter-term Tpair first
     for (auto &c : chan) {
@@ -131,7 +132,7 @@ bubble vertex4::_BuildBubble(channel chan, int ol) {
   ////////////////////   Right SubVer  ///////////////////
   int lvl = Level + 1;
   int oR = Order - 1 - ol;
-  int RInT = Tidx + (ol + 1);
+  int RInT = Tidx + (ol + 1) * 2;
   int Llopidx = LoopIdx + 1, Rlopidx = LoopIdx + 1 + ol;
 
   switch (chan) {
