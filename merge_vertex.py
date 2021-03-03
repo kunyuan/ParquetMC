@@ -107,8 +107,10 @@ while True:
 
         # Keep the ExtMom=0 elements only, and average the angle !!!!!!!
         # DataList = [np.average(d[:, :, :, 0, :], axis=2) for d in Data]
+
         DataList = [legendre.LegendreCoeff(d[:, :, :, 0, :], AngGrid, [
                                            0, ], axis=2)[0] for d in Data]
+
         # DataList = [d[:, :, 0, 0, :] for d in DataList]
 
         # construct bare interaction

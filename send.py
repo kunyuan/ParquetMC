@@ -54,6 +54,7 @@ CreateFolder(homedir)
 
 os.system("cp {0} {1}".format(execute, homedir))
 os.system("cp {0} {1}".format("parameter", homedir))
+os.system("cp {0} {1}".format("interaction.data", homedir))
 if selfConsistent:
     lastFolderName = GetLastOrderName(folder_name)
     if "sigma" in folder_name:

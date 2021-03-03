@@ -153,7 +153,7 @@ void propagator::LoadInteraction() {
   _DeltaRa.setZero(Para.BoseKGrid.size, Para.TauGrid.size);
   _DeltaRs.setZero(Para.BoseKGrid.size, Para.TauGrid.size);
   ifstream File;
-  File.open("interaction.dat", ios::in);
+  File.open("interaction.data", ios::in);
   if (File.is_open()) {
     for (int k = 0; k < Para.BoseKGrid.size; ++k)
       for (int t = 0; t < Para.TauGrid.size; ++t)
@@ -236,7 +236,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
   // Weight = {0.0, 0.0};
-  Weight[EX] = 0.0;
+  // Weight[EX] = 0.0;
   return Weight;
 }
 
@@ -257,17 +257,17 @@ verWeight propagator::InteractionTau(const momentum &KInL,
   Weight[EX] = 2.0 * Wa;
   // cout << Ws << ", " << Wa << ", " << _DeltaRs(0, 0) << endl;
 
-  // double kExQ = (KInL - KOutR).norm();
-  // Ws = _Interp2D<grid::BoseK>(_DeltaRs, Para.BoseKGrid, Para.TauGrid, kExQ,
-  //                             outT - inT);
-  // Wa = _Interp2D<grid::BoseK>(_DeltaRa, Para.BoseKGrid, Para.TauGrid, kExQ,
-  //                             outT - inT);
-  // Weight[DIR] += -2.0 * Wa;
-  // Weight[EX] += Ws - Wa;
+  double kExQ = (KInL - KOutR).norm();
+  Ws = _Interp2D<grid::BoseK>(_DeltaRs, Para.BoseKGrid, Para.TauGrid, kExQ,
+                              outT - inT);
+  Wa = _Interp2D<grid::BoseK>(_DeltaRa, Para.BoseKGrid, Para.TauGrid, kExQ,
+                              outT - inT);
+  Weight[DIR] += -2.0 * Wa;
+  Weight[EX] += Ws - Wa;
 
   // cout << Ws << ", " << Wa << endl;
 
-  Weight = {0.0, 0.0};
+  // Weight = {0.0, 0.0};
   // Weight[EX] = 0.0;
   return Weight;
 }

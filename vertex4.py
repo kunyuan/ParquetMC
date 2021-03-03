@@ -12,8 +12,11 @@ import argparse
 # size = 12
 
 
-Type = "As_Aa"
+# Type = "As_Aa"
 # Type = "Gamma_4spin"
+Type = "DirEx"
+
+IsIrreducible = False
 
 parser = argparse.ArgumentParser("Specify some parameters.")
 parser.add_argument("folder")
@@ -30,7 +33,6 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 ChanColor = {0: "c", 1: "r", 2: "b", 3: "g"}
 # 0: total, 1: order 1, ...
 Order = range(Para.Order+1)
-IsIrreducible = True
 
 shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 Data, Norm, Step, Grid = LoadFile(folder, "vertex_pid[0-9]+.dat", shape)
@@ -40,6 +42,7 @@ MomGrid = Grid["KGrid"]
 Angle = np.arccos(AngGrid)
 
 # Data shape : (pid numbers, order, chan, AngleGrid, KGrid)
+
 
 def PrintInfo(Channel, Data, DataErr):
     Data = -np.copy(Data)
@@ -66,6 +69,8 @@ def SpinMapping(Data):
         e = d[..., 0] + d[..., 1]
         d[..., 1] = d[..., 0]
         d[..., 0] = e
+    elif Type == "DirEx":
+        return d
     return d
 
 
@@ -79,6 +84,7 @@ def Bare(angle, Lambda):
         ((2.0*Para.kF*np.sin(angle/2.0))**2+Para.Mass2+Lambda)*Para.Nf
     Bare = SpinMapping(Bare)
     return Bare
+
 
 fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
 plt.suptitle("$r_s={0}, \\lambda={1}$".format(Para.Rs, Para.Lambda))
@@ -94,6 +100,11 @@ elif Type == "Gamma_4spin":
     label_bare_2 = "$u_{\\uparrow\\downarrow}$"
     label_all_1 = "$A_{\\uparrow\\uparrow}$"
     label_all_2 = "$A_{\\uparrow\\downarrow}$"
+elif Type == "DirEx":
+    label_bare_1 = "$u_d$"
+    label_bare_2 = "$u_e$"
+    label_all_1 = "$A_d$"
+    label_all_2 = "$A_e$"
 
 
 bare = Bare(Angle, 0.0)
@@ -105,7 +116,7 @@ Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
 # Data = [np.sum(d[1:Para.Order, ...], axis=0) for d in Data]
 
 
-ColorList = ["r", "b", "g","c","m","y"]
+ColorList = ["r", "b", "g", "c", "m", "y"]
 for chan in Channel:
     if Type == "As_Aa":
         label_channel_1 = f"${ChanName[chan]}_s$"
@@ -113,6 +124,9 @@ for chan in Channel:
     elif Type == "Gamma_4spin":
         label_channel_1 = f"${ChanName[chan]}$" + "$_{\\uparrow\\uparrow}$"
         label_channel_2 = f"${ChanName[chan]}$" + "$_{\\uparrow\\downarrow}$"
+    elif Type == "DirEx":
+        label_channel_1 = f"${ChanName[chan]}$" + "$_d$"
+        label_channel_2 = f"${ChanName[chan]}$" + "$_e$"
 
     data = [SpinMapping(d[chan, :, 0, :])*Para.Nf for d in Data]
     avg, err = Estimate(data, Norm)
@@ -135,11 +149,11 @@ ax2.errorbar(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1], fmt='-',
 
 # ax1.set_xlim([-1.01, 1.01])
 ax1.set_xlim([0.0, 3.15])
-ax1.set_ylim([-3, 2])
+# ax1.set_ylim([-3, 2])
 ax1.set_xlabel("$\\theta$", size=size)
 # ax2.set_xlim([-1.01, 1.01])
 ax2.set_xlim([0.0, 3.15])
-ax2.set_ylim([-3, 2])
+# ax2.set_ylim([-3, 2])
 ax2.set_xlabel("$\\theta$", size=size)
 ax1.legend(loc=1, frameon=False, fontsize=size)
 ax2.legend(loc=1, frameon=False, fontsize=size)
@@ -151,5 +165,5 @@ plt.legend(loc=1, frameon=False, fontsize=size)
 
 plt.tight_layout()
 
-plt.savefig("landau_parameter.pdf")
-# plt.show()
+# plt.savefig("landau_parameter.pdf")
+plt.show()

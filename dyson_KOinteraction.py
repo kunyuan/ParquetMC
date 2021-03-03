@@ -154,7 +154,7 @@ plt.title("dRa")
 plt.legend()
 plt.show()
 
-with open("interaction.dat", "w") as f:
+with open("interaction.data", "w") as f:
     for qi, q in enumerate(Kbose.grid):
         for ti, t in enumerate(T.grid):
             f.write(f"{dRsT[qi, ti]} ")

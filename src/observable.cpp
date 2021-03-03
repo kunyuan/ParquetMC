@@ -95,8 +95,8 @@ void ver4Obs::Measure(int Order, int QIndex, int AngleIndex,
          "AngleIndex out of range!");
 
   for (int chan = 0; chan < 4; ++chan) {
-    // cout << "chan=" << chan << ", " << AngleIndex << ", " << QIndex << endl;
-    // cout << Weight[chan] << endl;
+    // cout << "chan=" << chan << ", " << AngleIndex << ", Q: " << QIndex
+    //      << ", Weight:" << Weight[chan] << ", Factor: " << Factor << endl;
     _Estimator[chan](Order, AngleIndex, QIndex) += Weight[chan] * Factor;
     _Estimator[chan](0, AngleIndex, QIndex) += Weight[chan] * Factor;
   }
@@ -116,6 +116,7 @@ void ver4Obs::Save() {
 
     // cout << "Size: " << Para.Order << ", " << Para.AngleGrid.size << ", "
     //      << Para.BoseKGrid.size << endl;
+    // cout << _Estimator[1](1, 0, 0) << endl;
 
     for (int order = 0; order <= Para.Order; order++)
       for (int chan = 0; chan < 4; chan++)

@@ -5,4 +5,3 @@ rm *.log
 rm *.dat
 rm callgrind*
 rm *.pdf
-rm *.so
