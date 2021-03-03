@@ -211,8 +211,8 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
   // return Weight;
 
   double kDiQ = (KInL - KOutL).norm();
-  Weight[DIR] =
-      -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2 + Para.Lambda);
+  Weight[DIR] = -8.0 * PI * Para.Charge2 /
+                (kDiQ * kDiQ + Para.Mass2 + Para.Lambda) / Para.Beta;
 
   if (DiagType == SIGMA && IsZero(kDiQ))
     Weight[DIR] = 0.0;
@@ -222,8 +222,8 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
     Weight[DIR] = 0.0;
 
   double kExQ = (KInL - KOutR).norm();
-  Weight[EX] =
-      8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+  Weight[EX] = 8.0 * PI * Para.Charge2 /
+               (kExQ * kExQ + Para.Mass2 + Para.Lambda) / Para.Beta;
 
   // Weight[EX] = 0.0;
   if (DiagType == SIGMA && IsZero(kExQ))
@@ -235,6 +235,7 @@ verWeight propagator::Interaction(const momentum &KInL, const momentum &KOutL,
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
+  Weight = {0.0, 0.0};
   return Weight;
 }
 
@@ -244,18 +245,18 @@ verWeight propagator::InteractionTau(const momentum &KInL,
                                      const momentum &KOutR, double inT,
                                      double outT, double ExtQ) {
   verWeight Weight;
-  Weight = {0.0, 0.0};
-  // return Weight;
 
-  // double kDiQ = (KInL - KOutL).norm();
-  // Weight[DIR] = -8.0 * PI * Para.Charge2 / (kDiQ * kDiQ + Para.Mass2);
+  double kDiQ = (KInL - KOutL).norm();
+  Weight[DIR] = -8.0 * PI * Para.Charge2 /
+                (kDiQ * kDiQ + Para.Mass2 + Para.Lambda) / Para.Beta;
 
-  // double kExQ = (KInL - KOutR).norm();
-  // Weight[EX] =
-  //     8.0 * PI * Para.Charge2 / (kExQ * kExQ + Para.Mass2 + Para.Lambda);
+  double kExQ = (KInL - KOutR).norm();
+  Weight[EX] = 8.0 * PI * Para.Charge2 /
+               (kExQ * kExQ + Para.Mass2 + Para.Lambda) / Para.Beta;
 
   // cout << "Ver0: " << Weight[DIR] << ", " << Weight[EX] << endl;
   // cout << "extnal: " << ExtQ << ", " << kDiQ << endl;
+  // Weight = {0.0, 0.0};
   return Weight;
 }
 

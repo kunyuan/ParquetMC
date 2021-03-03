@@ -98,6 +98,11 @@ int main(int argc, const char *argv[]) {
       // cout << Var.LoopMom[0][0] << ", " << Var.LoopMom[0][1] << ", "
       //      << Var.LoopMom[0][2] << endl;
       // Markov.Weight.Test();
+      // if (Var.CurrOrder == 1) {
+      //   cout << "Order " << Var.CurrOrder << ", " << Var.Tau[0] << ", "
+      //        << Var.Tau[1] << ", " << Var.Tau[2] << ", " << Var.Tau[3] <<
+      //        endl;
+      // }
 
       if (i % 8 == 0)
         // fast operations

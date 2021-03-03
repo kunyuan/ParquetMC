@@ -147,13 +147,16 @@ while True:
             print(green("Order {0}".format(o)))
 
             # sum all orders
-            DataAllList = [np.sum(d[1:o+1, ...], axis=0) for d in DataList]
+            # DataAllList = [np.sum(d[1:o+1, ...], axis=0) for d in DataList]
+            DataAllList = [np.sum(d[o:o+1, ...], axis=0) for d in DataList]
             # sum all four channels
             DataAllList = [np.sum(d, axis=0) for d in DataAllList]
             # map DIR, EX to As, Aa
             DataAllList = [SpinMapping(d) for d in DataAllList]
             Data, Err = Estimate(DataAllList, Norm)
             # Data += Bare  # I channel has a bare part
+            # Data *= Para.Beta**4/2.0
+            # Err *= Para.Beta**4/2.0
             PrintInfo("Sum", Data, Err)
 
             # # print the S channel:

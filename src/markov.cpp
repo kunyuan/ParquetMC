@@ -21,7 +21,7 @@ using namespace std;
 int LastInterTauIdx(int Order) {
   // the last internal tau index
   if (DiagType == GAMMA)
-    return Order * 2;
+    return Order * 2 + 1;
   else if (DiagType == SIGMA)
     return Order - 2;
   else if (DiagType == POLAR)

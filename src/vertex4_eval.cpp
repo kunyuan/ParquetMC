@@ -40,17 +40,14 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
         Prop.Interaction(KInL, KOutL, KInR, KOutR, Var.LoopMom[0].norm());
   else if ((DiagType == GAMMA) && IsProper) {
 
-    Weight[0] =
-        Prop.Interaction(KInL, KOutL, KInR, KOutR,
-                         (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm()) /
-        Para.Beta; // equal-time contribution is distributed evenly in the
-                   // second time variable
+    Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR,
+                                 (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm());
 
-    Weight[1] = Prop.InteractionTau(
-        KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]],
-        (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm());
-  } else
+  } else {
     Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
+    Weight[1] = Prop.InteractionTau(KInL, KOutL, KInR, KOutR,
+                                    Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
+  }
   return;
 }
 

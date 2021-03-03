@@ -78,7 +78,7 @@ void oneBodyObs::Save() {
 
 ver4Obs::ver4Obs() {
   Normalization = 1.0e-10;
-  PhyWeight = Para.AngleGrid.size;
+  PhyWeight = Para.AngleGrid.size * Para.Beta;
   for (auto &estimator : _Estimator)
     estimator.Initialize(
         {Para.Order + 1, Para.AngleGrid.size, Para.BoseKGrid.size});
