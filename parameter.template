@@ -1,5 +1,5 @@
-#Order, Beta,  rs, Mass2,  Fs,   Fa,   charge2,  Dim, Spin  TotalStep(1e6)
-   3,    25,  2.0,  0.0,  -0.3, -0.2,    1.0,     3,    2,      101
+#Order, Beta,  rs, Mass2, Lambda, Fs,   Fa,   charge2,  Dim, Spin  TotalStep(1e6)
+   1,    25,  2.0,  0.01,  0.0,  -0.3, -0.2,    1.0,     3,    2,      101
 
 #TauGrid, MomGrid, AngGrid, MaxExtMom(*kF) 
   128,     64,       64,       6.0
