@@ -26,7 +26,7 @@ void weight::Initialization() {
     else
       Chan = {I, T, U, S, TC, UC};
 
-    Chan = {I, S};
+    Chan = {I, T};
     cout << "Printing Diagram..." << endl;
     for (int i = 0; i < Chan.size(); ++i) {
       cout << Chan[i] << endl;
@@ -88,8 +88,10 @@ double weight::Evaluate(int Order) {
     for (auto &w : ChanWeight)
       // collapse all channel to I
       ChanWeight[0] += w;
-    // cout << Order << ", " << ChanWeight[0][DIR] << ", " << ChanWeight[0][EX]
-    //      << endl;
+    // if (Var.CurrOrder == 1)
+    //   cout << Order << ", " << ChanWeight[0][DIR] << ", " <<
+    //   ChanWeight[0][EX]
+    //        << endl;
     return ChanWeight[0][DIR] + ChanWeight[0][EX] / SPIN;
 
   } else if (DiagType == diagtype::POLAR) {

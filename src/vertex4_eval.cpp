@@ -47,6 +47,8 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
     Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
     Weight[1] = Prop.InteractionTau(KInL, KOutL, KInR, KOutR,
                                     Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
+    // cout << "mom: " << (KOutL - KInL).norm() << endl;
+    // cout << Weight[0][DIR] << " vs " << Weight[1][DIR] << endl;
   }
   return;
 }
@@ -107,11 +109,12 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
       auto &Rw = RVerW[map[RVERT]];
 
       // cout << "g " << G[0][map[G0T]] << ", " << G[chan][map[GXT]] << endl;
-      // cout << "Order: " << Order << ", c=" << chan << ", " << GWeight << ",
-      // ["
-      //      << Lw[DIR] << ", " << Lw[EX] << "], [" << Rw[DIR] << ", " <<
-      //      Rw[EX]
-      //      << "]" << endl;
+      // if (Order == 1)
+      //   cout << "Order: " << Order << ", c=" << chan << ", " << GWeight <<
+      //   ",["
+      //        << Lw[DIR] << ", " << Lw[EX] << "], [" << Rw[DIR] << ", " <<
+      //        Rw[EX]
+      //        << "]" << endl;
 
       if (chan == T) {
         W[DIR] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
@@ -147,6 +150,9 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
           double dTau = Var.Tau[Tpair[t][INL]] - Var.Tau[Tpair[t][OUTL]];
           dTau += Var.Tau[Tpair[t][INR]] - Var.Tau[Tpair[t][OUTR]];
           ChanWeight[ChanMap[chan]] += W * GWeight * cos(PI / Para.Beta * dTau);
+          // if (Var.CurrOrder == 1)
+          //   cout << "W: " << W << ", "
+          //        << "GWight: " << GWeight << endl;
         }
       }
     }

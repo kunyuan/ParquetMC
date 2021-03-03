@@ -126,6 +126,8 @@ for qi, q in enumerate(Kbose.grid):
     dRsw[qi, :] = (1.0+inv*fs(q, Para.Fs))**2*PolarW[qi, :]/denorm/inv
     coeff[qi, :] = lu_solve((lu, piv), dRsw[qi, :])
     dRsT[qi, :] = KerT @ coeff[qi, :]
+    # if qi == 0:
+    #     print(denorm, inv, PolarW[qi, :])
 
     # dRa=fa^2*Pi0/(1-fa*Pi0)
     denorm = 1.0-fa(q, Para.Fa)*PolarW[qi, :]
@@ -134,17 +136,19 @@ for qi, q in enumerate(Kbose.grid):
     dRaT[qi, :] = KerT @ coeff[qi, :]
 
 # Ra
+# print(dRsw[0, 0])
+# print(PolarW[0, 0])
 
 ########### Plot Polarization in Tau ################
 plt.figure()
-for qi, q in enumerate(Kbose.grid[::6]):
+for qi, q in enumerate(Kbose.grid[:10]):
     Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
 plt.title("dRs")
 plt.legend()
 plt.show()
 
 plt.figure()
-for qi, q in enumerate(Kbose.grid[::6]):
+for qi, q in enumerate(Kbose.grid[:10]):
     Errorbar(T.grid, dRaT[qi, :], label=f"{q}")
 plt.title("dRa")
 plt.legend()
