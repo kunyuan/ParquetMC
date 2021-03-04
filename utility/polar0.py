@@ -1,4 +1,5 @@
 from numpy import *
+import math
 
 
 def Polarisi(q, w, EF):
@@ -26,7 +27,7 @@ def Polarisi(q, w, EF):
         iw = w[:iw_start]*1j
         wmq2 = iw-q2
         wpq2 = iw+q2
-        # print(wmq2, kFq)
+
         C1 = log(wmq2-kFq)-log(wmq2+kFq)
         C2 = log(wpq2-kFq)-log(wpq2+kFq)
         res[:iw_start] = real(-kF/(4*pi**2) * (1. - D *
@@ -37,6 +38,14 @@ def Polarisi(q, w, EF):
         res[iw_start:] = -c/(w[iw_start:]**2 + b2)
     else:
         # careful for small q or large w
+        if w == 0.0:
+            Nf = kF/2.0/pi/pi
+            x = q/2.0/kF
+            if abs(x-1.0) < 1.0e-8:
+                return -0.5*Nf
+            else:
+                return -(0.5-(x*x-1)/4.0/x*log(abs((1+x)/(1-x))))*Nf
+
         if w <= 20*(q2+kFq):
             iw = w*1j
             wmq2 = iw-q2

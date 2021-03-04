@@ -13,8 +13,6 @@ from scipy.linalg import lu_factor, lu_solve
 
 Para = param("./")
 
-polar.Polarisi(1.e-6, 0.0, Para.EF)
-
 ############# Construct Tau and Mom grids ################
 T = grid.Tau()
 # double beta, int _size, double scale
@@ -23,7 +21,7 @@ T.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF)
 Kbose = grid.BoseK()
 # double kF, double maxK, int _size, double scale
 Kbose.build(Para.kF, Para.MaxExtMom,
-            Para.MomGridSize, np.sqrt(1.0/Para.kF))
+            Para.MomGridSize, 1.0/Para.kF/2.0)
 print(Kbose.grid)
 
 ############  DLR basis   #################################
@@ -42,7 +40,8 @@ for i in range(k):
 PolarW = np.zeros([Kbose.size, k])
 wnlist = wnGrid*2.0*np.pi/Para.Beta
 for qi, q in enumerate(Kbose.grid):
-    PolarW[qi, :] = polar.Polarisi(q, wnlist, Para.EF)
+    for wi, w in enumerate(wnlist):
+        PolarW[qi, wi] = polar.Polarisi(q, w, Para.EF)
 
 coeff = np.zeros([Kbose.size, k])
 PolarBench = np.zeros([Kbose.size, k])

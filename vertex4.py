@@ -108,8 +108,8 @@ elif Type == "DirEx":
 
 
 bare = Bare(Angle, 0.0)
-ax1.plot(Angle, -bare[:, 0], '-', c='y', label=label_bare_1)
-ax2.plot(Angle, -bare[:, 1], '-', c='y', label=label_bare_2)
+# ax1.plot(Angle, -bare[:, 0], '-', c='y', label=label_bare_1)
+# ax2.plot(Angle, -bare[:, 1], '-', c='y', label=label_bare_2)
 
 
 Data = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
@@ -142,10 +142,10 @@ data = [SpinMapping(np.sum(d[:, :, 0, :], axis=0))*Para.Nf for d in Data]
 avg, err = Estimate(data, Norm)
 bareLambda = Bare(Angle, Para.Lambda)
 
-ax1.errorbar(Angle, -(avg[:, 0]+bareLambda[:, 0]), yerr=err[:, 0], fmt='-',
-             capthick=1, capsize=4, c='k', label=label_all_1)
-ax2.errorbar(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1], fmt='-',
-             capthick=1, capsize=4, c='k', label=label_all_2)
+# ax1.errorbar(Angle, -(avg[:, 0]+bareLambda[:, 0]), yerr=err[:, 0], fmt='-',
+#              capthick=1, capsize=4, c='k', label=label_all_1)
+# ax2.errorbar(Angle, -(avg[:, 1]+bareLambda[:, 1]), yerr=err[:, 1], fmt='-',
+#              capthick=1, capsize=4, c='k', label=label_all_2)
 
 # ax1.set_xlim([-1.01, 1.01])
 ax1.set_xlim([0.0, 3.15])
