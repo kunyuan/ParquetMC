@@ -64,7 +64,7 @@ void vertex4::Build(int level, int order, int loopIdx, int inTL,
     // the same for left and right vertex with loopnum=0
     _AddTidxPair({Tidx, Tidx, Tidx, Tidx});
     _AddTidxPair({Tidx, Tidx, Tidx + 1, Tidx + 1});
-    _AddTidxPair({Tidx, Tidx + 1, Tidx, Tidx + 1});
+    _AddTidxPair({Tidx, Tidx + 1, Tidx + 1, Tidx});
   } else {
     // push counter-term Tpair first
     for (auto &c : chan) {
