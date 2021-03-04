@@ -112,19 +112,19 @@ if __name__ == "__main__":
     dRsT, dRaT = InterTau(T.grid, Kbose.grid, Para)
 
     ########### Plot Polarization in Tau ################
-    # plt.figure()
-    # for qi, q in enumerate(Kbose.grid[:10]):
-    #     Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
-    # plt.title("dRs")
-    # plt.legend()
-    # plt.show()
+    plt.figure()
+    for qi, q in enumerate(Kbose.grid[:10]):
+        Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
+    plt.title("dRs")
+    plt.legend()
+    plt.show()
 
-    # plt.figure()
-    # for qi, q in enumerate(Kbose.grid[:10]):
-    #     Errorbar(T.grid, dRaT[qi, :], label=f"{q}")
-    # plt.title("dRa")
-    # plt.legend()
-    # plt.show()
+    plt.figure()
+    for qi, q in enumerate(Kbose.grid[:10]):
+        Errorbar(T.grid, dRaT[qi, :], label=f"{q}")
+    plt.title("dRa")
+    plt.legend()
+    plt.show()
 
     with open("interaction.data", "w") as f:
         for qi, q in enumerate(Kbose.grid):

@@ -26,7 +26,7 @@ void weight::Initialization() {
     else
       Chan = {I, T, U, S, TC, UC};
 
-    Chan = {I, U};
+    Chan = {I, S};
     cout << "Printing Diagram..." << endl;
     for (int i = 0; i < Chan.size(); ++i) {
       cout << Chan[i] << endl;
@@ -125,8 +125,9 @@ void weight::Measure() {
       // double CosAng = diag::Angle3D(Var.LoopMom[INL], Var.LoopMom[INR]);
       // int AngleIndex = diag::Angle2Index(CosAng, Para.AngBinSize);
       // cout << AngleIndex << " vs " << Var.CurrExtAngBin << endl;
-      // if (Var.CurrOrder == 1)
-      //   cout << "Measure: " << ChanWeight[1] << endl;
+      // if (Var.CurrOrder == 1 &&
+      //     (Var.LoopMom[OUTR] - Var.LoopMom[INL]).norm() < 1e-2)
+      //   cout << "Measure: " << ChanWeight[2] << endl;
 
       GammaObs.Measure(Var.CurrOrder, Var.CurrExtMomBin, Var.CurrExtAngBin,
                        ChanWeight, Factor);

@@ -265,7 +265,7 @@ verWeight propagator::InteractionTau(const momentum &KInL,
   Weight[DIR] += -2.0 * Wa;
   Weight[EX] += Ws - Wa;
 
-  // cout << Ws << ", " << Wa << endl;
+  // cout << "Ws: " << Ws << ", " << Wa << endl;
   // double v = 8.0 * PI / Para.Mass2;
   // Weight[DIR] = v * v * Para.Nf / (1.0 + v * Para.Nf) / Para.Beta;
 
@@ -362,12 +362,9 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid, double K,
 template <typename KGrid>
 double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid,
                              const grid::Tau &tgrid, double K, double T) {
-  double factor = 1.0;
   if (T < 0.0) {
     T = T + Para.Beta;
-    factor *= -1.0;
   }
-
   if (K > kgrid.grid.back() || T > Para.TauGrid.grid.back() || T < 0.0)
     return 0.0;
 
@@ -393,7 +390,7 @@ double propagator::_Interp2D(const weight2D &data, const KGrid &kgrid,
 
   // cout << K << "-" << Kidx0 << " dK0: " << dK0 << " dK1: " << dK1 << endl;
   // cout << d00 << ", " << d01 << ", " << d10 << ", " << d11 << endl;
-  double gx = factor * (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
+  double gx = (g0 * dT1 + g1 * dT0) / (dK0 + dK1) / (dT0 + dT1);
   return gx;
 }
 
