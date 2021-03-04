@@ -6,6 +6,7 @@ import numpy as np
 import utility.angle as legendre
 import sys
 import argparse
+import KOinteraction as KO
 
 parser = argparse.ArgumentParser("Specify some parameters.")
 parser.add_argument("folder")
@@ -115,19 +116,30 @@ while True:
 
         # construct bare interaction
         Bare = np.zeros(2)
-        if not Irreducible:
-            Bare[0] -= 8.0*np.pi/(Para.Mass2+Para.Lambda)
+        # if not Irreducible:
+        #     Bare[0] -= 8.0*np.pi/(Para.Mass2+Para.Lambda)
 
         AngHalf = np.arccos(AngGrid)/2.0
-        ExBare = +8.0 * np.pi / \
-            ((2.0*Para.kF*np.sin(AngHalf))**2+Para.Mass2+Para.Lambda)
+        # ExBare = +8.0 * np.pi / \
+        #     ((2.0*Para.kF*np.sin(AngHalf))**2+Para.Mass2+Para.Lambda)
+        ExRs, ExRa = KO.InterFreq(
+            np.array([0]), 2.0*Para.kF*np.sin(AngHalf), Para, addBare=True)
+        ExR = ExRs-ExRa
+
         # ExBare = +8.0 * np.pi / \
         # ((2.0*Para.kF*np.sin(AngHalf))**2+Para.Mass2)
         # print ExBare.shape
 
         # print "ExBare: ", AngleIntegation(ExBare, 0)
         # Bare[1] = np.average(ExBare)
-        Bare[1] = legendre.LegendreCoeff(ExBare, AngGrid, [0, ], 0)[0]
+        Bare[1] = legendre.LegendreCoeff(ExR, AngGrid, [0, ], 0)[0]
+        ExRs = legendre.LegendreCoeff(ExRs, AngGrid, [0, ], 0)[0]
+        ExRa = legendre.LegendreCoeff(ExRa, AngGrid, [0, ], 0)[0]
+        # ExRs *= Para.Nf
+        # ExRa *= Para.Nf
+        Bare[0] = ExRa*2
+        Bare[1] = ExRs-ExRa
+        # print(ExRs*Para.Nf, ExRa*Para.Nf)
         exchange0 = 8.0*np.pi/2.0/Para.kF**2 * \
             np.log((Para.Mass2+Para.Lambda+4.0*Para.kF**2) /
                    (Para.Mass2+Para.Lambda))/2.0  # factor 2 comes from the normalization
@@ -156,7 +168,7 @@ while True:
             # map DIR, EX to As, Aa
             DataAllList = [SpinMapping(d) for d in DataAllList]
             Data, Err = Estimate(DataAllList, Norm)
-            # Data += Bare  # I channel has a bare part
+            Data += Bare  # I channel has a bare part
             PrintInfo("Sum", Data, Err)
 
             # # print the S channel:

@@ -266,6 +266,8 @@ verWeight propagator::InteractionTau(const momentum &KInL,
   Weight[EX] += Ws - Wa;
 
   // cout << Ws << ", " << Wa << endl;
+  // double v = 8.0 * PI / Para.Mass2;
+  // Weight[DIR] = v * v * Para.Nf / (1.0 + v * Para.Nf) / Para.Beta;
 
   // Weight = {0.0, 0.0};
   // Weight[EX] = 0.0;

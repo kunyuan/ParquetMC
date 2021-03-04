@@ -140,14 +140,14 @@ for qi, q in enumerate(Kbose.grid):
 
 ########### Plot Polarization in Tau ################
 plt.figure()
-for qi, q in enumerate(Kbose.grid[:10]):
+for qi, q in enumerate(Kbose.grid[::20]):
     Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
 plt.title("dRs")
 plt.legend()
 plt.show()
 
 plt.figure()
-for qi, q in enumerate(Kbose.grid[:10]):
+for qi, q in enumerate(Kbose.grid[::20]):
     Errorbar(T.grid, dRaT[qi, :], label=f"{q}")
 plt.title("dRa")
 plt.legend()

@@ -48,7 +48,10 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
     Weight[1] = Prop.InteractionTau(KInL, KOutL, KInR, KOutR,
                                     Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
     // cout << "mom: " << (KOutL - KInL).norm() << endl;
+    // if ((KOutL - KInL).norm() < 1.0e-2) {
+    // cout << "mom: " << (KOutL - KInL).norm() << endl;
     // cout << Weight[0][DIR] << " vs " << Weight[1][DIR] << endl;
+    // }
   }
   return;
 }
@@ -104,6 +107,9 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
 
     for (auto &map : b.Map) {
       GWeight = ProjFactor * G[0][map[G0T]] * G[chan][map[GXT]];
+      // GWeight = ProjFactor *
+      //           Prop.Green(Para.Beta / 2.0, Var.LoopMom[LoopIdx], UP, 0) *
+      //           Prop.Green(-Para.Beta / 2.0, Var.LoopMom[LoopIdx], UP, 0);
 
       auto &Lw = LVerW[map[LVERT]];
       auto &Rw = RVerW[map[RVERT]];

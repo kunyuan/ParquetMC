@@ -8,8 +8,8 @@ import scipy.linalg as slinalg
 from scipy.linalg import lu_factor, lu_solve
 
 
-def fs(q, Fs): return Fs/Para.Nf
-def fa(q, Fa): return Fa/Para.Nf
+def fsq(q, fs): return fs
+def faq(q, fa): return fa
 
 
 def InterFreq(wngrid, kgrid, Para, addBare):
@@ -26,16 +26,19 @@ def InterFreq(wngrid, kgrid, Para, addBare):
     Rsw = np.zeros_like(PolarW)
     Raw = np.zeros_like(PolarW)
 
+    fs = Para.Fs/Para.Nf
+    fa = Para.Fa/Para.Nf
+
     for qi, q in enumerate(kgrid):
         # add a small mass to regularize everything
         inv = (q*q+Para.Mass2)/(8.0*np.pi)
         # dRs=(v+fs)^2*Pi0/(1-(v+fs)*Pi0)
-        denorm = inv-(1.0+inv*fs(q, Para.Fs))*PolarW[qi, :]
-        Rsw[qi, :] = (1.0+inv*fs(q, Para.Fs))**2*PolarW[qi, :]/denorm/inv
+        denorm = inv-(1.0+inv*fsq(q, fs))*PolarW[qi, :]
+        Rsw[qi, :] = (1.0+inv*fsq(q, fs))**2*PolarW[qi, :]/denorm/inv
 
         # dRa=fa^2*Pi0/(1-fa*Pi0)
-        denorm = 1.0-fa(q, Para.Fa)*PolarW[qi, :]
-        Raw[qi, :] = fa(q, Para.Fa)**2*PolarW[qi, :]/denorm
+        denorm = 1.0-faq(q, fa)*PolarW[qi, :]
+        Raw[qi, :] = faq(q, fa)**2*PolarW[qi, :]/denorm
 
         if addBare:
             Rsw[qi, :] += 1.0/inv

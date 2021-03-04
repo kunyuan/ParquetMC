@@ -26,7 +26,7 @@ void weight::Initialization() {
     else
       Chan = {I, T, U, S, TC, UC};
 
-    Chan = {I, T, U, S};
+    Chan = {I, U};
     cout << "Printing Diagram..." << endl;
     for (int i = 0; i < Chan.size(); ++i) {
       cout << Chan[i] << endl;
