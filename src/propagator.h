@@ -21,9 +21,13 @@ public:
                         const momentum &KInR, const momentum &KOutR,
                         double ExtQ = 0.0);
 
+  verWeight InteractionTauBare(const momentum &KInL, const momentum &KOutL,
+                               const momentum &KInR, const momentum &KOutR,
+                               double inTL, double inTR, double ExtQ = 0.0);
+
   verWeight InteractionTau(const momentum &KInL, const momentum &KOutL,
                            const momentum &KInR, const momentum &KOutR,
-                           double inT, double outT, double ExtQ = 0.0);
+                           double inTL, double inTR, double ExtQ = 0.0);
 
   // get the Direct part of the interaction
   double Interaction(const momentum &TranQ, int VerOrder = 0,
