@@ -44,10 +44,9 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
                                  (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm());
 
   } else {
-    Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
-    // Weight[0] = Prop.InteractionTauBare(
-    //     KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]],
-    //     Var.Tau[Tpair[1][2]]);
+    // Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
+    Weight[0] = Prop.InteractionTauBare(
+        KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
     auto weight = Prop.InteractionTau(
         KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
     // cout << Tpair[1][0] << " to " << Tpair[1][2] << endl;

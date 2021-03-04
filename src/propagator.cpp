@@ -270,7 +270,8 @@ verWeight propagator::InteractionTauBare(const momentum &KInL,
   double kExQ = (KInL - KOutR).norm();
   Weight[EX] = 8.0 * PI /
                (kExQ * kExQ + Para.Mass2 +
-                Para.Nf * 8.0 * PI * lindhard(kDiQ / Para.Kf / 2.0));
+                Para.Nf * 8.0 * PI * lindhard(kDiQ / Para.Kf / 2.0)) /
+               Para.Beta;
   Weight[EX] -= _Interp2D<grid::BoseK>(_DeltaRs, Para.BoseKGrid, Para.TauGrid,
                                        kExQ, outT - inT);
 
