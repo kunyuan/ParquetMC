@@ -45,8 +45,10 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
 
   } else {
     // Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
-    Weight[0] = Prop.InteractionTauBare(
-        KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
+    // Weight[0] = Prop.InteractionTauBare(
+    //     KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]],
+    //     Var.Tau[Tpair[1][2]]);
+    Weight[0] = {0.0, 0.0};
     auto weight = Prop.InteractionTau(
         KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
     // cout << Tpair[1][0] << " to " << Tpair[1][2] << endl;
@@ -133,7 +135,9 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
       //        << "]" << endl;
 
       if (chan == T) {
-        W[DIR] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
+        // W[DIR] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] *
+        // Rw[DIR];
+        W[DIR] = Lw[DIR] * Rw[DIR] * SPIN;
         // W[DIR] = Lw[DIR] * Rw[EX];
         W[EX] = Lw[EX] * Rw[EX];
       } else if (chan == U) {
