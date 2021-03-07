@@ -69,3 +69,5 @@ A_*
 F_*
 sigma_*
 test.*
+*.npy
+*.npz

@@ -1,11 +1,24 @@
 #!/usr/bin/env python3
-from utility.IO import *
-from utility.plot import *
-import utility.polar0 as polar
-import utility.dlr_boson as dlr
+import dlr_boson as dlr
+import polar0 as polar
 import numpy as np
 import scipy.linalg as slinalg
 from scipy.linalg import lu_factor, lu_solve
+import matplotlib.pyplot as plt
+
+
+class para:
+    def __init__(self):
+        self.Beta = 25.0
+        self.Rs = 1.0
+        self.Mass2 = 1.0
+        self.Fs = 0.0
+        self.Fa = 0.0
+        self.kF = (9.0*np.pi/4.0)**(1.0/3.0)/self.Rs
+        self.EF = self.kF**2
+        self.Spin = 2
+        self.Nf = self.kF/4.0/np.pi**2*self.Spin
+        self.Beta = self.Beta/self.EF
 
 
 def fsq(q, fs): return fs
@@ -22,6 +35,9 @@ def InterFreq(wngrid, kgrid, Para, addBare):
     for qi, q in enumerate(kgrid):
         for wi, w in enumerate(wngrid):
             PolarW[qi, wi] = polar.Polarisi(q, w, Para.EF)
+            print(q, w, PolarW[qi, wi])
+
+    # print(PolarW[:, 0])
 
     Rsw = np.zeros_like(PolarW)
     Raw = np.zeros_like(PolarW)
@@ -87,6 +103,7 @@ def InterTau(tgrid, kgrid, Para, eps=1.0e-12):
     # print(np.average(dRsT[0, :])*Para.Beta, Rsw[0, 0])
     print("RsT(q=0, tau)-Rs(q=0, w=0)/beta: ",
           np.max(abs(dRsT[0, :]-Rsw[0, 0]/Para.Beta)))
+    # print(dRsT[0, :])
 
     print("Maximum fitting error of Rs in frequency: ", np.max(abs(Rsw-_Rsw)))
     print("Maximum fitting error of Ra in frequency: ", np.max(abs(Raw-_Raw)))
@@ -95,49 +112,42 @@ def InterTau(tgrid, kgrid, Para, eps=1.0e-12):
 
 
 if __name__ == "__main__":
-    import grid
-    Para = param("./")
 
-    ############# Construct Tau and Mom grids ################
-    T = grid.Tau()
-    # double beta, int _size, double scale
-    T.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF)
-    print(T.grid)
-    Kbose = grid.BoseK()
-    # double kF, double maxK, int _size, double scale
-    Kbose.build(Para.kF, Para.MaxExtMom,
-                Para.MomGridSize, 1.0/Para.kF/2.0)
-    # print(Kbose.grid)
+    Para = para()
 
-    # tgrid = np.loadtxt("./calculator/tgrid.dat")
-    # kgrid = np.loadtxt("./calculator/kgrid.dat")
-    # dRsT, dRaT = InterTau(tgrid, kgrid, Para)
+    tgrid = np.loadtxt("tgrid.dat")
+    kgrid = np.loadtxt("kgrid.dat")
 
-    dRsT, dRaT = InterTau(T.grid, Kbose.grid, Para)
+    dRsT, dRaT = InterTau(tgrid, kgrid, Para)
+
+    # print(polar.Polarisi(2.2e-16, 0.0, Para.EF))
+    # print(dRsT[10, :])
 
     ########### Plot Polarization in Tau ################
     plt.figure()
-    for qi, q in enumerate(Kbose.grid[:10]):
-        Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
-    # for qi, q in enumerate(kgrid[:10]):
-    #     Errorbar(tgrid, dRsT[qi, :], label=f"{q}")
+    for qi, q in enumerate(kgrid[:10]):
+        plt.plot(tgrid, dRsT[qi, :], label=f"{q}")
+        # plt.plot(tgrid, dRsT[0, :], label=f"{q}")
     plt.title("dRs")
     plt.legend()
     plt.show()
 
     plt.figure()
-    for qi, q in enumerate(Kbose.grid[:10]):
-        Errorbar(T.grid, dRaT[qi, :], label=f"{q}")
-    # for qi, q in enumerate(kgrid[:10]):
-    #     Errorbar(tgrid, dRaT[qi, :], label=f"{q}")
+    for qi, q in enumerate(kgrid[:10]):
+        plt.plot(tgrid, dRaT[qi, :], label=f"{q}")
     plt.title("dRa")
     plt.legend()
     plt.show()
 
-    with open("interaction.data", "w") as f:
-        for qi, q in enumerate(Kbose.grid):
-            for ti, t in enumerate(T.grid):
-                f.write(f"{dRsT[qi, ti]} ")
-        for qi, q in enumerate(Kbose.grid):
-            for ti, t in enumerate(T.grid):
-                f.write(f"{dRaT[qi, ti]} ")
+    # savetxt("interaction.dat")
+    np.save("Rs", dRsT)
+    np.save("Ra", dRaT)
+
+    # with open("interaction.dat", "w") as f:
+    #     for qi, q in enumerate(kgrid):
+    #         for ti, t in enumerate(tgrid):
+    #             f.write(f"{dRsT[qi, ti]} ")
+    # f.write("\n")
+    # for qi, q in enumerate(kgrid):
+    #     for ti, t in enumerate(tgrid):
+    #         f.write(f"{dRaT[qi, ti]} ")
