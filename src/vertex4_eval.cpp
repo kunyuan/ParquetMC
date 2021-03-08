@@ -44,11 +44,11 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
                                  (Var.LoopMom[INL] - Var.LoopMom[OUTL]).norm());
 
   } else {
-    // Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
+    Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
     // Weight[0] = Prop.InteractionTauBare(
     //     KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]],
     //     Var.Tau[Tpair[1][2]]);
-    Weight[0] = {0.0, 0.0};
+    Weight[0][EX] = 0.0;
     auto weight = Prop.InteractionTau(
         KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
     // cout << Tpair[1][0] << " to " << Tpair[1][2] << endl;
@@ -56,7 +56,8 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
     Weight[1][EX] = 0.0;
     Weight[2][DIR] = 0.0;
     Weight[2][EX] = weight[EX];
-    // Weight[1] = {0.0, 0.0};
+    Weight[1] = {0.0, 0.0};
+    Weight[2][EX] = 1.0;
     // Weight[2] = {0.0, 0.0};
     // cout << "mom: " << (KOutL - KInL).norm() << endl;
     // if ((KOutL - KInL).norm() < 1.0e-2) {
@@ -118,10 +119,10 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
     // cout << "after2: " << b.Channel << ", " << b.Map.size() << endl << endl;
 
     for (auto &map : b.Map) {
-      GWeight = ProjFactor * G[0][map[G0T]] * G[chan][map[GXT]];
-      // GWeight = ProjFactor *
-      //           Prop.Green(Para.Beta / 2.0, Var.LoopMom[LoopIdx], UP, 0) *
-      //           Prop.Green(-Para.Beta / 2.0, Var.LoopMom[LoopIdx], UP, 0);
+      // GWeight = ProjFactor * G[0][map[G0T]] * G[chan][map[GXT]];
+      GWeight = ProjFactor *
+                Prop.Green(Para.Beta / 2.0, Var.LoopMom[LoopIdx], UP, 0) *
+                Prop.Green(-Para.Beta / 2.0, Var.LoopMom[LoopIdx], UP, 0);
 
       auto &Lw = LVerW[map[LVERT]];
       auto &Rw = RVerW[map[RVERT]];
@@ -137,8 +138,8 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
       if (chan == T) {
         // W[DIR] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] *
         // Rw[DIR];
-        W[DIR] = Lw[DIR] * Rw[DIR] * SPIN;
-        // W[DIR] = Lw[DIR] * Rw[EX];
+        // W[DIR] = Lw[DIR] * Rw[DIR] * SPIN;
+        W[DIR] = Lw[EX] * Rw[DIR];
         W[EX] = Lw[EX] * Rw[EX];
       } else if (chan == U) {
         W[EX] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
