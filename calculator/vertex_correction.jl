@@ -51,7 +51,9 @@ function interaction(qd, qe, t1, t2)
         we = Interpolate.linear2D(Rs, Q, T, qe, dt)
     end
 
-    # we = 1.0 / (qe * qe + 1)
+    vd, ve = 0.0, 0.0
+    wd = 1.0 / (qd * qd + 1)
+    we = 1.0 / (qe * qe + 1)
 
     # println(wd, ", ", vd)
 
@@ -64,9 +66,9 @@ end
 function phase(tInL, tOutL, tInR, tOutR)
     # return 1.0;
     if (IsF)
-        return exp(π * ((tInL + tOutL) - (tInR + tOutR)));
+        return cos(π * ((tInL + tOutL) - (tInR + tOutR)));
     else
-        return exp(π * ((tInL - tOutL) + (tInR - tOutR)))
+        return cos(π * ((tInL - tOutL) + (tInR - tOutR)))
     end
 end
 
@@ -89,53 +91,50 @@ function Tchannel(legK, t, k1)
     gd32 = Spectral.kernelFermiT(t[2] - t[3], ϵ2)
     gd42 = Spectral.kernelFermiT(t[2] - t[4], ϵ2)
 
-    # # # v(1111)*G(k1, 13)*G(k2, 31)*v(3333) ==> (1133)
-    # G = gu13 * gd31 / (2π)^3 * phase(t[1], t[1], t[3], t[3])
-    # wd += G * (SPIN * vld * vrd + vld * vre + vle * vrd)
-    # # wd += G * (SPIN * vld * vrd )
-    # we += G * (vle * vre)
+    # # v(1111)*G(k1, 13)*G(k2, 31)*v(3333) ==> (1133)
+    G = gu13 * gd31 / (2π)^3 * phase(t[1], t[1], t[3], t[3])
+    wd += G * (SPIN * vld * vrd + vld * vre + vle * vrd)
+    we += G * (vle * vre)
 
-    # # wd += G * (SPIN * (vld + wld) * (vrd + wrd) )
+    # v(1111)*G(k1, 13)*G(k2, 31)*Wd(3344) ==> (1144)
+    G = gu13 * gd31 / (2π)^3 * phase(t[1], t[1], t[4], t[4])
+    wd += G * (SPIN * vld * wrd + vle * wrd)
+    we += 0.0
 
-    # # v(1111)*G(k1, 13)*G(k2, 31)*Wd(3344) ==> (1144)
-    # G = gu13 * gd31 / (2π)^3 * phase(t[1], t[1], t[4], t[4])
-    # wd += G * (SPIN * vld * wrd + vle * wrd)
-    # we += 0.0
+    # Wd(1122)*G(k1, 23)*G(k2, 32)*v(3333) ==> (1133)
+    G = gu23 * gd32 / (2π)^3 * phase(t[1], t[1], t[3], t[3])
+    wd += G * (SPIN * wld * vrd + wld * vre)
+    we += 0.0
 
-    # # Wd(1122)*G(k1, 23)*G(k2, 32)*v(3333) ==> (1133)
-    # G = gu23 * gd32 / (2π)^3 * phase(t[1], t[1], t[3], t[3])
-    # wd += G * (SPIN * wld * vrd + wld * vre)
-    # we += 0.0
-
-    # # Wd(1122)*G(k1, 23)*G(k2, 32)*Wd(3344) ==> (1144)
-    # G = gu23 * gd32 / (2π)^3 * phase(t[1], t[1], t[4], t[4])
-    # wd += G * (SPIN * wld * wrd + vle * wrd)
-    # we += 0.0
+    # Wd(1122)*G(k1, 23)*G(k2, 32)*Wd(3344) ==> (1144)
+    G = gu23 * gd32 / (2π)^3 * phase(t[1], t[1], t[4], t[4])
+    wd += G * (SPIN * wld * wrd + vle * wrd)
+    we += 0.0
 
     # v(1111)*G(k1, 13)*G(k2, 41)*We(3443) ==> (1143)
-    # G = gu13 * gd41 / (2π)^3 * phase(t[1], t[1], t[4], t[3])
-    # wd += G * (vld * wre)
-    # we += G * (vle * wre)
+    G = gu13 * gd41 / (2π)^3 * phase(t[1], t[1], t[4], t[3])
+    wd += G * (vld * wre)
+    we += G * (vle * wre)
 
-    # # Wd(1122)*G(k1, 24)*G(k2, 32)*We(3443) ==> (1143)
-    # G = gu23 * gd42 / (2π)^3 * phase(t[1], t[1], t[4], t[3])
-    # wd += G * (wld * wre)
-    # we += 0.0
+    # Wd(1122)*G(k1, 24)*G(k2, 32)*We(3443) ==> (1143)
+    G = gu23 * gd42 / (2π)^3 * phase(t[1], t[1], t[4], t[3])
+    wd += G * (wld * wre)
+    we += 0.0
 
     # # We(1221)*G(k1, 13)*G(k2, 32)*v(3333) ==> (1233)
     G = gu13 * gd32 / (2π)^3 * phase(t[1], t[2], t[3], t[3])
     wd += G * (wle * vrd)
     we += G * (wle * vre)
 
-    # # We(1221)*G(k1, 13)*G(k2, 32)*Wd(3344) ==> (1244)
-    # G = gu13 * gd32 / (2π)^3 * phase(t[1], t[2], t[4], t[4])
-    # wd += G * (wle * wrd)
-    # we += 0.0
+    # We(1221)*G(k1, 13)*G(k2, 32)*Wd(3344) ==> (1244)
+    G = gu13 * gd32 / (2π)^3 * phase(t[1], t[2], t[4], t[4])
+    wd += G * (wle * wrd)
+    we += 0.0
 
-    # # We(1221)*G(k1, 13)*G(k2, 32)*We(3443) ==> (1243)
-    # G = gu13 * gd42 / (2π)^3 * phase(t[1], t[2], t[4], t[3])
-    # wd += 0.0
-    # we += G * (wle * wre)
+    # We(1221)*G(k1, 13)*G(k2, 42)*We(3443) ==> (1243)
+    G = gu13 * gd42 / (2π)^3 * phase(t[1], t[2], t[4], t[3])
+    wd += 0.0
+    we += G * (wle * wre)
 
     return @SVector [wd, we]
 end
@@ -143,18 +142,20 @@ end
 function integrand1(x, f)
     k, θ, ϕ = x[1] * kF, x[2] * π, x[3] * 2π
     k1 = @SVector [k * sin(θ) * cos(ϕ), k * sin(θ) * sin(ϕ), k * cos(θ)]
-    t = @SVector [x[4], x[5], x[6], x[7]]
-    factor = kF * 2π^2 * β^4 * k^2 * sin(θ) 
-    f[1], f[2] = Tchannel(legK, t, k1) * factor * Nf / β
+    t = @SVector [0.0, x[4], x[5], x[6]]
+    # t = @SVector [x[4], x[5], x[6], x[7]]
+    factor = kF * 2π^2 * β^3 * k^2 * sin(θ) 
+    f[1], f[2] = Tchannel(legK, t, k1) * factor * Nf 
     # return * 4π * k^2 * kF * phase * β^2
 end
 
 function integrand2(x, f)
     k, θ, ϕ = kF + x[1] / (1 - x[1]), x[2] * π, x[3] * 2π
     k1 = @SVector [k * sin(θ) * cos(ϕ), k * sin(θ) * sin(ϕ), k * cos(θ)]
-    t = @SVector [x[4], x[5], x[6], x[7]]
-    factor = 2π^2 * β^4 * k^2 * sin(θ) / (1 - x[1])^2
-    f[1], f[2] = Tchannel(legK, t, k1) * factor * Nf / β
+    t = @SVector [0.0, x[4], x[5], x[6]]
+    # t = @SVector [x[4], x[5], x[6], x[7]]
+    factor = 2π^2 * β^3 * k^2 * sin(θ) / (1 - x[1])^2
+    f[1], f[2] = Tchannel(legK, t, k1) * factor * Nf 
     # return * 4π * k^2 * kF * phase * β^2
 end
 
@@ -194,16 +195,16 @@ end
 
 # end
 
-result1, err1 = Cuba.cuhre(integrand1, 7, 2, atol=1e-12, rtol=1e-10);
-result2, err2 = Cuba.cuhre(integrand2, 7, 2, atol=1e-12, rtol=1e-10);
+result1, err1 = Cuba.cuhre(integrand1, 6, 2, atol=1e-12, rtol=1e-10);
+result2, err2 = Cuba.cuhre(integrand2, 6, 2, atol=1e-12, rtol=1e-10);
 
 # println(" Dir: ", result1[1], " ± ", err1[1])
 # println(" Result of Cuba: ", result2[1], " ± ", err2[1])
 println(" Dir: ", result1[1] + result2[1], " ± ", err1[1] + err2[1])
 println(" Ex : ", result1[2] + result2[2], " ± ", err1[2] + err2[2])
 
-result1, err1 = Cuba.vegas(integrand1, 7, 2, atol=1e-12, rtol=1e-10);
-result2, err2 = Cuba.vegas(integrand2, 7, 2, atol=1e-12, rtol=1e-10);
+result1, err1 = Cuba.vegas(integrand1, 6, 2, atol=1e-12, rtol=1e-10);
+result2, err2 = Cuba.vegas(integrand2, 6, 2, atol=1e-12, rtol=1e-10);
 
 # println(" Result of Cuba: ", result1[1], " ± ", err1[1])
 # println(" Result of Cuba: ", result2[1], " ± ", err2[1])
