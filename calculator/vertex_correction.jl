@@ -51,9 +51,9 @@ function interaction(qd, qe, t1, t2)
         we = Interpolate.linear2D(Rs, Q, T, qe, dt)
     end
 
-    vd, ve = 0.0, 0.0
-    wd = 1.0 / (qd * qd + 1)
-    we = 1.0 / (qe * qe + 1)
+    # vd, ve = 0.0, 0.0
+    # wd = 1.0 / (qd * qd + 1)
+    # we = 1.0 / (qe * qe + 1)
 
     # println(wd, ", ", vd)
 
@@ -142,8 +142,8 @@ end
 function integrand1(x, f)
     k, θ, ϕ = x[1] * kF, x[2] * π, x[3] * 2π
     k1 = @SVector [k * sin(θ) * cos(ϕ), k * sin(θ) * sin(ϕ), k * cos(θ)]
-    t = @SVector [0.0, x[4], x[5], x[6]]
-    # t = @SVector [x[4], x[5], x[6], x[7]]
+    # t = @SVector [0.0, x[4], x[5], x[6]]
+    t = @SVector [x[4], x[5], x[6], x[7]]
     factor = kF * 2π^2 * β^3 * k^2 * sin(θ) 
     f[1], f[2] = Tchannel(legK, t, k1) * factor * Nf 
     # return * 4π * k^2 * kF * phase * β^2
@@ -152,8 +152,8 @@ end
 function integrand2(x, f)
     k, θ, ϕ = kF + x[1] / (1 - x[1]), x[2] * π, x[3] * 2π
     k1 = @SVector [k * sin(θ) * cos(ϕ), k * sin(θ) * sin(ϕ), k * cos(θ)]
-    t = @SVector [0.0, x[4], x[5], x[6]]
-    # t = @SVector [x[4], x[5], x[6], x[7]]
+    # t = @SVector [0.0, x[4], x[5], x[6]]
+    t = @SVector [x[4], x[5], x[6], x[7]]
     factor = 2π^2 * β^3 * k^2 * sin(θ) / (1 - x[1])^2
     f[1], f[2] = Tchannel(legK, t, k1) * factor * Nf 
     # return * 4π * k^2 * kF * phase * β^2
@@ -195,16 +195,16 @@ end
 
 # end
 
-result1, err1 = Cuba.cuhre(integrand1, 6, 2, atol=1e-12, rtol=1e-10);
-result2, err2 = Cuba.cuhre(integrand2, 6, 2, atol=1e-12, rtol=1e-10);
+result1, err1 = Cuba.cuhre(integrand1, 7, 2, atol=1e-12, rtol=1e-10);
+result2, err2 = Cuba.cuhre(integrand2, 7, 2, atol=1e-12, rtol=1e-10);
 
 # println(" Dir: ", result1[1], " ± ", err1[1])
 # println(" Result of Cuba: ", result2[1], " ± ", err2[1])
 println(" Dir: ", result1[1] + result2[1], " ± ", err1[1] + err2[1])
 println(" Ex : ", result1[2] + result2[2], " ± ", err1[2] + err2[2])
 
-result1, err1 = Cuba.vegas(integrand1, 6, 2, atol=1e-12, rtol=1e-10);
-result2, err2 = Cuba.vegas(integrand2, 6, 2, atol=1e-12, rtol=1e-10);
+result1, err1 = Cuba.vegas(integrand1, 7, 2, atol=1e-12, rtol=1e-10);
+result2, err2 = Cuba.vegas(integrand2, 7, 2, atol=1e-12, rtol=1e-10);
 
 # println(" Result of Cuba: ", result1[1], " ± ", err1[1])
 # println(" Result of Cuba: ", result2[1], " ± ", err2[1])
