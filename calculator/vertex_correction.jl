@@ -17,8 +17,10 @@ INL, OUTL, INR, OUTR = 1, 2, 3, 4
 DI, EX = 1, 2
 
 k0 = @SVector [0.0, 0.0, kF]
+k1 = @SVector [1.0e-2, 0.0, kF - 1.e-2]
+k2 = @SVector [-1.0e-2, 0.0, kF + 1.e-2]
 
-legK = [k0, k0, k0, k0]
+legK = [k0, k1, k0, k2]
 
 Rs = npzread("Rs.npy") # dimension: k, t
 Ra = npzread("Ra.npy") # dimension: k, t
@@ -42,11 +44,12 @@ function interaction(qd, qe, t1, t2)
     qe = sqrt(dot(qe, qe))
     dt = abs(t2 - t1) * β
 
+
     # bare interaction part, equal time (t1, t1, t1, t1)
-    vd = -8π / (qd^2 + mass2) / β
-    ve = 8π / (qe^2 + mass2) / β
-    # vd = -8π / (qd^2 + mass2 + 8π * Nf * lindhard(qd / 2.0 / kF)) / β
-    # ve = 8π / (qe^2 + mass2 + 8π * Nf * lindhard(qe / 2.0 / kF)) / β
+    # vd = -8π / (qd^2 + mass2) / β
+    # ve = 8π / (qe^2 + mass2) / β
+    vd = -8π / (qd^2 + mass2 + 8π * Nf * lindhard(qd / 2.0 / kF)) / β
+    ve = 8π / (qe^2 + mass2 + 8π * Nf * lindhard(qe / 2.0 / kF)) / β
 
     # direct part of retared interaction, (t1, t1, t2, t2)
     if (qd <= Q.grid[1])
@@ -76,6 +79,12 @@ function interaction(qd, qe, t1, t2)
     # println(wd, ", ", vd)
 
     # ve, we = 0.0, 0.0
+    if (qd < 1.0e-3)
+        vd, wd = 0.0, 0.0
+    end
+    if (qe < 1.0e-3)
+        ve, we = 0.0, 0.0
+    end
 
     return vd, ve, wd, we
     # return 1 / β
@@ -231,3 +240,4 @@ println(" Dir: ", result1[1] + result2[1], " ± ", err1[1] + err2[1])
 println(" Ex : ", result1[2] + result2[2], " ± ", err1[2] + err2[2])
 
 
+    

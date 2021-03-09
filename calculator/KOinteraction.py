@@ -11,7 +11,7 @@ class para:
     def __init__(self):
         self.Beta = 25.0
         self.Rs = 1.0
-        self.Mass2 = 0.1
+        self.Mass2 = 1.0e-6
         self.Fs = 0.0
         self.Fa = 0.0
         self.kF = (9.0*np.pi/4.0)**(1.0/3.0)/self.Rs
@@ -50,7 +50,8 @@ def InterFreq(wngrid, kgrid, Para, addBare):
         inv = (q*q+Para.Mass2)/(8.0*np.pi)
         # dRs=(v+fs)^2*Pi0/(1-(v+fs)*Pi0)
         denorm = inv-(1.0+inv*fsq(q, fs))*PolarW[qi, :]
-        Rsw[qi, :] = (1.0+inv*fsq(q, fs))**2*PolarW[qi, :]/denorm/inv
+        # Rsw[qi, :] = (1.0+inv*fsq(q, fs))**2*PolarW[qi, :]/denorm/inv
+        Rsw[qi, :] = (1.0+inv*fsq(q, fs))**2*PolarW[qi, :]/denorm
 
         # dRa=fa^2*Pi0/(1-fa*Pi0)
         denorm = 1.0-faq(q, fa)*PolarW[qi, :]
@@ -192,8 +193,8 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
-    plt.plot(kgrid, dRsT[:, 0], label=f"{tgrid[0]}")
-    plt.xlabel("t")
+    plt.plot(kgrid/Para.kF, dRsT[:, 0], label=f"{tgrid[0]}")
+    plt.xlabel("q/kF")
     plt.title("dRs in K")
     plt.legend()
     plt.show()

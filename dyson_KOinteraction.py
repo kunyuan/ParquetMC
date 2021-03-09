@@ -122,7 +122,7 @@ for qi, q in enumerate(Kbose.grid):
     inv = (q*q+Para.Mass2)/(8.0*np.pi)
     # dRs=(v+fs)^2*Pi0/(1-(v+fs)*Pi0)
     denorm = inv-(1.0+inv*fs(q, Para.Fs))*PolarW[qi, :]
-    dRsw[qi, :] = (1.0+inv*fs(q, Para.Fs))**2*PolarW[qi, :]/denorm/inv
+    dRsw[qi, :] = (1.0+inv*fs(q, Para.Fs))**2*PolarW[qi, :]/denorm
     coeff[qi, :] = lu_solve((lu, piv), dRsw[qi, :])
     dRsT[qi, :] = KerT @ coeff[qi, :]
     # if qi == 0:
@@ -140,15 +140,22 @@ for qi, q in enumerate(Kbose.grid):
 
 ########### Plot Polarization in Tau ################
 plt.figure()
-for qi, q in enumerate(Kbose.grid[::20]):
-    Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
+N = 5
+for i in range(N):
+    qi = int(i*len(Kbose.grid)/N)
+    plt.plot(T.grid, dRsT[qi, :], label=f"{Kbose.grid[qi]}")
+# for qi, q in enumerate(Kbose.grid[::20]):
+#     Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
 plt.title("dRs")
 plt.legend()
 plt.show()
 
 plt.figure()
-for qi, q in enumerate(Kbose.grid[::20]):
-    Errorbar(T.grid, dRaT[qi, :], label=f"{q}")
+for i in range(N):
+    qi = int(i*len(Kbose.grid)/N)
+    plt.plot(T.grid, dRaT[qi, :], label=f"{Kbose.grid[qi]}")
+# for qi, q in enumerate(Kbose.grid[::20]):
+#     Errorbar(T.grid, dRaT[qi, :], label=f"{q}")
 plt.title("dRa")
 plt.legend()
 plt.show()
