@@ -280,30 +280,49 @@ verWeight propagator::InteractionTauBare(const momentum &KInL,
   return Weight;
 }
 
-verWeight propagator::InteractionTau(const momentum &KInL,
-                                     const momentum &KOutL,
-                                     const momentum &KInR,
-                                     const momentum &KOutR, double inT,
-                                     double outT, double ExtQ) {
-  verWeight Weight;
+void propagator::InteractionTau(const momentum &KInL, const momentum &KOutL,
+                                const momentum &KInR, const momentum &KOutR,
+                                double inT, double outT, verWeight &w0,
+                                verWeight &w1, verWeight &w2, double ExtQ) {
   double Ws, Wa;
 
   double kDiQ = (KInL - KOutL).norm();
-  Ws = _Interp2D<grid::BoseK>(_DeltaRs, Para.BoseKGrid, Para.TauGrid, kDiQ,
-                              outT - inT);
+  double vd = 8.0 * PI / (kDiQ * kDiQ + Para.Mass2);
+  Ws = vd * _Interp2D<grid::BoseK>(_DeltaRs, Para.BoseKGrid, Para.TauGrid, kDiQ,
+                                   outT - inT);
   Wa = _Interp2D<grid::BoseK>(_DeltaRa, Para.BoseKGrid, Para.TauGrid, kDiQ,
                               outT - inT);
-  Weight[DIR] = -(Ws - Wa);
-  Weight[EX] = 2.0 * Wa;
+  w1[DIR] = -(Ws - Wa);
+  w1[EX] = 2.0 * Wa;
   // cout << Ws << ", " << Wa << ", " << _DeltaRs(0, 0) << endl;
 
+  w0[DIR] = -8.0 * PI /
+            (kDiQ * kDiQ + Para.Mass2 +
+             Para.Nf * 8.0 * PI * lindhard(kDiQ / Para.Kf / 2.0)) /
+            Para.Beta;
+  w0[DIR] += Ws;
+
   double kExQ = (KInL - KOutR).norm();
-  Ws = _Interp2D<grid::BoseK>(_DeltaRs, Para.BoseKGrid, Para.TauGrid, kExQ,
-                              outT - inT);
+  double ve = 8.0 * PI / (kExQ * kExQ + Para.Mass2);
+  Ws = ve * _Interp2D<grid::BoseK>(_DeltaRs, Para.BoseKGrid, Para.TauGrid, kExQ,
+                                   outT - inT);
+
   Wa = _Interp2D<grid::BoseK>(_DeltaRa, Para.BoseKGrid, Para.TauGrid, kExQ,
                               outT - inT);
-  Weight[DIR] += -2.0 * Wa;
-  Weight[EX] += Ws - Wa;
+
+  // cout << "kExQ: " << kExQ << ", " << ve << ", Ws: " << Ws << ", Wa: " << Wa
+  //      << endl;
+  w2[DIR] = -2.0 * Wa;
+  w2[EX] = Ws - Wa;
+
+  w0[EX] = 8.0 * PI /
+           (kExQ * kExQ + Para.Mass2 +
+            Para.Nf * 8.0 * PI * lindhard(kDiQ / Para.Kf / 2.0)) /
+           Para.Beta;
+  w0[EX] += -Ws;
+  // cout << w2[DIR] << ", " << w2[EX] << endl;
+  // w1 = {0.0, 0.0};
+  // w2 = {0.0, 0.0};
 
   // cout << "Ws: " << Ws << ", " << Wa << endl;
   // double v = 8.0 * PI / Para.Mass2;
@@ -321,7 +340,6 @@ verWeight propagator::InteractionTau(const momentum &KInL,
   // Weight[EX] = 8.0 * PI / (kExQ * kExQ + Para.Mass2) *
   //              exp(-pow(outT - inT, 2) / 2.0 / sigma / sigma) / sqrt(2.0 *
   //              PI) / sigma;
-  return Weight;
 }
 
 double propagator::Interaction(const momentum &TranQ, int VerOrder,

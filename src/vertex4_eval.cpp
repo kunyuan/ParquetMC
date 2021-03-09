@@ -45,17 +45,21 @@ void vertex4::_EvalBare(const momentum &KInL, const momentum &KOutL,
 
   } else {
     // Weight[0] = Prop.Interaction(KInL, KOutL, KInR, KOutR);
-    Weight[0] = Prop.InteractionTauBare(
-        KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
+    // Weight[0] = Prop.InteractionTauBare(
+    //     KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]],
+    //     Var.Tau[Tpair[1][2]]);
     // Weight[0][DIR] = 0.0;
     // Weight[0][EX] = 0.0;
-    auto weight = Prop.InteractionTau(
-        KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]], Var.Tau[Tpair[1][2]]);
+    Prop.InteractionTau(KInL, KOutL, KInR, KOutR, Var.Tau[Tpair[1][0]],
+                        Var.Tau[Tpair[1][2]], Weight[0], Weight[1], Weight[2]);
+    // cout << "bare " << Weight[0][DIR] << ", " << Weight[0][EX] << endl;
+    // cout << "Ws " << Weight[1][DIR] << ", " << Weight[1][EX] << endl;
+    // cout << "Wa " << Weight[2][DIR] << ", " << Weight[2][EX] << endl;
     // cout << Tpair[1][0] << " to " << Tpair[1][2] << endl;
-    Weight[1][DIR] = weight[DIR];
-    Weight[1][EX] = 0.0;
-    Weight[2][DIR] = 0.0;
-    Weight[2][EX] = weight[EX];
+    // Weight[1][DIR] = weight[DIR];
+    // Weight[1][EX] = 0.0;
+    // Weight[2][DIR] = 0.0;
+    // Weight[2][EX] = weight[EX];
     // Weight[1] = {0.0, 0.0};
     // Weight[1][DIR] = 1.0 / (pow((KInL - KOutL).norm(), 2) + 1.0);
     // Weight[2][EX] = 1.0 / (pow((KInL - KOutR).norm(), 2) + 1.0);

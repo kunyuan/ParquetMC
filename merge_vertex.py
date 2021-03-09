@@ -41,6 +41,7 @@ def SpinMapping(Data):
     if Type == "Symmetry_Anti":
         d[..., 0] += d[..., 1]/Para.Spin
         d[..., 1] /= Para.Spin
+        # pass
     elif Type == "Gamma_4spin":
         e = d[..., 0] + d[..., 1]
         d[..., 1] = d[..., 0]
@@ -164,7 +165,8 @@ while True:
             # DataAllList = [np.sum(d[1:o+1, ...], axis=0) for d in DataList]
             DataAllList = [np.sum(d[o:o+1, ...], axis=0) for d in DataList]
             # sum all four channels
-            DataAllList = [np.sum(d, axis=0) for d in DataAllList]
+            # DataAllList = [np.sum(d, axis=0) for d in DataAllList]
+            DataAllList = [d[1, ...] for d in DataAllList]
             # map DIR, EX to As, Aa
             DataAllList = [SpinMapping(d) for d in DataAllList]
             Data, Err = Estimate(DataAllList, Norm)

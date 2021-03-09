@@ -150,6 +150,13 @@ plt.title("dRs")
 plt.legend()
 plt.show()
 
+
+plt.plot(np.array(Kbose.grid)/Para.kF, dRsT[:, 0], label=f"{T.grid[0]}")
+plt.xlabel("q/kF")
+plt.title("dRs in K")
+plt.legend()
+plt.show()
+
 plt.figure()
 for i in range(N):
     qi = int(i*len(Kbose.grid)/N)

@@ -74,9 +74,13 @@ function vertex3(k, t)
     phase0 = cos(π * (t[1] - t[1])) / (2π)^3
     phase1 = cos(π * (t[1] - t[2])) / (2π)^3
 
+    # phase0 = cos(π * (t[1] - t[1])) / (2π)^3
+    # phase1 = cos(π * (t[1] - t[2])) / (2π)^3
+
     # gamma = (g1 * g2 + g1 * g0) * phase
 
     gamma = g1 * g0 * vd * phase0 + g1 * g2 * wd * phase1
+    # gamma = g1 * g0 * vd * phase0
 
     return gamma
 end
