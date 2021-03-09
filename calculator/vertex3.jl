@@ -12,7 +12,7 @@ println("rs=$rs mass2=$mass2 kF=$kF β=$β Nf=$Nf")
 P0, err = Diagram.Polar0(1.0e-4, 0, kF, β)
 NfT = Diagram.println("Nf(T)=$(real(P0) * SPIN)  ± $(real(err) * SPIN)")
 
-IsF = true
+IsF = false
 INL, OUTL, INR, OUTR = 1, 2, 3, 4
 DI, EX = 1, 2
 
@@ -27,15 +27,6 @@ Ra = npzread("Ra.npy") # dimension: k, t
 
 # println(T.grid)
 # println(Q.grid)
-function lindhard(x)
-    if (abs(x) < 1.0e-4)
-        return 1.0
-    elseif (abs(x - 1.0) < 1.0e-4)
-        return 0.5
-    else
-        return 0.5 - (x^2 - 1) / 4.0 / x * log(abs((1 + x) / (1 - x)))
-    end
-end
 
 function interaction(qd, qe, t1, t2)
     qd = sqrt(dot(qd, qd))
@@ -45,8 +36,6 @@ function interaction(qd, qe, t1, t2)
     # bare interaction part, equal time (t1, t1, t1, t1)
     vd = -8π / (qd^2 + mass2) / β
     ve = 8π / (qe^2 + mass2) / β
-    # vd = -8π / (qd^2 + mass2 + 8π * Nf * lindhard(qd / 2.0 / kF)) / β
-    # ve = 8π / (qe^2 + mass2 + 8π * Nf * lindhard(qe / 2.0 / kF)) / β
 
     # direct part of retared interaction, (t1, t1, t2, t2)
     if (qd <= Q.grid[1])
@@ -62,16 +51,9 @@ function interaction(qd, qe, t1, t2)
         we = Interpolate.linear2D(Rs, Q, T, qe, dt)
     end
 
-    # vd -= wd
-    # ve -= we
-
-
-    # we, ve = 0.0, 0.0
-
     # vd, ve = 0.0, 0.0
     # wd = 1.0 / (qd * qd + 1)
     # we = 1.0 / (qe * qe + 1)
-    # wd, we = 0.0, 0.0
 
     # println(wd, ", ", vd)
 
@@ -88,6 +70,30 @@ function phase(tInL, tOutL, tInR, tOutR)
     else
         return cos(π * ((tInL - tOutL) + (tInR - tOutR)))
     end
+end
+
+function vertex3(k0, k, t)
+    ϵ1, ϵ2 = (dot(k, k) - kF^2) * β, (dot(k, k) - kF^2) * β
+    t0 = 0.0
+    g1 = Spectral.kernelFermiT(t0 - t[1], ϵ1)
+    g2 = Spectral.kernelFermiT(t[2] - t0, ϵ2)
+    q = @SVector [k[1], k[2], k[3] + kF]
+
+    qd = sqrt(dot(qd, qd))
+    dt = abs(t[2] - t[1]) * β
+
+    # bare interaction part, equal time (t1, t1, t1, t1)
+    # vd = -8π / (qd^2 + mass2) / β
+
+    # direct part of retared interaction, (t1, t1, t2, t2)
+    if (qd <= Q.grid[1])
+        wd = -Interpolate.linear2D(Rs, Q, T, 1.0e-6, dt)
+    else
+        wd = -Interpolate.linear2D(Rs, Q, T, qd, dt)
+    end
+
+
+
 end
 
 function Tchannel(legK, t, k1)
@@ -109,25 +115,25 @@ function Tchannel(legK, t, k1)
     gd32 = Spectral.kernelFermiT(t[2] - t[3], ϵ2)
     gd42 = Spectral.kernelFermiT(t[2] - t[4], ϵ2)
 
-    # # v(1111)*G(k1, 13)*G(k2, 31)*v(3333) ==> (1133)
-    G = gu13 * gd31 / (2π)^3 * phase(t[1], t[1], t[3], t[3])
-    wd += G * (SPIN * vld * vrd + vld * vre + vle * vrd)
-    we += G * (vle * vre)
+    # # # v(1111)*G(k1, 13)*G(k2, 31)*v(3333) ==> (1133)
+    # G = gu13 * gd31 / (2π)^3 * phase(t[1], t[1], t[3], t[3])
+    # wd += G * (SPIN * vld * vrd + vld * vre + vle * vrd)
+    # we += G * (vle * vre)
 
-    # v(1111)*G(k1, 13)*G(k2, 31)*Wd(3344) ==> (1144)
-    G = gu13 * gd31 / (2π)^3 * phase(t[1], t[1], t[4], t[4])
-    wd += G * (SPIN * vld * wrd + vle * wrd)
-    we += 0.0
+    # # v(1111)*G(k1, 13)*G(k2, 31)*Wd(3344) ==> (1144)
+    # G = gu13 * gd31 / (2π)^3 * phase(t[1], t[1], t[4], t[4])
+    # wd += G * (SPIN * vld * wrd + vle * wrd)
+    # we += 0.0
 
-    # Wd(1122)*G(k1, 23)*G(k2, 32)*v(3333) ==> (1133)
-    G = gu23 * gd32 / (2π)^3 * phase(t[1], t[1], t[3], t[3])
-    wd += G * (SPIN * wld * vrd + wld * vre)
-    we += 0.0
+    # # Wd(1122)*G(k1, 23)*G(k2, 32)*v(3333) ==> (1133)
+    # G = gu23 * gd32 / (2π)^3 * phase(t[1], t[1], t[3], t[3])
+    # wd += G * (SPIN * wld * vrd + wld * vre)
+    # we += 0.0
 
-    # Wd(1122)*G(k1, 23)*G(k2, 32)*Wd(3344) ==> (1144)
-    G = gu23 * gd32 / (2π)^3 * phase(t[1], t[1], t[4], t[4])
-    wd += G * (SPIN * wld * wrd + vle * wrd)
-    we += 0.0
+    # # Wd(1122)*G(k1, 23)*G(k2, 32)*Wd(3344) ==> (1144)
+    # G = gu23 * gd32 / (2π)^3 * phase(t[1], t[1], t[4], t[4])
+    # wd += G * (SPIN * wld * wrd + vle * wrd)
+    # we += 0.0
 
     # # v(1111)*G(k1, 13)*G(k2, 41)*We(3443) ==> (1143)
     # G = gu13 * gd41 / (2π)^3 * phase(t[1], t[1], t[4], t[3])
@@ -139,15 +145,15 @@ function Tchannel(legK, t, k1)
     # wd += G * (wld * wre)
     # we += 0.0
 
-    # # # We(1221)*G(k1, 13)*G(k2, 32)*v(3333) ==> (1233)
-    # G = gu13 * gd32 / (2π)^3 * phase(t[1], t[2], t[3], t[3])
-    # wd += G * (wle * vrd)
-    # we += G * (wle * vre)
+    # # We(1221)*G(k1, 13)*G(k2, 32)*v(3333) ==> (1233)
+    G = gu13 * gd32 / (2π)^3 * phase(t[1], t[2], t[3], t[3])
+    wd += G * (wle * vrd)
+    we += G * (wle * vre)
 
-    # # We(1221)*G(k1, 13)*G(k2, 32)*Wd(3344) ==> (1244)
-    # G = gu13 * gd32 / (2π)^3 * phase(t[1], t[2], t[4], t[4])
-    # wd += G * (wle * wrd)
-    # we += 0.0
+    # We(1221)*G(k1, 13)*G(k2, 32)*Wd(3344) ==> (1244)
+    G = gu13 * gd32 / (2π)^3 * phase(t[1], t[2], t[4], t[4])
+    wd += G * (wle * wrd)
+    we += 0.0
 
     # # We(1221)*G(k1, 13)*G(k2, 42)*We(3443) ==> (1243)
     # G = gu13 * gd42 / (2π)^3 * phase(t[1], t[2], t[4], t[3])

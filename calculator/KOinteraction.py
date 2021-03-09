@@ -11,7 +11,7 @@ class para:
     def __init__(self):
         self.Beta = 25.0
         self.Rs = 1.0
-        self.Mass2 = 1.0
+        self.Mass2 = 0.1
         self.Fs = 0.0
         self.Fa = 0.0
         self.kF = (9.0*np.pi/4.0)**(1.0/3.0)/self.Rs
@@ -108,7 +108,53 @@ def InterTau(tgrid, kgrid, Para, eps=1.0e-12):
     print("Maximum fitting error of Rs in frequency: ", np.max(abs(Rsw-_Rsw)))
     print("Maximum fitting error of Ra in frequency: ", np.max(abs(Raw-_Raw)))
 
+    # q = 1.0*Para.kF
+    # Nk = int(len(kgrid)/2)
+    # q = kgrid[Nk]
+    # wt = np.zeros(len(tgrid))
+    # wn = np.array(range(-100, 101))*2*np.pi/Para.Beta
+
+    # p = [polar.Polarisi(q, abs(w), Para.EF) for w in wn]
+    # p = np.array(p)
+    # w = 8.0*np.pi*p/(q*q+Para.Mass2-8.0*np.pi*p)*8.0*np.pi/(q*q+Para.Mass2)
+    # print(w)
+    # print(np.sum(w)/Para.Beta)
+    # print(polar.Polarisi(1.0e-4, 0.0, Para.EF))
+    # print(8.0*np.pi*0.097/(0.1+8.0*np.pi*0.097)
+    #       * 8.0*np.pi/(q*q+Para.Mass2)/Para.Beta)
+    # wt[ti] = np.sum(w*np.exp(1j*wn*t))/Para.Beta
+
+    # for ti, t in enumerate(tgrid):
+    #     p = [polar.Polarisi(q, abs(w), Para.EF) for w in wn]
+    #     p = np.array(p)
+    #     v = 8.0*np.pi/(q*q+Para.Mass2)
+    #     Wint = 8.0*np.pi*p/(q*q+Para.Mass2-8.0*np.pi*p) * v
+    #     wt[ti] = np.sum(Wint*np.cos(wn*t))/Para.Beta
+    # print(p)
+    # print(Wint)
+    # print(Wint*np.cos(wn*t))
+    # print(t, wt[ti])
+
+    # print(wt[0])
+    # plt.figure()
+    # plt.plot(tgrid, wt)
+    # plt.plot(tgrid, dRsT[Nk, :])
+    # plt.show()
+
     return dRsT, dRaT
+
+
+def RinT(tgrid, q):
+    wn = np.array(range(-100, 101))*2*np.pi/Para.Beta
+    p = np.array([polar.Polarisi(q, abs(w), Para.EF) for w in wn])
+    v = 8.0*np.pi/(q*q+Para.Mass2)
+    rint = np.zeros(len(tgrid))
+    Wint = 8.0*np.pi*p/(q*q+Para.Mass2-8.0*np.pi*p) * v
+
+    for ti, t in enumerate(tgrid):
+        rint[ti] = np.sum(Wint*np.cos(wn*t))/Para.Beta
+
+    return rint
 
 
 if __name__ == "__main__":
@@ -122,19 +168,41 @@ if __name__ == "__main__":
 
     # print(polar.Polarisi(2.2e-16, 0.0, Para.EF))
     # print(dRsT[10, :])
+    print(kgrid)
+    print(kgrid[-10::2])
 
     ########### Plot Polarization in Tau ################
     plt.figure()
-    for qi, q in enumerate(kgrid[:10]):
-        plt.plot(tgrid, dRsT[qi, :], label=f"{q}")
-        # plt.plot(tgrid, dRsT[0, :], label=f"{q}")
+
+    N = 5
+    # for i in range(N):
+    #     qi = int(i*len(kgrid)/N)
+    #     plt.plot(tgrid, dRsT[qi, :], label=f"{kgrid[qi]}")
+    #     plt.plot(tgrid, RinT(tgrid, kgrid[qi]), label=f"{kgrid[qi]}")
+
+    qi = 0
+    plt.plot(tgrid, dRsT[qi, :], label=f"{kgrid[qi]}")
+    plt.plot(tgrid, RinT(tgrid, kgrid[qi]), label=f"{kgrid[qi]}")
+
+    qi = -180
+    plt.plot(tgrid, dRsT[qi, :], label=f"{kgrid[qi]}")
+    plt.plot(tgrid, RinT(tgrid, kgrid[qi]), label=f"{kgrid[qi]}")
+
     plt.title("dRs")
     plt.legend()
     plt.show()
 
+    plt.plot(kgrid, dRsT[:, 0], label=f"{tgrid[0]}")
+    plt.xlabel("t")
+    plt.title("dRs in K")
+    plt.legend()
+    plt.show()
+
     plt.figure()
-    for qi, q in enumerate(kgrid[:10]):
-        plt.plot(tgrid, dRaT[qi, :], label=f"{q}")
+    for i in range(N):
+        qi = int(i*len(kgrid)/N)
+        plt.plot(tgrid, dRaT[qi, :], label=f"{kgrid[qi]}")
+        # plt.plot(tgrid, RinT(tgrid, q), label=f"{q}")
     plt.title("dRa")
     plt.legend()
     plt.show()
