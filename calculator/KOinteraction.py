@@ -25,7 +25,7 @@ def fsq(q, fs): return fs
 def faq(q, fa): return fa
 
 
-def InterFreq(wngrid, kgrid, Para, addBare):
+def InterFreq(wngrid, kgrid, Para):
     """wngrid: matsubara frequency (integers!)
     """
     ksize = len(kgrid)
@@ -57,9 +57,6 @@ def InterFreq(wngrid, kgrid, Para, addBare):
         denorm = 1.0-faq(q, fa)*PolarW[qi, :]
         Raw[qi, :] = faq(q, fa)**2*PolarW[qi, :]/denorm
 
-        if addBare:
-            Rsw[qi, :] += 1.0/inv
-
     return Rsw, Raw
 
 
@@ -80,7 +77,7 @@ def InterTau(tgrid, kgrid, Para, eps=1.0e-12):
 
     KerT = dlr.getKerT(tgrid, wGrid, Para.Beta)
 
-    Rsw, Raw = InterFreq(wnGrid, kgrid, Para, False)
+    Rsw, Raw = InterFreq(wnGrid, kgrid, Para)
     print(Rsw[0, 0]+8.0*np.pi/Para.Mass2-8.0 *
           np.pi/(Para.Mass2+8.0*np.pi*Para.Nf))
 
@@ -156,6 +153,9 @@ def RinT(tgrid, q):
         rint[ti] = np.sum(Wint*np.cos(wn*t))/Para.Beta
 
     return rint
+
+
+# def AngleAvg(RsW):
 
 
 if __name__ == "__main__":

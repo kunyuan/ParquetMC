@@ -69,7 +69,6 @@ def Bare(angle, Lambda):
     return Bare
 
 
-
 def GetCoeff():
     m = 1.0/2.0
     Zname = "ZandM_order{0}.data".format(Para.Order-1)
@@ -79,7 +78,7 @@ def GetCoeff():
         print("Can not load Z and m*")
         Z, mStar = 1, m
     # Z, mStar = 0.873, 0.955*0.5
-    coeff = Z*Z * mStar * Para.kF / ( np.pi*np.pi)
+    coeff = Z*Z * mStar * Para.kF / (np.pi*np.pi)
     return coeff
 
 
@@ -90,9 +89,9 @@ Data1 = [np.sum(d[1:Para.Order+1, ...], axis=0) for d in Data]
 # Data shape : (pid numbers, chan, AngleGrid, KGrid, 2)
 
 
-#=========================== A ===============================
+# =========================== A ===============================
 Adata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0)) for d in Data1]
-# Adata shape : (pid numbers, AngleGrid, 2), channels are summed, momentum is set as p=0. 
+# Adata shape : (pid numbers, AngleGrid, 2), channels are summed, momentum is set as p=0.
 avg, err = Estimate(Adata, Norm)
 bareLambda = Bare(Angle, Para.Lambda)
 
@@ -100,7 +99,7 @@ Adata_s = -(avg[:, 0]+bareLambda[:, 0])
 Adata_a = -(avg[:, 1]+bareLambda[:, 1])
 
 
-# A Error 
+# A Error
 Data2 = [np.sum(d[1:Para.Order, ...], axis=0) for d in Data]
 Adata = [SpinMapping(np.sum(d[:, :, 0, :], axis=0)) for d in Data2]
 avg, err = Estimate(Adata, Norm)
@@ -108,7 +107,7 @@ Adata_sErr = -(avg[:, 0]+bareLambda[:, 0])
 Adata_aErr = -(avg[:, 1]+bareLambda[:, 1])
 
 
-#=========================== F ===============================
+# =========================== F ===============================
 Para = param(folderF)
 shape = (Para.Order+1, 4, Para.AngGridSize, Para.MomGridSize, 2)
 Data, Norm, Step, Grid = LoadFile(folderF, "vertex_pid[0-9]+.dat", shape)
@@ -151,7 +150,6 @@ FsErr = LegendreCoeff((Fdata_s-Fdata_sErr)*coeff, AngGrid, legendreL)
 FaErr = LegendreCoeff((Fdata_a-Fdata_aErr)*coeff, AngGrid, legendreL)
 
 
-
 # ============================================================================
 
 def renormalize(ldict):
@@ -159,6 +157,8 @@ def renormalize(ldict):
     for l in ldict:
         newl[l] = ldict[l]/(1 + ldict[l]/(2*l+1))
     return newl
+
+
 def renormalize_error(ldict, lerrdict):
     newl = {}
     for l in ldict:
@@ -166,9 +166,12 @@ def renormalize_error(ldict, lerrdict):
         partial_Fl = 1.0/(1+x) - x/((1+x)**2)
         newl[l] = partial_Fl * lerrdict[l]
     return newl
+
+
 def AFprint(Bl, Errl):
     for k in Bl.keys():
-        print("legendreL l=" + str(k) + ":  ", Bl[k], "+-", abs(Errl[k]) )
+        print("legendreL l=" + str(k) + ":  ", Bl[k], "+-", abs(Errl[k]))
+
 
 print("Fs: ")
 AFprint(Fs, FsErr)
@@ -184,7 +187,6 @@ print("----------------------------------\nRenoemalized from Fs:")
 AFprint(renormalize(Fs), renormalize_error(Fs, FsErr))
 print("Renoemalized from Fa:")
 AFprint(renormalize(Fa), renormalize_error(Fa, FaErr))
-
 
 
 # print("\n\nrenormalized Fs :")
