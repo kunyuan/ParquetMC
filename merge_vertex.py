@@ -165,8 +165,8 @@ while True:
             # DataAllList = [np.sum(d[1:o+1, ...], axis=0) for d in DataList]
             DataAllList = [np.sum(d[o:o+1, ...], axis=0) for d in DataList]
             # sum all four channels
-            # DataAllList = [np.sum(d, axis=0) for d in DataAllList]
-            DataAllList = [d[1, ...] for d in DataAllList]
+            DataAllList = [np.sum(d, axis=0) for d in DataAllList]
+            # DataAllList = [d[1, ...] for d in DataAllList]
             # map DIR, EX to As, Aa
             DataAllList = [SpinMapping(d) for d in DataAllList]
             Data, Err = Estimate(DataAllList, Norm)

@@ -25,7 +25,7 @@ const int MaxMomNum = MaxOrder + 3;
 const int IsDynamic = false;
 const bool IsProper = false; // true means one-interaction irreducible
 
-const bool IsF = false;
+const bool IsF = true;
 
 // const greentype GreenType = BoldG;
 // const greentype GreenType = FockG;

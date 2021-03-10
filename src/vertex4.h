@@ -12,10 +12,10 @@ namespace diag {
 using namespace std;
 
 enum channel { I = 0, T, U, S, TC, UC };
-const string ChanName[] = {"I", "T", "U", "S", "TC", "UC"};
-const double SymFactor[6] = {1.0, -1.0, 1.0, -0.5, +1.0, -1.0};
+const string ChanName[] = {"I", "T", "U", "S", "TC", "UC", "SC"};
+const double SymFactor[7] = {1.0, -1.0, 1.0, -0.5, +1.0, -1.0, 0.5};
 // map channels to a more compact form
-const channel ChanMap[] = {I, T, U, S, T, U};
+const channel ChanMap[] = {I, T, U, S, T, U, S};
 
 struct bubble;
 struct envelope;

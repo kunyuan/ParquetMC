@@ -141,11 +141,16 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
       //        << "]" << endl;
 
       if (chan == T) {
-        W[DIR] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
+        // W[DIR] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] *
+        // Rw[DIR];
+        // W[DIR] = Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
+        W[DIR] = 0.0;
         // W[DIR] = Lw[DIR] * Rw[EX];
         W[EX] = Lw[EX] * Rw[EX];
       } else if (chan == U) {
-        W[EX] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
+        // W[EX] = Lw[DIR] * Rw[DIR] * SPIN + Lw[DIR] * Rw[EX] + Lw[EX] *
+        // Rw[DIR];
+        W[EX] = Lw[DIR] * Rw[EX] + Lw[EX] * Rw[DIR];
         W[DIR] = Lw[EX] * Rw[EX];
       } else if (chan == S) {
         // see the note "code convention"
@@ -166,15 +171,6 @@ void vertex4::_EvalUST(const momentum &KInL, const momentum &KOutL,
         //   endl; cout << G[T]._Tpair[map[GXT]][0] << G[T]._Tpair[map[GXT]][1]
         //   << endl;
         // }
-
-        // double dTau1 = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]] - 2 *
-        // Var.Tau[Tpair[t][OUTR]]; double dTau2 = Var.Tau[Tpair[t][INR]] -
-        // Var.Tau[Tpair[t][OUTR]]; double dTau3 = Var.Tau[Tpair[t][OUTL]] -
-        // Var.Tau[Tpair[t][OUTR]]; double exp1 = cos(Para.OmegaINL * dTau1);
-        // double exp2 = cos(Para.OmegaINR * dTau2);
-        // double exp3 = cos(Para.Omega * dTau3);
-
-        // ChanWeight[ChanMap[chan]] += W * GWeight * exp1 * exp2 * exp3;
 
         if (IsF) {
           double dTau = Var.Tau[Tpair[t][INL]] + Var.Tau[Tpair[t][OUTL]];
