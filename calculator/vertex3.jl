@@ -92,7 +92,7 @@ for (qi, q0) in enumerate(LinRange(0.0, 3 * kF, N))
         g0 = Spectral.kernelFermiT(t[1] - t0, ϵ2)
 
 
-    # projected fermionic left in (0, 0, kF), projected fermionic right in k/|k|*kF
+    # projected fermionic leftin/leftout (0, 0, kF), projected fermionic rightin/rightout k/|k|*kF
         kp = k / sqrt(dot(k, k)) * kF
         q = @SVector [kp[1], kp[2], kp[3] - kF]
         qd = sqrt(dot(q, q))
