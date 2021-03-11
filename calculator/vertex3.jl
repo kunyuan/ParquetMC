@@ -128,7 +128,7 @@ for (qi, q0) in enumerate(LinRange(0.0, 3 * kF, N))
     # t = @SVector [0.0, x[4], x[5], x[6]]
         t = @SVector [x[4], x[5]]
         factor = kF * 2π^2 * β^2 * k^2 * sin(θ) 
-        f[1] = vertex3(k1, t) * factor * Nf 
+        f[1] = vertex3(k1, t) * factor
     # return * 4π * k^2 * kF * phase * β^2
     end
 
@@ -138,7 +138,7 @@ for (qi, q0) in enumerate(LinRange(0.0, 3 * kF, N))
     # t = @SVector [0.0, x[4], x[5], x[6]]
         t = @SVector [x[4], x[5]]
         factor = 2π^2 * β^2 * k^2 * sin(θ) / (1 - x[1])^2
-        f[1] = vertex3(k1, t) * factor * Nf 
+        f[1] = vertex3(k1, t) * factor 
     # return * 4π * k^2 * kF * phase * β^2
     end
 

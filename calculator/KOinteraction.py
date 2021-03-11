@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 class para:
     def __init__(self):
         self.Beta = 25.0
-        self.Rs = 1.0
-        self.Mass2 = 0.01
+        self.Rs = 4.0
+        self.Mass2 = 0.0001
         self.Fs = 0.0
         self.Fa = 0.0
         self.kF = (9.0*np.pi/4.0)**(1.0/3.0)/self.Rs
