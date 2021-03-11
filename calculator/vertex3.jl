@@ -73,8 +73,8 @@ for (qi, q0) in enumerate(LinRange(0.0, 3 * kF, N))
         vd = -8π / (qd^2 + mass2 + 8π * Nf * lindhard(qd / 2.0 / kF)) / β
         vd -= wd
 
-        phase0 = cos(π * (t[1] + t[1])) / (2π)^3
-        phase1 = cos(π * (t[1] + t[2])) / (2π)^3
+        phase0 = cos(π * (t[1] - t[1])) / (2π)^3
+        phase1 = cos(π * (t[1] - t[2])) / (2π)^3
 
         gamma = g1 * g0 * vd * phase0 + g1 * g2 * wd * phase1
 
@@ -82,19 +82,21 @@ for (qi, q0) in enumerate(LinRange(0.0, 3 * kF, N))
     end
 
     function counterterm(k, t)
-        ϵ1, ϵ2 = (dot(k, k) - kF^2) * β, (dot(k, k) - kF^2) * β
+    # bosonic in: (0, 0, q0), fermionic in: (0, 0, kF-q/2), fermionic out: (0, 0, kF+q/2)
+        k1 = k # first Green's function
+        k2 = @SVector [k[1], k[2], k[3] + q0] # second Green's function
+
+        ϵ1, ϵ2 = (dot(k1, k1) - kF^2) * β, (dot(k2, k2) - kF^2) * β
         t0 = 0.0
-        g0 = Spectral.kernelFermiT(t[1] - t0, ϵ2)
         g1 = Spectral.kernelFermiT(t0 - t[1], ϵ1)
-        g2 = Spectral.kernelFermiT(t[2] - t0, ϵ2)
-        q = @SVector [k[1], k[2], k[3] + kF]
+        g0 = Spectral.kernelFermiT(t[1] - t0, ϵ2)
 
-        kr = k / sqrt(dot(k, k)) * kF
 
+    # projected fermionic left in (0, 0, kF), projected fermionic right in k/|k|*kF
+        kp = k / sqrt(dot(k, k)) * kF
+        q = @SVector [kp[1], kp[2], kp[3] - kF]
         qd = sqrt(dot(q, q))
         dt = abs(t[2] - t[1]) * β
-
-    # bare interaction part, equal time (t1, t1, t1, t1)
 
     # direct part of retared interaction, (t1, t1, t2, t2)
         if (qd <= 1.0e-4)
@@ -103,24 +105,18 @@ for (qi, q0) in enumerate(LinRange(0.0, 3 * kF, N))
             wd = -Interpolate.linear2D(Rs, Q, T, qd, dt) * 8π / (qd^2 + mass2)
         end
 
+    # bare interaction part, equal time (t1, t1, t1, t1)
         vd = -8π / (qd^2 + mass2 + 8π * Nf * lindhard(qd / 2.0 / kF)) / β
         vd -= wd
 
-    # vd = -8π / (qd^2 + mass2) / β
+        phase0 = 1.0 / (2π)^3
+        phase1 = 1.0 / (2π)^3
 
-        phase0 = cos(π * (t[1] - t[1])) / (2π)^3
-        phase1 = cos(π * (t[1] - t[2])) / (2π)^3
-
-    # phase0 = cos(π * (t[1] - t[1])) / (2π)^3
-    # phase1 = cos(π * (t[1] - t[2])) / (2π)^3
-
-    # gamma = (g1 * g2 + g1 * g0) * phase
-
-        gamma = g1 * g0 * vd * phase0 + g1 * g2 * wd * phase1
-    # gamma = g1 * g0 * vd * phase0
+        gamma = g1 * g0 * vd * phase0 + g1 * g0 * wd * phase1
 
         return gamma
     end
+
 
     function integrand1(x, f)
         k, θ, ϕ = x[1] * kF, x[2] * π, x[3] * 2π
@@ -128,7 +124,7 @@ for (qi, q0) in enumerate(LinRange(0.0, 3 * kF, N))
     # t = @SVector [0.0, x[4], x[5], x[6]]
         t = @SVector [x[4], x[5]]
         factor = kF * 2π^2 * β^2 * k^2 * sin(θ) 
-        f[1] = vertex3(k1, t) * factor
+        f[1] = (vertex3(k1, t) - counterterm(k1, t)) * factor
     # return * 4π * k^2 * kF * phase * β^2
     end
 
@@ -138,7 +134,7 @@ for (qi, q0) in enumerate(LinRange(0.0, 3 * kF, N))
     # t = @SVector [0.0, x[4], x[5], x[6]]
         t = @SVector [x[4], x[5]]
         factor = 2π^2 * β^2 * k^2 * sin(θ) / (1 - x[1])^2
-        f[1] = vertex3(k1, t) * factor 
+        f[1] = (vertex3(k1, t) - counterterm(k1, t)) * factor
     # return * 4π * k^2 * kF * phase * β^2
     end
 
