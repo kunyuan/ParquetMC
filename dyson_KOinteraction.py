@@ -150,8 +150,8 @@ plt.title("dRs")
 plt.legend()
 plt.show()
 
-
-plt.plot(np.array(Kbose.grid)/Para.kF, dRsT[:, 0], label=f"{T.grid[0]}")
+plt.plot(np.array(Kbose.grid)/Para.kF,
+         dRsT[:, 0], label=f"$\\tau={T.grid[0]}$")
 plt.xlabel("q/kF")
 plt.title("dRs in K")
 plt.legend()
@@ -164,6 +164,13 @@ for i in range(N):
 # for qi, q in enumerate(Kbose.grid[::20]):
 #     Errorbar(T.grid, dRaT[qi, :], label=f"{q}")
 plt.title("dRa")
+plt.legend()
+plt.show()
+
+plt.plot(np.array(Kbose.grid)/Para.kF,
+         dRaT[:, 0], label=f"$\\tau={T.grid[0]}$")
+plt.xlabel("q/kF")
+plt.title("dRa in K")
 plt.legend()
 plt.show()
 
