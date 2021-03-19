@@ -75,7 +75,7 @@ def GetCoeff():
         print("Can not load Z and m*, will assume Z=1 and m=1/2")
         Z, mStar = 1, m
     # Z, mStar = 0.873, 0.955*0.5
-    coeff = Z*Z * mStar * Para.kF / (np.pi*np.pi)
+    coeff = Z*Z * mStar * Para.kF / (2.0*np.pi*np.pi)*Para.Spin
     return coeff
 
 
@@ -124,7 +124,7 @@ while True:
         # ExBare = +8.0 * np.pi / \
         #     ((2.0*Para.kF*np.sin(AngHalf))**2+Para.Mass2+Para.Lambda)
         ExRs, ExRa = KO.InterFreq(
-            np.array([0]), 2.0*Para.kF*np.sin(AngHalf), Para, addBare=True)
+            np.array([0]), 2.0*Para.kF*np.sin(AngHalf), Para)
         ExR = ExRs-ExRa
 
         # ExBare = +8.0 * np.pi / \

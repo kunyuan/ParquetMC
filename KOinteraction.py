@@ -6,19 +6,22 @@ import utility.dlr_boson as dlr
 import numpy as np
 import scipy.linalg as slinalg
 from scipy.linalg import lu_factor, lu_solve
+import utility.angle as legendre
+from scipy import integrate
 
 
 def fsq(q, fs): return fs
 def faq(q, fa): return fa
 
 
-def InterFreq(wngrid, kgrid, Para, addBare):
+def InterFreq(wngrid, kgrid, Para):
     """wngrid: matsubara frequency (integers!)
+        dRsW=(Physical dRsW)/v_q
     """
     ksize = len(kgrid)
     wnsize = len(wngrid)
     PolarW = np.zeros([ksize, wnsize])
-    wngrid = wngrid*2.0*np.pi/Para.Beta
+    wngrid = np.array(wngrid)*2.0*np.pi/Para.Beta
     for qi, q in enumerate(kgrid):
         for wi, w in enumerate(wngrid):
             PolarW[qi, wi] = polar.Polarisi(q, w, Para.EF)
@@ -34,14 +37,11 @@ def InterFreq(wngrid, kgrid, Para, addBare):
         inv = (q*q+Para.Mass2)/(8.0*np.pi)
         # dRs=(v+fs)^2*Pi0/(1-(v+fs)*Pi0)
         denorm = inv-(1.0+inv*fsq(q, fs))*PolarW[qi, :]
-        Rsw[qi, :] = (1.0+inv*fsq(q, fs))**2*PolarW[qi, :]/denorm/inv
+        Rsw[qi, :] = (1.0+inv*fsq(q, fs))**2*PolarW[qi, :]/denorm
 
         # dRa=fa^2*Pi0/(1-fa*Pi0)
         denorm = 1.0-faq(q, fa)*PolarW[qi, :]
         Raw[qi, :] = faq(q, fa)**2*PolarW[qi, :]/denorm
-
-        if addBare:
-            Rsw[qi, :] += 1.0/inv
 
     return Rsw, Raw
 
@@ -63,7 +63,7 @@ def InterTau(tgrid, kgrid, Para, eps=1.0e-12):
 
     KerT = dlr.getKerT(tgrid, wGrid, Para.Beta)
 
-    Rsw, Raw = InterFreq(wnGrid, kgrid, Para, False)
+    Rsw, Raw = InterFreq(wnGrid, kgrid, Para)
     print(Rsw[0, 0]+8.0*np.pi/Para.Mass2-8.0 *
           np.pi/(Para.Mass2+8.0*np.pi*Para.Nf))
 
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     T = grid.Tau()
     # double beta, int _size, double scale
     T.build(Para.Beta, Para.TauGridSize, 6.0/Para.EF)
-    print(T.grid)
+    # print(T.grid)
     Kbose = grid.BoseK()
     # double kF, double maxK, int _size, double scale
     Kbose.build(Para.kF, Para.MaxExtMom,
@@ -115,23 +115,44 @@ if __name__ == "__main__":
 
     dRsT, dRaT = InterTau(T.grid, Kbose.grid, Para)
 
-    ########### Plot Polarization in Tau ################
-    plt.figure()
-    for qi, q in enumerate(Kbose.grid[:10]):
-        Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
-    # for qi, q in enumerate(kgrid[:10]):
-    #     Errorbar(tgrid, dRsT[qi, :], label=f"{q}")
-    plt.title("dRs")
-    plt.legend()
-    plt.show()
+    theta = np.linspace(0.0, np.pi, 1000)
+    Qgrid = Para.kF*2.0*np.sin(theta/2.0)
 
-    plt.figure()
-    for qi, q in enumerate(Kbose.grid[:10]):
-        Errorbar(T.grid, dRaT[qi, :], label=f"{q}")
-    # for qi, q in enumerate(kgrid[:10]):
-    #     Errorbar(tgrid, dRaT[qi, :], label=f"{q}")
-    plt.title("dRa")
-    plt.legend()
+    dRsW, dRaW = InterFreq([0, ], Qgrid, Para)
+
+    dRsW = dRsW[:, 0]
+    dRsW = (1.0+dRsW)*8.0*np.pi/(Qgrid**2+Para.Mass2)
+    Rs0 = legendre.LegendreCoeff(dRsW, -np.cos(theta), [0, ], 0)[0]
+    print(dRsW*Para.Nf)
+    print("l=0: ", Rs0*Para.Nf)
+
+    ########### Plot Polarization in Tau ################
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    N = 5
+    for i in range(N):
+        qi = int(i*len(Kbose.grid)/N)
+        ax1.plot(T.grid, dRsT[qi, :], label=f"{Kbose.grid[qi]}")
+    # for qi, q in enumerate(Kbose.grid[::20]):
+    #     Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
+    ax1.set_title("dRs")
+
+    ax2.plot(np.array(Kbose.grid)/Para.kF,
+             dRsT[:, 0], label=f"$\\tau={T.grid[0]}$")
+    ax2.set_xlabel("q/kF")
+    ax2.set_title("dRs in K")
+
+    N = 5
+    for i in range(N):
+        qi = int(i*len(Kbose.grid)/N)
+        ax3.plot(T.grid, dRaT[qi, :], label=f"{Kbose.grid[qi]}")
+    # for qi, q in enumerate(Kbose.grid[::20]):
+    #     Errorbar(T.grid, dRsT[qi, :], label=f"{q}")
+    ax3.set_title("dRs")
+
+    ax1.legend()
+    ax2.legend()
+    ax3.legend()
+    ax4.legend()
     plt.show()
 
     with open("interaction.data", "w") as f:
