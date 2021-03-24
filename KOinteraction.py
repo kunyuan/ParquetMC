@@ -93,6 +93,22 @@ def InterTau(tgrid, kgrid, Para, eps=1.0e-12):
 
     return dRsT, dRaT
 
+def LandauParameter(Para):
+    theta = np.linspace(0.0, np.pi, 1000)
+    Qgrid = Para.kF*2.0*np.sin(theta/2.0)
+
+    dRsW, dRaW = InterFreq([0, ], Qgrid, Para)
+
+    dRsW = dRsW[:, 0]
+    dRsW = (1.0+dRsW)*8.0*np.pi/(Qgrid**2+Para.Mass2)
+    Rs0 = legendre.LegendreCoeff(dRsW, -np.cos(theta), [0, ], 0)[0]
+    # print(dRsW*Para.Nf)
+    # print("l=0: ", Rs0*Para.Nf)
+    Fs=-0.5*Rs0*Para.Nf
+    Fa=-0.5*Rs0*Para.Nf
+    return Fs, Fa
+
+
 
 if __name__ == "__main__":
     import grid
@@ -115,16 +131,9 @@ if __name__ == "__main__":
 
     dRsT, dRaT = InterTau(T.grid, Kbose.grid, Para)
 
-    theta = np.linspace(0.0, np.pi, 1000)
-    Qgrid = Para.kF*2.0*np.sin(theta/2.0)
+    Fs, Fa=LandauParameter(Para)
+    print(Fs, Fa)
 
-    dRsW, dRaW = InterFreq([0, ], Qgrid, Para)
-
-    dRsW = dRsW[:, 0]
-    dRsW = (1.0+dRsW)*8.0*np.pi/(Qgrid**2+Para.Mass2)
-    Rs0 = legendre.LegendreCoeff(dRsW, -np.cos(theta), [0, ], 0)[0]
-    print(dRsW*Para.Nf)
-    print("l=0: ", Rs0*Para.Nf)
 
     ########### Plot Polarization in Tau ################
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
