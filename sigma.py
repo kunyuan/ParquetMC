@@ -13,8 +13,8 @@ print("Folder to plot : " + folder)
 
 
 # XType = "Tau"
-XType = "Mom"
-# XType = "Z"
+# XType = "Mom"
+XType = "Z"
 # XType = "Freq"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
@@ -36,7 +36,7 @@ fig, ax = plt.subplots()
 
 if(XType == "Mom"):
     # ??? Order 1 sigma is a delta function of tau
-    oo = 2
+    oo = 3
     Data = [np.sum(d[1:oo, ...], axis=0) for d in Data]
     # y, err = Estimate(Data, Norm, lambda d: np.average(d[1, :, :], axis=1))
     y, err = Estimate(Data, Norm, lambda d: np.average(d[:, :], axis=1))
@@ -55,6 +55,11 @@ if(XType == "Mom"):
     x = kF
     Mu = 2.0*kF/np.pi*(1.0+l/kF*np.arctan((x-kF)/l)-l/kF*np.arctan((x+kF)/l) -
                        (l*l-x*x+kF*kF)/4.0/x/kF*np.log((l*l+(x-kF)**2)/(l*l+(x+kF)**2)))
+    print("Order ", 1)
+    for (ki, k) in enumerate(MomGrid):
+        if ki%2==0:
+            print("{:6.4f}{:10.6f}{:10.6f}{:10.6f}{:10.6f}".format(k/Para.kF, y[ki], 0.0, 0.0, 0.0))
+    print("\n")
     print("Mu: ", Mu)
     # for i in range(MomGridSize):
     #     print(f"{MomGrid[i]/Para.kF:12.6f}{(y[i]-Mu)/Para.EF:12.6f}")
@@ -71,11 +76,20 @@ elif(XType == "Z"):
 
     for o in Order:
         SigmaW, Err = Estimate(Data, Norm, lambda d: Fourier.naiveT2W(
-            np.sum(d[2:o+1, :, :], axis=0)))
+            np.sum(d[o:o+1, :, :], axis=0)))
         # print SigmaW.shape
         # print SigmaW[:, 1]-SigmaW[:, 0]
-        Errorbar(MomGrid/Para.kF, 1.0-(SigmaW[:, 1].imag-SigmaW[:, 0].imag)/(2.0*np.pi/Para.Beta),
-                 color=ColorList[o], label="Order {0}".format(o))
+        # Errorbar(MomGrid/Para.kF, 1.0-(SigmaW[:, 1].imag-SigmaW[:, 0].imag)/(2.0*np.pi/Para.Beta),
+        #          color=ColorList[o], label="Order {0}".format(o))
+        print("Order ", o)
+        for (ki, k) in enumerate(MomGrid):
+            if ki%2==0:
+                print("{:6.4f}{:10.6f}{:10.6f}{:10.6f}{:10.6f}".format(k/Para.kF, SigmaW[ki, 1].real, Err[ki, 1].real, SigmaW[ki, 1].imag, Err[ki, 1].imag))
+        print("\n")
+        Errorbar(MomGrid/Para.kF, SigmaW[:, 1].real,
+                 color=ColorList[2*o], label="real Order {0}".format(o))
+        Errorbar(MomGrid/Para.kF, SigmaW[:, 1].imag,
+                 color=ColorList[2*o+1], label="imag Order {0}".format(o))
         plt.axvline(x=1.0, linestyle='--')
     ax.set_xlim([MomGrid[0]/Para.kF, MomGrid[-1]/Para.kF])
     ax.set_xlabel("$Ext K$", size=size)
@@ -103,7 +117,7 @@ elif(XType == "Tau"):
 elif(XType == "Freq"):
     N = 5
     # o = 2
-    oo = 4
+    oo = 3
     Data = [np.sum(d[1:oo, ...], axis=0) for d in Data]
 
     MaxFreq = 50

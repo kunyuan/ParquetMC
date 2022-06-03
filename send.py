@@ -27,7 +27,7 @@ Cluster = "local"
 ############################################
 
 Number = int(jobs_number)
-print "Creating {0} jobs ...".format(Number)
+print("Creating {0} jobs ...".format(Number))
 PIDList = range(Number)
 
 

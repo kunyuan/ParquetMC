@@ -31,7 +31,8 @@ double propagator::Green(double Tau, const momentum &K, spin Spin, int GType) {
     if (Var.CurrOrder >= 1)
       fgreen += -1*_Interp2D<grid::FermiK>(_deltaGOrder[Para.Order], Para.FermiKGrid, k, Tau);
   } else {
-    Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
+    if (IsFockGreen)
+      Ek += fockYukawa(k, Para.Kf, sqrt(Para.Lambda + Para.Mass2), true);
     fgreen = fermiGreen(Para.Beta, Tau, Ek);
   }
   return fgreen;

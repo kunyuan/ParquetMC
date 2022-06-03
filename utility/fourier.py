@@ -88,7 +88,7 @@ class fourier:
 
         dataW = np.zeros(Wshape, dtype=complex)
         for i, freq in enumerate(self.WnGrid):
-            phase = np.exp(-1j*self.uTauGrid*freq)
+            phase = np.exp(1j*self.uTauGrid*freq)
             dw = dataT[..., :]*phase
             dataW[..., i] = integrate.trapz(dw[..., :], self.uTauGrid)
             # SigmaW[i] = integrate.simps(dw, self.TauGrid)
@@ -104,7 +104,7 @@ class fourier:
 
         dataT = np.zeros(Tshape, dtype=complex)
         for i, tau in enumerate(self.TauGrid):
-            phase = np.exp(1j*self.WnGrid*tau)
+            phase = np.exp(-1j*self.WnGrid*tau)
             dt = dataW[..., :]*phase
             dataT[..., i] = np.sum(dt, axis=-1)
         return dataT/self.Beta

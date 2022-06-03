@@ -22,14 +22,15 @@ const int MaxTauNum = MaxOrder + 1;
 const int MaxMomNum = MaxOrder + 3;
 
 const int IsDynamic = false;
-const bool IsProper = true; // true means one-interaction irreducible
-const bool BoldG = true;
+const bool IsProper = false; // true means one-interaction irreducible
+const bool BoldG = false;
 const bool IsF = false;
+const bool IsFockGreen = false; //is BoldG is false, then you may choose to use Fock-renormalized G or not.
 
 // const diagtype DiagType = GAMMA;
-// const diagtype DiagType = SIGMA;
+const diagtype DiagType = SIGMA;
 
-const diagtype DiagType = POLAR;
+// const diagtype DiagType = POLAR;
 
 // typedef kFermiGrid kGrid; // for sigma
 // typedef kBoseGrid kGrid; // for gamma, polar and delta
